@@ -1,23 +1,26 @@
-# Lethal
+# Lethal Mod for Minecraft
 
-This project uses [Gradle](https://gradle.org/).
-To build and run the application, use the *Gradle* tool window by clicking the Gradle icon in the right-hand toolbar,
-or run it directly from the terminal:
+This is a commission minecraft add-on featuring powerful weapons, armors and tools.
 
-* Run `./gradlew run` to build and run the application.
-* Run `./gradlew build` to only build the application.
-* Run `./gradlew check` to run all checks, including tests.
-* Run `./gradlew clean` to clean all build outputs.
+# Abstract Game Framework
 
-Note the usage of the Gradle Wrapper (`./gradlew`).
-This is the suggested way to use Gradle in production projects.
+For the sake of greater portability, we first experimented with the **Abstract Game Framework**
+in [1.12.2](https://github.com/heckerpowered/Lethal/tree/1.12.2), where the framework was integrated into the project in
+the form of source code
 
-[Learn more about the Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html).
+## Core Concept
 
-[Learn more about Gradle tasks](https://docs.gradle.org/current/userguide/command_line_interface.html#common_tasks).
+The core concept of **Abstract Game Framework** is *Inversion of Control*. The core logics of the project no longer
+interact directly with Minecraft, but is abstracted to a simple game framework. Just as Java's cross-platform
+capabilities. When migrating the target game version, we only need to update the game framework, which greatly reduces
+the migration cost
 
-This project follows the suggested multi-module setup and consists of the `app` and `utils` subprojects.
-The shared build logic was extracted to a convention plugin located in `buildSrc`.
+# Project Name
 
-This project uses a version catalog (see `gradle/libs.versions.toml`) to declare and version dependencies
-and both a build cache and a configuration cache (see `gradle.properties`).
+The commissioner didn't give a clear name for the project, so we'll tentatively call it 'Lethal' because the
+commissioner needed powerful weapons, armor and tools, and this project happened to be born out of that
+
+# Credits
+
+* [Heckerpowered](https://github.com/heckerpowered)
+* [1zero0](https://github.com/1zero0)
