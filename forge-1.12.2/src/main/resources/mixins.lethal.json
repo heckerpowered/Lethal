@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "heckerpowered.lethal.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.lethal.refmap.json",
+  "mixins": [
+    "AxisAlignedBBMixin",
+    "Vec3dMixin"
+  ],
+  "client": [],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8",
+  "target": "@env(DEFAULT)"
+}

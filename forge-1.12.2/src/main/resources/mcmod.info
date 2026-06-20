@@ -1,0 +1,18 @@
+[
+  {
+    "modid": "lethal",
+    "name": "Lethal Mod",
+    "description": "Commission mod.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "Heckerpowered"
+    ],
+    "credits": "Heckerpowered",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
