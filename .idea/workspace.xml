@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="AutomaticModuleUnloader">
+    <loaded-modules>
+      <module name="Lethal" />
+      <module name="Lethal.common.main" />
+      <module name="Lethal.common.test" />
+      <module name="Lethal.bridge" />
+      <module name="Lethal.forge-1.12.2.test" />
+      <module name="Lethal.common" />
+      <module name="Lethal.buildSrc" />
+      <module name="Lethal.forge-1.12.2.main" />
+      <module name="Lethal.forge-1.12.2" />
+      <module name="Lethal.buildSrc.main" />
+      <module name="Lethal.buildSrc.test" />
+      <module name="Lethal.bridge.main" />
+      <module name="Lethal.bridge.test" />
+    </loaded-modules>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7632ad0c-5bd9-4bfc-954a-4400ed55e052" name="更改" comment="Add build configuration for Kotlin and ForgeGradle integration">
+      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/BridgeRepresentation.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/DamageSourcePresets.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/DamageTypeFeature.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/VanillaDamageType.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/VirtualDamageType.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/resources/Identifier.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/java/heckerpowered/lethal/mixin/ResourceLocationMixin.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/DamageInterop.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/GeometryInterop.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/IdentifierInterop.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/services/DamageProvider.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/services/IdentifierProvider.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/resources/META-INF/services/heckerpowered.lethal.bridge.resources.IdentifierProvider" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/App.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bridge/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/bridge/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/DamageSource.kt" beforeDir="false" afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/DamageSource.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/math/GeometryProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/math/GeometryProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/math/Vector.kt" beforeDir="false" afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/math/Vector.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/buildSrc/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/buildSrc/src/main/kotlin/kotlin-jvm.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/src/main/kotlin/kotlin-jvm.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/common/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/forge-1.12.2/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/forge-1.12.2/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/forge-1.12.2/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/forge-1.12.2/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/gameplay/LethalMod.kt" beforeDir="false" afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/gameplay/LethalMod.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/forge-1.12.2/src/main/resources/mixins.lethal.json" beforeDir="false" afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/resources/mixins.lethal.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeInsightWorkspaceSettings">
+    <option name="optimizeImportsOnTheFly" value="true" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_/Users/hecker/Projects/Lethal" value="3FLQFT6zilZdllLp6V3sCuMEvXy" />
+    </persistenceIdMap>
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="335" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="buildSrc" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="common" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="documentation" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="help" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="ide" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="other" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="slime launcher" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="verification" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
+                <item name="compileClasspath" type="62daadca:ExternalSystemViewDefaultContributor$DependencyScopeExternalSystemNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="Lethal" type="f1a62948:ProjectNode" />
+                <item name="forge-1.12.2" type="2d1252cf:ModuleNode" />
+                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
+                <item name="runtimeClasspath" type="62daadca:ExternalSystemViewDefaultContributor$DependencyScopeExternalSystemNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Interface" />
+        <option value="Class" />
+        <option value="Kotlin Object" />
+        <option value="Kotlin File" />
+        <option value="Kotlin Data Class" />
+        <option value="Kotlin Class" />
+      </list>
+    </option>
+  </component>
+  <component name="FormatOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="codex/damageable-entity-bridge" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;heckerpowered&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/heckerpowered/Lethal.git&quot;,
+    &quot;accountId&quot;: &quot;7db74b72-da81-4a18-827f-017e034e94bf&quot;
+  }
+}</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.minecraftforge/forgegradle/7.0.29/6c51d5a4cb773f0b1e71ae3afd70bc68b1250184/forgegradle-7.0.29.jar!/net/minecraftforge/gradle/ForgeGradleExtension.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.minecraftforge/forgegradle/7.0.29/6c51d5a4cb773f0b1e71ae3afd70bc68b1250184/forgegradle-7.0.29.jar!/net/minecraftforge/gradle/SlimeLauncherOptionsNested.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.minecraftforge/forgegradle/7.0.29/6c51d5a4cb773f0b1e71ae3afd70bc68b1250184/forgegradle-7.0.29.jar!/net/minecraftforge/gradle/internal/ForgeGradleExtensionInternal.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-gradle-plugin-api/2.3.21/aab42dae665a1b6560d71484e9f8d5d1af38f4b1/kotlin-gradle-plugin-api-2.3.21-gradle813-sources.jar!/org/jetbrains/kotlin/gradle/dsl/KotlinCommonCompilerOptions.kt" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-gradle-plugin/2.3.21/24cd0fef7f2b18be74a59975d6f941798a0e4b96/kotlin-gradle-plugin-2.3.21-gradle813.jar!/org/jetbrains/kotlin/gradle/dsl/KotlinJvmProjectExtension.class" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.3.21/e83b401761ec424bd131011507e692dcf053c3ae/kotlin-stdlib-2.3.21-sources.jar!/commonMain/kotlin/collections/Sets.kt" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.3.21/e83b401761ec424bd131011507e692dcf053c3ae/kotlin-stdlib-2.3.21-sources.jar!/commonMain/kotlin/util/Standard.kt" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/Library/Java/JavaVirtualMachines/corretto-1.8.0_412/Contents/Home/src.zip!/java/util/ServiceLoader.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$USER_HOME$/Library/Java/JavaVirtualMachines/corretto-1.8.0_412/Contents/Home/src.zip!/sun/reflect/NativeConstructorAccessorImpl.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/.gradle/mavenizer/repo/net/minecraftforge/forge/1.12.2-14.23.5.2864/forge-1.12.2-14.23.5.2864-sources-stable-39-1.12.jar!/net/minecraft/network/play/server/SPacketChunkData.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/.gradle/mavenizer/repo/net/minecraftforge/forge/1.12.2-14.23.5.2864/forge-1.12.2-14.23.5.2864-sources-stable-39-1.12.jar!/net/minecraft/util/DamageSource.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/.gradle/mavenizer/repo/net/minecraftforge/forge/1.12.2-14.23.5.2864/forge-1.12.2-14.23.5.2864-sources-stable-39-1.12.jar!/net/minecraft/util/EntityDamageSource.java" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0000001061935884" />
+      <entry key="S10" value="1.0003258735773672" />
+      <entry key="S30" value="1.068826177395218" />
+      <entry key="S60" value="1.2751880030985758" />
+      <entry key="M2" value="1.9507509331459827" />
+      <entry key="M5" value="5.41558895681325" />
+      <entry key="M10" value="9.320196285715493" />
+      <entry key="M15" value="11.648061326422347" />
+      <entry key="M30" value="16.928672898539958" />
+      <entry key="H1" value="24.6881306626292" />
+      <entry key="H2" value="32.583832162199755" />
+      <entry key="H4" value="39.7463937605359" />
+      <entry key="D1" value="106.33716413571597" />
+      <entry key="W1" value="512.686634364665" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="6.048239197097097E-118" />
+      <entry key="S5" value="1.296139014630533E-47" />
+      <entry key="S10" value="3.6001930716925505E-24" />
+      <entry key="S30" value="1.5336444680102194E-8" />
+      <entry key="S60" value="1.270021347032868E-4" />
+      <entry key="M2" value="0.013111061361747015" />
+      <entry key="M5" value="0.27844204948948914" />
+      <entry key="M10" value="0.8862412166681661" />
+      <entry key="M15" value="1.46676554194259" />
+      <entry key="M30" value="3.896187188457245" />
+      <entry key="H1" value="9.07370000400288" />
+      <entry key="H2" value="15.076314807846446" />
+      <entry key="H4" value="21.08379536314172" />
+      <entry key="D1" value="87.88234982276265" />
+      <entry key="W1" value="409.1678728959631" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.9075191553171609" />
+      <entry key="MS500" value="0.9807790039885513" />
+      <entry key="S2" value="0.9951597218200828" />
+      <entry key="S5" value="0.998061175922619" />
+      <entry key="S10" value="0.9993554416625972" />
+      <entry key="S30" value="1.0684677540344185" />
+      <entry key="S60" value="1.275063747312236" />
+      <entry key="M2" value="1.9633217644179395" />
+      <entry key="M5" value="5.692270835327599" />
+      <entry key="M10" value="10.20428865819795" />
+      <entry key="M15" value="13.112687882728745" />
+      <entry key="M30" value="20.82239498942444" />
+      <entry key="H1" value="33.75911738295818" />
+      <entry key="H2" value="47.65792419641955" />
+      <entry key="H4" value="60.82862091569498" />
+      <entry key="D1" value="194.21829650594157" />
+      <entry key="W1" value="921.8536066389108" />
+    </decayedShown>
+  </component>
+  <component name="OptimizeOnSaveOptions">
+    <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="3FLQFT6zilZdllLp6V3sCuMEvXy" />
+  <component name="ProjectViewState">
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.Lethal [:forge-1.12.2:build].executor": "Run",
+    "Gradle.Lethal [:forge-1.12.2:classes].executor": "Run",
+    "Gradle.Lethal [:forge-1.12.2:genEclipseRunClientForForge].executor": "Run",
+    "Gradle.Lethal [:forge-1.12.2:genEclipseRuns].executor": "Run",
+    "Gradle.Lethal [:forge-1.12.2:runClient].executor": "Debug",
+    "Gradle.Lethal [:forge-1.12.2:slimeLauncherMetadataForForge].executor": "Run",
+    "Gradle.Lethal [jar].executor": "Run",
+    "Gradle.升级 Gradle 包装器.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "code.cleanup.on.save": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "copilot.chat.legacySessionMetadata.migrated": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/hecker/Projects/Lethal/forge-1.12.2/src/main/resources",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "/Users/hecker/Projects/Lethal/forge-1.12.2/src/main/kotlin/Main.kt",
+    "project.structure.last.edited": "模块",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.37126437",
+    "rearrange.code.on.save": "true",
+    "settings.editor.selected.configurable": "project.kotlinCompiler"
+  },
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/新建临时文件": [
+      "TEXT"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/forge-1.12.2/src/main/resources" />
+    </key>
+    <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
+      <recent name="heckerpowered.lethal.bridge.adapter.entity" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.Lethal [:forge-1.12.2:runClient]">
+    <configuration name="Lethal [:forge-1.12.2:build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":forge-1.12.2:build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="Lethal [:forge-1.12.2:classes]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":forge-1.12.2:classes" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="Lethal [:forge-1.12.2:genEclipseRunClientForForge]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":forge-1.12.2:genEclipseRunClientForForge" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="Lethal [:forge-1.12.2:runClient]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":forge-1.12.2:runClient" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="Lethal [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="jar" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.Lethal [:forge-1.12.2:runClient]" />
+        <item itemvalue="Gradle.Lethal [jar]" />
+        <item itemvalue="Gradle.Lethal [:forge-1.12.2:build]" />
+        <item itemvalue="Gradle.Lethal [:forge-1.12.2:classes]" />
+        <item itemvalue="Gradle.Lethal [:forge-1.12.2:genEclipseRunClientForForge]" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.26222.65" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.26222.65" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="7632ad0c-5bd9-4bfc-954a-4400ed55e052" name="更改" comment="" />
+      <created>1781851768167</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1781851768167</updated>
+    </task>
+    <task id="LOCAL-00001" summary="真是一段优美的代码(赞赏)">
+      <option name="closed" value="true" />
+      <created>1781965170298</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1781965170298</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Update README.md to provide project details and clarify core concepts">
+      <option name="closed" value="true" />
+      <created>1781965491411</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1781965491411</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Revise README.md to enhance project description and clarify core concepts of the Lethal Minecraft mod">
+      <option name="closed" value="true" />
+      <created>1781966407507</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1781966407507</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Add build configuration for Kotlin and ForgeGradle integration">
+      <option name="closed" value="true" />
+      <created>1782120932981</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1782120932981</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnloadedModulesList">
+    <module name="Lethal.utils.main" />
+    <module name="Lethal.utils.test" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="真是一段优美的代码(赞赏)" />
+    <MESSAGE value="Update README.md to provide project details and clarify core concepts" />
+    <MESSAGE value="Revise README.md to enhance project description and clarify core concepts of the Lethal Minecraft mod" />
+    <MESSAGE value="Add build configuration for Kotlin and ForgeGradle integration" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add build configuration for Kotlin and ForgeGradle integration" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/app/src/main/kotlin/App.kt</url>
+          <line>17</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/common/bridge/src/main/kotlin/Main.kt</url>
+          <line>13</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

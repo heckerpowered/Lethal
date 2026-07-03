@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     // Apply the shared build logic from a convention plugin.
@@ -27,8 +26,6 @@ java {
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_1_8
-        apiVersion = KotlinVersion.KOTLIN_2_3
-        languageVersion = KotlinVersion.KOTLIN_2_3
     }
 }
 

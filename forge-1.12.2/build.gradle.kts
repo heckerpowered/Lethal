@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import java.util.zip.GZIPInputStream
 
 plugins {
@@ -8,10 +7,19 @@ plugins {
     id("net.minecraftforge.renamer") version "1.+"
 }
 
-val minecraftVersion: String by project
-val forgeVersion: String by project
-val mixinVersion: String by project
-val modId: String by project
+val minecraftVersion = project.property("minecraftVersion").toString()
+val forgeVersion = project.property("forgeVersion").toString()
+val mixinVersion = project.property("mixinVersion").toString()
+val modId = project.property("modId").toString()
+val modVersion = project.property("modVersion").toString()
+
+val archiveName = "$modId-mc$minecraftVersion-forge$forgeVersion"
+
+version = modVersion
+
+base {
+    archivesName.set(archiveName)
+}
 
 repositories {
     minecraft.mavenizer(this)
@@ -89,15 +97,6 @@ kotlin {
 
     compilerOptions {
         jvmTarget = JvmTarget.JVM_1_8
-        apiVersion = KotlinVersion.KOTLIN_2_3
-        languageVersion = KotlinVersion.KOTLIN_2_3
-    }
-}
-
-fun File.extractGzipTo(target: File) {
-    target.parentFile.mkdirs()
-    GZIPInputStream(inputStream()).use { input ->
-        target.outputStream().use(input::copyTo)
     }
 }
 
@@ -105,16 +104,28 @@ val mixinProcessorMappings = layout.buildDirectory.file("tmp/mixin/processor-map
 val mixinOutputMappings = layout.buildDirectory.file("tmp/mixin/generated-mappings.tsrg")
 val mixinRefmap = layout.buildDirectory.file("tmp/mixin/refmap.json")
 
-val prepareMixinMappings by tasks.registering {
+val prepareMixinMappings = tasks.register("prepareMixinMappings") {
     description = "Extracts the ForgeGradle SRG mapping file for the Mixin annotation processor."
 
     val inputMappings = minecraft.dependency.toSrgFile
 
     inputs.file(inputMappings)
+        .withPropertyName("inputMappings")
+
     outputs.file(mixinProcessorMappings)
+        .withPropertyName("mixinProcessorMappings")
 
     doLast {
-        inputMappings.get().extractGzipTo(mixinProcessorMappings.get().asFile)
+        val inputFile = inputs.files.singleFile
+        val outputFile = outputs.files.singleFile
+
+        outputFile.parentFile.mkdirs()
+
+        GZIPInputStream(inputFile.inputStream()).use { input ->
+            outputFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
     }
 }
 
@@ -145,21 +156,29 @@ val reobfMappings = renamer.merge("reobfMappings") {
 val reobfJar = renamer.classes("reobfJar", tasks.jar) {
     dependsOn(reobfMappings)
     map = files(reobfMappings)
-    archiveClassifier = "srg"
+
+    archiveClassifier.set("")
 }
 
+val mixinConfigName = "mixins.$modId.json"
+val mixinRefmapName = "mixins.$modId.refmap.json"
+
 tasks.jar {
+    archiveBaseName.set(archiveName)
+    archiveVersion.set(modVersion)
+    archiveClassifier.set("dev")
+
     manifest {
         attributes(
             "FMLCorePlugin" to "heckerpowered.lethal.gameplay.common.core.CorePlugin",
             "FMLCorePluginContainsFMLMod" to true,
-            "MixinConfigs" to "mixins.$modId.json"
+            "MixinConfigs" to mixinConfigName
         )
     }
 
     from(mixinRefmap) {
         into("")
-        rename { "mixins.$modId.refmap.json" }
+        rename("refmap\\.json", mixinRefmapName)
     }
 }
 
