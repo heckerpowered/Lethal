@@ -1,5 +1,6 @@
 package heckerpowered.lethal.bridge.math
 
+import heckerpowered.lethal.bridge.FreestandingRepresentation
 import heckerpowered.lethal.bridge.platform.Services
 import heckerpowered.lethal.bridge.platform.loadOrNull
 
@@ -45,20 +46,20 @@ private data class FreestandingVector(
     override val x: Double,
     override val y: Double,
     override val z: Double,
-) : VectorView
+) : VectorView, FreestandingRepresentation
 
 private data class FreestandingBox(
     override val min: VectorView,
     override val max: VectorView,
-) : BoxView
+) : BoxView, FreestandingRepresentation
 
 private data class FreestandingRotator(
     override val pitch: Double,
     override val yaw: Double,
     override val roll: Double = 0.0,
-) : RotatorView
+) : RotatorView, FreestandingRepresentation
 
 private data class FreestandingRay(
     override val origin: VectorView,
     override val direction: VectorView,
-) : RayView
+) : RayView, FreestandingRepresentation

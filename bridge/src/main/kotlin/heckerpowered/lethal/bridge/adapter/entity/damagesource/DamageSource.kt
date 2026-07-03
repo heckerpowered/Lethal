@@ -1,39 +1,84 @@
 package heckerpowered.lethal.bridge.adapter.entity.damagesource
 
+import heckerpowered.lethal.bridge.QuantumRepresentation
+import heckerpowered.lethal.bridge.VirtualRepresentation
 import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
 import heckerpowered.lethal.bridge.math.VectorView
+import heckerpowered.lethal.bridge.platform.Services
+import heckerpowered.lethal.bridge.platform.loadOrNull
+import heckerpowered.lethal.bridge.resources.Identifier
+import java.util.*
 
 interface DamageSourceView {
-    val id: String
-
     val directEntity: EntityAccess?
     val causingEntity: EntityAccess?
     val position: VectorView?
+
+    val type: Identifier
+
+    fun has(feature: DamageFeature): Boolean
 }
 
-enum class VanillaDamageSource {
-    Generic,
-    Magic,
-    InFire,
-    OnFire,
-    Lava,
-    Drown,
-    Fall,
-    OutOfWorld,
-    Cactus,
-    Starve,
-    InWall,
-    FlyIntoWall,
-    Anvil,
-    FallingBlock,
-    DragonBreath,
-    LightningBolt,
-    Explosion,
-    PlayerExplosion,
-    Mob,
-    Player,
-    Arrow,
-    Thrown,
-    IndirectMagic,
-    Thorns
+sealed interface DamageSourceSpec
+
+data class VirtualDamageSourceSpec(
+    val type: Identifier,
+    val features: EnumSet<DamageFeature>,
+) : DamageSourceSpec, VirtualRepresentation
+
+data class VanillaDamageSourceSpec(
+    val type: VanillaDamageType,
+) : DamageSourceSpec, QuantumRepresentation
+
+sealed interface NativeDamageSourceSpec : DamageSourceSpec
+
+data class VirtualDamageSource(
+    val spec: VirtualDamageSourceSpec,
+
+    override val directEntity: EntityAccess?,
+    override val causingEntity: EntityAccess?,
+    override val position: VectorView?,
+) : DamageSourceView, VirtualRepresentation {
+    override val type: Identifier
+        get() = spec.type
+
+    override fun has(feature: DamageFeature): Boolean {
+        return spec.features.contains(feature)
+    }
+}
+
+data class QuantumVanillaDamageSource(
+    val source: VanillaDamageType,
+
+    override val directEntity: EntityAccess?,
+    override val causingEntity: EntityAccess?,
+    override val position: VectorView?,
+) : DamageSourceView, QuantumRepresentation {
+    override val type: Identifier
+        get() = source.identifier
+
+    override fun has(feature: DamageFeature): Boolean {
+        return source.has(feature)
+    }
+}
+
+interface DamageProvider {
+    fun source(spec: DamageSourceSpec, directEntity: EntityAccess? = null, causingEntity: EntityAccess?, position: VectorView? = null): DamageSourceView
+
+    companion object {
+        val Virtual: DamageProvider = VirtualDamageProvider
+        val Hosting: DamageProvider?
+            get() = Services.loadOrNull<DamageProvider>()
+        val Auto
+            get() = Hosting ?: Virtual
+    }
+}
+
+object VirtualDamageProvider : DamageProvider {
+    override fun source(spec: DamageSourceSpec, directEntity: EntityAccess?, causingEntity: EntityAccess?, position: VectorView?): DamageSourceView {
+        return when (spec) {
+            is VirtualDamageSourceSpec -> VirtualDamageSource(spec, directEntity, causingEntity, position)
+            is VanillaDamageSourceSpec -> QuantumVanillaDamageSource(spec.type, directEntity, causingEntity, position)
+        }
+    }
 }

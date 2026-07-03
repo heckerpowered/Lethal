@@ -46,10 +46,14 @@ interface VectorView : Interpolatable<VectorView> {
     fun isNearlyNormalized(epsilon: Double = 1.0E-6): Boolean = abs(1.0 - lengthSquared) <= epsilon
     fun isNormalized(epsilon: Double = 1.0E-6): Boolean = isNearlyNormalized(epsilon)
 
-    fun containsNaN(): Boolean {
+    fun isFinite(): Boolean {
         return !x.isFinite() ||
                 !y.isFinite() ||
                 !z.isFinite()
+    }
+
+    fun containsNan(): Boolean {
+        return x.isNaN() || y.isNaN() || z.isNaN()
     }
 
     val maxComponent: Double
@@ -167,13 +171,64 @@ fun VectorView.normalized2D(): VectorView {
 }
 
 fun VectorView.reciprocal(): VectorView {
-    val big = 3.4E38
     return Geometry.vector(
-        if (x != 0.0) 1.0 / x else big,
-        if (y != 0.0) 1.0 / y else big,
-        if (z != 0.0) 1.0 / z else big
+        1.0 / x,
+        1.0 / y,
+        1.0 / z
     )
 }
+
+fun VectorView.safeReciprocal(
+    resultIfZero: VectorView = Geometry.vector(1.0E30, 1.0E30, 1.0E30),
+): VectorView {
+    fun safeReciprocalComponent(value: Double, resultIfZero: Double): Double {
+        if (value == .0) return if (value.toRawBits() < 0L) -resultIfZero else resultIfZero
+
+        val result = 1.0 / value
+        if (!result.isFinite()) return if (value < 0.0) -resultIfZero else resultIfZero
+
+        return result.coerceIn(-resultIfZero, resultIfZero)
+    }
+
+    return Geometry.vector(
+        safeReciprocalComponent(x, resultIfZero.x),
+        safeReciprocalComponent(y, resultIfZero.y),
+        safeReciprocalComponent(z, resultIfZero.z),
+    )
+}
+
+fun VectorView.requireReciprocal(): VectorView {
+    val x = x
+    val y = y
+    val z = z
+    require(x != 0.0 && y != 0.0 && z != 0.0) {
+        "Cannot take reciprocal of vector with zero component: $this"
+    }
+
+    // Do not use .reciprocal(), potential TOCTOU
+    return Geometry.vector(
+        1.0 / x,
+        1.0 / y,
+        1.0 / z
+    )
+}
+
+fun VectorView.reciprocalOrNull(): VectorView? {
+    val x = x
+    val y = y
+    val z = z
+    if (x == 0.0 || y == 0.0 || z == 0.0) {
+        return null
+    }
+
+    // Do not use .reciprocal(), potential TOCTOU
+    return Geometry.vector(
+        1.0 / x,
+        1.0 / y,
+        1.0 / z
+    )
+}
+
 
 fun VectorView.cross(other: VectorView): VectorView {
     return Geometry.vector(
@@ -202,8 +257,8 @@ fun VectorView.componentMin(vector: VectorView): VectorView {
 fun VectorView.componentMax(vector: VectorView): VectorView {
     return Geometry.vector(
         maxOf(x, vector.x),
-        maxOf(z, vector.z),
-        maxOf(y, vector.y)
+        maxOf(y, vector.y),
+        maxOf(z, vector.z)
     )
 }
 
@@ -376,9 +431,9 @@ fun VectorView.gridSnap(gridSize: Double): VectorView {
     }
 
     return Geometry.vector(
+        snapToGrid(x, gridSize),
         snapToGrid(y, gridSize),
-        snapToGrid(z, gridSize),
-        snapToGrid(x, gridSize)
+        snapToGrid(z, gridSize)
     )
 }
 

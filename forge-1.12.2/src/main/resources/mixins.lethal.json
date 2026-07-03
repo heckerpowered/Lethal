@@ -5,6 +5,8 @@
   "refmap": "mixins.lethal.refmap.json",
   "mixins": [
     "AxisAlignedBBMixin",
+    "DamageSourceMixin",
+    "ResourceLocationMixin",
     "Vec3dMixin"
   ],
   "client": [],

@@ -1,5 +1,6 @@
 package heckerpowered.lethal.gameplay
 
+import heckerpowered.lethal.platform.IdentifierInterop
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
@@ -30,5 +31,15 @@ class LethalMod {
     @EventHandler
     fun preInitialize(event: FMLPreInitializationEvent) {
         Logger = event.modLog
+
+        val native = ResourceLocation("lethal", "blood_sword")
+        val bridge = IdentifierInterop.identifier(native)
+        val back = IdentifierInterop.identifier(bridge)
+
+        println("native -> bridge class = ${bridge.javaClass.name}")
+        println("bridge -> native class = ${back.javaClass.name}")
+        println("same native object = ${native === back}")
+        println("bridge namespace = ${bridge.namespace}")
+        println("bridge path = ${bridge.path}")
     }
 }

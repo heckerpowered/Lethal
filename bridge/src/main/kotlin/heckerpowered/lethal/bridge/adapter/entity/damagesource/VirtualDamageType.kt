@@ -1,0 +1,14 @@
+package heckerpowered.lethal.bridge.adapter.entity.damagesource
+
+import heckerpowered.lethal.bridge.resources.Identifier
+import java.util.*
+
+sealed interface DamageType
+
+data class VirtualDamageType(
+    val type: Identifier,
+    val features: EnumSet<DamageFeature>,
+)
+
+inline fun <reified E : Enum<E>> features(first: E, vararg rest: E): EnumSet<E> =
+    EnumSet.of(first, *rest)
