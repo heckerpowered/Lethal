@@ -30,8 +30,6 @@ data class VanillaDamageSourceSpec(
     val type: VanillaDamageType,
 ) : DamageSourceSpec, QuantumRepresentation
 
-sealed interface NativeDamageSourceSpec : DamageSourceSpec
-
 data class VirtualDamageSource(
     val spec: VirtualDamageSourceSpec,
 

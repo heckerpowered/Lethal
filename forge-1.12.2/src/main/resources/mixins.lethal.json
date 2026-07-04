@@ -6,6 +6,7 @@
   "mixins": [
     "AxisAlignedBBMixin",
     "DamageSourceMixin",
+    "EntityMixin",
     "ResourceLocationMixin",
     "Vec3dMixin"
   ],
