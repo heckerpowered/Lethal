@@ -21,27 +21,15 @@
     </loaded-modules>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7632ad0c-5bd9-4bfc-954a-4400ed55e052" name="更改" comment="Update build configuration and dependencies for Kotlin and ForgeGradle integration">
-      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/BridgeRepresentation.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/DamageFeature.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/VanillaDamageType.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/VirtualDamageType.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/resources/Identifier.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/java/heckerpowered/lethal/mixin/DamageSourceMixin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/java/heckerpowered/lethal/mixin/ResourceLocationMixin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/gameplay/common/entity/damagesource/VirtualDamageSource.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/GeometryInterop.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/IdentifierInterop.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/ObjectInterop.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/services/DamageProvider.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/services/IdentifierProvider.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/resources/META-INF/services/heckerpowered.lethal.bridge.resources.IdentifierProvider" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
+    <list default="true" id="7632ad0c-5bd9-4bfc-954a-4400ed55e052" name="更改" comment="Refactor damage source handling to utilize ObjectInterop for virtual and vanilla damage types">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/DamageSource.kt" beforeDir="false" afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/adapter/entity/damagesource/DamageSource.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/math/GeometryProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/math/GeometryProvider.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/math/Vector.kt" beforeDir="false" afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/math/Vector.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/resources/Identifier.kt" beforeDir="false" afterPath="$PROJECT_DIR$/bridge/src/main/kotlin/heckerpowered/lethal/bridge/resources/Identifier.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/forge-1.12.2/src/main/java/heckerpowered/lethal/mixin/DamageSourceMixin.java" beforeDir="false" afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/java/heckerpowered/lethal/mixin/DamageSourceMixin.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/gameplay/LethalMod.kt" beforeDir="false" afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/gameplay/LethalMod.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/ObjectInterop.kt" beforeDir="false" afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/ObjectInterop.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/services/DamageProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/kotlin/heckerpowered/lethal/platform/services/DamageProvider.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/forge-1.12.2/src/main/resources/mixins.lethal.json" beforeDir="false" afterPath="$PROJECT_DIR$/forge-1.12.2/src/main/resources/mixins.lethal.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -58,7 +46,7 @@
     </persistenceIdMap>
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="253" />
+    <option name="cachedIndexableFilesCount" value="261" />
   </component>
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
@@ -222,9 +210,12 @@
     <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.3.21/e83b401761ec424bd131011507e692dcf053c3ae/kotlin-stdlib-2.3.21-sources.jar!/commonMain/kotlin/util/Standard.kt" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/Library/Java/JavaVirtualMachines/corretto-1.8.0_412/Contents/Home/src.zip!/java/util/ServiceLoader.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$USER_HOME$/Library/Java/JavaVirtualMachines/corretto-1.8.0_412/Contents/Home/src.zip!/sun/reflect/NativeConstructorAccessorImpl.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/.gradle/mavenizer/repo/net/minecraftforge/forge/1.12.2-14.23.5.2864/forge-1.12.2-14.23.5.2864-sources-stable-39-1.12.jar!/net/minecraft/entity/Entity.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$PROJECT_DIR$/.gradle/mavenizer/repo/net/minecraftforge/forge/1.12.2-14.23.5.2864/forge-1.12.2-14.23.5.2864-sources-stable-39-1.12.jar!/net/minecraft/network/play/server/SPacketChunkData.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$PROJECT_DIR$/.gradle/mavenizer/repo/net/minecraftforge/forge/1.12.2-14.23.5.2864/forge-1.12.2-14.23.5.2864-sources-stable-39-1.12.jar!/net/minecraft/util/DamageSource.java" root0="SKIP_INSPECTION" />
     <setting file="jar://$PROJECT_DIR$/.gradle/mavenizer/repo/net/minecraftforge/forge/1.12.2-14.23.5.2864/forge-1.12.2-14.23.5.2864-sources-stable-39-1.12.jar!/net/minecraft/util/EntityDamageSource.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/.gradle/mavenizer/repo/net/minecraftforge/forge/1.12.2-14.23.5.2864/forge-1.12.2-14.23.5.2864-sources-stable-39-1.12.jar!/net/minecraft/util/EntityDamageSourceIndirect.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/.gradle/mavenizer/repo/net/minecraftforge/forge/1.12.2-14.23.5.2864/forge-1.12.2-14.23.5.2864-sources-stable-39-1.12.jar!/net/minecraft/util/math/Vec3d.java" root0="SKIP_INSPECTION" />
   </component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -233,64 +224,67 @@
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
       <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="4.430142085129106E-66" />
-      <entry key="S2" value="5.481949185721961E-17" />
-      <entry key="S5" value="4.431759861355454E-7" />
-      <entry key="S10" value="9.419551681575424E-4" />
-      <entry key="S30" value="0.2284036767208799" />
-      <entry key="S60" value="1.3552488138371879" />
-      <entry key="M2" value="4.433033314246119" />
-      <entry key="M5" value="13.045402679127168" />
-      <entry key="M10" value="23.483133397367638" />
-      <entry key="M15" value="31.347962446359116" />
-      <entry key="M30" value="48.0146128516419" />
-      <entry key="H1" value="70.78544397724761" />
-      <entry key="H2" value="99.65238391448828" />
-      <entry key="H4" value="128.51749936216365" />
-      <entry key="D1" value="222.29690098098268" />
-      <entry key="W1" value="635.4941183428137" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="9.818771266608643E-92" />
+      <entry key="S5" value="1.2843979853449341E-36" />
+      <entry key="S10" value="4.0285764038870225E-18" />
+      <entry key="S30" value="9.855864503631652E-6" />
+      <entry key="S60" value="0.012699248896632234" />
+      <entry key="M2" value="0.47787184923098" />
+      <entry key="M5" value="4.835820196704094" />
+      <entry key="M10" value="13.610012973201238" />
+      <entry key="M15" value="22.393081293436865" />
+      <entry key="M30" value="45.65915641944371" />
+      <entry key="H1" value="79.17852556283474" />
+      <entry key="H2" value="119.95381523218714" />
+      <entry key="H4" value="160.02946904612057" />
+      <entry key="D1" value="269.1848548991469" />
+      <entry key="W1" value="686.1360792769653" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0003938680464952" />
-      <entry key="MS500" value="1.2085397087706657" />
-      <entry key="S2" value="1.7625910775495526" />
-      <entry key="S5" value="2.23119811152496" />
-      <entry key="S10" value="2.5421600111354956" />
-      <entry key="S30" value="3.485226570643945" />
-      <entry key="S60" value="5.829066328130732" />
-      <entry key="M2" value="10.55425770222081" />
-      <entry key="M5" value="22.166112144923705" />
-      <entry key="M10" value="35.26250255833479" />
-      <entry key="M15" value="44.489981865951556" />
-      <entry key="M30" value="64.7290779247933" />
-      <entry key="H1" value="94.48088171101817" />
-      <entry key="H2" value="130.19645414170748" />
-      <entry key="H4" value="162.91366582569918" />
-      <entry key="D1" value="260.2393453158412" />
-      <entry key="W1" value="590.139648559205" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0000000043273585" />
+      <entry key="M2" value="1.0000659379013481" />
+      <entry key="M5" value="1.03756484470955" />
+      <entry key="M10" value="2.1025835609738848" />
+      <entry key="M15" value="5.2943395459735925" />
+      <entry key="M30" value="20.977173617359078" />
+      <entry key="H1" value="53.517616887085424" />
+      <entry key="H2" value="98.24778351927573" />
+      <entry key="H4" value="142.10337938819148" />
+      <entry key="D1" value="255.78847706622156" />
+      <entry key="W1" value="590.0298025507249" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.0012042640772942325" />
-      <entry key="MS500" value="0.3329242521485493" />
-      <entry key="S2" value="1.2950525715435677" />
-      <entry key="S5" value="1.9720244302550476" />
-      <entry key="S10" value="2.3902193960187157" />
-      <entry key="S30" value="3.6400224905730125" />
-      <entry key="S60" value="7.102316354111372" />
-      <entry key="M2" value="14.884798238645221" />
-      <entry key="M5" value="35.10906986531191" />
-      <entry key="M10" value="58.661569097120626" />
-      <entry key="M15" value="75.76653700716669" />
-      <entry key="M30" value="112.69112183726686" />
-      <entry key="H1" value="165.22793950129633" />
-      <entry key="H2" value="229.82260450428527" />
-      <entry key="H4" value="291.4149173609091" />
-      <entry key="D1" value="482.53208254362704" />
-      <entry key="W1" value="1225.63242698336" />
+      <entry key="MS100" value="0.0010180329695714074" />
+      <entry key="MS500" value="0.25208811372364875" />
+      <entry key="S2" value="0.7085786982541082" />
+      <entry key="S5" value="0.8712749681280394" />
+      <entry key="S10" value="0.9334211097505988" />
+      <entry key="S30" value="0.9773051915262794" />
+      <entry key="S60" value="1.0012134067857357" />
+      <entry key="M2" value="1.4709071797187392" />
+      <entry key="M5" value="5.865955501215355" />
+      <entry key="M10" value="15.703519839199647" />
+      <entry key="M15" value="27.67522565727384" />
+      <entry key="M30" value="66.61682283680796" />
+      <entry key="H1" value="132.6729768443667" />
+      <entry key="H2" value="218.181037824821" />
+      <entry key="H4" value="302.1182785254165" />
+      <entry key="D1" value="524.9691700411462" />
+      <entry key="W1" value="1276.1645321683527" />
     </decayedShown>
   </component>
   <component name="OptimizeOnSaveOptions">
     <option name="myRunOnSave" value="true" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -320,7 +314,7 @@
     "code.cleanup.on.save": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "copilot.chat.legacySessionMetadata.migrated": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "codex/damage-source-object-interop",
     "javascript.preferred.runtime.type.id": "node",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/hecker/Projects/Lethal/forge-1.12.2/src/main/resources",
@@ -334,7 +328,7 @@
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.37126437",
     "rearrange.code.on.save": "true",
-    "settings.editor.selected.configurable": "settings.sync"
+    "settings.editor.selected.configurable": "Errors"
   },
   "keyToStringList": {
     "com.intellij.ide.scratch.ScratchImplUtil$2/新建临时文件": [

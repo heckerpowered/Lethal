@@ -13,6 +13,7 @@ interface Identifier {
     companion object {
         val Provider = IdentifierProvider.Auto
 
+        @JvmStatic
         fun create(namespace: String, path: String): Identifier {
             return Provider.identifier(namespace, path)
         }
