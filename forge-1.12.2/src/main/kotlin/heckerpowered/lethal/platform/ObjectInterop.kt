@@ -37,6 +37,8 @@ object ObjectInterop {
 
     @JvmStatic
     fun damageSourceType(source: DamageSource): Identifier {
+        if (source is VirtualDamageSource) return source.spec.type
+
         val vanillaType = vanillaDamageType(source)
         if (vanillaType != null) return vanillaType.identifier
 

@@ -10,6 +10,8 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.projectile.EntityArrow
 import net.minecraft.entity.projectile.EntityFireball
 import net.minecraft.util.DamageSource
+import net.minecraft.util.EntityDamageSource
+import net.minecraft.util.EntityDamageSourceIndirect
 
 class DamageProvider : DamageProvider {
     private fun vanilla(spec: VanillaDamageSourceSpec, directEntity: EntityAccess?, causingEntity: EntityAccess?, position: VectorView?): DamageSourceView {
@@ -40,10 +42,11 @@ class DamageProvider : DamageProvider {
             )
 
             VanillaDamageType.MobProjectile -> ObjectInterop.damageSource(
-                DamageSource.causeIndirectDamage(
+                EntityDamageSourceIndirect(
+                    "mob",
                     ObjectInterop.entityOrNull(directEntity),
-                    ObjectInterop.entityOrNull(causingEntity) as? EntityLivingBase
-                )
+                    ObjectInterop.entityOrNull(causingEntity)
+                ).setProjectile()
             )
 
             VanillaDamageType.PlayerAttack -> ObjectInterop.damageSource(
@@ -58,18 +61,14 @@ class DamageProvider : DamageProvider {
             )
 
             VanillaDamageType.Fireball -> ObjectInterop.damageSource(
-                DamageSource.causeFireballDamage(
+                EntityDamageSourceIndirect(
+                    "fireball",
                     ObjectInterop.entityOrNull(directEntity) as? EntityFireball,
                     ObjectInterop.entityOrNull(causingEntity)
-                )
+                ).setFireDamage().setProjectile()
             )
 
-            VanillaDamageType.UnattributedFireball -> ObjectInterop.damageSource(
-                DamageSource.causeFireballDamage(
-                    ObjectInterop.entityOrNull(directEntity) as? EntityFireball,
-                    null
-                )
-            )
+            VanillaDamageType.UnattributedFireball -> virtual(spec, directEntity, causingEntity, position)
 
             VanillaDamageType.Thrown -> ObjectInterop.damageSource(
                 DamageSource.causeThrownDamage(
@@ -89,7 +88,12 @@ class DamageProvider : DamageProvider {
                 DamageSource.causeExplosionDamage(null as? EntityLivingBase)
             )
 
-            VanillaDamageType.PlayerExplosion -> ObjectInterop.damageSource(DamageSource.causeExplosionDamage(ObjectInterop.entityOrNull(causingEntity) as? EntityLivingBase))
+            VanillaDamageType.PlayerExplosion -> ObjectInterop.damageSource(
+                EntityDamageSource(
+                    "explosion.player",
+                    ObjectInterop.entityOrNull(causingEntity)
+                ).setDifficultyScaled().setExplosion()
+            )
 
             else -> virtual(spec, directEntity, causingEntity, position)
         }
