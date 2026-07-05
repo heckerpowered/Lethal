@@ -5,6 +5,7 @@
   "refmap": "mixins.lethal.refmap.json",
   "mixins": [
     "AxisAlignedBBMixin",
+    "BlockPositionMixin",
     "DamageSourceMixin",
     "EntityMixin",
     "ResourceLocationMixin",
