@@ -2,8 +2,11 @@ package heckerpowered.lethal.platform
 
 import heckerpowered.lethal.bridge.math.BoxView
 import heckerpowered.lethal.bridge.math.Geometry
+import heckerpowered.lethal.bridge.math.BlockPositionView
+import heckerpowered.lethal.bridge.math.BlockPositions
 import heckerpowered.lethal.bridge.math.VectorView
 import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 
 object GeometryInterop {
@@ -35,5 +38,15 @@ object GeometryInterop {
             min = vector(Vec3d(value.minX, value.minY, value.minZ)),
             max = vector(Vec3d(value.maxX, value.maxY, value.maxZ))
         )
+    }
+
+    @JvmStatic
+    fun blockPosition(value: BlockPositionView): BlockPos {
+        return value as? BlockPos ?: BlockPos(value.x, value.y, value.z)
+    }
+
+    @JvmStatic
+    fun blockPosition(value: BlockPos): BlockPositionView {
+        return value as? BlockPositionView ?: BlockPositions.of(value.x, value.y, value.z)
     }
 }
