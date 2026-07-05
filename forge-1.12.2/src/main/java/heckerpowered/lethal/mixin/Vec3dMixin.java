@@ -5,7 +5,7 @@ import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.*;
 
 @Mixin(Vec3d.class)
-@Implements(@Interface(iface = VectorView.class, prefix = "vector3dView$"))
+@Implements(@Interface(iface = VectorView.class, prefix = "vectorView$"))
 class Vec3dMixin {
     @Shadow
     @Final
@@ -22,15 +22,15 @@ class Vec3dMixin {
     private Vec3dMixin() {
     }
 
-    public double vector3dView$getX() {
+    public double vectorView$getX() {
         return x;
     }
 
-    public double vector3dView$getY() {
+    public double vectorView$getY() {
         return y;
     }
 
-    public double vector3dView$getZ() {
+    public double vectorView$getZ() {
         return z;
     }
 }
