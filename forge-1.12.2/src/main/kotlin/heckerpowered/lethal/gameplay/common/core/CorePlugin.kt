@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 heckerpowered
+ */
+
 package heckerpowered.lethal.gameplay.common.core
 
 import net.minecraft.launchwrapper.Launch

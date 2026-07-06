@@ -1,4 +1,7 @@
-import org.gradle.kotlin.dsl.mavenCentral
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 heckerpowered
+ */
 
 pluginManagement {
     repositories {

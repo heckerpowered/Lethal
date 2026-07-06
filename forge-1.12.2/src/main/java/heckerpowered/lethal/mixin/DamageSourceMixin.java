@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 heckerpowered
+ */
+
 package heckerpowered.lethal.mixin;
 
 import heckerpowered.lethal.bridge.adapter.entity.EntityAccess;
@@ -48,7 +53,7 @@ class DamageSourceMixin {
     public VectorView damageSourceView$getPosition() {
         final Vec3d position = getDamageLocation();
         if (position == null) return null;
-        
+
         return GeometryInterop.vector(position);
     }
 

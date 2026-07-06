@@ -1,17 +1,18 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 heckerpowered
+ */
+
 package heckerpowered.lethal.platform
 
 import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageFeature
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageSourceView
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.QuantumVanillaDamageSource
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.VanillaDamageType
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.VirtualDamageSource as BridgeVirtualDamageSource
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.VirtualDamageSourceSpec
+import heckerpowered.lethal.bridge.adapter.entity.damagesource.*
 import heckerpowered.lethal.bridge.resources.Identifier
 import heckerpowered.lethal.gameplay.common.entity.damagesource.VirtualDamageSource
 import net.minecraft.entity.Entity
 import net.minecraft.util.DamageSource
-import java.util.EnumSet
+import java.util.*
+import heckerpowered.lethal.bridge.adapter.entity.damagesource.VirtualDamageSource as BridgeVirtualDamageSource
 
 object ObjectInterop {
     fun source(source: DamageSourceView): DamageSource {

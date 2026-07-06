@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 heckerpowered
+ */
+
 package heckerpowered.convention
 
 import org.gradle.api.tasks.testing.logging.TestLogEvent

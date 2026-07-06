@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 heckerpowered
+ */
+
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 plugins {

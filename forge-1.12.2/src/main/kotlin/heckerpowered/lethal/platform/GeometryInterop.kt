@@ -1,10 +1,11 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 heckerpowered
+ */
+
 package heckerpowered.lethal.platform
 
-import heckerpowered.lethal.bridge.math.BoxView
-import heckerpowered.lethal.bridge.math.Geometry
-import heckerpowered.lethal.bridge.math.BlockPositionView
-import heckerpowered.lethal.bridge.math.BlockPositions
-import heckerpowered.lethal.bridge.math.VectorView
+import heckerpowered.lethal.bridge.math.*
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
