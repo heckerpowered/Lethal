@@ -5,11 +5,15 @@
 
 package heckerpowered.lethal.bridge.platform
 
+import heckerpowered.lethal.bridge.adapter.item.ItemProvider
+import heckerpowered.lethal.bridge.adapter.item.ItemRegistration
 import heckerpowered.lethal.bridge.platform.services.ModPlatform
 import java.util.*
 
 object Services {
     val Platform = load<ModPlatform>()
+    val ItemProvider = load<ItemProvider>()
+    val ItemRegistration = load<ItemRegistration>()
 
     fun <T : Any> load(type: Class<T>): T {
         return loadOrNull(type)
@@ -20,6 +24,10 @@ object Services {
         return ServiceLoader.load(type, Services::class.java.classLoader)
             .firstOrNull()
     }
+
+    fun <T : Any> loads(type: Class<T>): ServiceLoader<T> {
+        return ServiceLoader.load(type, Services::class.java.classLoader)
+    }
 }
 
 inline fun <reified T : Any> Services.load(): T =
@@ -27,3 +35,6 @@ inline fun <reified T : Any> Services.load(): T =
 
 inline fun <reified T : Any> Services.loadOrNull(): T? =
     loadOrNull(T::class.java)
+
+inline fun <reified T : Any> Services.loads(): ServiceLoader<T> =
+    loads(T::class.java)
