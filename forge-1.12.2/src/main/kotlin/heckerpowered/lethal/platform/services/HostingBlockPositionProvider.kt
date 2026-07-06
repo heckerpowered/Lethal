@@ -7,7 +7,7 @@ package heckerpowered.lethal.platform.services
 
 import heckerpowered.lethal.bridge.math.BlockPositionProvider
 import heckerpowered.lethal.bridge.math.BlockPositionView
-import heckerpowered.lethal.platform.GeometryInterop
+import heckerpowered.lethal.platform.interop.GeometryInterop
 import net.minecraft.util.math.BlockPos
 
 class HostingBlockPositionProvider : BlockPositionProvider {
