@@ -9,7 +9,7 @@ import heckerpowered.lethal.bridge.adapter.entity.EntityAccess;
 import heckerpowered.lethal.bridge.math.BoxView;
 import heckerpowered.lethal.bridge.math.Geometry;
 import heckerpowered.lethal.bridge.math.VectorView;
-import heckerpowered.lethal.platform.GeometryInterop;
+import heckerpowered.lethal.platform.interop.GeometryInterop;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;

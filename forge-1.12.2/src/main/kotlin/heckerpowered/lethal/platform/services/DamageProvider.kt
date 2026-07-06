@@ -9,7 +9,7 @@ import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
 import heckerpowered.lethal.bridge.adapter.entity.damagesource.*
 import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageProvider
 import heckerpowered.lethal.bridge.math.VectorView
-import heckerpowered.lethal.platform.ObjectInterop
+import heckerpowered.lethal.platform.interop.ObjectInterop
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.projectile.EntityArrow
