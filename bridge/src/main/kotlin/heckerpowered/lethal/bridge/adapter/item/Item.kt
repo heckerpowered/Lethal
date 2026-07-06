@@ -17,10 +17,7 @@ import heckerpowered.lethal.bridge.resources.Identifier
 interface ItemAccess {
     val identifier: Identifier
     val form: ItemForm
-    val properties: ItemProperties
-}
 
-interface ItemBlueprint : ItemAccess {
     fun use(stack: ItemStackAccess, world: WorldAccess, user: EntityAccess, hand: Hand): ItemInteractionResult {
         return ItemInteractionResult.Pass
     }
@@ -55,7 +52,7 @@ interface ItemBlueprint : ItemAccess {
     }
 
     fun getUseDurationTicks(stack: ItemStackAccess, user: EntityAccess?): Int {
-        return properties.maxUseDurationTicks
+        return 0
     }
 
     fun getDestroySpeed(stack: ItemStackAccess, blockState: BlockStateAccess): Double {
@@ -93,6 +90,14 @@ interface ItemBlueprint : ItemAccess {
 
     fun getArmorToughnessPoints(stack: ItemStackAccess, slot: EquipmentSlot?, wearer: EntityAccess?): Double {
         return 0.0
+    }
+}
+
+interface ItemBlueprint : ItemAccess {
+    val properties: ItemProperties
+
+    override fun getUseDurationTicks(stack: ItemStackAccess, user: EntityAccess?): Int {
+        return properties.maxUseDurationTicks
     }
 }
 
