@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.platform
+package heckerpowered.lethal.platform.interop
 
 import heckerpowered.lethal.bridge.math.*
 import net.minecraft.util.math.AxisAlignedBB

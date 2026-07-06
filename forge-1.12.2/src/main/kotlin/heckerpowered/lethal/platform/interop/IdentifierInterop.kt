@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.platform
+package heckerpowered.lethal.platform.interop
 
 import heckerpowered.lethal.bridge.resources.Identifier
 import net.minecraft.util.ResourceLocation

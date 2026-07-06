@@ -3,12 +3,13 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.platform
+package heckerpowered.lethal.platform.interop
 
 import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
 import heckerpowered.lethal.bridge.adapter.entity.damagesource.*
 import heckerpowered.lethal.bridge.resources.Identifier
 import heckerpowered.lethal.gameplay.common.entity.damagesource.VirtualDamageSource
+import heckerpowered.lethal.platform.EntityAccessor
 import net.minecraft.entity.Entity
 import net.minecraft.util.DamageSource
 import java.util.*
