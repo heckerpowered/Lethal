@@ -7,16 +7,14 @@ package heckerpowered.lethal.platform.adapter.item
 
 import com.google.common.collect.HashMultimap
 import com.google.common.collect.Multimap
-import heckerpowered.lethal.bridge.adapter.item.EquipmentSlot
-import heckerpowered.lethal.bridge.adapter.item.ItemBlueprint
-import heckerpowered.lethal.bridge.adapter.item.ItemForm
-import heckerpowered.lethal.bridge.adapter.item.ItemInteractionResult
+import heckerpowered.lethal.bridge.adapter.item.*
 import heckerpowered.lethal.bridge.math.Geometry
-import heckerpowered.lethal.platform.GeometryInterop
-import heckerpowered.lethal.platform.IdentifierInterop
-import heckerpowered.lethal.platform.ObjectInterop
 import heckerpowered.lethal.platform.adapter.block.HostedBlockStateAccess
 import heckerpowered.lethal.platform.adapter.world.HostedWorldAccess
+import heckerpowered.lethal.platform.interop.GeometryInterop
+import heckerpowered.lethal.platform.interop.IdentifierInterop
+import heckerpowered.lethal.platform.interop.ItemInterop
+import heckerpowered.lethal.platform.interop.ObjectInterop
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
@@ -37,9 +35,7 @@ import net.minecraft.world.World
 import java.nio.charset.StandardCharsets
 import java.util.*
 
-open class HostedItem(
-    val blueprint: ItemBlueprint,
-) : Item() {
+open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blueprint {
     init {
         registryName = IdentifierInterop.identifier(blueprint.identifier)
 
@@ -174,7 +170,7 @@ open class HostedItem(
 
     private fun defaultDescriptionKey(): String {
         val namespace = blueprint.identifier.namespace
-        val path = blueprint.identifier.path.replace('/','.')
+        val path = blueprint.identifier.path.replace('/', '.')
         return "$namespace.$path"
     }
 
@@ -187,7 +183,7 @@ open class HostedItem(
     }
 
     private fun stackAccess(stack: ItemStack): HostedItemStackAccess {
-        return HostedItemStackAccess(stack, blueprint)
+        return HostedItemStackAccess(stack, this)
     }
 
     private fun attributeModifierId(name: String, slot: EntityEquipmentSlot): UUID {
