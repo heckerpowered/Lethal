@@ -17,6 +17,8 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+
+    implementation(project(":bridge"))
 }
 
 java {

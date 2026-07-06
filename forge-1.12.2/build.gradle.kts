@@ -34,6 +34,7 @@ repositories {
 
 dependencies {
     implementation(project(":bridge"))
+    implementation(project(":common"))
 
     implementation(minecraft.dependency("net.minecraftforge:forge:$minecraftVersion-$forgeVersion"))
     // annotationProcessor("net.minecraftforge:eventbus-validator:7.0.1")
