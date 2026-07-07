@@ -9,7 +9,8 @@ import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
 import heckerpowered.lethal.bridge.math.BoxView
 import heckerpowered.lethal.bridge.math.Geometry
 import heckerpowered.lethal.bridge.math.VectorView
-import heckerpowered.lethal.platform.interop.GeometryInterop
+import heckerpowered.lethal.platform.interop.box
+import heckerpowered.lethal.platform.interop.vector
 import net.minecraft.entity.Entity
 import java.util.*
 
@@ -21,7 +22,7 @@ class EntityAccessor(val entity: Entity) : EntityAccess {
         get() = entity.uniqueID
 
     override val position: VectorView
-        get() = GeometryInterop.vector(entity.positionVector)
+        get() = entity.positionVector.vector()
 
     override var velocity: VectorView
         get() = Geometry.vector(entity.motionX, entity.motionY, entity.motionZ)
@@ -32,9 +33,9 @@ class EntityAccessor(val entity: Entity) : EntityAccess {
         }
 
     override var boundingBox: BoxView
-        get() = GeometryInterop.box(entity.entityBoundingBox)
+        get() = entity.entityBoundingBox.box()
         set(value) {
-            entity.entityBoundingBox = GeometryInterop.box(value)
+            entity.entityBoundingBox = value.box()
         }
 
     override var pitch: Double
