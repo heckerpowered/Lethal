@@ -7,7 +7,7 @@ package heckerpowered.lethal.platform.services
 
 import heckerpowered.lethal.bridge.math.BlockPositionProvider
 import heckerpowered.lethal.bridge.math.BlockPositionView
-import heckerpowered.lethal.platform.interop.GeometryInterop
+import heckerpowered.lethal.platform.interop.blockPosition
 import net.minecraft.util.math.BlockPos
 
 class HostingBlockPositionProvider : BlockPositionProvider {
@@ -22,6 +22,6 @@ class HostingBlockPositionProvider : BlockPositionProvider {
     }
 
     override fun asLong(position: BlockPositionView): Long {
-        return GeometryInterop.blockPosition(position).toLong()
+        return position.blockPosition().toLong()
     }
 }
