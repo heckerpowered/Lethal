@@ -3,14 +3,17 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.mixin;
+package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.lethal.bridge.adapter.entity.EntityAccess;
+import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageSourceView;
 import heckerpowered.lethal.bridge.math.BoxView;
 import heckerpowered.lethal.bridge.math.Geometry;
 import heckerpowered.lethal.bridge.math.VectorView;
 import heckerpowered.lethal.platform.interop.GeometryInterop;
+import heckerpowered.lethal.platform.interop.ObjectInterop;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -71,6 +74,9 @@ abstract class EntityMixin {
 
     @Shadow
     public abstract boolean isBurning();
+
+    @Shadow
+    public abstract boolean attackEntityFrom(@NotNull DamageSource source, float amount);
 
     public int entityAccess$getId() {
         return getEntityId();
@@ -141,5 +147,9 @@ abstract class EntityMixin {
 
     public boolean entityAccess$isOnFire() {
         return isBurning();
+    }
+
+    public boolean entityAccess$hurt(@NotNull DamageSourceView source, double damagePoints) {
+        return attackEntityFrom(ObjectInterop.damageSource(source), (float) damagePoints);
     }
 }

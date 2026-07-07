@@ -5,6 +5,7 @@
 
 package heckerpowered.lethal.bridge.adapter.entity
 
+import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageSourceView
 import heckerpowered.lethal.bridge.math.*
 import java.util.*
 
@@ -37,6 +38,8 @@ interface EntityAccess : UniquelyIdentifiable {
     fun distanceTo(other: EntityAccess): Double {
         return position.distanceTo(other.position)
     }
+
+    fun hurt(source: DamageSourceView, damagePoints: Double): Boolean
 
     val isAlive: Boolean
     val isRemoved: Boolean

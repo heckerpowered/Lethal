@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "heckerpowered.lethal.mixin",
+  "package": "heckerpowered.lethal.mixin.target",
   "compatibilityLevel": "JAVA_8",
   "refmap": "mixins.lethal.refmap.json",
   "mixins": [
@@ -11,7 +11,8 @@
     "ItemMixin",
     "ItemStackMixin",
     "ResourceLocationMixin",
-    "Vec3dMixin"
+    "Vec3dMixin",
+    "WorldMixin"
   ],
   "client": [],
   "server": [],

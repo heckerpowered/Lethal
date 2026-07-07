@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.mixin;
+package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.lethal.bridge.resources.Identifier;
 import net.minecraft.util.ResourceLocation;

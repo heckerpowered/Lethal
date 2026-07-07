@@ -66,7 +66,7 @@ data class QuantumVanillaDamageSource(
 }
 
 interface DamageProvider {
-    fun source(spec: DamageSourceSpec, directEntity: EntityAccess? = null, causingEntity: EntityAccess?, position: VectorView? = null): DamageSourceView
+    fun source(spec: DamageSourceSpec, directEntity: EntityAccess? = null, causingEntity: EntityAccess? = null, position: VectorView? = null): DamageSourceView
 
     companion object {
         val Virtual: DamageProvider = VirtualDamageProvider
@@ -83,5 +83,17 @@ object VirtualDamageProvider : DamageProvider {
             is VirtualDamageSourceSpec -> VirtualDamageSource(spec, directEntity, causingEntity, position)
             is VanillaDamageSourceSpec -> QuantumVanillaDamageSource(spec.type, directEntity, causingEntity, position)
         }
+    }
+}
+
+object DamageSources {
+    var Provider = DamageProvider.Auto
+
+    fun source(spec: DamageSourceSpec, directEntity: EntityAccess? = null, causingEntity: EntityAccess? = null, position: VectorView? = null): DamageSourceView {
+        return Provider.source(spec, directEntity, causingEntity, position)
+    }
+
+    fun vanilla(type: VanillaDamageType, directEntity: EntityAccess? = null, causingEntity: EntityAccess? = null, position: VectorView? = null): DamageSourceView {
+        return Provider.source(VanillaDamageSourceSpec(type), directEntity, causingEntity, position)
     }
 }

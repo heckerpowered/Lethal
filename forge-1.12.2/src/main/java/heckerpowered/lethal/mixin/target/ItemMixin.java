@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.mixin;
+package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.lethal.bridge.adapter.block.BlockStateAccess;
 import heckerpowered.lethal.bridge.adapter.entity.EntityAccess;

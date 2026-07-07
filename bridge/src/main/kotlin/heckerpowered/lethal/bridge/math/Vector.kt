@@ -472,6 +472,10 @@ fun VectorView.createPerpendicularBasis(): Basis3dView {
     return Basis3d(right, up, forward)
 }
 
+fun VectorView.asPointBox(): BoxView {
+    return Geometry.box(this, this)
+}
+
 object Vectors {
     val Zero: VectorView = Geometry.vector(0.0, 0.0, 0.0)
     val One: VectorView = Geometry.vector(1.0, 1.0, 1.0)

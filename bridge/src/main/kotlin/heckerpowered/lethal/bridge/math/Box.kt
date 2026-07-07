@@ -31,17 +31,26 @@ data class BoxIntersection(
     val startsInside: Boolean
         get() = enterTime == null
 
-    val enterPoint: VectorView?
+    val enterSurfacePoint: VectorView?
         get() = enterTime?.let(ray::pointAt)
+
+    val enterPoint: VectorView
+        get() = enterTime?.let(ray::pointAt) ?: ray.origin
 
     val exitPoint: VectorView
         get() = ray.pointAt(exitTime)
 
-    val nearestHitTime: Double
+    val nearestSurfaceHitTime: Double
         get() = enterTime ?: exitTime
 
+    val nearestHitTime: Double
+        get() = enterTime ?: 0.0
+
     val nearestHitPoint: VectorView
-        get() = ray.pointAt(nearestHitTime)
+        get() = enterTime?.let(ray::pointAt) ?: ray.origin
+
+    val nearestSurfaceHitPoint: VectorView
+        get() = ray.pointAt(nearestSurfaceHitTime)
 
     val nearestHitNormal: VectorView
         get() = enterNormal ?: exitNormal
@@ -190,6 +199,20 @@ fun BoxView.pointBoxIntersection(point: VectorView): Boolean {
     return containsOrOn(point)
 }
 
+/**
+ * Describes the intersection interval between a ray and an axis-aligned box.
+ *
+ * [BoxIntersection.enterTime] and [BoxIntersection.exitTime] are expressed in the parameter space of [ray]:
+ * `ray.pointAt(time)`. When the ray starts inside the box, [BoxIntersection.enterTime] is
+ * `null` and the nearest hit point is the ray origin.
+ *
+ * If the intersection was produced by [BoxView.intersect] with a finite
+ * `length`, the length is used only to decide whether the ray reaches the box.
+ * The returned [BoxIntersection.exitTime] is still the real exit time from the box surface and
+ * is not clipped to that length. Therefore [BoxIntersection.exitTime] and [BoxIntersection.exitPoint] may lie
+ * beyond the requested ray length, especially when the ray starts inside the
+ * box or the length ends before the ray leaves the box.
+ */
 fun BoxView.intersect(ray: RayView, length: Double? = null): BoxIntersection? {
     val directionLength = ray.direction.length
     if (directionLength.isNearlyZero()) return null
@@ -242,7 +265,7 @@ fun BoxView.intersect(ray: RayView, length: Double? = null): BoxIntersection? {
     return BoxIntersection(
         ray = ray,
         enterTime = if (startsInside) null else enterTime,
-        exitTime = if (maxTime != null) exitTime.coerceAtMost(maxTime) else exitTime,
+        exitTime = exitTime,
         enterNormal = if (startsInside) null else enterNormal,
         exitNormal = exitNormal ?: Vectors.Zero
     )

@@ -6,10 +6,12 @@
 package heckerpowered.lethal.platform
 
 import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
+import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageSourceView
 import heckerpowered.lethal.bridge.math.BoxView
 import heckerpowered.lethal.bridge.math.Geometry
 import heckerpowered.lethal.bridge.math.VectorView
 import heckerpowered.lethal.platform.interop.box
+import heckerpowered.lethal.platform.interop.damageSource
 import heckerpowered.lethal.platform.interop.vector
 import net.minecraft.entity.Entity
 import java.util.*
@@ -64,4 +66,16 @@ class EntityAccessor(val entity: Entity) : EntityAccess {
 
     override val isOnFire: Boolean
         get() = entity.isBurning
+
+    override fun hurt(source: DamageSourceView, damagePoints: Double): Boolean {
+        return entity.attackEntityFrom(source.damageSource(), damagePoints.toFloat())
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return entity == other
+    }
+
+    override fun hashCode(): Int {
+        return entity.hashCode()
+    }
 }
