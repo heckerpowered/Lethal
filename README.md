@@ -42,4 +42,3 @@ throughout the gameplay code.
 # Credits
 
 * [Heckerpowered](https://github.com/heckerpowered)
-* [1zero0](https://github.com/1zero0)
