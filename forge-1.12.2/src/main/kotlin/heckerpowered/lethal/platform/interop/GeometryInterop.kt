@@ -23,14 +23,7 @@ object GeometryInterop {
 
     @JvmStatic
     fun box(value: BoxView): AxisAlignedBB {
-        return value as? AxisAlignedBB ?: AxisAlignedBB(
-            value.min.x,
-            value.min.y,
-            value.min.z,
-            value.max.x,
-            value.max.y,
-            value.max.z
-        )
+        return value as? AxisAlignedBB ?: AxisAlignedBB(value.min.x, value.min.y, value.min.z, value.max.x, value.max.y, value.max.z)
     }
 
     @JvmStatic
