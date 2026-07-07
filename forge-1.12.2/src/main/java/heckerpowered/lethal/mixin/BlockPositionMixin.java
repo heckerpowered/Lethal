@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(BlockPos.class)
@@ -19,14 +20,17 @@ class BlockPositionMixin extends Vec3i {
         super(x, y, z);
     }
 
+    @Intrinsic
     public int blockPositionView$getX() {
         return super.getX();
     }
 
+    @Intrinsic
     public int blockPositionView$getY() {
         return super.getY();
     }
 
+    @Intrinsic
     public int blockPositionView$getZ() {
         return super.getZ();
     }
