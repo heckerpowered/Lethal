@@ -51,3 +51,27 @@ object GeometryInterop {
         return value as? BlockPositionView ?: BlockPositions.of(value.x, value.y, value.z)
     }
 }
+
+fun VectorView.vector(): Vec3d {
+    return GeometryInterop.vector(this)
+}
+
+fun Vec3d.vector(): VectorView {
+    return GeometryInterop.vector(this)
+}
+
+fun BoxView.box(): AxisAlignedBB {
+    return GeometryInterop.box(this)
+}
+
+fun AxisAlignedBB.box(): BoxView {
+    return GeometryInterop.box(this)
+}
+
+fun BlockPositionView.blockPosition(): BlockPos {
+    return GeometryInterop.blockPosition(this)
+}
+
+fun BlockPos.blockPosition(): BlockPositionView {
+    return GeometryInterop.blockPosition(this)
+}
