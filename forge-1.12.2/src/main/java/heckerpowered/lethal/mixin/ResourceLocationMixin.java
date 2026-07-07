@@ -21,11 +21,13 @@ class ResourceLocationMixin {
     @Final
     protected String path;
 
+    @Intrinsic
     @NotNull
     public String identifier$getNamespace() {
         return namespace;
     }
 
+    @Intrinsic
     @NotNull
     public String identifier$getPath() {
         return path;
