@@ -8,6 +8,8 @@
     "BlockPositionMixin",
     "DamageSourceMixin",
     "EntityMixin",
+    "ItemMixin",
+    "ItemStackMixin",
     "ResourceLocationMixin",
     "Vec3dMixin"
   ],
