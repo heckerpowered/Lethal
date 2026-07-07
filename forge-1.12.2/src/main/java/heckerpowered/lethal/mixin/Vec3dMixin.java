@@ -27,14 +27,17 @@ class Vec3dMixin {
     private Vec3dMixin() {
     }
 
+    @Intrinsic
     public double vectorView$getX() {
         return x;
     }
 
+    @Intrinsic
     public double vectorView$getY() {
         return y;
     }
 
+    @Intrinsic
     public double vectorView$getZ() {
         return z;
     }
