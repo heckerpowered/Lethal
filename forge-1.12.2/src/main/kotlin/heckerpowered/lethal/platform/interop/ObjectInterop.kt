@@ -104,8 +104,7 @@ object ObjectInterop {
 
     @JvmStatic
     fun entityOrNull(entity: EntityAccess?): Entity? {
-        if (entity == null) return null
-        return entity(entity)
+        return entity(entity ?: return null)
     }
 
     private fun damageSourceType(damageType: String): Identifier {
@@ -164,4 +163,36 @@ object ObjectInterop {
             else -> null
         }
     }
+}
+
+fun DamageSourceView.damageSource(): DamageSource {
+    return ObjectInterop.damageSource(this)
+}
+
+fun DamageSource.damageSource(): DamageSourceView {
+    return ObjectInterop.damageSource(this)
+}
+
+fun DamageSource.damageSourceType(): Identifier {
+    return ObjectInterop.damageSourceType(this)
+}
+
+fun DamageSource.hasDamageFeature(feature: DamageFeature): Boolean {
+    return ObjectInterop.hasDamageFeature(this, feature)
+}
+
+fun Entity.entity(): EntityAccess {
+    return ObjectInterop.entity(this)
+}
+
+fun Entity?.entityOrNull(): EntityAccess? {
+    return ObjectInterop.entityOrNull(this)
+}
+
+fun EntityAccess.entity(): Entity {
+    return ObjectInterop.entity(this)
+}
+
+fun EntityAccess?.entityOrNull(): Entity? {
+    return ObjectInterop.entityOrNull(this)
 }
