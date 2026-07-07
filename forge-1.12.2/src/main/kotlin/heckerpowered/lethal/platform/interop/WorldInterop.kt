@@ -9,6 +9,11 @@ import heckerpowered.lethal.bridge.adapter.world.WorldAccess
 import heckerpowered.lethal.platform.adapter.world.HostedWorldAccess
 import net.minecraft.world.World
 
+/**
+ * Converts worlds across the bridge boundary.
+ *
+ * Native-to-bridge conversion can fall back to [HostedWorldAccess]; bridge-to-native conversion requires a known hosted or native world.
+ */
 object WorldInterop {
     @JvmStatic
     fun world(world: WorldAccess): World {
