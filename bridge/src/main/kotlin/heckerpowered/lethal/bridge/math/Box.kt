@@ -6,17 +6,27 @@
 package heckerpowered.lethal.bridge.math
 
 interface BoxView {
+    val minX: Double
+    val minY: Double
+    val minZ: Double
+
+    val maxX: Double
+    val maxY: Double
+    val maxZ: Double
+
     val min: VectorView
+        get() = Geometry.vector(minX, minY, minZ)
     val max: VectorView
+        get() = Geometry.vector(maxX, maxY, maxZ)
 
     val center: VectorView
-        get() = (min + max) * 0.5
+        get() = Geometry.vector((minX + maxX) * 0.5, (minY + maxY) * 0.5, (minZ + maxZ) * 0.5)
     val size: VectorView
-        get() = max - min
+        get() = Geometry.vector(maxX - minX, maxY - minY, maxZ - minZ)
     val extent: VectorView
-        get() = size * 0.5
+        get() = Geometry.vector((maxX - minX) * 0.5, (maxY - minY) * 0.5, (maxZ - minZ) * 0.5)
     val volume: Double
-        get() = size.x * size.y * size.z
+        get() = (maxX - minX) * (maxY - minY) * (maxZ - minZ)
 }
 
 data class BoxIntersection(
@@ -57,20 +67,19 @@ data class BoxIntersection(
 }
 
 fun BoxView.expandedBy(amount: Double): BoxView {
-    val vector = Geometry.vector(amount, amount, amount)
-    return Geometry.box(min - vector, max + vector)
+    return Geometry.box(minX - amount, minY - amount, minZ - amount, maxX + amount, maxY + amount, maxZ + amount)
 }
 
 fun BoxView.expandedBy(amount: VectorView): BoxView {
-    return Geometry.box(min - amount, max + amount)
+    return Geometry.box(minX - amount.x, minY - amount.y, minZ - amount.z, maxX + amount.x, maxY + amount.y, maxZ + amount.z)
 }
 
 fun BoxView.expandedBy(negative: VectorView, positive: VectorView): BoxView {
-    return Geometry.box(min - negative, max + positive)
+    return Geometry.box(minX - negative.x, minY - negative.y, minZ - negative.z, maxX + positive.x, maxY + positive.y, maxZ + positive.z)
 }
 
 fun BoxView.translatedBy(offset: VectorView): BoxView {
-    return Geometry.box(min + offset, max + offset)
+    return Geometry.box(minX + offset.x, minY + offset.y, minZ + offset.z, maxX + offset.x, maxY + offset.y, maxZ + offset.z)
 }
 
 fun BoxView.movedTo(destination: VectorView): BoxView {
@@ -78,112 +87,109 @@ fun BoxView.movedTo(destination: VectorView): BoxView {
 }
 
 fun BoxView.union(point: VectorView): BoxView {
-    return Geometry.box(
-        Vectors.min(min, point),
-        Vectors.max(max, point)
-    )
+    return Geometry.box(minOf(minX, point.x), minOf(minY, point.y), minOf(minZ, point.z), maxOf(maxX, point.x), maxOf(maxY, point.y), maxOf(maxZ, point.z))
 }
 
 fun BoxView.union(other: BoxView): BoxView {
-    return Geometry.box(
-        Vectors.min(min, other.min),
-        Vectors.max(max, other.max)
-    )
+    return Geometry.box(minOf(minX, other.minX), minOf(minY, other.minY), minOf(minZ, other.minZ), maxOf(maxX, other.maxX), maxOf(maxY, other.maxY), maxOf(maxZ, other.maxZ))
 }
 
 fun BoxView.closestPointTo(point: VectorView): VectorView {
     return Geometry.vector(
-        point.x.coerceIn(min.x, max.x),
-        point.y.coerceIn(min.y, max.y),
-        point.z.coerceIn(min.z, max.z)
+        point.x.coerceIn(minX, maxX),
+        point.y.coerceIn(minY, maxY),
+        point.z.coerceIn(minZ, maxZ)
     )
 }
 
 fun BoxView.distanceSquaredTo(point: VectorView): Double {
     var distanceSquared = 0.0
 
-    if (point.x < min.x) distanceSquared += (point.x - min.x).square()
-    else if (point.x > max.x) distanceSquared += (point.x - max.x).square()
+    if (point.x < minX) distanceSquared += (point.x - minX).square()
+    else if (point.x > maxX) distanceSquared += (point.x - maxX).square()
 
-    if (point.y < min.y) distanceSquared += (point.y - min.y).square()
-    else if (point.y > max.y) distanceSquared += (point.y - max.y).square()
+    if (point.y < minY) distanceSquared += (point.y - minY).square()
+    else if (point.y > maxY) distanceSquared += (point.y - maxY).square()
 
-    if (point.z < min.z) distanceSquared += (point.z - min.z).square()
-    else if (point.z > max.z) distanceSquared += (point.z - max.z).square()
+    if (point.z < minZ) distanceSquared += (point.z - minZ).square()
+    else if (point.z > maxZ) distanceSquared += (point.z - maxZ).square()
 
     return distanceSquared
 }
 
 fun BoxView.contains(point: VectorView): Boolean {
-    return point.x > min.x && point.x < max.x &&
-            point.y > min.y && point.y < max.y &&
-            point.z > min.z && point.z < max.z
+    return point.x > minX && point.x < maxX &&
+            point.y > minY && point.y < maxY &&
+            point.z > minZ && point.z < maxZ
 }
 
 fun BoxView.containsOrOn(point: VectorView): Boolean {
-    return point.x in min.x..max.x &&
-            point.y in min.y..max.y &&
-            point.z in min.z..max.z
+    return point.x in minX..maxX &&
+            point.y in minY..maxY &&
+            point.z in minZ..maxZ
 }
 
 fun BoxView.contains(other: BoxView): Boolean {
-    return contains(other.min) && contains(other.max)
+    return other.minX > minX && other.maxX < maxX &&
+            other.minY > minY && other.maxY < maxY &&
+            other.minZ > minZ && other.maxZ < maxZ
 }
 
 fun BoxView.containsOrOn(other: BoxView): Boolean {
-    return containsOrOn(other.min) && containsOrOn(other.max)
+    return other.minX in minX..maxX && other.maxX in minX..maxX &&
+            other.minY in minY..maxY && other.maxY in minY..maxY &&
+            other.minZ in minZ..maxZ && other.maxZ in minZ..maxZ
 }
 
 fun BoxView.containsHorizontal(point: VectorView): Boolean {
-    return point.x > min.x && point.x < max.x &&
-            point.z > min.z && point.z < max.z
+    return point.x > minX && point.x < maxX &&
+            point.z > minZ && point.z < maxZ
 }
 
 fun BoxView.containsOrOnHorizontal(point: VectorView): Boolean {
-    return point.x in min.x..max.x &&
-            point.z in min.z..max.z
+    return point.x in minX..maxX &&
+            point.z in minZ..maxZ
 }
 
 fun BoxView.containsHorizontal(other: BoxView): Boolean {
-    return containsHorizontal(other.min) && containsHorizontal(other.max)
+    return other.minX > minX && other.maxX < maxX &&
+            other.minZ > minZ && other.maxZ < maxZ
 }
 
 fun BoxView.containsOrOnHorizontal(other: BoxView): Boolean {
-    return containsOrOnHorizontal(other.min) && containsOrOnHorizontal(other.max)
+    return other.minX in minX..maxX && other.maxX in minX..maxX &&
+            other.minZ in minZ..maxZ && other.maxZ in minZ..maxZ
 }
 
 fun BoxView.intersects(other: BoxView): Boolean {
-    return min.x <= other.max.x && other.min.x <= max.x &&
-            min.y <= other.max.y && other.min.y <= max.y &&
-            min.z <= other.max.z && other.min.z <= max.z
+    return minX <= other.maxX && other.minX <= maxX &&
+            minY <= other.maxY && other.minY <= maxY &&
+            minZ <= other.maxZ && other.minZ <= maxZ
 }
 
 fun BoxView.intersectsHorizontal(other: BoxView): Boolean {
-    return min.x <= other.max.x && other.min.x <= max.x &&
-            min.z <= other.max.z && other.min.z <= max.z
+    return minX <= other.maxX && other.minX <= maxX &&
+            minZ <= other.maxZ && other.minZ <= maxZ
 }
 
 fun BoxView.overlap(other: BoxView): BoxView {
     if (!intersects(other)) {
-        return Geometry.box(Vectors.Zero, Vectors.Zero)
+        return Geometry.box(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     }
 
-    return Geometry.box(
-        Vectors.max(min, other.min),
-        Vectors.min(max, other.max)
-    )
+    return Geometry.box(maxOf(minX, other.minX), maxOf(minY, other.minY), maxOf(minZ, other.minZ), minOf(maxX, other.maxX), minOf(maxY, other.maxY), minOf(maxZ, other.maxZ))
 }
 
 fun BoxView.vertices(): Array<VectorView> {
     return arrayOf(
-        Geometry.vector(min.x, min.y, min.z),
-        Geometry.vector(min.x, min.y, max.z),
-        Geometry.vector(min.x, max.y, min.z),
-        Geometry.vector(min.x, max.y, max.z),
-        Geometry.vector(max.x, min.y, min.z),
-        Geometry.vector(max.x, min.y, max.z),
-        Geometry.vector(max.x, max.y, min.z),
-        Geometry.vector(max.x, max.y, max.z)
+        Geometry.vector(minX, minY, minZ),
+        Geometry.vector(minX, minY, maxZ),
+        Geometry.vector(minX, maxY, minZ),
+        Geometry.vector(minX, maxY, maxZ),
+        Geometry.vector(maxX, minY, minZ),
+        Geometry.vector(maxX, minY, maxZ),
+        Geometry.vector(maxX, maxY, minZ),
+        Geometry.vector(maxX, maxY, maxZ)
     )
 }
 
@@ -253,9 +259,12 @@ fun BoxView.intersect(ray: RayView, length: Double? = null): BoxIntersection? {
         return enterTime <= exitTime
     }
 
-    if (!testAxis(ray.origin.x, ray.direction.x, min.x, max.x, -Vectors.UnitX, Vectors.UnitX)) return null
-    if (!testAxis(ray.origin.y, ray.direction.y, min.y, max.y, -Vectors.UnitY, Vectors.UnitY)) return null
-    if (!testAxis(ray.origin.z, ray.direction.z, min.z, max.z, -Vectors.UnitZ, Vectors.UnitZ)) return null
+    val origin = ray.origin
+    val direction = ray.direction
+
+    if (!testAxis(origin.x, direction.x, minX, maxX, -Vectors.UnitX, Vectors.UnitX)) return null
+    if (!testAxis(origin.y, direction.y, minY, maxY, -Vectors.UnitY, Vectors.UnitY)) return null
+    if (!testAxis(origin.z, direction.z, minZ, maxZ, -Vectors.UnitZ, Vectors.UnitZ)) return null
 
     if (exitTime < 0.0) return null
     if (maxTime != null && enterTime > maxTime) return null

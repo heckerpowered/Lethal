@@ -6,12 +6,22 @@
 package heckerpowered.lethal.bridge.adapter.world
 
 import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
+import heckerpowered.lethal.bridge.adapter.world.raycast.EntityRayBucketSource
 import heckerpowered.lethal.bridge.math.BoxView
 
 /**
  * Host-neutral world access.
  */
-interface WorldAccess {
+interface WorldAccess : EntityRayBucketSource {
+    val isClientSide: Boolean
+
+    /**
+     * Number of loaded entities visible to this world access.
+     *
+     * Hosts should expose this as a cheap count instead of deriving it by consuming [entities].
+     */
+    val loadedEntityCount: Int
+
     /**
      * Loaded entities visible to this world access.
      */

@@ -6,7 +6,8 @@
 package heckerpowered.lethal.mixin.impl
 
 import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.math.BoxView
+import heckerpowered.lethal.bridge.adapter.world.raycast.EntityRayBucket
+import heckerpowered.lethal.bridge.math.*
 import heckerpowered.lethal.platform.interop.box
 import heckerpowered.lethal.platform.interop.entity
 import net.minecraft.entity.Entity
@@ -14,12 +15,19 @@ import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.world.World
 import net.minecraft.world.chunk.Chunk
 import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.min
 
 object WorldAccessImpl {
     private const val SECTION_SIZE = 16.0
 
     interface ChunkAccess {
         fun isChunkLoadedForEntitySearch(chunkX: Int, chunkZ: Int, allowEmpty: Boolean): Boolean
+    }
+
+    @JvmStatic
+    fun loadedEntityCount(world: World): Int {
+        return world.loadedEntityList.size
     }
 
     @JvmStatic
@@ -84,5 +92,91 @@ object WorldAccessImpl {
 
     private fun sectionCoordinate(blockCoordinate: Double): Int {
         return floor(blockCoordinate / SECTION_SIZE).toInt()
+    }
+
+    @JvmStatic
+    fun getEntityRayBuckets(world: World, ray: RayView, length: Double): Sequence<EntityRayBucket> {
+        val directionLength = ray.direction.length
+        if (directionLength.isNearlyZero()) return emptySequence()
+
+        val maxTime = length / directionLength
+        val searchBox = getRaySearchBox(ray, maxTime)
+
+        val buckets = ArrayList<EntityRayBucket>()
+
+        for (chunk in getChunks(world, searchBox)) {
+            addChunkBuckets(buckets, chunk, ray, length, searchBox)
+        }
+
+        buckets.sortBy { it.lowerBoundTime }
+        return buckets.asSequence()
+    }
+
+    private fun getRaySearchBox(ray: RayView, maxTime: Double): AxisAlignedBB {
+        val origin = ray.origin
+        val end = ray.pointAt(maxTime)
+        val radius = World.MAX_ENTITY_RADIUS
+
+        return AxisAlignedBB(
+            min(origin.x, end.x) - radius,
+            min(origin.y, end.y) - radius,
+            min(origin.z, end.z) - radius,
+            max(origin.x, end.x) + radius,
+            max(origin.y, end.y) + radius,
+            max(origin.z, end.z) + radius,
+        )
+    }
+
+
+    private fun addChunkBuckets(buckets: MutableList<EntityRayBucket>, chunk: Chunk, ray: RayView, length: Double, searchBox: AxisAlignedBB) {
+        val entitySections = chunk.entityLists
+
+        val minimumSectionIndex = floor(searchBox.minY / SECTION_SIZE).toInt()
+            .coerceIn(0, entitySections.lastIndex)
+        val maximumSectionIndex = floor(searchBox.maxY / SECTION_SIZE).toInt()
+            .coerceIn(0, entitySections.lastIndex)
+
+        for (sectionIndex in minimumSectionIndex..maximumSectionIndex) {
+            val entitySection = entitySections[sectionIndex]
+            if (entitySection.isEmpty()) continue
+
+            val lowerBoundTime = getSectionLowerBoundTime(chunk, sectionIndex, ray, length) ?: continue
+
+            buckets += EntityRayBucket(lowerBoundTime, entitySectionEntities(entitySection).asIterable())
+        }
+    }
+
+    private fun entitySectionEntities(entitySection: Iterable<Entity>): Sequence<EntityAccess> = sequence {
+        for (entity in entitySection) {
+            yield(entity.entity())
+
+            val parts = entity.parts
+            if (parts != null) {
+                for (part in parts) {
+                    yield(part.entity())
+                }
+            }
+        }
+    }
+
+    private fun getSectionLowerBoundTime(chunk: Chunk, sectionIndex: Int, ray: RayView, length: Double): Double? {
+        val chunkX = chunk.x
+        val chunkZ = chunk.z
+        val radius = World.MAX_ENTITY_RADIUS
+
+        val minimumX = chunkX * 16.0 - radius
+        val minimumY = sectionIndex * 16.0 - radius
+        val minimumZ = chunkZ * 16.0 - radius
+
+        val maximumX = (chunkX + 1) * 16.0 + radius
+        val maximumY = (sectionIndex + 1) * 16.0 + radius
+        val maximumZ = (chunkZ + 1) * 16.0 + radius
+
+        return intersectSectionBounds(ray, length, minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ)
+    }
+
+    private fun intersectSectionBounds(ray: RayView, length: Double, minimumX: Double, minimumY: Double, minimumZ: Double, maximumX: Double, maximumY: Double, maximumZ: Double): Double? {
+        val box = Geometry.box(minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ)
+        return box.intersect(ray, length)?.nearestHitTime
     }
 }

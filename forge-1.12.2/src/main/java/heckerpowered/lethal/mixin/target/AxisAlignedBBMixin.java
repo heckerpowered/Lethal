@@ -39,6 +39,30 @@ class AxisAlignedBBMixin {
     @Final
     public double maxZ;
 
+    public double boxView$getMinX() {
+        return minX;
+    }
+
+    public double boxView$getMinY() {
+        return minY;
+    }
+
+    public double boxView$getMinZ() {
+        return minZ;
+    }
+
+    public double boxView$getMaxX() {
+        return maxX;
+    }
+
+    public double boxView$getMaxY() {
+        return maxY;
+    }
+
+    public double boxView$getMaxZ() {
+        return maxZ;
+    }
+
     @NotNull
     public VectorView boxView$getMin() {
         return Geometry.vector(minX, minY, minZ);

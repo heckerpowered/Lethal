@@ -17,8 +17,8 @@ class HostingGeometryProvider : GeometryProvider {
         return Vec3d(x, y, z) as VectorView
     }
 
-    override fun box(min: VectorView, max: VectorView): BoxView {
+    override fun box(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double): BoxView {
         @Suppress("CAST_NEVER_SUCCEEDS")
-        return AxisAlignedBB(min as Vec3d, max as Vec3d) as BoxView
+        return AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ) as BoxView
     }
 }
