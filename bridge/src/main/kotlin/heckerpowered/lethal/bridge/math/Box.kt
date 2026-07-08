@@ -210,13 +210,28 @@ fun BoxView.pointBoxIntersection(point: VectorView): Boolean {
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun BoxView.intersectTime(ray: RayView, length: Double): Double {
-    val direction = ray.direction
-    val directionLength = direction.length
-    if (directionLength.isNearlyZero()) return Double.NaN
+    val context = RayIntersectionContext.create(ray, length) ?: return Double.NaN
+    return intersectTime(context)
+}
 
-    val origin = ray.origin
-    val maxTime = length / directionLength
-    return intersectTime(origin.x, origin.y, origin.z, direction.x, direction.y, direction.z, minX, minY, minZ, maxX, maxY, maxZ, maxTime)
+@Suppress("NOTHING_TO_INLINE")
+inline fun BoxView.intersectTime(context: RayIntersectionContext): Double {
+    return intersectTime(context, minX, minY, minZ, maxX, maxY, maxZ)
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun intersectTime(context: RayIntersectionContext, minimumX: Double, minimumY: Double, minimumZ: Double, maximumX: Double, maximumY: Double, maximumZ: Double): Double {
+    var enterTime = Double.NEGATIVE_INFINITY
+    var exitTime = Double.POSITIVE_INFINITY
+
+    if (!intersectAxisTime(context.originX, context.directionXIsNearlyZero, context.inverseDirectionX, minimumX, maximumX, enterTime, exitTime, { enterTime = it }, { exitTime = it })) return Double.NaN
+    if (!intersectAxisTime(context.originY, context.directionYIsNearlyZero, context.inverseDirectionY, minimumY, maximumY, enterTime, exitTime, { enterTime = it }, { exitTime = it })) return Double.NaN
+    if (!intersectAxisTime(context.originZ, context.directionZIsNearlyZero, context.inverseDirectionZ, minimumZ, maximumZ, enterTime, exitTime, { enterTime = it }, { exitTime = it })) return Double.NaN
+
+    if (exitTime < 0.0) return Double.NaN
+    if (enterTime > context.maximumTime) return Double.NaN
+
+    return if (enterTime < 0.0) 0.0 else enterTime
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -224,52 +239,50 @@ inline fun intersectTime(originX: Double, originY: Double, originZ: Double, dire
     var enterTime = Double.NEGATIVE_INFINITY
     var exitTime = Double.POSITIVE_INFINITY
 
-    if (directionX.isNearlyZero()) {
-        if (originX < minimumX || originX > maximumX) return Double.NaN
-    } else {
-        val inverseDirection = 1.0 / directionX
-        var axisEnterTime = (minimumX - originX) * inverseDirection
-        var axisExitTime = (maximumX - originX) * inverseDirection
-        if (axisEnterTime > axisExitTime) {
-            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
-        }
-        if (axisEnterTime > enterTime) enterTime = axisEnterTime
-        if (axisExitTime < exitTime) exitTime = axisExitTime
-        if (enterTime > exitTime) return Double.NaN
-    }
-
-    if (directionY.isNearlyZero()) {
-        if (originY < minimumY || originY > maximumY) return Double.NaN
-    } else {
-        val inverseDirection = 1.0 / directionY
-        var axisEnterTime = (minimumY - originY) * inverseDirection
-        var axisExitTime = (maximumY - originY) * inverseDirection
-        if (axisEnterTime > axisExitTime) {
-            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
-        }
-        if (axisEnterTime > enterTime) enterTime = axisEnterTime
-        if (axisExitTime < exitTime) exitTime = axisExitTime
-        if (enterTime > exitTime) return Double.NaN
-    }
-
-    if (directionZ.isNearlyZero()) {
-        if (originZ < minimumZ || originZ > maximumZ) return Double.NaN
-    } else {
-        val inverseDirection = 1.0 / directionZ
-        var axisEnterTime = (minimumZ - originZ) * inverseDirection
-        var axisExitTime = (maximumZ - originZ) * inverseDirection
-        if (axisEnterTime > axisExitTime) {
-            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
-        }
-        if (axisEnterTime > enterTime) enterTime = axisEnterTime
-        if (axisExitTime < exitTime) exitTime = axisExitTime
-        if (enterTime > exitTime) return Double.NaN
-    }
+    if (!intersectAxisTime(originX, directionX, minimumX, maximumX, enterTime, exitTime, { enterTime = it }, { exitTime = it })) return Double.NaN
+    if (!intersectAxisTime(originY, directionY, minimumY, maximumY, enterTime, exitTime, { enterTime = it }, { exitTime = it })) return Double.NaN
+    if (!intersectAxisTime(originZ, directionZ, minimumZ, maximumZ, enterTime, exitTime, { enterTime = it }, { exitTime = it })) return Double.NaN
 
     if (exitTime < 0.0) return Double.NaN
     if (enterTime > maximumTime) return Double.NaN
 
     return if (enterTime < 0.0) 0.0 else enterTime
+}
+
+@PublishedApi
+internal inline fun intersectAxisTime(origin: Double, direction: Double, minimum: Double, maximum: Double, enterTime: Double, exitTime: Double, updateEnterTime: (Double) -> Unit, updateExitTime: (Double) -> Unit): Boolean {
+    val directionIsNearlyZero = direction.isNearlyZero()
+    val inverseDirection = if (directionIsNearlyZero) 0.0 else 1.0 / direction
+    return intersectAxisTime(origin, directionIsNearlyZero, inverseDirection, minimum, maximum, enterTime, exitTime, updateEnterTime, updateExitTime)
+}
+
+@PublishedApi
+internal inline fun intersectAxisTime(origin: Double, directionIsNearlyZero: Boolean, inverseDirection: Double, minimum: Double, maximum: Double, enterTime: Double, exitTime: Double, updateEnterTime: (Double) -> Unit, updateExitTime: (Double) -> Unit): Boolean {
+    if (directionIsNearlyZero) return origin >= minimum && origin <= maximum
+
+    var axisEnterTime = (minimum - origin) * inverseDirection
+    var axisExitTime = (maximum - origin) * inverseDirection
+
+    if (axisEnterTime > axisExitTime) {
+        val previousEnterTime = axisEnterTime
+        axisEnterTime = axisExitTime
+        axisExitTime = previousEnterTime
+    }
+
+    var nextEnterTime = enterTime
+    var nextExitTime = exitTime
+
+    if (axisEnterTime > enterTime) {
+        nextEnterTime = axisEnterTime
+        updateEnterTime(axisEnterTime)
+    }
+
+    if (axisExitTime < exitTime) {
+        nextExitTime = axisExitTime
+        updateExitTime(axisExitTime)
+    }
+
+    return nextEnterTime <= nextExitTime
 }
 
 /**
@@ -287,105 +300,70 @@ inline fun intersectTime(originX: Double, originY: Double, originZ: Double, dire
  * box or the length ends before the ray leaves the box.
  */
 fun BoxView.intersect(ray: RayView, length: Double? = null): BoxIntersection? {
-    val direction = ray.direction
-    val directionLength = direction.length
-    if (directionLength.isNearlyZero()) return null
+    val context = RayIntersectionContext.create(ray, length) ?: return null
+    return intersect(context)
+}
 
-    val maxTime = length?.let { it / directionLength }
-
-    val origin = ray.origin
-    val originX = origin.x
-    val originY = origin.y
-    val originZ = origin.z
-    val directionX = direction.x
-    val directionY = direction.y
-    val directionZ = direction.z
-
+fun BoxView.intersect(context: RayIntersectionContext): BoxIntersection? {
     var enterTime = Double.NEGATIVE_INFINITY
     var exitTime = Double.POSITIVE_INFINITY
 
     var enterNormal: VectorView? = null
     var exitNormal: VectorView? = null
 
-    if (directionX.isNearlyZero()) {
-        if (originX < minX || originX > maxX) return null
-    } else {
-        val inverseDirection = 1.0 / directionX
-        var axisEnterTime = (minX - originX) * inverseDirection
-        var axisExitTime = (maxX - originX) * inverseDirection
-        var axisEnterNormal = Vectors.NegativeUnitX
-        var axisExitNormal = Vectors.UnitX
-        if (axisEnterTime > axisExitTime) {
-            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
-            axisEnterNormal = axisExitNormal.also { axisExitNormal = axisEnterNormal }
-        }
-        if (axisEnterTime > enterTime) {
-            enterTime = axisEnterTime
-            enterNormal = axisEnterNormal
-        }
-        if (axisExitTime < exitTime) {
-            exitTime = axisExitTime
-            exitNormal = axisExitNormal
-        }
-        if (enterTime > exitTime) return null
-    }
-
-    if (directionY.isNearlyZero()) {
-        if (originY < minY || originY > maxY) return null
-    } else {
-        val inverseDirection = 1.0 / directionY
-        var axisEnterTime = (minY - originY) * inverseDirection
-        var axisExitTime = (maxY - originY) * inverseDirection
-        var axisEnterNormal = Vectors.NegativeUnitY
-        var axisExitNormal = Vectors.UnitY
-        if (axisEnterTime > axisExitTime) {
-            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
-            axisEnterNormal = axisExitNormal.also { axisExitNormal = axisEnterNormal }
-        }
-        if (axisEnterTime > enterTime) {
-            enterTime = axisEnterTime
-            enterNormal = axisEnterNormal
-        }
-        if (axisExitTime < exitTime) {
-            exitTime = axisExitTime
-            exitNormal = axisExitNormal
-        }
-        if (enterTime > exitTime) return null
-    }
-
-    if (directionZ.isNearlyZero()) {
-        if (originZ < minZ || originZ > maxZ) return null
-    } else {
-        val inverseDirection = 1.0 / directionZ
-        var axisEnterTime = (minZ - originZ) * inverseDirection
-        var axisExitTime = (maxZ - originZ) * inverseDirection
-        var axisEnterNormal = Vectors.NegativeUnitZ
-        var axisExitNormal = Vectors.UnitZ
-        if (axisEnterTime > axisExitTime) {
-            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
-            axisEnterNormal = axisExitNormal.also { axisExitNormal = axisEnterNormal }
-        }
-        if (axisEnterTime > enterTime) {
-            enterTime = axisEnterTime
-            enterNormal = axisEnterNormal
-        }
-        if (axisExitTime < exitTime) {
-            exitTime = axisExitTime
-            exitNormal = axisExitNormal
-        }
-        if (enterTime > exitTime) return null
-    }
+    if (!intersectAxis(context.originX, context.directionXIsNearlyZero, context.inverseDirectionX, minX, maxX, Vectors.NegativeUnitX, Vectors.UnitX, enterTime, exitTime, { time, normal -> enterTime = time; enterNormal = normal }, { time, normal -> exitTime = time; exitNormal = normal })) return null
+    if (!intersectAxis(context.originY, context.directionYIsNearlyZero, context.inverseDirectionY, minY, maxY, Vectors.NegativeUnitY, Vectors.UnitY, enterTime, exitTime, { time, normal -> enterTime = time; enterNormal = normal }, { time, normal -> exitTime = time; exitNormal = normal })) return null
+    if (!intersectAxis(context.originZ, context.directionZIsNearlyZero, context.inverseDirectionZ, minZ, maxZ, Vectors.NegativeUnitZ, Vectors.UnitZ, enterTime, exitTime, { time, normal -> enterTime = time; enterNormal = normal }, { time, normal -> exitTime = time; exitNormal = normal })) return null
 
     if (exitTime < 0.0) return null
-    if (maxTime != null && enterTime > maxTime) return null
+    if (enterTime > context.maximumTime) return null
 
     val startsInside = enterTime < 0.0
 
     return BoxIntersection(
-        ray = ray,
+        ray = context.ray,
         enterTime = if (startsInside) null else enterTime,
         exitTime = exitTime,
         enterNormal = if (startsInside) null else enterNormal,
         exitNormal = exitNormal ?: Vectors.Zero
     )
+}
+
+private inline fun intersectAxis(origin: Double, direction: Double, minimum: Double, maximum: Double, minimumNormal: VectorView, maximumNormal: VectorView, enterTime: Double, exitTime: Double, updateEnter: (Double, VectorView) -> Unit, updateExit: (Double, VectorView) -> Unit): Boolean {
+    val directionIsNearlyZero = direction.isNearlyZero()
+    val inverseDirection = if (directionIsNearlyZero) 0.0 else 1.0 / direction
+    return intersectAxis(origin, directionIsNearlyZero, inverseDirection, minimum, maximum, minimumNormal, maximumNormal, enterTime, exitTime, updateEnter, updateExit)
+}
+
+private inline fun intersectAxis(origin: Double, directionIsNearlyZero: Boolean, inverseDirection: Double, minimum: Double, maximum: Double, minimumNormal: VectorView, maximumNormal: VectorView, enterTime: Double, exitTime: Double, updateEnter: (Double, VectorView) -> Unit, updateExit: (Double, VectorView) -> Unit): Boolean {
+    if (directionIsNearlyZero) return origin in minimum..maximum
+
+    var axisEnterTime = (minimum - origin) * inverseDirection
+    var axisExitTime = (maximum - origin) * inverseDirection
+    var axisEnterNormal = minimumNormal
+    var axisExitNormal = maximumNormal
+
+    if (axisEnterTime > axisExitTime) {
+        val previousEnterTime = axisEnterTime
+        val previousEnterNormal = axisEnterNormal
+        axisEnterTime = axisExitTime
+        axisEnterNormal = axisExitNormal
+        axisExitTime = previousEnterTime
+        axisExitNormal = previousEnterNormal
+    }
+
+    var nextEnterTime = enterTime
+    var nextExitTime = exitTime
+
+    if (axisEnterTime > enterTime) {
+        nextEnterTime = axisEnterTime
+        updateEnter(axisEnterTime, axisEnterNormal)
+    }
+
+    if (axisExitTime < exitTime) {
+        nextExitTime = axisExitTime
+        updateExit(axisExitTime, axisExitNormal)
+    }
+
+    return nextEnterTime <= nextExitTime
 }
