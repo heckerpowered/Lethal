@@ -105,7 +105,7 @@ object WorldAccessImpl {
         val buckets = ArrayList<EntityRayBucket>()
 
         for (chunk in getChunks(world, searchBox)) {
-            addChunkBuckets(buckets, chunk, ray, length, searchBox)
+            addChunkBuckets(buckets, chunk, ray, maxTime, searchBox)
         }
 
         buckets.sortBy { it.lowerBoundTime }
@@ -128,7 +128,7 @@ object WorldAccessImpl {
     }
 
 
-    private fun addChunkBuckets(buckets: MutableList<EntityRayBucket>, chunk: Chunk, ray: RayView, length: Double, searchBox: AxisAlignedBB) {
+    private fun addChunkBuckets(buckets: MutableList<EntityRayBucket>, chunk: Chunk, ray: RayView, maxTime: Double, searchBox: AxisAlignedBB) {
         val entitySections = chunk.entityLists
 
         val minimumSectionIndex = floor(searchBox.minY / SECTION_SIZE).toInt()
@@ -140,7 +140,7 @@ object WorldAccessImpl {
             val entitySection = entitySections[sectionIndex]
             if (entitySection.isEmpty()) continue
 
-            val lowerBoundTime = getSectionLowerBoundTime(chunk, sectionIndex, ray, length) ?: continue
+            val lowerBoundTime = getSectionLowerBoundTime(chunk, sectionIndex, ray, maxTime) ?: continue
 
             buckets += EntityRayBucket(lowerBoundTime, entitySectionEntities(entitySection).asIterable())
         }
@@ -159,7 +159,7 @@ object WorldAccessImpl {
         }
     }
 
-    private fun getSectionLowerBoundTime(chunk: Chunk, sectionIndex: Int, ray: RayView, length: Double): Double? {
+    private fun getSectionLowerBoundTime(chunk: Chunk, sectionIndex: Int, ray: RayView, maxTime: Double): Double? {
         val chunkX = chunk.x
         val chunkZ = chunk.z
         val radius = World.MAX_ENTITY_RADIUS
@@ -172,11 +172,13 @@ object WorldAccessImpl {
         val maximumY = (sectionIndex + 1) * 16.0 + radius
         val maximumZ = (chunkZ + 1) * 16.0 + radius
 
-        return intersectSectionBounds(ray, length, minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ)
+        return intersectSectionBounds(ray, maxTime, minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ)
     }
 
-    private fun intersectSectionBounds(ray: RayView, length: Double, minimumX: Double, minimumY: Double, minimumZ: Double, maximumX: Double, maximumY: Double, maximumZ: Double): Double? {
-        val box = Geometry.box(minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ)
-        return box.intersect(ray, length)?.nearestHitTime
+    private fun intersectSectionBounds(ray: RayView, maxTime: Double, minimumX: Double, minimumY: Double, minimumZ: Double, maximumX: Double, maximumY: Double, maximumZ: Double): Double? {
+        val origin = ray.origin
+        val direction = ray.direction
+        val hitTime = intersectTime(origin.x, origin.y, origin.z, direction.x, direction.y, direction.z, minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ, maxTime)
+        return if (hitTime.isNaN()) null else hitTime
     }
 }
