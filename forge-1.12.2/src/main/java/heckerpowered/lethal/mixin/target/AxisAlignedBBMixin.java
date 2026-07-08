@@ -39,26 +39,32 @@ class AxisAlignedBBMixin {
     @Final
     public double maxZ;
 
+    @Intrinsic
     public double boxView$getMinX() {
         return minX;
     }
 
+    @Intrinsic
     public double boxView$getMinY() {
         return minY;
     }
 
+    @Intrinsic
     public double boxView$getMinZ() {
         return minZ;
     }
 
+    @Intrinsic
     public double boxView$getMaxX() {
         return maxX;
     }
 
+    @Intrinsic
     public double boxView$getMaxY() {
         return maxY;
     }
 
+    @Intrinsic
     public double boxView$getMaxZ() {
         return maxZ;
     }
