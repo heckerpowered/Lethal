@@ -83,7 +83,10 @@ fun BoxView.translatedBy(offset: VectorView): BoxView {
 }
 
 fun BoxView.movedTo(destination: VectorView): BoxView {
-    return translatedBy(destination - center)
+    val offsetX = destination.x - (minX + maxX) * 0.5
+    val offsetY = destination.y - (minY + maxY) * 0.5
+    val offsetZ = destination.z - (minZ + maxZ) * 0.5
+    return Geometry.box(minX + offsetX, minY + offsetY, minZ + offsetZ, maxX + offsetX, maxY + offsetY, maxZ + offsetZ)
 }
 
 fun BoxView.union(point: VectorView): BoxView {
@@ -124,9 +127,9 @@ fun BoxView.contains(point: VectorView): Boolean {
 }
 
 fun BoxView.containsOrOn(point: VectorView): Boolean {
-    return point.x in minX..maxX &&
-            point.y in minY..maxY &&
-            point.z in minZ..maxZ
+    return point.x >= minX && point.x <= maxX &&
+            point.y >= minY && point.y <= maxY &&
+            point.z >= minZ && point.z <= maxZ
 }
 
 fun BoxView.contains(other: BoxView): Boolean {
@@ -136,9 +139,9 @@ fun BoxView.contains(other: BoxView): Boolean {
 }
 
 fun BoxView.containsOrOn(other: BoxView): Boolean {
-    return other.minX in minX..maxX && other.maxX in minX..maxX &&
-            other.minY in minY..maxY && other.maxY in minY..maxY &&
-            other.minZ in minZ..maxZ && other.maxZ in minZ..maxZ
+    return other.minX >= minX && other.maxX <= maxX &&
+            other.minY >= minY && other.maxY <= maxY &&
+            other.minZ >= minZ && other.maxZ <= maxZ
 }
 
 fun BoxView.containsHorizontal(point: VectorView): Boolean {
@@ -147,8 +150,8 @@ fun BoxView.containsHorizontal(point: VectorView): Boolean {
 }
 
 fun BoxView.containsOrOnHorizontal(point: VectorView): Boolean {
-    return point.x in minX..maxX &&
-            point.z in minZ..maxZ
+    return point.x >= minX && point.x <= maxX &&
+            point.z >= minZ && point.z <= maxZ
 }
 
 fun BoxView.containsHorizontal(other: BoxView): Boolean {
@@ -157,8 +160,8 @@ fun BoxView.containsHorizontal(other: BoxView): Boolean {
 }
 
 fun BoxView.containsOrOnHorizontal(other: BoxView): Boolean {
-    return other.minX in minX..maxX && other.maxX in minX..maxX &&
-            other.minZ in minZ..maxZ && other.maxZ in minZ..maxZ
+    return other.minX >= minX && other.maxX <= maxX &&
+            other.minZ >= minZ && other.maxZ <= maxZ
 }
 
 fun BoxView.intersects(other: BoxView): Boolean {
@@ -205,6 +208,70 @@ fun BoxView.pointBoxIntersection(point: VectorView): Boolean {
     return containsOrOn(point)
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun BoxView.intersectTime(ray: RayView, length: Double): Double {
+    val direction = ray.direction
+    val directionLength = direction.length
+    if (directionLength.isNearlyZero()) return Double.NaN
+
+    val origin = ray.origin
+    val maxTime = length / directionLength
+    return intersectTime(origin.x, origin.y, origin.z, direction.x, direction.y, direction.z, minX, minY, minZ, maxX, maxY, maxZ, maxTime)
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun intersectTime(originX: Double, originY: Double, originZ: Double, directionX: Double, directionY: Double, directionZ: Double, minimumX: Double, minimumY: Double, minimumZ: Double, maximumX: Double, maximumY: Double, maximumZ: Double, maximumTime: Double): Double {
+    var enterTime = Double.NEGATIVE_INFINITY
+    var exitTime = Double.POSITIVE_INFINITY
+
+    if (directionX.isNearlyZero()) {
+        if (originX < minimumX || originX > maximumX) return Double.NaN
+    } else {
+        val inverseDirection = 1.0 / directionX
+        var axisEnterTime = (minimumX - originX) * inverseDirection
+        var axisExitTime = (maximumX - originX) * inverseDirection
+        if (axisEnterTime > axisExitTime) {
+            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
+        }
+        if (axisEnterTime > enterTime) enterTime = axisEnterTime
+        if (axisExitTime < exitTime) exitTime = axisExitTime
+        if (enterTime > exitTime) return Double.NaN
+    }
+
+    if (directionY.isNearlyZero()) {
+        if (originY < minimumY || originY > maximumY) return Double.NaN
+    } else {
+        val inverseDirection = 1.0 / directionY
+        var axisEnterTime = (minimumY - originY) * inverseDirection
+        var axisExitTime = (maximumY - originY) * inverseDirection
+        if (axisEnterTime > axisExitTime) {
+            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
+        }
+        if (axisEnterTime > enterTime) enterTime = axisEnterTime
+        if (axisExitTime < exitTime) exitTime = axisExitTime
+        if (enterTime > exitTime) return Double.NaN
+    }
+
+    if (directionZ.isNearlyZero()) {
+        if (originZ < minimumZ || originZ > maximumZ) return Double.NaN
+    } else {
+        val inverseDirection = 1.0 / directionZ
+        var axisEnterTime = (minimumZ - originZ) * inverseDirection
+        var axisExitTime = (maximumZ - originZ) * inverseDirection
+        if (axisEnterTime > axisExitTime) {
+            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
+        }
+        if (axisEnterTime > enterTime) enterTime = axisEnterTime
+        if (axisExitTime < exitTime) exitTime = axisExitTime
+        if (enterTime > exitTime) return Double.NaN
+    }
+
+    if (exitTime < 0.0) return Double.NaN
+    if (enterTime > maximumTime) return Double.NaN
+
+    return if (enterTime < 0.0) 0.0 else enterTime
+}
+
 /**
  * Describes the intersection interval between a ray and an axis-aligned box.
  *
@@ -220,10 +287,19 @@ fun BoxView.pointBoxIntersection(point: VectorView): Boolean {
  * box or the length ends before the ray leaves the box.
  */
 fun BoxView.intersect(ray: RayView, length: Double? = null): BoxIntersection? {
-    val directionLength = ray.direction.length
+    val direction = ray.direction
+    val directionLength = direction.length
     if (directionLength.isNearlyZero()) return null
 
     val maxTime = length?.let { it / directionLength }
+
+    val origin = ray.origin
+    val originX = origin.x
+    val originY = origin.y
+    val originZ = origin.z
+    val directionX = direction.x
+    val directionY = direction.y
+    val directionZ = direction.z
 
     var enterTime = Double.NEGATIVE_INFINITY
     var exitTime = Double.POSITIVE_INFINITY
@@ -231,40 +307,74 @@ fun BoxView.intersect(ray: RayView, length: Double? = null): BoxIntersection? {
     var enterNormal: VectorView? = null
     var exitNormal: VectorView? = null
 
-    fun testAxis(origin: Double, direction: Double, minimum: Double, maximum: Double, minimumNormal: VectorView, maximumNormal: VectorView): Boolean {
-        if (direction.isNearlyZero()) return origin in minimum..maximum
-
-        val inverseDirection = 1.0 / direction
-
-        var axisEnterTime = (minimum - origin) * inverseDirection
-        var axisExitTime = (maximum - origin) * inverseDirection
-        var axisEnterNormal = minimumNormal
-        var axisExitNormal = maximumNormal
-
+    if (directionX.isNearlyZero()) {
+        if (originX < minX || originX > maxX) return null
+    } else {
+        val inverseDirection = 1.0 / directionX
+        var axisEnterTime = (minX - originX) * inverseDirection
+        var axisExitTime = (maxX - originX) * inverseDirection
+        var axisEnterNormal = Vectors.NegativeUnitX
+        var axisExitNormal = Vectors.UnitX
         if (axisEnterTime > axisExitTime) {
             axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
             axisEnterNormal = axisExitNormal.also { axisExitNormal = axisEnterNormal }
         }
-
         if (axisEnterTime > enterTime) {
             enterTime = axisEnterTime
             enterNormal = axisEnterNormal
         }
-
         if (axisExitTime < exitTime) {
             exitTime = axisExitTime
             exitNormal = axisExitNormal
         }
-
-        return enterTime <= exitTime
+        if (enterTime > exitTime) return null
     }
 
-    val origin = ray.origin
-    val direction = ray.direction
+    if (directionY.isNearlyZero()) {
+        if (originY < minY || originY > maxY) return null
+    } else {
+        val inverseDirection = 1.0 / directionY
+        var axisEnterTime = (minY - originY) * inverseDirection
+        var axisExitTime = (maxY - originY) * inverseDirection
+        var axisEnterNormal = Vectors.NegativeUnitY
+        var axisExitNormal = Vectors.UnitY
+        if (axisEnterTime > axisExitTime) {
+            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
+            axisEnterNormal = axisExitNormal.also { axisExitNormal = axisEnterNormal }
+        }
+        if (axisEnterTime > enterTime) {
+            enterTime = axisEnterTime
+            enterNormal = axisEnterNormal
+        }
+        if (axisExitTime < exitTime) {
+            exitTime = axisExitTime
+            exitNormal = axisExitNormal
+        }
+        if (enterTime > exitTime) return null
+    }
 
-    if (!testAxis(origin.x, direction.x, minX, maxX, -Vectors.UnitX, Vectors.UnitX)) return null
-    if (!testAxis(origin.y, direction.y, minY, maxY, -Vectors.UnitY, Vectors.UnitY)) return null
-    if (!testAxis(origin.z, direction.z, minZ, maxZ, -Vectors.UnitZ, Vectors.UnitZ)) return null
+    if (directionZ.isNearlyZero()) {
+        if (originZ < minZ || originZ > maxZ) return null
+    } else {
+        val inverseDirection = 1.0 / directionZ
+        var axisEnterTime = (minZ - originZ) * inverseDirection
+        var axisExitTime = (maxZ - originZ) * inverseDirection
+        var axisEnterNormal = Vectors.NegativeUnitZ
+        var axisExitNormal = Vectors.UnitZ
+        if (axisEnterTime > axisExitTime) {
+            axisEnterTime = axisExitTime.also { axisExitTime = axisEnterTime }
+            axisEnterNormal = axisExitNormal.also { axisExitNormal = axisEnterNormal }
+        }
+        if (axisEnterTime > enterTime) {
+            enterTime = axisEnterTime
+            enterNormal = axisEnterNormal
+        }
+        if (axisExitTime < exitTime) {
+            exitTime = axisExitTime
+            exitNormal = axisExitNormal
+        }
+        if (enterTime > exitTime) return null
+    }
 
     if (exitTime < 0.0) return null
     if (maxTime != null && enterTime > maxTime) return null
