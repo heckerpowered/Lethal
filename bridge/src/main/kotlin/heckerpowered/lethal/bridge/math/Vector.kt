@@ -484,6 +484,10 @@ object Vectors {
     val UnitY: VectorView = Geometry.vector(0.0, 1.0, 0.0)
     val UnitZ: VectorView = Geometry.vector(0.0, 0.0, 1.0)
 
+    val NegativeUnitX: VectorView = Geometry.vector(-1.0, 0.0, 0.0)
+    val NegativeUnitY: VectorView = Geometry.vector(0.0, -1.0, 0.0)
+    val NegativeUnitZ: VectorView = Geometry.vector(0.0, 0.0, -1.0)
+
     fun of(x: Double, y: Double, z: Double): VectorView {
         return Geometry.vector(x, y, z)
     }
