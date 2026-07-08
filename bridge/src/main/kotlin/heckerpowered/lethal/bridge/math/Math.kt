@@ -5,8 +5,10 @@
 
 package heckerpowered.lethal.bridge.math
 
+import kotlin.math.abs
+
 fun Double.square() = this * this
 
 fun Double.isNearlyZero(epsilon: Double = 1.0E-8): Boolean {
-    return kotlin.math.abs(this) <= epsilon
+    return abs(this) <= epsilon
 }
