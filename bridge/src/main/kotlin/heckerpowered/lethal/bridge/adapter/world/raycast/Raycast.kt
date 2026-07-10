@@ -76,9 +76,15 @@ private fun Sequence<EntityAccess>.asEntityRayHits(context: RayIntersectionConte
     }
 }
 
-fun WorldAccess.raycastEntityHits(ray: RayView, distance: Double, excluded: EntityAccess? = null, policy: RaycastExecutionPolicy = RaycastExecutionPolicy.AUTO): Sequence<EntityRayHit> {
-    if (policy == RaycastExecutionPolicy.AUTO) return raycastEntityHitsResolved(ray, distance, excluded)
+fun WorldAccess.raycastEntityHits(ray: RayView, distance: Double, excluded: EntityAccess? = null): Sequence<EntityRayHit> {
+    return raycastEntityHitsResolved(ray, distance, excluded)
+}
 
+fun WorldAccess.raycastEntityHits(ray: RayView, distance: Double, policy: RaycastExecutionPolicy): Sequence<EntityRayHit> {
+    return raycastEntityHits(ray, distance, null, policy)
+}
+
+fun WorldAccess.raycastEntityHits(ray: RayView, distance: Double, excluded: EntityAccess?, policy: RaycastExecutionPolicy): Sequence<EntityRayHit> {
     val context = RayIntersectionContext.create(ray, distance) ?: return emptySequence()
     return when (policy) {
         RaycastExecutionPolicy.FULL_SCAN -> entities
@@ -95,8 +101,11 @@ fun WorldAccess.raycastEntityHits(ray: RayView, distance: Double, excluded: Enti
         }
 
         RaycastExecutionPolicy.ORDERED_BUCKET -> getEntityRayBuckets(ray, distance).raycastEntityHitsOrdered(context, excluded)
-        RaycastExecutionPolicy.AUTO -> error("AUTO should have been resolved before execution")
     }
+}
+
+fun WorldAccess.resolveRaycastExecutionPolicy(distance: Double): RaycastExecutionPolicy {
+    return AlgorithmResolution.resolve(AlgorithmResolutionState(loadedEntityCount, distance))
 }
 
 private fun WorldAccess.raycastEntityHitsResolved(ray: RayView, distance: Double, excluded: EntityAccess?): Sequence<EntityRayHit> {
