@@ -14,6 +14,7 @@ import heckerpowered.lethal.bridge.adapter.world.WorldAccess
 import heckerpowered.lethal.bridge.math.BlockDirection
 import heckerpowered.lethal.bridge.math.BlockPositionView
 import heckerpowered.lethal.bridge.math.VectorView
+import heckerpowered.lethal.platform.adapter.item.HostedItem
 import heckerpowered.lethal.platform.interop.*
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.SharedMonsterAttributes
@@ -201,6 +202,9 @@ object ItemAccessImpl {
 
     @JvmStatic
     fun form(item: Item): ItemForm {
+        if (item is HostedItem) return item.blueprint.form
+        if (item is ItemForm) return item
+
         return when (item) {
             is ItemPickaxe -> ItemForm.Pickaxe
             is ItemAxe -> ItemForm.Axe
