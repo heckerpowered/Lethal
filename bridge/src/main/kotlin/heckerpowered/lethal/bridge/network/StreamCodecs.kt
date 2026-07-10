@@ -11,31 +11,27 @@ import java.nio.charset.CodingErrorAction
 import java.util.*
 
 object StreamCodecs {
-    val Boolean = StreamCodec.of(PacketBuffer::writeBoolean, PacketBuffer::readBoolean)
-    val Byte = StreamCodec.of(PacketBuffer::writeByte, PacketBuffer::readByte)
-    val Short = StreamCodec.of(PacketBuffer::writeShort, PacketBuffer::readShort)
-    val Int = StreamCodec.of(PacketBuffer::writeInt, PacketBuffer::readInt)
-    val Long = StreamCodec.of(PacketBuffer::writeLong, PacketBuffer::readLong)
-    val Float = StreamCodec.of(PacketBuffer::writeFloat, PacketBuffer::readFloat)
-    val Double = StreamCodec.of(PacketBuffer::writeDouble, PacketBuffer::readDouble)
+    val Boolean = StreamCodec.of(StreamBuffer::writeBoolean, StreamBuffer::readBoolean)
+    val Byte = StreamCodec.of(StreamBuffer::writeByte, StreamBuffer::readByte)
+    val Short = StreamCodec.of(StreamBuffer::writeShort, StreamBuffer::readShort)
+    val Int = StreamCodec.of(StreamBuffer::writeInt, StreamBuffer::readInt)
+    val Long = StreamCodec.of(StreamBuffer::writeLong, StreamBuffer::readLong)
+    val Float = StreamCodec.of(StreamBuffer::writeFloat, StreamBuffer::readFloat)
+    val Double = StreamCodec.of(StreamBuffer::writeDouble, StreamBuffer::readDouble)
 
     val VarInt = StreamCodec.of(::writeVarInt, ::readVarInt)
     val VarLong = StreamCodec.of(::writeVarLong, ::readVarLong)
 
-    val Uuid = StreamCodec.of<PacketBuffer, UUID>(
-        encoder = { output, value ->
-            output.writeLong(value.mostSignificantBits)
-            output.writeLong(value.leastSignificantBits)
-        },
-        decoder = { input ->
-            UUID(input.readLong(), input.readLong())
-        },
+    val Uuid = StreamCodec.composite(
+        Long, UUID::getMostSignificantBits,
+        Long, UUID::getLeastSignificantBits,
+        ::UUID
     )
 
     val ByteArray = byteArray(1_048_576)
     val StringUTF8 = stringUtf8(32_767)
 
-    fun byteArray(maximumByteCount: Int): StreamCodec<PacketBuffer, ByteArray> {
+    fun byteArray(maximumByteCount: Int): StreamCodec<StreamBuffer, ByteArray> {
         require(maximumByteCount >= 0) { "Maximum byte count must not be negative" }
 
         return StreamCodec.of(
@@ -56,7 +52,7 @@ object StreamCodecs {
         )
     }
 
-    fun stringUtf8(maximumCharacterCount: Int): StreamCodec<PacketBuffer, String> {
+    fun stringUtf8(maximumCharacterCount: Int): StreamCodec<StreamBuffer, String> {
         require(maximumCharacterCount >= 0) { "Maximum character count must not be negative" }
         require(maximumCharacterCount <= Integer.MAX_VALUE / 4) { "Maximum character count is too large: $maximumCharacterCount" }
 
@@ -84,7 +80,7 @@ object StreamCodecs {
         )
     }
 
-    private fun readVarInt(input: PacketBuffer): Int {
+    private fun readVarInt(input: StreamBuffer): Int {
         var value = 0
         var byteIndex = 0
         while (byteIndex < 5) {
@@ -99,7 +95,7 @@ object StreamCodecs {
         throw IllegalArgumentException("VarInt is too large")
     }
 
-    private fun writeVarInt(output: PacketBuffer, value: Int) {
+    private fun writeVarInt(output: StreamBuffer, value: Int) {
         var remainingValue = value
         while (remainingValue and 0x7F.inv() != 0) {
             output.writeByte(((remainingValue and 0x7F) or 0x80).toByte())
@@ -108,7 +104,7 @@ object StreamCodecs {
         output.writeByte(remainingValue.toByte())
     }
 
-    private fun readVarLong(input: PacketBuffer): Long {
+    private fun readVarLong(input: StreamBuffer): Long {
         var value = 0L
         var byteIndex = 0
         while (byteIndex < 10) {
@@ -123,7 +119,7 @@ object StreamCodecs {
         throw IllegalArgumentException("VarLong is too large")
     }
 
-    private fun writeVarLong(output: PacketBuffer, value: Long) {
+    private fun writeVarLong(output: StreamBuffer, value: Long) {
         var remainingValue = value
         while (remainingValue and 0x7FL.inv() != 0L) {
             output.writeByte(((remainingValue and 0x7F) or 0x80).toByte())
