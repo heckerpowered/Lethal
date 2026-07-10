@@ -12,6 +12,9 @@ import heckerpowered.lethal.bridge.adapter.item.ItemForm
 import heckerpowered.lethal.bridge.adapter.item.ItemProperties
 import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess
 import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.lethal.bridge.rule.RuleRegistry
+import heckerpowered.lethal.bridge.rule.ServerUpdateRule
+import heckerpowered.lethal.bridge.rule.forEach
 import heckerpowered.lethal.bridge.time.Frequency
 import java.lang.reflect.Proxy
 import kotlin.test.AfterTest
@@ -52,6 +55,18 @@ class FireStateTrackerTest {
 
         FireStateTracker.tick()
         assertEquals(2, gun.fireCount)
+    }
+
+    @Test
+    fun registeredServerUpdateAdvancesFiring() {
+        val gun = TestGun(Frequency.perMinute(600))
+        val weaponStack = TestItemStack(gun)
+        val player = createPlayer(mainHandStack = { weaponStack }, offHandStack = { emptyStack })
+        FireStateTracker.setFiring(player, true)
+
+        RuleRegistry.forEach<ServerUpdateRule> { it.onServerUpdate() }
+
+        assertEquals(1, gun.fireCount)
     }
 
     @Test
@@ -118,7 +133,7 @@ class FireStateTrackerTest {
     }
 
     @Test
-    fun batchedOperationsRecheckWhetherTheGunMayFire() {
+    fun batchedOperationsStopWhenFireFails() {
         val gun = TestGun(Frequency.perMinute(6000))
         gun.maximumSuccessfulFireCount = 1
         val weaponStack = TestItemStack(gun)
@@ -183,11 +198,14 @@ class FireStateTrackerTest {
         }
 
         override fun mayFire(player: PlayerAccess, weaponStack: ItemStackAccess): Boolean {
-            return firingAllowed && fireCount < maximumSuccessfulFireCount
+            return firingAllowed
         }
 
-        override fun fire(player: PlayerAccess, weaponStack: ItemStackAccess) {
+        override fun fire(player: PlayerAccess, weaponStack: ItemStackAccess): Boolean {
+            if (!firingAllowed || fireCount >= maximumSuccessfulFireCount) return false
+
             fireCount++
+            return true
         }
 
         override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess) {

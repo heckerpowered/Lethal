@@ -9,16 +9,30 @@ import heckerpowered.lethal.bridge.adapter.entity.PlayerAccess
 import heckerpowered.lethal.bridge.adapter.item.Hand
 import heckerpowered.lethal.bridge.adapter.item.asSlot
 import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess
+import heckerpowered.lethal.bridge.rule.RuleRegistry
+import heckerpowered.lethal.bridge.rule.ServerUpdateRule
+import heckerpowered.lethal.bridge.rule.register
 import heckerpowered.lethal.bridge.time.FixedRateRepeater
 import java.util.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-object FireStateTracker {
+object FireStateTracker : ServerUpdateRule {
     private val defaultTickDuration = 50.milliseconds
 
     private val firingPlayers: MutableSet<PlayerAccess> = Collections.newSetFromMap(WeakHashMap())
     private val weaponStates: MutableMap<ItemStackAccess, FixedRateRepeater> = IdentityHashMap()
+
+    init {
+        RuleRegistry.register<ServerUpdateRule>(this)
+    }
+
+    /**
+     * Adapts the host's server update callback to the default Minecraft tick duration.
+     */
+    override fun onServerUpdate() {
+        tick()
+    }
 
     /**
      * Records player-level trigger intent without binding it to the weapon equipped at input time.
@@ -139,9 +153,8 @@ object FireStateTracker {
     }
 
     /**
-     * Converts accumulated cadence into complete fire transactions while the current gun remains eligible.
-     * Eligibility is checked again between batched operations because each unconditional fire may consume its own prerequisites.
-     * Operations invalidated during the batch are dropped rather than retained as a later burst.
+     * Converts accumulated cadence into fire transactions after a single scheduling eligibility check.
+     * A failed transaction terminates the batch, and its remaining operations are dropped rather than retained as a later burst.
      */
     private fun updateTriggeredWeapon(triggeredWeapon: TriggeredWeapon, weaponStack: ItemStackAccess, weaponState: FixedRateRepeater, deltaTime: Duration) {
         val player = triggeredWeapon.player
@@ -155,11 +168,8 @@ object FireStateTracker {
         val operationCount = weaponState.updateActive(deltaTime)
         if (operationCount == 0L) return
 
-        gun.fire(player, weaponStack)
-
-        for (operationIndex in 1L until operationCount) {
-            if (!gun.mayFire(player, weaponStack)) return
-            gun.fire(player, weaponStack)
+        for (operationIndex in 0L until operationCount) {
+            if (!gun.fire(player, weaponStack)) return
         }
     }
 
