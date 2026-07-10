@@ -12,6 +12,13 @@ import heckerpowered.lethal.bridge.time.Frequency
 interface Gun {
     fun getFrequency(player: PlayerAccess, weaponStack: ItemStackAccess): Frequency
     fun mayFire(player: PlayerAccess, weaponStack: ItemStackAccess): Boolean
-    fun fire(player: PlayerAccess, weaponStack: ItemStackAccess)
+
+    /**
+     * Attempts one complete fire transaction.
+     *
+     * @return `true` only when the transaction completed and should count as a fired operation.
+     */
+    fun fire(player: PlayerAccess, weaponStack: ItemStackAccess): Boolean
+
     fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess)
 }
