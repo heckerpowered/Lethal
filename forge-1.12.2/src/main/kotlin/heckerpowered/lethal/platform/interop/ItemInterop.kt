@@ -58,9 +58,15 @@ object ItemInterop {
         }
     }
 
+    @JvmName("equipmentSlotOrNull")
     fun equipmentSlot(slot: EquipmentSlot?): EntityEquipmentSlot? {
         if (slot == null) return null
 
+        return equipmentSlot(slot)
+    }
+
+    @JvmStatic
+    fun equipmentSlot(slot: EquipmentSlot): EntityEquipmentSlot {
         return when (slot) {
             EquipmentSlot.MainHand -> EntityEquipmentSlot.MAINHAND
             EquipmentSlot.OffHand -> EntityEquipmentSlot.OFFHAND
