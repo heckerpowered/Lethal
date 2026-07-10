@@ -5,10 +5,10 @@
 
 package heckerpowered.lethal.bridge.adapter.item
 
-sealed interface ItemForm {
+interface ItemForm {
     object Regular : ItemForm
 
-    sealed interface MiningTool : ItemForm {
+    interface MiningTool : ItemForm {
         val miningCategory: MiningToolCategory
     }
 
@@ -34,7 +34,7 @@ sealed interface ItemForm {
 
     object Sword : ItemForm
 
-    sealed interface Armor : ItemForm {
+    interface Armor : ItemForm {
         val equipmentSlot: EquipmentSlot
     }
 
@@ -78,6 +78,13 @@ enum class EquipmentSlot {
 enum class Hand {
     Main,
     Off,
+}
+
+fun Hand.asSlot(): EquipmentSlot {
+    return when (this) {
+        Hand.Main -> EquipmentSlot.MainHand
+        Hand.Off -> EquipmentSlot.OffHand
+    }
 }
 
 enum class ItemUseAnimation {
