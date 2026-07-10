@@ -12,7 +12,6 @@ class FixedRateRepeater(
     var frequency: Frequency,
     initialCredit: Double = 1.0,
     private val inactiveCreditLimit: Double = 1.0,
-    private val activeCreditLimit: Double = Double.POSITIVE_INFINITY,
 ) {
     var paused: Boolean = false
 
@@ -27,8 +26,7 @@ class FixedRateRepeater(
         require(deltaTime >= Duration.ZERO)
         if (paused) return
 
-        credit += deltaTime.inWholeNanoseconds.toDouble() /
-                frequency.intervalNanos.toDouble()
+        credit += deltaTime.inWholeNanoseconds.toDouble() / frequency.intervalNanos.toDouble()
         credit = credit.coerceAtMost(inactiveCreditLimit)
     }
 
@@ -39,7 +37,6 @@ class FixedRateRepeater(
         if (paused) return 0L
 
         credit += deltaTime.inWholeNanoseconds.toDouble() / frequency.intervalNanos.toDouble()
-        credit = credit.coerceAtMost(activeCreditLimit)
         val operations = floor(credit).toLong().coerceAtMost(maxOperations)
         credit -= operations.toDouble()
 
