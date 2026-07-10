@@ -5,7 +5,13 @@
 
 package heckerpowered.lethal
 
+import heckerpowered.lethal.bridge.resources.Identifier
+
 object Constants {
     const val MOD_ID = "lethal"
     const val MOD_NAME = "Lethal"
+
+    fun identifier(path: String): Identifier {
+        return Identifier.create(MOD_ID, path)
+    }
 }
