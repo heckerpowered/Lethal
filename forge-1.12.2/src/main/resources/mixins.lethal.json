@@ -12,6 +12,7 @@
     "EntityPlayerMixin",
     "ItemMixin",
     "ItemStackMixin",
+    "MinecraftServerMixin",
     "ResourceLocationMixin",
     "Vec3dMixin",
     "WorldMixin"
