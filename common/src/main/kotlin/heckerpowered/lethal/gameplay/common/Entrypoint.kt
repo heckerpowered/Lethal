@@ -11,6 +11,6 @@ import heckerpowered.lethal.gameplay.common.item.TestItem
 
 class Entrypoint : Entrypoint {
     override fun onEntrypoint() {
-        Services.ItemRegistration.register(TestItem())
+        Services.ItemRegistrar.register(TestItem())
     }
 }
