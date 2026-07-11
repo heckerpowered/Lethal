@@ -5,6 +5,6 @@
 
 package heckerpowered.lethal.bridge.adapter.item
 
-interface ItemRegistration {
+interface ItemRegistrar {
     fun register(blueprint: ItemBlueprint): ItemAccess
 }
