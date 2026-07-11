@@ -8,7 +8,6 @@ package heckerpowered.lethal.gameplay
 import heckerpowered.bridge.platform.Services
 import heckerpowered.bridge.platform.loads
 import heckerpowered.bridge.platform.services.Entrypoint
-import heckerpowered.lethal.platform.network.ForgePayloadNetwork
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
@@ -48,7 +47,5 @@ class LethalMod {
             Logger.info("Calling entrypoint ($index/$entrypointCount): ${entrypoint.javaClass.name}")
             entrypoint.onEntrypoint()
         }
-
-        ForgePayloadNetwork.onInitialize()
     }
 }
