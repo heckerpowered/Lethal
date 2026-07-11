@@ -23,7 +23,11 @@ class InputEventHandler private constructor() {
         fun onMouseInput(event: MouseEvent) {
             val mouseButton = translateMouseButton(event.button) ?: return
             val inputAction = if (event.isButtonstate) InputAction.Press else InputAction.Release
-            ClientInput.handle(MouseButtonEvent(mouseButton, inputAction))
+            val mouseButtonEvent = MouseButtonEvent(mouseButton, inputAction)
+            ClientInput.handle(mouseButtonEvent)
+
+            if (!mouseButtonEvent.isCanceled) return
+            event.isCanceled = true
         }
 
         private fun translateMouseButton(buttonCode: Int): MouseButton? {

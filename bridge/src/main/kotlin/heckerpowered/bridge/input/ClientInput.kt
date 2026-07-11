@@ -18,7 +18,14 @@ enum class InputAction {
     Release,
 }
 
-data class MouseButtonEvent(val button: MouseButton, val action: InputAction)
+class MouseButtonEvent(val button: MouseButton, val action: InputAction) {
+    var isCanceled = false
+        private set
+
+    fun cancel() {
+        isCanceled = true
+    }
+}
 
 interface MouseButtonInputRule {
     fun onMouseButtonInput(event: MouseButtonEvent)

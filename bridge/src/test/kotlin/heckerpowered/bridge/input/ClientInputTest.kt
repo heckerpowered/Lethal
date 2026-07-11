@@ -11,6 +11,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ClientInputTest {
     @BeforeTest
@@ -48,6 +49,29 @@ class ClientInputTest {
 
         assertEquals(listOf(event), firstRuleEvents)
         assertEquals(listOf(event), secondRuleEvents)
+    }
+
+    @Test
+    fun canceledEventRemainsCanceledForFollowingRules() {
+        var followingRuleObservedCancellation = false
+        val cancelingRule = object : MouseButtonInputRule {
+            override fun onMouseButtonInput(event: MouseButtonEvent) {
+                event.cancel()
+            }
+        }
+        val followingRule = object : MouseButtonInputRule {
+            override fun onMouseButtonInput(event: MouseButtonEvent) {
+                followingRuleObservedCancellation = event.isCanceled
+            }
+        }
+        RuleRegistry.register<MouseButtonInputRule>(cancelingRule)
+        RuleRegistry.register<MouseButtonInputRule>(followingRule)
+
+        val event = MouseButtonEvent(MouseButton.Left, InputAction.Press)
+        ClientInput.handle(event)
+
+        assertTrue(event.isCanceled)
+        assertTrue(followingRuleObservedCancellation)
     }
 
     private fun clearMouseButtonInputRules() {
