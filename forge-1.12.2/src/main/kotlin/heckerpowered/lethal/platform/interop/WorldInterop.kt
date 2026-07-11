@@ -23,6 +23,7 @@ object WorldInterop {
         return world as? World ?: error("Unsupported WorldAccess implementation: ${world.javaClass.name}")
     }
 
+    @JvmStatic
     fun world(world: World): WorldAccess {
         @Suppress("CAST_NEVER_SUCCEEDS")
         return world as? WorldAccess ?: HostedWorldAccess(world)
