@@ -6,12 +6,15 @@
 package heckerpowered.bridge.adapter.entity
 
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
+import heckerpowered.bridge.adapter.world.WorldAccess
 import heckerpowered.bridge.math.*
 import java.util.*
 
 interface EntityAccess : UniquelyIdentifiable {
     val id: Int
     override val uuid: UUID
+
+    val world: WorldAccess
 
     val position: VectorView
     var velocity: VectorView
