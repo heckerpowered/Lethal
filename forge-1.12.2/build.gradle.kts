@@ -4,7 +4,6 @@
  */
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import net.minecraftforge.renamer.gradle.RenameJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.text.SimpleDateFormat
 import java.util.*
@@ -192,7 +191,14 @@ tasks.jar {
         attributes(
             "FMLCorePlugin" to "heckerpowered.lethal.gameplay.common.core.CorePlugin",
             "FMLCorePluginContainsFMLMod" to true,
-            "MixinConfigs" to mixinConfigName
+            "MixinConfigs" to mixinConfigName,
+            "Specification-Title" to "Lethal",
+            "Specification-Vendor" to "Heckerpowered Corporation",
+            "Specification-Version" to "1",
+            "Implementation-Title" to project.name,
+            "Implementation-Version" to project.version,
+            "Implementation-Vendor" to "Heckerpowered",
+            "Implementation-Timestamp" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(Date())
         )
     }
 
@@ -215,35 +221,30 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.register<ShadowJar>("singleJar") {
-    description = "Compile the mod into a single file containing the specified dependencies"
-
-    dependsOn(tasks.named("reobfJar"))
+val shadowJar = tasks.named<ShadowJar>("shadowJar") {
     configurations = project.configurations.named("attached").map { listOf(it) }
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
     archiveBaseName = project.base.archivesName
-    archiveClassifier = "single"
+    archiveClassifier = "shadow"
     archiveVersion = project.version.toString()
+    destinationDirectory.set(layout.buildDirectory.dir("tmp/shadowJar"))
 
-    from(zipTree(tasks.named<RenameJar>("reobfJar").get().output.get()))
     mergeServiceFiles()
-    filesNotMatching(listOf("META-INF/services/**", "META-INF/*.kotlin_module")) {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    }
-    exclude("module-info.class")
-    exclude("LICENSE.txt")
+}
 
-    manifest.attributes(
-        "Specification-Title" to "Lethal",
-        "Specification-Vendor" to "Heckerpowered Corporation",
-        "Specification-Version" to "1",
-        "Implementation-Title" to project.name,
-        "Implementation-Version" to project.version,
-        "Implementation-Vendor" to "Heckerpowered",
-        "Implementation-Timestamp" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(Date()),
-        "FMLCorePlugin" to "heckerpowered.lethal.gameplay.common.core.CorePlugin",
-        "FMLCorePluginContainsFMLMod" to true
-    )
+val reobfShadowJar = renamer.classes("reobfShadowJar", shadowJar) {
+    description = "Reobfuscate the shadow JAR"
+
+    dependsOn(reobfMappings)
+    map = files(reobfMappings)
+
+    archiveClassifier.set("shadow")
+    output.set(layout.buildDirectory.file("libs/$archiveName-$modVersion-shadow.jar"))
+}
+
+shadowJar.configure {
+    finalizedBy(reobfShadowJar)
 }
 
 gradle.projectsEvaluated {
