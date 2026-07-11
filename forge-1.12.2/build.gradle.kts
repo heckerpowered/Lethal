@@ -3,7 +3,10 @@
  * Copyright (c) 2026 heckerpowered
  */
 
+import net.minecraftforge.renamer.gradle.RenameJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.zip.GZIPInputStream
 
 plugins {
@@ -17,6 +20,7 @@ val forgeVersion = project.property("forgeVersion").toString()
 val mixinVersion = project.property("mixinVersion").toString()
 val modId = project.property("modId").toString()
 val modVersion = project.property("modVersion").toString()
+val kotlinVersion = project.property("kotlinVersion").toString()
 
 val archiveName = "$modId-mc$minecraftVersion-forge$forgeVersion"
 
@@ -30,6 +34,11 @@ repositories {
     minecraft.mavenizer(this)
     maven(fg.minecraftLibsMaven)
     maven(fg.forgeMaven)
+}
+
+val attached = configurations.create("attached") {
+    isCanBeResolved = true
+    assert(isCanBeResolved)
 }
 
 dependencies {
@@ -46,6 +55,15 @@ dependencies {
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     testImplementation(kotlin("test"))
+
+    attached(project(":common"))
+    attached(project(":bridge"))
+    attached("org.spongepowered:mixin:$mixinVersion") {
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "commons-io", module = "commons-io")
+        exclude(group = "com.google.code.gson", module = "gson")
+    }
+    attached("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
 }
 
 minecraft {
@@ -86,6 +104,7 @@ sourceSets {
         resources {
             srcDir("src/generated/resources")
         }
+        // output.setResourcesDir(layout.buildDirectory.dir("classes/kotlin/main").get().asFile)
     }
 }
 
@@ -115,11 +134,8 @@ val prepareMixinMappings = tasks.register("prepareMixinMappings") {
 
     val inputMappings = minecraft.dependency.toSrgFile
 
-    inputs.file(inputMappings)
-        .withPropertyName("inputMappings")
-
-    outputs.file(mixinProcessorMappings)
-        .withPropertyName("mixinProcessorMappings")
+    inputs.file(inputMappings).withPropertyName("inputMappings")
+    outputs.file(mixinProcessorMappings).withPropertyName("mixinProcessorMappings")
 
     doLast {
         val inputFile = inputs.files.singleFile
@@ -188,12 +204,58 @@ tasks.jar {
     }
 }
 
+tasks.processResources {
+    inputs.property("version", modVersion)
+    inputs.property("mcversion", minecraftVersion)
+}
+
 tasks.assemble {
     dependsOn(reobfJar)
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.register<Jar>("singleJar") {
+    description = "Compile the mod into a single file containing the specified dependencies"
+
+    dependsOn(tasks.named("reobfJar"))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archiveBaseName = project.base.archivesName
+    archiveClassifier = "single"
+    archiveVersion = project.version.toString()
+
+    from(zipTree(tasks.named<RenameJar>("reobfJar").get().output.get()))
+    from(configurations.named("attached").get().map { dependency ->
+        if (dependency.isDirectory) {
+            dependency
+        } else {
+            zipTree(dependency)
+        }
+    }) {
+        exclude {
+            it.path.contains("META-INF") &&
+                    !it.path.contains("META-INF/services")
+        }
+    }
+    from(configurations.named("attached").get()) {
+        include("META-INF/services", "META-INF/services/**")
+    }
+    exclude("module-info.class")
+    exclude("LICENSE.txt")
+
+    manifest.attributes(
+        "Specification-Title" to "Lethal",
+        "Specification-Vendor" to "Heckerpowered Corporation",
+        "Specification-Version" to "1",
+        "Implementation-Title" to project.name,
+        "Implementation-Version" to project.version,
+        "Implementation-Vendor" to "Heckerpowered",
+        "Implementation-Timestamp" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(Date()),
+        "FMLCorePlugin" to "heckerpowered.lethal.gameplay.common.core.CorePlugin",
+        "FMLCorePluginContainsFMLMod" to true
+    )
 }
 
 gradle.projectsEvaluated {
