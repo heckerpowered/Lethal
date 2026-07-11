@@ -6,14 +6,16 @@
 package heckerpowered.lethal.bridge.platform
 
 import heckerpowered.lethal.bridge.adapter.item.ItemProvider
-import heckerpowered.lethal.bridge.adapter.item.ItemRegistration
+import heckerpowered.lethal.bridge.adapter.item.ItemRegistrar
+import heckerpowered.lethal.bridge.network.PayloadRegistrar
 import heckerpowered.lethal.bridge.platform.services.ModPlatform
 import java.util.*
 
 object Services {
     val Platform = load<ModPlatform>()
     val ItemProvider = load<ItemProvider>()
-    val ItemRegistration = load<ItemRegistration>()
+    val ItemRegistrar = load<ItemRegistrar>()
+    val PayloadRegistrar = load<PayloadRegistrar>()
 
     fun <T : Any> load(type: Class<T>): T {
         return loadOrNull(type)
