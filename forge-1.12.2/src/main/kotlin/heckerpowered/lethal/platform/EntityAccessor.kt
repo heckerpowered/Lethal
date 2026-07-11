@@ -7,9 +7,11 @@ package heckerpowered.lethal.platform
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
+import heckerpowered.bridge.adapter.world.WorldAccess
 import heckerpowered.bridge.math.BoxView
 import heckerpowered.bridge.math.Geometry
 import heckerpowered.bridge.math.VectorView
+import heckerpowered.lethal.platform.interop.WorldInterop
 import heckerpowered.lethal.platform.interop.box
 import heckerpowered.lethal.platform.interop.damageSource
 import heckerpowered.lethal.platform.interop.vector
@@ -22,6 +24,8 @@ class EntityAccessor(val entity: Entity) : EntityAccess {
 
     override val uuid: UUID
         get() = entity.uniqueID
+    override val world: WorldAccess
+        get() = WorldInterop.world(entity.world)
 
     override val position: VectorView
         get() = entity.positionVector.vector()
