@@ -7,6 +7,7 @@ package heckerpowered.bridge.platform
 
 import heckerpowered.bridge.adapter.item.ItemProvider
 import heckerpowered.bridge.adapter.item.ItemRegistrar
+import heckerpowered.bridge.network.PayloadTransport
 import heckerpowered.bridge.platform.services.ModPlatform
 import java.util.*
 
@@ -14,6 +15,7 @@ object Services {
     val Platform = load<ModPlatform>()
     val ItemProvider = load<ItemProvider>()
     val ItemRegistrar = load<ItemRegistrar>()
+    val PayloadTransport = load<PayloadTransport>()
 
     fun <T : Any> load(type: Class<T>): T {
         return loadOrNull(type)
