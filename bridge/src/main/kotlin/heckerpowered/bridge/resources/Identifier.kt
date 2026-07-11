@@ -5,10 +5,10 @@
 
 package heckerpowered.bridge.resources
 
-import heckerpowered.lethal.bridge.FreestandingRepresentation
-import heckerpowered.lethal.bridge.platform.Services
-import heckerpowered.lethal.bridge.platform.loadOrNull
-import heckerpowered.lethal.bridge.security.Untrusted
+import heckerpowered.bridge.FreestandingRepresentation
+import heckerpowered.bridge.platform.Services
+import heckerpowered.bridge.platform.loadOrNull
+import heckerpowered.bridge.security.Untrusted
 
 interface Identifier {
     val namespace: String

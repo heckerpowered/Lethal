@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.platform.network
 
-import heckerpowered.lethal.bridge.network.StreamBuffer
+import heckerpowered.bridge.network.StreamBuffer
 import io.netty.buffer.ByteBuf
 
 class ByteBufStreamBuffer(private val buffer: ByteBuf) : StreamBuffer {
