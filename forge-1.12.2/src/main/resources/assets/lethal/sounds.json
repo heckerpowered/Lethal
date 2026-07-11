@@ -1,0 +1,16 @@
+{
+  "fortune_fire": {
+    "category": "player",
+    "subtitle": "lethal.sound.fortune_fire",
+    "sounds": [
+      "lethal:fortune_fire"
+    ]
+  },
+  "archaeopteryx_fire": {
+    "category": "player",
+    "subtitle:": "lethal.sound.archaeopteryx_fire",
+    "sounds": [
+      "lethal:archaeopteryx_fire"
+    ]
+  }
+}
