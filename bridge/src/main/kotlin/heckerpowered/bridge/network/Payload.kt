@@ -5,7 +5,7 @@
 
 package heckerpowered.bridge.network
 
-import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.bridge.resources.Identifier
 
 interface Payload<T : Payload<T>> {
     val type: Type<T>
