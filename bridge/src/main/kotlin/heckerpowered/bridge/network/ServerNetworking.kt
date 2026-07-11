@@ -18,9 +18,7 @@ object ServerNetworking {
         receivers.handle(payload, context)
     }
 
-    interface Context {
-        // TODO: ClientAccess
-
-        val player: PlayerAccess
-    }
+    data class Context(
+        val player: PlayerAccess,
+    )
 }
