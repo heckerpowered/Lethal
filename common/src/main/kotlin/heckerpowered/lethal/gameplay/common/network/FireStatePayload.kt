@@ -11,6 +11,7 @@ import heckerpowered.bridge.network.ServerboundPayload
 import heckerpowered.bridge.network.StreamCodecs
 import heckerpowered.bridge.network.codec.StreamCodec
 import heckerpowered.lethal.Constants
+import heckerpowered.lethal.gameplay.common.item.firearm.FireStateTracker
 
 class FireStatePayload(val state: Boolean) : ServerboundPayload<FireStatePayload> {
     companion object {
@@ -23,6 +24,7 @@ class FireStatePayload(val state: Boolean) : ServerboundPayload<FireStatePayload
         get() = Type
 
     fun handle(context: ServerPlayNetworking.Context) {
-
+        val player = context.player
+        FireStateTracker.setFiring(player, state)
     }
 }
