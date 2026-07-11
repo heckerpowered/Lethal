@@ -5,8 +5,11 @@
 
 package heckerpowered.lethal.gameplay.common
 
+import heckerpowered.bridge.adapter.item.ItemRegistry
 import heckerpowered.bridge.platform.Services
 import heckerpowered.bridge.platform.services.Entrypoint
+import heckerpowered.lethal.gameplay.common.item.Archaeopteryx
+import heckerpowered.lethal.gameplay.common.item.Fortune
 import heckerpowered.lethal.gameplay.common.item.TestFirearmItem
 import heckerpowered.lethal.gameplay.common.item.TestItem
 import heckerpowered.lethal.gameplay.common.network.ModServerPlayNetworking
@@ -18,10 +21,12 @@ class Entrypoint : Entrypoint {
     }
 
     private fun registerItem() {
-        val registrar = Services.ItemRegistrar
         if (Services.Platform.isDevelopmentEnvironment) {
-            registrar.register(TestItem)
-            registrar.register(TestFirearmItem)
+            ItemRegistry.register(TestItem)
+            ItemRegistry.register(TestFirearmItem)
         }
+
+        ItemRegistry.register(Archaeopteryx)
+        ItemRegistry.register(Fortune)
     }
 }
