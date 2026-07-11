@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.lethal.bridge.adapter.block.BlockStateAccess
+import heckerpowered.bridge.adapter.block.BlockStateAccess
 import heckerpowered.lethal.platform.adapter.block.HostedBlockStateAccess
 import net.minecraft.block.state.IBlockState
 import net.minecraft.util.math.BlockPos

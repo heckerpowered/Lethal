@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.bridge.resources.Identifier
 import net.minecraft.util.ResourceLocation
 
 object IdentifierInterop {

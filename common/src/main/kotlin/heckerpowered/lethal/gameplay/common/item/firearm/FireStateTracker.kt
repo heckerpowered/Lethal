@@ -5,14 +5,14 @@
 
 package heckerpowered.lethal.gameplay.common.item.firearm
 
-import heckerpowered.lethal.bridge.adapter.entity.PlayerAccess
-import heckerpowered.lethal.bridge.adapter.item.Hand
-import heckerpowered.lethal.bridge.adapter.item.asSlot
-import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess
-import heckerpowered.lethal.bridge.rule.RuleRegistry
-import heckerpowered.lethal.bridge.rule.ServerUpdateRule
-import heckerpowered.lethal.bridge.rule.register
-import heckerpowered.lethal.bridge.time.FixedRateRepeater
+import heckerpowered.bridge.adapter.entity.PlayerAccess
+import heckerpowered.bridge.adapter.item.Hand
+import heckerpowered.bridge.adapter.item.asSlot
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
+import heckerpowered.bridge.rule.RuleRegistry
+import heckerpowered.bridge.rule.ServerUpdateRule
+import heckerpowered.bridge.rule.register
+import heckerpowered.bridge.time.FixedRateRepeater
 import java.util.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds

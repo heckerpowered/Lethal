@@ -5,8 +5,8 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.lethal.bridge.adapter.item.ItemAccess;
-import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess;
+import heckerpowered.bridge.adapter.item.ItemAccess;
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess;
 import heckerpowered.lethal.platform.interop.ItemInterop;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

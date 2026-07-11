@@ -5,8 +5,8 @@
 
 package heckerpowered.lethal.platform.services
 
-import heckerpowered.lethal.bridge.math.BlockPositionProvider
-import heckerpowered.lethal.bridge.math.BlockPositionView
+import heckerpowered.bridge.math.BlockPositionProvider
+import heckerpowered.bridge.math.BlockPositionView
 import heckerpowered.lethal.platform.interop.blockPosition
 import net.minecraft.util.math.BlockPos
 

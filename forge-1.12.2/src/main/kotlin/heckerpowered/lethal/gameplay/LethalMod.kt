@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.gameplay
 
-import heckerpowered.lethal.bridge.platform.Services
-import heckerpowered.lethal.bridge.platform.loads
-import heckerpowered.lethal.bridge.platform.services.Entrypoint
+import heckerpowered.bridge.platform.Services
+import heckerpowered.bridge.platform.loads
+import heckerpowered.bridge.platform.services.Entrypoint
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler

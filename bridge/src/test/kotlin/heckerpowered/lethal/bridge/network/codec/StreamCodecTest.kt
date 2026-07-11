@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.bridge.network.codec
+package heckerpowered.bridge.network.codec
 
 import java.util.ArrayDeque
 import kotlin.test.Test

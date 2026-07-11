@@ -5,13 +5,13 @@
 
 package heckerpowered.bridge.adapter.entity.damagesource
 
-import heckerpowered.lethal.bridge.QuantumRepresentation
-import heckerpowered.lethal.bridge.VirtualRepresentation
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.math.VectorView
-import heckerpowered.lethal.bridge.platform.Services
-import heckerpowered.lethal.bridge.platform.loadOrNull
-import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.bridge.QuantumRepresentation
+import heckerpowered.bridge.VirtualRepresentation
+import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.math.VectorView
+import heckerpowered.bridge.platform.Services
+import heckerpowered.bridge.platform.loadOrNull
+import heckerpowered.bridge.resources.Identifier
 import java.util.*
 
 interface DamageSourceView {

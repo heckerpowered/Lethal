@@ -5,7 +5,7 @@
 
 package heckerpowered.bridge.adapter.world.raycast
 
-import heckerpowered.lethal.bridge.math.RayView
+import heckerpowered.bridge.math.RayView
 
 /**
  * Provides ordered entity buckets for ray queries.

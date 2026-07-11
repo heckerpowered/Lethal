@@ -5,10 +5,10 @@
 
 package heckerpowered.bridge.platform
 
-import heckerpowered.lethal.bridge.adapter.item.ItemProvider
-import heckerpowered.lethal.bridge.adapter.item.ItemRegistrar
-import heckerpowered.lethal.bridge.network.PayloadRegistrar
-import heckerpowered.lethal.bridge.platform.services.ModPlatform
+import heckerpowered.bridge.adapter.item.ItemProvider
+import heckerpowered.bridge.adapter.item.ItemRegistrar
+import heckerpowered.bridge.network.PayloadRegistrar
+import heckerpowered.bridge.platform.services.ModPlatform
 import java.util.*
 
 object Services {

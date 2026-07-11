@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.gameplay.common.item.firearm
 
-import heckerpowered.lethal.bridge.adapter.entity.PlayerAccess
-import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess
-import heckerpowered.lethal.bridge.time.Frequency
+import heckerpowered.bridge.adapter.entity.PlayerAccess
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
+import heckerpowered.bridge.time.Frequency
 
 interface Gun {
     fun getFrequency(player: PlayerAccess, weaponStack: ItemStackAccess): Frequency

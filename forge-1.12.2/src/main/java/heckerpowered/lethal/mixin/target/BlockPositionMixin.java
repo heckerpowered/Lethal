@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.lethal.bridge.math.BlockPositionView;
+import heckerpowered.bridge.math.BlockPositionView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.spongepowered.asm.mixin.Implements;

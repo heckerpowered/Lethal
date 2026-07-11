@@ -5,8 +5,8 @@
 
 package heckerpowered.lethal.platform.services
 
-import heckerpowered.lethal.bridge.resources.Identifier
-import heckerpowered.lethal.bridge.resources.IdentifierProvider
+import heckerpowered.bridge.resources.Identifier
+import heckerpowered.bridge.resources.IdentifierProvider
 import net.minecraft.util.ResourceLocation
 
 class HostingIdentifierProvider : IdentifierProvider {

@@ -5,7 +5,7 @@
 
 package heckerpowered.bridge.adapter.item.stack
 
-import heckerpowered.lethal.bridge.adapter.item.ItemAccess
+import heckerpowered.bridge.adapter.item.ItemAccess
 
 interface ItemStackAccess {
     val item: ItemAccess

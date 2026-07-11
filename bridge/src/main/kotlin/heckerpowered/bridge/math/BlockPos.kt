@@ -5,9 +5,9 @@
 
 package heckerpowered.bridge.math
 
-import heckerpowered.lethal.bridge.FreestandingRepresentation
-import heckerpowered.lethal.bridge.platform.Services
-import heckerpowered.lethal.bridge.platform.loadOrNull
+import heckerpowered.bridge.FreestandingRepresentation
+import heckerpowered.bridge.platform.Services
+import heckerpowered.bridge.platform.loadOrNull
 import kotlin.math.abs
 import kotlin.math.floor
 

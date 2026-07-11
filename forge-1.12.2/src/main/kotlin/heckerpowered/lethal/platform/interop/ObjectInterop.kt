@@ -5,15 +5,15 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.*
-import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.entity.damagesource.*
+import heckerpowered.bridge.resources.Identifier
 import heckerpowered.lethal.gameplay.common.entity.damagesource.VirtualDamageSource
 import heckerpowered.lethal.platform.EntityAccessor
 import net.minecraft.entity.Entity
 import net.minecraft.util.DamageSource
 import java.util.*
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.VirtualDamageSource as BridgeVirtualDamageSource
+import heckerpowered.bridge.adapter.entity.damagesource.VirtualDamageSource as BridgeVirtualDamageSource
 
 object ObjectInterop {
     fun source(source: DamageSourceView): DamageSource {

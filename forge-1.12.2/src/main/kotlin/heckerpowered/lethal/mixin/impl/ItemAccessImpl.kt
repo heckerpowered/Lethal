@@ -6,14 +6,14 @@
 package heckerpowered.lethal.mixin.impl
 
 import com.google.common.collect.Multimap
-import heckerpowered.lethal.bridge.adapter.block.BlockStateAccess
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.adapter.item.*
-import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess
-import heckerpowered.lethal.bridge.adapter.world.WorldAccess
-import heckerpowered.lethal.bridge.math.BlockDirection
-import heckerpowered.lethal.bridge.math.BlockPositionView
-import heckerpowered.lethal.bridge.math.VectorView
+import heckerpowered.bridge.adapter.block.BlockStateAccess
+import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.item.*
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
+import heckerpowered.bridge.adapter.world.WorldAccess
+import heckerpowered.bridge.math.BlockDirection
+import heckerpowered.bridge.math.BlockPositionView
+import heckerpowered.bridge.math.VectorView
 import heckerpowered.lethal.platform.adapter.item.HostedItem
 import heckerpowered.lethal.platform.interop.*
 import net.minecraft.entity.EntityLivingBase

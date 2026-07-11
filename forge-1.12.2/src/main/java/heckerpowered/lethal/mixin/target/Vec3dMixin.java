@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.lethal.bridge.math.VectorView;
+import heckerpowered.bridge.math.VectorView;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.*;
 

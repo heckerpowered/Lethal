@@ -5,8 +5,8 @@
 
 package heckerpowered.lethal.gameplay.common
 
-import heckerpowered.lethal.bridge.platform.Services
-import heckerpowered.lethal.bridge.platform.services.Entrypoint
+import heckerpowered.bridge.platform.Services
+import heckerpowered.bridge.platform.services.Entrypoint
 import heckerpowered.lethal.gameplay.common.item.TestItem
 
 class Entrypoint : Entrypoint {

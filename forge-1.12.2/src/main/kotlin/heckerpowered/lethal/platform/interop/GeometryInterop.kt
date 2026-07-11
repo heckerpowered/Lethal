@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.lethal.bridge.math.*
+import heckerpowered.bridge.math.*
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d

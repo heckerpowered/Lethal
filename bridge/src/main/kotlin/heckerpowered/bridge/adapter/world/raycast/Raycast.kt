@@ -5,11 +5,12 @@
 
 package heckerpowered.bridge.adapter.world.raycast
 
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.adapter.world.WorldAccess
-import heckerpowered.lethal.bridge.math.Geometry
-import heckerpowered.lethal.bridge.math.RayIntersectionContext
-import heckerpowered.lethal.bridge.math.RayView
+import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.world.WorldAccess
+import heckerpowered.bridge.math.Geometry
+import heckerpowered.bridge.math.RayIntersectionContext
+import heckerpowered.bridge.math.RayView
+import heckerpowered.bridge.math.intersect
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min

@@ -5,9 +5,9 @@
 
 package heckerpowered.bridge.adapter.world
 
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.adapter.world.raycast.EntityRayBucketSource
-import heckerpowered.lethal.bridge.math.BoxView
+import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.world.raycast.EntityRayBucketSource
+import heckerpowered.bridge.math.BoxView
 
 /**
  * Host-neutral world access.

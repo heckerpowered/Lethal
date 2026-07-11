@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.platform.services
 
-import heckerpowered.lethal.bridge.platform.services.ModPlatform
+import heckerpowered.bridge.platform.services.ModPlatform
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler
 

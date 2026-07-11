@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.mixin.impl
 
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.adapter.world.raycast.EntityRayBucket
-import heckerpowered.lethal.bridge.math.*
+import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket
+import heckerpowered.bridge.math.*
 import heckerpowered.lethal.platform.interop.box
 import heckerpowered.lethal.platform.interop.entity
 import net.minecraft.entity.Entity

@@ -5,10 +5,10 @@
 
 package heckerpowered.lethal.platform.services
 
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.*
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageProvider
-import heckerpowered.lethal.bridge.math.VectorView
+import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.entity.damagesource.*
+import heckerpowered.bridge.adapter.entity.damagesource.DamageProvider
+import heckerpowered.bridge.math.VectorView
 import heckerpowered.lethal.platform.interop.damageSource
 import heckerpowered.lethal.platform.interop.entityOrNull
 import net.minecraft.entity.EntityLivingBase

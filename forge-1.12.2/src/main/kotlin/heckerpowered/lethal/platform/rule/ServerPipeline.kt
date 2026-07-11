@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.platform.rule
 
-import heckerpowered.lethal.bridge.rule.RuleRegistry
-import heckerpowered.lethal.bridge.rule.ServerUpdateRule
-import heckerpowered.lethal.bridge.rule.forEach
+import heckerpowered.bridge.rule.RuleRegistry
+import heckerpowered.bridge.rule.ServerUpdateRule
+import heckerpowered.bridge.rule.forEach
 
 object ServerPipeline {
     @JvmStatic

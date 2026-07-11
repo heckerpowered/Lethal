@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.platform.adapter.item
 
-import heckerpowered.lethal.bridge.adapter.item.ItemAccess
-import heckerpowered.lethal.bridge.adapter.item.ItemBlueprint
-import heckerpowered.lethal.bridge.adapter.item.ItemRegistrar
+import heckerpowered.bridge.adapter.item.ItemAccess
+import heckerpowered.bridge.adapter.item.ItemBlueprint
+import heckerpowered.bridge.adapter.item.ItemRegistrar
 import net.minecraft.item.Item
 import net.minecraftforge.fml.common.registry.GameRegistry
 

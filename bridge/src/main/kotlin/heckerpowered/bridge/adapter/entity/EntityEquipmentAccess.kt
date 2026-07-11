@@ -5,8 +5,8 @@
 
 package heckerpowered.bridge.adapter.entity
 
-import heckerpowered.lethal.bridge.adapter.item.EquipmentSlot
-import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess
+import heckerpowered.bridge.adapter.item.EquipmentSlot
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 
 interface EntityEquipmentAccess : EntityAccess {
     fun getEquippedStack(slot: EquipmentSlot): ItemStackAccess

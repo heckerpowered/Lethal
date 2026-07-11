@@ -7,8 +7,8 @@ package heckerpowered.lethal.platform.adapter.item
 
 import com.google.common.collect.HashMultimap
 import com.google.common.collect.Multimap
-import heckerpowered.lethal.bridge.adapter.item.*
-import heckerpowered.lethal.bridge.math.Geometry
+import heckerpowered.bridge.adapter.item.*
+import heckerpowered.bridge.math.Geometry
 import heckerpowered.lethal.platform.interop.*
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.Entity

@@ -5,8 +5,8 @@
 
 package heckerpowered.bridge.adapter.entity
 
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageSourceView
-import heckerpowered.lethal.bridge.math.*
+import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
+import heckerpowered.bridge.math.*
 import java.util.*
 
 interface EntityAccess : UniquelyIdentifiable {

@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal
 
-import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.bridge.resources.Identifier
 
 object Constants {
     const val MOD_ID = "lethal"

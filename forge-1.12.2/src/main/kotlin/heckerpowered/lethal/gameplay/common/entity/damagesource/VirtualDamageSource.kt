@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.gameplay.common.entity.damagesource
 
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageFeature
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.VanillaDamageType
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.VirtualDamageSourceSpec
+import heckerpowered.bridge.adapter.entity.damagesource.DamageFeature
+import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageType
+import heckerpowered.bridge.adapter.entity.damagesource.VirtualDamageSourceSpec
 import net.minecraft.entity.Entity
 import net.minecraft.util.EntityDamageSourceIndirect
 import net.minecraft.util.math.Vec3d

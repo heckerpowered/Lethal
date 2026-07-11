@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.lethal.bridge.adapter.entity.EntityEquipmentAccess;
-import heckerpowered.lethal.bridge.adapter.item.EquipmentSlot;
-import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess;
+import heckerpowered.bridge.adapter.entity.EntityEquipmentAccess;
+import heckerpowered.bridge.adapter.item.EquipmentSlot;
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess;
 import heckerpowered.lethal.platform.interop.ItemInterop;
 import heckerpowered.lethal.platform.interop.ItemStackInterop;
 import net.minecraft.entity.EntityLivingBase;

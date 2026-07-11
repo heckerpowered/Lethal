@@ -5,11 +5,11 @@
 
 package heckerpowered.lethal.platform.adapter.world
 
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.adapter.world.WorldAccess
-import heckerpowered.lethal.bridge.adapter.world.raycast.EntityRayBucket
-import heckerpowered.lethal.bridge.math.BoxView
-import heckerpowered.lethal.bridge.math.RayView
+import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.world.WorldAccess
+import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket
+import heckerpowered.bridge.math.BoxView
+import heckerpowered.bridge.math.RayView
 import heckerpowered.lethal.mixin.impl.WorldAccessImpl
 import net.minecraft.world.World
 

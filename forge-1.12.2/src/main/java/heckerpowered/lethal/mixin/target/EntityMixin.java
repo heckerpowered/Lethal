@@ -5,11 +5,11 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess;
-import heckerpowered.lethal.bridge.adapter.entity.damagesource.DamageSourceView;
-import heckerpowered.lethal.bridge.math.BoxView;
-import heckerpowered.lethal.bridge.math.Geometry;
-import heckerpowered.lethal.bridge.math.VectorView;
+import heckerpowered.bridge.adapter.entity.EntityAccess;
+import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView;
+import heckerpowered.bridge.math.BoxView;
+import heckerpowered.bridge.math.Geometry;
+import heckerpowered.bridge.math.VectorView;
 import heckerpowered.lethal.platform.interop.GeometryInterop;
 import heckerpowered.lethal.platform.interop.ObjectInterop;
 import net.minecraft.entity.Entity;

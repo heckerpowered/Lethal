@@ -5,7 +5,7 @@
 
 package heckerpowered.bridge.adapter.item
 
-import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.bridge.resources.Identifier
 
 /**
  * Static item settings used when a host materializes an item blueprint.

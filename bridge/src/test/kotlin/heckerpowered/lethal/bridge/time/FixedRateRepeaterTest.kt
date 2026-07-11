@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.bridge.time
+package heckerpowered.bridge.time
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

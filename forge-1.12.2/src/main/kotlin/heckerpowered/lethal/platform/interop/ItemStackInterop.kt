@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 import heckerpowered.lethal.platform.adapter.item.HostedItemStackAccess
 import net.minecraft.item.ItemStack
 

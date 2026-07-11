@@ -5,7 +5,7 @@
 
 package heckerpowered.bridge.adapter.entity.damagesource
 
-import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.bridge.resources.Identifier
 import java.util.*
 
 sealed interface DamageType

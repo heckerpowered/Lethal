@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.lethal.bridge.adapter.item.*
-import heckerpowered.lethal.bridge.math.BlockDirection
-import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.bridge.adapter.item.*
+import heckerpowered.bridge.math.BlockDirection
+import heckerpowered.bridge.resources.Identifier
 import net.minecraft.inventory.EntityEquipmentSlot
 import net.minecraft.item.EnumAction
 import net.minecraft.item.Item

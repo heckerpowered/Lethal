@@ -5,17 +5,17 @@
 
 package heckerpowered.lethal.gameplay.common.item.firearm
 
-import heckerpowered.lethal.bridge.adapter.entity.PlayerAccess
-import heckerpowered.lethal.bridge.adapter.item.EquipmentSlot
-import heckerpowered.lethal.bridge.adapter.item.ItemAccess
-import heckerpowered.lethal.bridge.adapter.item.ItemForm
-import heckerpowered.lethal.bridge.adapter.item.ItemProperties
-import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess
-import heckerpowered.lethal.bridge.resources.Identifier
-import heckerpowered.lethal.bridge.rule.RuleRegistry
-import heckerpowered.lethal.bridge.rule.ServerUpdateRule
-import heckerpowered.lethal.bridge.rule.forEach
-import heckerpowered.lethal.bridge.time.Frequency
+import heckerpowered.bridge.adapter.entity.PlayerAccess
+import heckerpowered.bridge.adapter.item.EquipmentSlot
+import heckerpowered.bridge.adapter.item.ItemAccess
+import heckerpowered.bridge.adapter.item.ItemForm
+import heckerpowered.bridge.adapter.item.ItemProperties
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
+import heckerpowered.bridge.resources.Identifier
+import heckerpowered.bridge.rule.RuleRegistry
+import heckerpowered.bridge.rule.ServerUpdateRule
+import heckerpowered.bridge.rule.forEach
+import heckerpowered.bridge.time.Frequency
 import java.lang.reflect.Proxy
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

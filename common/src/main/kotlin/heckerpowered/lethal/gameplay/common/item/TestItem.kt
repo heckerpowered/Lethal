@@ -6,16 +6,16 @@
 package heckerpowered.lethal.gameplay.common.item
 
 import heckerpowered.lethal.Constants
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
-import heckerpowered.lethal.bridge.adapter.item.*
-import heckerpowered.lethal.bridge.adapter.item.stack.ItemStackAccess
-import heckerpowered.lethal.bridge.adapter.world.WorldAccess
-import heckerpowered.lethal.bridge.adapter.world.raycast.AlgorithmResolution
-import heckerpowered.lethal.bridge.adapter.world.raycast.AlgorithmResolutionState
-import heckerpowered.lethal.bridge.adapter.world.raycast.RaycastExecutionPolicy
-import heckerpowered.lethal.bridge.adapter.world.raycast.raycastEntityHits
-import heckerpowered.lethal.bridge.math.Geometry
-import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.item.*
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
+import heckerpowered.bridge.adapter.world.WorldAccess
+import heckerpowered.bridge.adapter.world.raycast.AlgorithmResolution
+import heckerpowered.bridge.adapter.world.raycast.AlgorithmResolutionState
+import heckerpowered.bridge.adapter.world.raycast.RaycastExecutionPolicy
+import heckerpowered.bridge.adapter.world.raycast.raycastEntityHits
+import heckerpowered.bridge.math.Geometry
+import heckerpowered.bridge.resources.Identifier
 
 class TestItem : ItemBlueprint {
     override val properties: ItemProperties = ItemProperties(1, 0, null)

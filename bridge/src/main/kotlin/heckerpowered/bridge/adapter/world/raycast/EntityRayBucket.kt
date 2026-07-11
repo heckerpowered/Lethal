@@ -5,7 +5,7 @@
 
 package heckerpowered.bridge.adapter.world.raycast
 
-import heckerpowered.lethal.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.entity.EntityAccess
 
 /**
  * A storage bucket that may contain entities hit by a ray.

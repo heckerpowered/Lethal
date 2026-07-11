@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.lethal.bridge.adapter.world.WorldAccess
+import heckerpowered.bridge.adapter.world.WorldAccess
 import heckerpowered.lethal.platform.adapter.world.HostedWorldAccess
 import net.minecraft.world.World
 
