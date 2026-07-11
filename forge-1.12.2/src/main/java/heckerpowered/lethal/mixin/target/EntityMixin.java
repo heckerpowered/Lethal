@@ -7,15 +7,18 @@ package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.entity.EntityAccess;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView;
+import heckerpowered.bridge.adapter.world.WorldAccess;
 import heckerpowered.bridge.math.BoxView;
 import heckerpowered.bridge.math.Geometry;
 import heckerpowered.bridge.math.VectorView;
 import heckerpowered.lethal.platform.interop.GeometryInterop;
 import heckerpowered.lethal.platform.interop.ObjectInterop;
+import heckerpowered.lethal.platform.interop.WorldInterop;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -78,6 +81,9 @@ abstract class EntityMixin {
     @Shadow
     public abstract boolean attackEntityFrom(@NotNull DamageSource source, float amount);
 
+    @Shadow
+    public World world;
+
     public int entityAccess$getId() {
         return getEntityId();
     }
@@ -85,6 +91,11 @@ abstract class EntityMixin {
     @NotNull
     public UUID entityAccess$getUuid() {
         return getUniqueID();
+    }
+
+    @NotNull
+    public WorldAccess entityAccess$getWorld() {
+        return WorldInterop.world(world);
     }
 
     @NotNull
