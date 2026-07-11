@@ -84,7 +84,7 @@ object ObjectInterop {
 
     @JvmStatic
     fun entity(entity: Entity): EntityAccess {
-        return entity as? EntityAccess ?: EntityAccessor(entity)
+        return entity as? EntityAccess ?: EntityAccessor(entity) // TODO: Consider remove EntityAccessor
     }
 
     inline fun <reified T : EntityAccess> entity(entity: Entity): T {
@@ -104,6 +104,14 @@ object ObjectInterop {
             is EntityAccessor -> entity.entity
             else -> error("Unsupported entity access implementation: ${entity::class.java.name}")
         }
+    }
+
+    inline fun <reified T : Entity> entity(entity: EntityAccess): T {
+        return when (entity) {
+            is Entity -> entity
+            is EntityAccessor -> entity.entity
+            else -> error("Unsupported entity access implementation: ${entity::class.java.name}")
+        } as T
     }
 
     @JvmStatic
