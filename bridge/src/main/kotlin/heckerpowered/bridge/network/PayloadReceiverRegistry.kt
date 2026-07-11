@@ -7,7 +7,7 @@ package heckerpowered.bridge.network
 
 import java.util.*
 
-class PayloadHandlerRegistry<C> {
+class PayloadReceiverRegistry<C> {
     private val registrations = IdentityHashMap<Payload.Type<*>, PayloadHandlerRegistration<*, C>>()
 
     fun <T : Payload<T>> register(type: Payload.Type<T>, handler: (T, C) -> Unit) {
