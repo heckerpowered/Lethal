@@ -87,6 +87,10 @@ object ObjectInterop {
         return entity as? EntityAccess ?: EntityAccessor(entity)
     }
 
+    inline fun <reified T : EntityAccess> entity(entity: Entity): T {
+        return entity as? T ?: error("Unsupported EntityAccess(${T::class.java.name}) implementation: ${entity.javaClass.name}")
+    }
+
     @JvmStatic
     fun entityOrNull(entity: Entity?): EntityAccess? {
         if (entity == null) return null
