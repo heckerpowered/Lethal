@@ -44,7 +44,6 @@ class LethalMod {
     @EventHandler
     fun preInitialize(event: FMLPreInitializationEvent) {
         proxy.preInitialize(event)
-
         Services.callEntrypoints<Entrypoint>()
     }
 
