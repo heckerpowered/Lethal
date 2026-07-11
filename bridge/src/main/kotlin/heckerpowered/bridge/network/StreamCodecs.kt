@@ -5,7 +5,7 @@
 
 package heckerpowered.bridge.network
 
-import heckerpowered.lethal.bridge.network.codec.StreamCodec
+import heckerpowered.bridge.network.codec.StreamCodec
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.util.*

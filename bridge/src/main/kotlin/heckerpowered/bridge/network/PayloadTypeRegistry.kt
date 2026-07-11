@@ -5,10 +5,10 @@
 
 package heckerpowered.bridge.network
 
-import heckerpowered.lethal.bridge.network.codec.StreamCodec
-import heckerpowered.lethal.bridge.resources.Identifier
-import heckerpowered.lethal.bridge.security.UnsafeUntrustedAccess
-import heckerpowered.lethal.bridge.security.Untrusted
+import heckerpowered.bridge.network.codec.StreamCodec
+import heckerpowered.bridge.resources.Identifier
+import heckerpowered.bridge.security.UnsafeUntrustedAccess
+import heckerpowered.bridge.security.Untrusted
 
 data class PayloadDefinition<T : Payload<T>>(
     val type: Payload.Type<T>,
@@ -19,6 +19,11 @@ data class PayloadDefinition<T : Payload<T>>(
 }
 
 class PayloadTypeRegistry {
+    companion object {
+        val Clientbound = PayloadTypeRegistry()
+        val Serverbound = PayloadTypeRegistry()
+    }
+
     private val registrations = LinkedHashMap<Identifier, PayloadRegistration<*>>()
 
     fun <T : Payload<T>> register(type: Payload.Type<T>, codec: StreamCodec<StreamBuffer, T>): PayloadDefinition<T> {
