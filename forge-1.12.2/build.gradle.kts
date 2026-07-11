@@ -3,6 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.minecraftforge.renamer.gradle.RenameJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.text.SimpleDateFormat
@@ -13,6 +14,7 @@ plugins {
     id("heckerpowered.convention.kotlin-jvm")
     id("net.minecraftforge.gradle") version "7.+"
     id("net.minecraftforge.renamer") version "1.+"
+    id("com.gradleup.shadow") version "9.+"
 }
 
 val minecraftVersion = project.property("minecraftVersion").toString()
@@ -41,17 +43,13 @@ val attached = configurations.create("attached") {
     assert(isCanBeResolved)
 }
 
-dependencies {
-    implementation(project(":bridge"))
-    implementation(project(":common"))
+configurations.implementation {
+    extendsFrom(attached)
+}
 
+dependencies {
     implementation(minecraft.dependency("net.minecraftforge:forge:$minecraftVersion-$forgeVersion"))
     // annotationProcessor("net.minecraftforge:eventbus-validator:7.0.1")
-    implementation("org.spongepowered:mixin:$mixinVersion") {
-        exclude(group = "com.google.guava", module = "guava")
-        exclude(group = "commons-io", module = "commons-io")
-        exclude(group = "com.google.code.gson", module = "gson")
-    }
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     testImplementation(kotlin("test"))
@@ -217,30 +215,20 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.register<Jar>("singleJar") {
+tasks.register<ShadowJar>("singleJar") {
     description = "Compile the mod into a single file containing the specified dependencies"
 
     dependsOn(tasks.named("reobfJar"))
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    configurations = project.configurations.named("attached").map { listOf(it) }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     archiveBaseName = project.base.archivesName
     archiveClassifier = "single"
     archiveVersion = project.version.toString()
 
     from(zipTree(tasks.named<RenameJar>("reobfJar").get().output.get()))
-    from(configurations.named("attached").get().map { dependency ->
-        if (dependency.isDirectory) {
-            dependency
-        } else {
-            zipTree(dependency)
-        }
-    }) {
-        exclude {
-            it.path.contains("META-INF") &&
-                    !it.path.contains("META-INF/services")
-        }
-    }
-    from(configurations.named("attached").get()) {
-        include("META-INF/services", "META-INF/services/**")
+    mergeServiceFiles()
+    filesNotMatching(listOf("META-INF/services/**", "META-INF/*.kotlin_module")) {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
     exclude("module-info.class")
     exclude("LICENSE.txt")
