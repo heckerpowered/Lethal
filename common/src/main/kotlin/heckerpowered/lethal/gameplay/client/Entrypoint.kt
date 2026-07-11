@@ -9,6 +9,6 @@ import heckerpowered.bridge.platform.services.ClientEntrypoint
 
 class Entrypoint : ClientEntrypoint {
     override fun onEntrypoint() {
-        println("Client entrypoint")
+        MouseEventHandler.onInitialize()
     }
 }

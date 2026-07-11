@@ -6,8 +6,8 @@
 package heckerpowered.lethal.gameplay
 
 import heckerpowered.bridge.platform.Services
+import heckerpowered.bridge.platform.services.Entrypoint
 import heckerpowered.lethal.gameplay.common.CommonProxy
-import heckerpowered.lethal.gameplay.common.Entrypoint
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler

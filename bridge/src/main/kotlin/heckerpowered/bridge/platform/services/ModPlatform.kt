@@ -5,6 +5,8 @@
 
 package heckerpowered.bridge.platform.services
 
+import heckerpowered.bridge.adapter.client.MinecraftAccess
+
 interface ModPlatform {
     /**
      * The name of current platform, e.g. "Fabric", "Forge", "Paper", etc.
@@ -31,4 +33,6 @@ interface ModPlatform {
      */
     val environmentName: String
         get() = if (isDevelopmentEnvironment) "development" else "production"
+
+    val minecraft: MinecraftAccess
 }

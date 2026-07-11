@@ -5,7 +5,9 @@
 
 package heckerpowered.lethal.platform.services
 
+import heckerpowered.bridge.adapter.client.MinecraftAccess
 import heckerpowered.bridge.platform.services.ModPlatform
+import net.minecraft.client.Minecraft
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler
 
@@ -31,4 +33,7 @@ class ForgePlatform : ModPlatform {
      */
     override val isDevelopmentEnvironment: Boolean
         get() = FMLLaunchHandler.isDeobfuscatedEnvironment()
+
+    override val minecraft: MinecraftAccess
+        get() = Minecraft.getMinecraft() as MinecraftAccess
 }

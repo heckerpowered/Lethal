@@ -10,6 +10,7 @@
     "EntityLivingBaseMixin",
     "EntityMixin",
     "EntityPlayerMixin",
+    "EntityPlayerMPMixin",
     "ItemMixin",
     "ItemStackMixin",
     "MinecraftServerMixin",
@@ -17,7 +18,10 @@
     "Vec3dMixin",
     "WorldMixin"
   ],
-  "client": [],
+  "client": [
+    "EntityPlayerSPMixin",
+    "MinecraftMixin"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1
