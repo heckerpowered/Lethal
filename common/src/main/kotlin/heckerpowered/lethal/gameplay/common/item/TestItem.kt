@@ -5,7 +5,6 @@
 
 package heckerpowered.lethal.gameplay.common.item
 
-import heckerpowered.lethal.Constants
 import heckerpowered.bridge.adapter.entity.EntityAccess
 import heckerpowered.bridge.adapter.item.*
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
@@ -16,8 +15,9 @@ import heckerpowered.bridge.adapter.world.raycast.RaycastExecutionPolicy
 import heckerpowered.bridge.adapter.world.raycast.raycastEntityHits
 import heckerpowered.bridge.math.Geometry
 import heckerpowered.bridge.resources.Identifier
+import heckerpowered.lethal.Constants
 
-class TestItem : ItemBlueprint {
+object TestItem : ItemBlueprint {
     override val properties: ItemProperties = ItemProperties(1, 0, null)
     override val identifier: Identifier = Constants.identifier("test_item")
     override val form: ItemForm = ItemForm.Regular

@@ -12,7 +12,7 @@ import heckerpowered.bridge.time.Frequency
 import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.common.item.firearm.Firearm
 
-class TestFirearmItem : Firearm() {
+object TestFirearmItem : Firearm() {
     override val identifier: Identifier
         get() = Constants.identifier("test_firearm")
 
