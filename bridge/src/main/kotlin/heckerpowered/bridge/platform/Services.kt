@@ -14,11 +14,11 @@ import heckerpowered.bridge.platform.services.PlatformLogger
 import java.util.*
 
 object Services {
-    val Logger = load<PlatformLogger>()
-    val Platform = load<ModPlatform>()
-    val ItemProvider = load<ItemProvider>()
-    val ItemRegistrar = load<ItemRegistrar>()
-    val PayloadTransport = load<PayloadTransport>()
+    val Logger by lazy { load<PlatformLogger>() }
+    val Platform by lazy { load<ModPlatform>() }
+    val ItemProvider by lazy { load<ItemProvider>() }
+    val ItemRegistrar by lazy { load<ItemRegistrar>() }
+    val PayloadTransport by lazy { load<PayloadTransport>() }
 
     fun <T : Any> load(type: Class<T>): T {
         return loadOrNull(type)
@@ -39,6 +39,7 @@ object Services {
         val entrypointCount = entrypoints.count()
 
         Logger.info("Found $entrypointCount entrypoint(s).")
+        // Logger.info("Classloader(${Services::class.java.name})=${Services::class.java.classLoader}, ${T::class.java.name})=${T::class.java.classLoader}")
         for ((index, entrypoint) in entrypoints.withIndex()) {
             Logger.info("Calling entrypoint (${index + 1}/$entrypointCount): ${entrypoint.javaClass.name}")
             entrypoint.onEntrypoint()

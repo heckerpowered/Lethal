@@ -10,8 +10,8 @@ import heckerpowered.bridge.resources.IdentifierProvider
 import net.minecraft.util.ResourceLocation
 
 class HostingIdentifierProvider : IdentifierProvider {
-    @Suppress("KotlinConstantConditions")
     override fun identifier(namespace: String, path: String): Identifier {
-        return ResourceLocation(namespace, path) as Identifier
+        @Suppress("CAST_NEVER_SUCCEEDS")
+        return ResourceLocation(namespace, path) as? Identifier ?: IdentifierProvider.Freestanding.identifier(namespace, path)
     }
 }

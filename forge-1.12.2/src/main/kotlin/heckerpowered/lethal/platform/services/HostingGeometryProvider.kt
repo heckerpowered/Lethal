@@ -14,11 +14,11 @@ import net.minecraft.util.math.Vec3d
 class HostingGeometryProvider : GeometryProvider {
     override fun vector(x: Double, y: Double, z: Double): VectorView {
         @Suppress("CAST_NEVER_SUCCEEDS")
-        return Vec3d(x, y, z) as VectorView
+        return Vec3d(x, y, z) as? VectorView ?: GeometryProvider.Freestanding.vector(x, y, z)
     }
 
     override fun box(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double): BoxView {
         @Suppress("CAST_NEVER_SUCCEEDS")
-        return AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ) as BoxView
+        return AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ) as? BoxView ?: GeometryProvider.Freestanding.box(minX, minY, minZ, maxX, maxY, maxZ)
     }
 }
