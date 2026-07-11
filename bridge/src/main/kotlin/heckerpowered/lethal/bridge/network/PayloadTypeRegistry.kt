@@ -54,9 +54,6 @@ class PayloadTypeRegistry {
     private class PayloadRegistration<T : Payload<T>>(
         private val definition: PayloadDefinition<T>,
     ) {
-        val type: Payload.Type<*>
-            get() = definition.type
-
         fun decode(input: StreamBuffer): Payload<*> {
             val payload = definition.decode(input)
             require(payload.type === definition.type) { "Codec for ${definition.type.id} decoded payload with type ${payload.type.id}" }
