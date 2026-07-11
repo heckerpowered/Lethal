@@ -47,13 +47,13 @@ abstract class ForgePayloadEnvelope(private val registry: PayloadTypeRegistry) :
     }
 }
 
-class ClientboundForgePayloadEnvelope() : ForgePayloadEnvelope(PayloadTypeRegistry.Clientbound) {
+class ClientboundForgePayloadEnvelope() : ForgePayloadEnvelope(PayloadTypeRegistry.ClientboundPlay) {
     internal constructor(packet: ClientboundPayload<*>) : this() {
         initialize(packet)
     }
 }
 
-class ServerboundForgePayloadEnvelope() : ForgePayloadEnvelope(PayloadTypeRegistry.Serverbound) {
+class ServerboundForgePayloadEnvelope() : ForgePayloadEnvelope(PayloadTypeRegistry.ServerboundPlay) {
     internal constructor(packet: ServerboundPayload<*>) : this() {
         initialize(packet)
     }
@@ -65,8 +65,8 @@ internal class ClientboundForgePacketEnvelopeHandler : IMessageHandler<Clientbou
         val client = Minecraft.getMinecraft()
         client.addScheduledTask {
             val player = client.player ?: return@addScheduledTask
-            val context = ClientNetworking.Context(ObjectInterop.entity<PlayerAccess>(player))
-            ClientNetworking.handle(message.payload, context)
+            val context = ClientPlayNetworking.Context(ObjectInterop.entity<PlayerAccess>(player))
+            ClientPlayNetworking.handle(message.payload, context)
         }
         return null
     }
@@ -76,8 +76,8 @@ internal class ServerboundForgePacketEnvelopeHandler : IMessageHandler<Serverbou
     override fun onMessage(message: ServerboundForgePayloadEnvelope, context: MessageContext): IMessage? {
         val player = context.serverHandler.player
         player.serverWorld.addScheduledTask {
-            val context = ServerNetworking.Context(ObjectInterop.entity<PlayerAccess>(player))
-            ServerNetworking.handle(message.payload, context)
+            val context = ServerPlayNetworking.Context(ObjectInterop.entity<PlayerAccess>(player))
+            ServerPlayNetworking.handle(message.payload, context)
         }
         return null
     }

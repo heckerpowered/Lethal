@@ -7,7 +7,7 @@ package heckerpowered.bridge.network
 
 import heckerpowered.bridge.adapter.entity.PlayerAccess
 
-object ClientNetworking {
+object ServerPlayNetworking {
     private val receivers = PayloadReceiverRegistry<Context>()
 
     fun <T : ClientboundPayload<T>> registerReceiver(type: Payload.Type<T>, handler: (T, Context) -> Unit) {

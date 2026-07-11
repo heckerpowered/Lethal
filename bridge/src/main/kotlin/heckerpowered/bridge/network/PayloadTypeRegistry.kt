@@ -20,8 +20,8 @@ data class PayloadDefinition<T : Payload<T>>(
 
 class PayloadTypeRegistry {
     companion object {
-        val Clientbound = PayloadTypeRegistry()
-        val Serverbound = PayloadTypeRegistry()
+        val ClientboundPlay = PayloadTypeRegistry()
+        val ServerboundPlay = PayloadTypeRegistry()
     }
 
     private val registrations = LinkedHashMap<Identifier, PayloadRegistration<*>>()
