@@ -7,6 +7,8 @@ package heckerpowered.lethal.bridge.network
 
 import heckerpowered.lethal.bridge.network.codec.StreamCodec
 import heckerpowered.lethal.bridge.resources.Identifier
+import heckerpowered.lethal.bridge.security.UnsafeUntrustedAccess
+import heckerpowered.lethal.bridge.security.Untrusted
 
 data class PayloadDefinition<T : Payload<T>>(
     val type: Payload.Type<T>,
@@ -34,6 +36,12 @@ class PayloadTypeRegistry {
 
     fun decode(typeId: Identifier, input: StreamBuffer): Payload<*> {
         val registration = registrations[typeId] ?: error("Payload type is not registered: $typeId")
+        return registration.decode(input)
+    }
+
+    @OptIn(UnsafeUntrustedAccess::class)
+    fun decode(typeId: Untrusted<Identifier>, input: StreamBuffer): Payload<*> {
+        val registration = registrations[typeId.unsafeUnwrap()] ?: error("Payload type is not registered: (untrusted identifier)")
         return registration.decode(input)
     }
 
