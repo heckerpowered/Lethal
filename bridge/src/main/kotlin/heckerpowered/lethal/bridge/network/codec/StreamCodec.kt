@@ -181,12 +181,6 @@ interface StreamCodec<Buffer, Value> {
             )
         }
 
-        fun <Buffer, CompositeValue> record(definition: RecordStreamCodecBuilder<Buffer, CompositeValue>.() -> Unit): StreamCodec<Buffer, CompositeValue> {
-            return RecordStreamCodecBuilder<Buffer, CompositeValue>()
-                .apply(definition)
-                .build()
-        }
-
         fun <Buffer, Value> recursive(factory: CodecOperation<Buffer, Value, Value>): StreamCodec<Buffer, Value> {
             return RecursiveStreamCodec(factory)
         }
