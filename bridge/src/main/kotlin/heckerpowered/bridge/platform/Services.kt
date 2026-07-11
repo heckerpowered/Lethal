@@ -8,10 +8,13 @@ package heckerpowered.bridge.platform
 import heckerpowered.bridge.adapter.item.ItemProvider
 import heckerpowered.bridge.adapter.item.ItemRegistrar
 import heckerpowered.bridge.network.PayloadTransport
+import heckerpowered.bridge.platform.services.Entrypoint
 import heckerpowered.bridge.platform.services.ModPlatform
+import heckerpowered.bridge.platform.services.PlatformLogger
 import java.util.*
 
 object Services {
+    val Logger = load<PlatformLogger>()
     val Platform = load<ModPlatform>()
     val ItemProvider = load<ItemProvider>()
     val ItemRegistrar = load<ItemRegistrar>()
@@ -29,6 +32,17 @@ object Services {
 
     fun <T : Any> loads(type: Class<T>): ServiceLoader<T> {
         return ServiceLoader.load(type, Services::class.java.classLoader)
+    }
+
+    inline fun <reified T : Entrypoint> callEntrypoints() {
+        val entrypoints = Services.loads<T>()
+        val entrypointCount = entrypoints.count()
+
+        Logger.info("Found $entrypointCount entrypoint(s).")
+        for ((index, entrypoint) in entrypoints.withIndex()) {
+            Logger.info("Calling entrypoint (${index + 1}/$entrypointCount): ${entrypoint.javaClass.name}")
+            entrypoint.onEntrypoint()
+        }
     }
 }
 

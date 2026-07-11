@@ -87,6 +87,7 @@ object ObjectInterop {
         return entity as? EntityAccess ?: EntityAccessor(entity) // TODO: Consider remove EntityAccessor
     }
 
+    @JvmName("entityExact")
     inline fun <reified T : EntityAccess> entity(entity: Entity): T {
         return entity as? T ?: error("Unsupported EntityAccess(${T::class.java.name}) implementation: ${entity.javaClass.name}")
     }
@@ -106,6 +107,7 @@ object ObjectInterop {
         }
     }
 
+    @JvmName("entityExact")
     inline fun <reified T : Entity> entity(entity: EntityAccess): T {
         return when (entity) {
             is Entity -> entity

@@ -6,13 +6,15 @@
 package heckerpowered.lethal.gameplay
 
 import heckerpowered.bridge.platform.Services
-import heckerpowered.bridge.platform.loads
-import heckerpowered.bridge.platform.services.Entrypoint
+import heckerpowered.lethal.gameplay.common.CommonProxy
+import heckerpowered.lethal.gameplay.common.Entrypoint
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
+import net.minecraftforge.fml.common.SidedProxy
+import net.minecraftforge.fml.common.event.FMLInitializationEvent
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
-import org.apache.logging.log4j.Logger
 
 @Mod(
     modid = LethalMod.MOD_ID,
@@ -26,8 +28,12 @@ class LethalMod {
         const val NAME = "Lethal Mod"
         const val VERSION = "1.0"
 
+        @SidedProxy(
+            serverSide = "heckerpowered.lethal.gameplay.common.CommonProxy",
+            clientSide = "heckerpowered.lethal.gameplay.client.ClientProxy"
+        )
         @JvmStatic
-        lateinit var Logger: Logger
+        lateinit var proxy: CommonProxy
 
         @JvmStatic
         fun resource(path: String): ResourceLocation {
@@ -37,15 +43,20 @@ class LethalMod {
 
     @EventHandler
     fun preInitialize(event: FMLPreInitializationEvent) {
-        Logger = event.modLog
+        proxy.preInitialize(event)
 
-        val entrypoints = Services.loads<Entrypoint>()
-        val entrypointCount = entrypoints.count()
-
-        Logger.info("Found $entrypointCount entrypoint(s).")
-        for ((index, entrypoint) in entrypoints.withIndex()) {
-            Logger.info("Calling entrypoint ($index/$entrypointCount): ${entrypoint.javaClass.name}")
-            entrypoint.onEntrypoint()
-        }
+        Services.callEntrypoints<Entrypoint>()
     }
+
+
+    @EventHandler
+    fun initialize(event: FMLInitializationEvent) {
+        proxy.initialize(event)
+    }
+
+    @EventHandler
+    fun postInitialize(event: FMLPostInitializationEvent) {
+        proxy.postInitialize(event)
+    }
+
 }
