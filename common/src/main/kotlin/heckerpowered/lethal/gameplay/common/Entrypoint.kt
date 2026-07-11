@@ -14,14 +14,14 @@ import heckerpowered.lethal.gameplay.common.network.ModServerPlayNetworking
 class Entrypoint : Entrypoint {
     override fun onEntrypoint() {
         ModServerPlayNetworking.onInitialize()
+        registerItem()
     }
 
     private fun registerItem() {
         val registrar = Services.ItemRegistrar
         if (Services.Platform.isDevelopmentEnvironment) {
             registrar.register(TestItem)
+            registrar.register(TestFirearmItem)
         }
-
-        registrar.register(TestFirearmItem)
     }
 }
