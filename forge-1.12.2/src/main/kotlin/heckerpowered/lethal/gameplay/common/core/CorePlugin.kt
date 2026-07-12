@@ -11,6 +11,7 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.*
 import org.apache.commons.lang3.reflect.MethodUtils
 import org.spongepowered.asm.launch.MixinBootstrap
 import org.spongepowered.asm.mixin.Mixins
+import org.spongepowered.asm.service.MixinService
 
 @Name("LethalCoreMod")
 @MCVersion("1.12.2")
@@ -21,6 +22,12 @@ class CorePlugin : IFMLLoadingPlugin {
         fun launchMixin() {
             MixinBootstrap.init()
             Mixins.addConfiguration("mixins.lethal.json")
+
+            MixinService.getService()
+                .transformerProvider
+                .addTransformerExclusion(
+                    "wiresegal.thicc.asm.ThiccAsmTransformer",
+                )
         }
     }
 
