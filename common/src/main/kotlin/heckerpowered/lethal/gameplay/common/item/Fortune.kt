@@ -15,6 +15,7 @@ import heckerpowered.bridge.resources.Identifier
 import heckerpowered.bridge.time.Frequency
 import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.common.item.firearm.Firearm
+import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
 object Fortune : Firearm() {
     override val identifier: Identifier
@@ -25,6 +26,8 @@ object Fortune : Firearm() {
     }
 
     override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess) {
+        player.world.playSound(player.eyePosition, ModSounds.FortuneFire)
+
         val damageSource = DamageSources.vanilla(VanillaDamageType.FellOutOfWorld, player, player)
         player.world.raycastEntityHits(Geometry.ray(player.eyePosition, player.viewVector), 100.0, player)
             .forEach {

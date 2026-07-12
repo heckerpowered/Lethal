@@ -15,6 +15,7 @@ import heckerpowered.bridge.resources.Identifier
 import heckerpowered.bridge.time.Frequency
 import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.common.item.firearm.Firearm
+import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
 object Archaeopteryx : Firearm() {
     override val identifier: Identifier
@@ -25,6 +26,8 @@ object Archaeopteryx : Firearm() {
     }
 
     override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess) {
+        player.world.playSound(player.eyePosition, ModSounds.ArchaeopteryxFire)
+
         val damageSource = DamageSources.vanilla(VanillaDamageType.Generic, player, player)
         player.world.raycastEntityHits(Geometry.ray(player.eyePosition, player.viewVector), 120.0, player)
             .forEach {
