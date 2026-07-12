@@ -72,6 +72,7 @@ minecraft {
 
             systemProperty("forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP")
             systemProperty("forge.logging.console.level", "trace")
+            systemProperty("mixin.env.disableRefMap", "true")
 
             jvmArgs.add("-Dfml.coreMods.load=heckerpowered.lethal.gameplay.common.core.CorePlugin")
         }
@@ -101,7 +102,6 @@ sourceSets {
         resources {
             srcDir("src/generated/resources")
         }
-        // output.setResourcesDir(layout.buildDirectory.dir("classes/kotlin/main").get().asFile)
     }
 }
 
@@ -172,15 +172,20 @@ val reobfMappings = renamer.merge("reobfMappings") {
     map(files(mixinOutputMappings))
 }
 
-val reobfJar = renamer.classes("reobfJar", tasks.jar) {
-    dependsOn(reobfMappings)
-    map = files(reobfMappings)
-
-    archiveClassifier.set("")
-}
-
 val mixinConfigName = "mixins.$modId.json"
 val mixinRefmapName = "mixins.$modId.refmap.json"
+val modManifestAttributes = mapOf(
+    "FMLCorePlugin" to "heckerpowered.lethal.gameplay.common.core.CorePlugin",
+    "FMLCorePluginContainsFMLMod" to true,
+    "MixinConfigs" to mixinConfigName,
+    "Specification-Title" to "Lethal",
+    "Specification-Vendor" to "Heckerpowered Corporation",
+    "Specification-Version" to "1",
+    "Implementation-Title" to project.name,
+    "Implementation-Version" to project.version,
+    "Implementation-Vendor" to "Heckerpowered",
+    "Implementation-Timestamp" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(Date())
+)
 
 tasks.jar {
     archiveBaseName.set(archiveName)
@@ -188,24 +193,19 @@ tasks.jar {
     archiveClassifier.set("dev")
 
     manifest {
-        attributes(
-            "FMLCorePlugin" to "heckerpowered.lethal.gameplay.common.core.CorePlugin",
-            "FMLCorePluginContainsFMLMod" to true,
-            "MixinConfigs" to mixinConfigName,
-            "Specification-Title" to "Lethal",
-            "Specification-Vendor" to "Heckerpowered Corporation",
-            "Specification-Version" to "1",
-            "Implementation-Title" to project.name,
-            "Implementation-Version" to project.version,
-            "Implementation-Vendor" to "Heckerpowered",
-            "Implementation-Timestamp" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(Date())
-        )
+        attributes(modManifestAttributes)
     }
-
     from(mixinRefmap) {
         into("")
         rename("refmap\\.json", mixinRefmapName)
     }
+}
+
+val reobfJar = renamer.classes("reobfJar", tasks.jar) {
+    dependsOn(reobfMappings)
+    map = files(reobfMappings)
+
+    archiveClassifier.set("")
 }
 
 tasks.processResources {
@@ -234,6 +234,9 @@ val shadowJar = tasks.named<ShadowJar>("shadowJar") {
         into("")
         rename("refmap\\.json", mixinRefmapName)
     }
+    // The mod tracks recent Kotlin releases and uses APIs that may be unavailable in the older runtime provided by the mod environment.
+    // Relocation isolates the bundled standard library and prevents linkage errors caused by incompatible Kotlin versions.
+    // Revalidate this setup before adding kotlin-reflect or libraries that inspect Kotlin metadata, as they are tightly coupled to the standard library package.
     relocate("kotlin", "heckerpowered.lethal.shadow.kotlin")
     mergeServiceFiles()
 }
@@ -245,7 +248,6 @@ val reobfShadowJar = renamer.classes("reobfShadowJar", shadowJar) {
     map = files(reobfMappings)
 
     archiveClassifier.set("shadow")
-    output.set(layout.buildDirectory.file("libs/$archiveName-$modVersion-shadow.jar"))
 }
 
 shadowJar.configure {
@@ -253,6 +255,16 @@ shadowJar.configure {
 }
 
 gradle.projectsEvaluated {
+    val developmentJar = tasks.jar
+    val developmentOutput = sourceSets.main.get().output
+
+    tasks.withType<JavaExec>()
+        .matching { it.name == "runClient" || it.name == "runServer" }
+        .configureEach {
+            dependsOn(developmentJar)
+            classpath = files(developmentJar.flatMap { it.archiveFile }).plus(classpath.minus(developmentOutput))
+        }
+
     configurations.configureEach {
         if (name.startsWith("detachedConfiguration")) {
             // ForgeGradle 7 creates detached configurations for legacy run metadata/runtime resolution.
