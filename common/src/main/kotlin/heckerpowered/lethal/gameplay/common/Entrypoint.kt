@@ -13,10 +13,12 @@ import heckerpowered.lethal.gameplay.common.item.Fortune
 import heckerpowered.lethal.gameplay.common.item.TestFirearmItem
 import heckerpowered.lethal.gameplay.common.item.TestItem
 import heckerpowered.lethal.gameplay.common.network.ModServerPlayNetworking
+import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
 class Entrypoint : Entrypoint {
     override fun onEntrypoint() {
         ModServerPlayNetworking.onInitialize()
+        ModSounds.register()
         registerItem()
     }
 
