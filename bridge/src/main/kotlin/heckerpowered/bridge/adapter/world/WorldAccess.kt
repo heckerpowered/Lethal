@@ -6,8 +6,10 @@
 package heckerpowered.bridge.adapter.world
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.sound.SoundPlayback
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucketSource
 import heckerpowered.bridge.math.BoxView
+import heckerpowered.bridge.math.VectorView
 
 /**
  * Host-neutral world access.
@@ -33,4 +35,6 @@ interface WorldAccess : EntityRayBucketSource {
      * Implementations should preserve lazy traversal when the host exposes spatial entity storage.
      */
     fun getEntities(searchBox: BoxView): Sequence<EntityAccess>
+
+    fun playSound(position: VectorView, playback: SoundPlayback)
 }
