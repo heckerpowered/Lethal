@@ -6,10 +6,12 @@
 package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.entity.EntityAccess;
+import heckerpowered.bridge.adapter.sound.SoundPlayback;
 import heckerpowered.bridge.adapter.world.WorldAccess;
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket;
 import heckerpowered.bridge.math.BoxView;
 import heckerpowered.bridge.math.RayView;
+import heckerpowered.bridge.math.VectorView;
 import heckerpowered.lethal.mixin.impl.WorldAccessImpl;
 import heckerpowered.lethal.mixin.impl.WorldAccessImpl.ChunkAccess;
 import kotlin.sequences.Sequence;
@@ -52,6 +54,10 @@ abstract class WorldMixin {
     @NotNull
     public Sequence<EntityAccess> worldAccess$getEntities(@NotNull BoxView searchBox) {
         return WorldAccessImpl.getEntities(self(), searchBox);
+    }
+
+    public void worldAccess$playSound(@NotNull VectorView position, @NotNull SoundPlayback playback) {
+        WorldAccessImpl.playSound(self(), position, playback);
     }
 
     public boolean chunkAccess$isChunkLoadedForEntitySearch(int chunkX, int chunkZ, boolean allowEmpty) {

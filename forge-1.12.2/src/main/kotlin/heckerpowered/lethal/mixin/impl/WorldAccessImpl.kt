@@ -6,10 +6,13 @@
 package heckerpowered.lethal.mixin.impl
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.sound.SoundPlayback
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket
 import heckerpowered.bridge.math.*
 import heckerpowered.lethal.platform.interop.box
 import heckerpowered.lethal.platform.interop.entity
+import heckerpowered.lethal.platform.interop.soundCategory
+import heckerpowered.lethal.platform.interop.soundEvent
 import net.minecraft.entity.Entity
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.world.World
@@ -39,6 +42,11 @@ object WorldAccessImpl {
     fun getEntities(world: World, searchBox: BoxView): Sequence<EntityAccess> {
         val nativeSearchBox = searchBox.box()
         return getEntities(world, nativeSearchBox).map { it.entity() }
+    }
+
+    @JvmStatic
+    fun playSound(world: World, position: VectorView, playback: SoundPlayback) {
+        world.playSound(null, position.x, position.y, position.z, playback.sound.soundEvent(), playback.category.soundCategory(), playback.volume.toFloat(), playback.pitch.toFloat())
     }
 
     private fun getEntities(world: World, searchBox: AxisAlignedBB): Sequence<Entity> {
