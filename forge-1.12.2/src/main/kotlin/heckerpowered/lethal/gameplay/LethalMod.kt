@@ -19,8 +19,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 @Mod(
     modid = LethalMod.MOD_ID,
     name = LethalMod.NAME,
-    version = LethalMod.VERSION,
-    // modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter"
+    version = LethalMod.VERSION
 )
 class LethalMod {
     companion object {
@@ -57,5 +56,4 @@ class LethalMod {
     fun postInitialize(event: FMLPostInitializationEvent) {
         proxy.postInitialize(event)
     }
-
 }
