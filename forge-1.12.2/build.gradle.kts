@@ -230,6 +230,11 @@ val shadowJar = tasks.named<ShadowJar>("shadowJar") {
     archiveVersion = project.version.toString()
     destinationDirectory.set(layout.buildDirectory.dir("tmp/shadowJar"))
 
+    from(mixinRefmap) {
+        into("")
+        rename("refmap\\.json", mixinRefmapName)
+    }
+    relocate("kotlin", "heckerpowered.lethal.shadow.kotlin")
     mergeServiceFiles()
 }
 
