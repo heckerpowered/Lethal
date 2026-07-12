@@ -8,7 +8,7 @@
   },
   "archaeopteryx_fire": {
     "category": "player",
-    "subtitle:": "lethal.sound.archaeopteryx_fire",
+    "subtitle": "lethal.sound.archaeopteryx_fire",
     "sounds": [
       "lethal:archaeopteryx_fire"
     ]
