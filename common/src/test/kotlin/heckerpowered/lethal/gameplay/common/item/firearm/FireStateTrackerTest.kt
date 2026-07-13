@@ -133,7 +133,7 @@ class FireStateTrackerTest {
     }
 
     @Test
-    fun batchedOperationsStopWhenFireFails() {
+    fun batchedOperationsUseOneFireCallAndStopWhenFireFails() {
         val gun = TestGun(Frequency.perMinute(6000))
         gun.maximumSuccessfulFireCount = 1
         val weaponStack = TestItemStack(gun)
@@ -143,6 +143,7 @@ class FireStateTrackerTest {
         FireStateTracker.tick()
 
         assertEquals(1, gun.fireCount)
+        assertEquals(1, gun.fireCallCount)
     }
 
     @Test
@@ -191,6 +192,7 @@ class FireStateTrackerTest {
             get() = error("Identifier is not used by this test")
         override val properties: ItemProperties = ItemProperties()
         var fireCount: Int = 0
+        var fireCallCount: Int = 0
         var maximumSuccessfulFireCount: Int = Int.MAX_VALUE
 
         override fun getFrequency(player: PlayerAccess, weaponStack: ItemStackAccess): Frequency {
@@ -201,14 +203,18 @@ class FireStateTrackerTest {
             return firingAllowed
         }
 
-        override fun fire(player: PlayerAccess, weaponStack: ItemStackAccess): Boolean {
-            if (!firingAllowed || fireCount >= maximumSuccessfulFireCount) return false
+        override fun fire(player: PlayerAccess, weaponStack: ItemStackAccess, requestedShotCount: Long): Long {
+            require(requestedShotCount >= 0)
+            fireCallCount++
+            if (!firingAllowed) return 0
 
-            fireCount++
-            return true
+            val remainingSuccessfulFireCount = (maximumSuccessfulFireCount - fireCount).coerceAtLeast(0).toLong()
+            val firedShotCount = minOf(requestedShotCount, remainingSuccessfulFireCount)
+            fireCount += firedShotCount.toInt()
+            return firedShotCount
         }
 
-        override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess) {
+        override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long) {
         }
     }
 

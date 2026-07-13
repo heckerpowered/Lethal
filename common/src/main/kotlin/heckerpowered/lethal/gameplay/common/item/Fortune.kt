@@ -25,13 +25,14 @@ object Fortune : Firearm() {
         return Frequency.perMinute(840)
     }
 
-    override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess) {
+    override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long) {
         player.world.playSound(player.eyePosition, ModSounds.FortuneFire)
 
         val damageSource = DamageSources.vanilla(VanillaDamageType.FellOutOfWorld, player, player)
+        val damagePoints = 30000.0 * shotCount.toDouble()
         player.world.raycastEntityHits(Geometry.ray(player.eyePosition, player.viewVector), 100.0, player)
             .forEach {
-                it.entity.hurt(damageSource, 30000.0)
+                it.entity.hurt(damageSource, damagePoints)
             }
     }
 }

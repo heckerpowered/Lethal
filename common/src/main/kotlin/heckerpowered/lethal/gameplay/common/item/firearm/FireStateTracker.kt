@@ -153,8 +153,7 @@ object FireStateTracker : ServerUpdateRule {
     }
 
     /**
-     * Converts accumulated cadence into fire transactions after a single scheduling eligibility check.
-     * A failed transaction terminates the batch, and its remaining operations are dropped rather than retained as a later burst.
+     * Converts accumulated cadence into one batched gun invocation after a single scheduling eligibility check.
      */
     private fun updateTriggeredWeapon(triggeredWeapon: TriggeredWeapon, weaponStack: ItemStackAccess, weaponState: FixedRateRepeater, deltaTime: Duration) {
         val player = triggeredWeapon.player
@@ -168,9 +167,7 @@ object FireStateTracker : ServerUpdateRule {
         val operationCount = weaponState.updateActive(deltaTime)
         if (operationCount == 0L) return
 
-        for (operationIndex in 0L until operationCount) {
-            if (!gun.fire(player, weaponStack)) return
-        }
+        gun.fire(player, weaponStack, operationCount)
     }
 
     private data class TriggeredWeapon(val player: PlayerAccess, val gun: Gun)

@@ -14,11 +14,11 @@ interface Gun {
     fun mayFire(player: PlayerAccess, weaponStack: ItemStackAccess): Boolean
 
     /**
-     * Attempts one complete fire transaction.
+     * Attempts up to [requestedShotCount] fire transactions.
      *
-     * @return `true` only when the transaction completed and should count as a fired operation.
+     * @return the number of completed fire transactions.
      */
-    fun fire(player: PlayerAccess, weaponStack: ItemStackAccess): Boolean
+    fun fire(player: PlayerAccess, weaponStack: ItemStackAccess, requestedShotCount: Long = 1): Long
 
-    fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess)
+    fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long)
 }

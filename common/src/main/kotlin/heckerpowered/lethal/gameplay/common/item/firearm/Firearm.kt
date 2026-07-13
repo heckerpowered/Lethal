@@ -21,10 +21,11 @@ abstract class Firearm : ItemBlueprint, ItemForm, Gun {
         return true
     }
 
-    override fun fire(player: PlayerAccess, weaponStack: ItemStackAccess): Boolean {
-        if (!mayFire(player, weaponStack)) return false
-        shoot(player, weaponStack)
+    override fun fire(player: PlayerAccess, weaponStack: ItemStackAccess, requestedShotCount: Long): Long {
+        require(requestedShotCount >= 0) { "Requested shot count must be non-negative" }
+        if (requestedShotCount == 0L || !mayFire(player, weaponStack)) return 0
 
-        return true
+        shoot(player, weaponStack, requestedShotCount)
+        return requestedShotCount
     }
 }

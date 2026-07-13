@@ -25,13 +25,16 @@ object Archaeopteryx : Firearm() {
         return Frequency.perMinute(650)
     }
 
-    override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess) {
+    override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long) {
         player.world.playSound(player.eyePosition, ModSounds.ArchaeopteryxFire)
 
         val damageSource = DamageSources.vanilla(VanillaDamageType.Generic, player, player)
+        val damagePoints = 7.0 * shotCount.toDouble()
         player.world.raycastEntityHits(Geometry.ray(player.eyePosition, player.viewVector), 120.0, player)
             .forEach {
-                it.entity.hurt(damageSource, 7.0)
+                it.entity.hurt(damageSource, damagePoints)
             }
+
+        // player.world.spawnParticles(player.eyePosition, ParticleEffect(VanillaParticle.))
     }
 }
