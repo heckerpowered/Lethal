@@ -8,6 +8,7 @@ package heckerpowered.lethal.gameplay.common
 import heckerpowered.bridge.adapter.item.ItemRegistry
 import heckerpowered.bridge.platform.Services
 import heckerpowered.bridge.platform.services.Entrypoint
+import heckerpowered.lethal.gameplay.common.creativetab.ModCreativeModeTabs
 import heckerpowered.lethal.gameplay.common.item.Archaeopteryx
 import heckerpowered.lethal.gameplay.common.item.Fortune
 import heckerpowered.lethal.gameplay.common.item.TestFirearmItem
@@ -19,6 +20,7 @@ class Entrypoint : Entrypoint {
     override fun onEntrypoint() {
         ModServerPlayNetworking.onInitialize()
         ModSounds.register()
+        ModCreativeModeTabs.register()
         registerItem()
     }
 
