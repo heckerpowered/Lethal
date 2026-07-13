@@ -11,6 +11,7 @@ import heckerpowered.bridge.network.Payload
 import heckerpowered.bridge.network.StreamBuffer
 import heckerpowered.bridge.network.codec.StreamCodec
 import heckerpowered.lethal.Constants
+import heckerpowered.lethal.gameplay.client.render.DivineShotEffect
 
 object DivineParticlePayload : ClientboundPayload<DivineParticlePayload> {
     val PayloadId = Constants.identifier("divine_particle")
@@ -23,6 +24,6 @@ object DivineParticlePayload : ClientboundPayload<DivineParticlePayload> {
         get() = Type
 
     fun handle(payload: DivineParticlePayload, context: Context) {
-        
+        DivineShotEffect.play(context.player)
     }
 }
