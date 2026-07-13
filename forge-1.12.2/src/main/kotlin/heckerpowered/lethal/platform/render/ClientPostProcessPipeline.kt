@@ -16,13 +16,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.relauncher.Side
 
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID, value = [Side.CLIENT])
-class ClientPostProcessPipeline private constructor() {
-    companion object {
-        @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
-        @JvmStatic
-        fun onRenderGameOverlay(event: RenderGameOverlayEvent.Pre) {
-            if (event.type != RenderGameOverlayEvent.ElementType.ALL) return
-            RuleRegistry.forEach<ClientPostProcessRule> { rule -> rule.onPostProcess(ForgeClientPostProcessContext) }
-        }
+object ClientPostProcessPipeline {
+    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
+    @JvmStatic
+    fun onRenderGameOverlay(event: RenderGameOverlayEvent.Pre) {
+        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return
+        RuleRegistry.forEach<ClientPostProcessRule> { rule -> rule.onPostProcess(ForgeClientPostProcessContext) }
     }
 }
