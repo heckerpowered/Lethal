@@ -6,6 +6,7 @@
 package heckerpowered.lethal.platform.adapter.world
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.effect.ParticleEffect
 import heckerpowered.bridge.adapter.sound.SoundPlayback
 import heckerpowered.bridge.adapter.world.WorldAccess
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket
@@ -31,6 +32,10 @@ class HostedWorldAccess(val world: World) : WorldAccess {
 
     override fun playSound(position: VectorView, playback: SoundPlayback) {
         WorldAccessImpl.playSound(world, position, playback)
+    }
+
+    override fun spawnParticles(position: VectorView, effect: ParticleEffect) {
+        WorldAccessImpl.spawnParticles(world, position, effect)
     }
 
     override fun getEntityRayBuckets(ray: RayView, length: Double): Sequence<EntityRayBucket> {
