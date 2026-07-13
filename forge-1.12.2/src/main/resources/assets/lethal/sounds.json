@@ -12,5 +12,12 @@
     "sounds": [
       "lethal:archaeopteryx_fire"
     ]
+  },
+  "divine_fire": {
+    "category": "player",
+    "subtitle": "lethal.sound.divine_fire",
+    "sounds": [
+      "lethal:divine_fire"
+    ]
   }
 }

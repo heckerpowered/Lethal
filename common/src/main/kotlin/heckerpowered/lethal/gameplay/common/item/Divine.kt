@@ -18,6 +18,7 @@ import heckerpowered.bridge.time.Frequency
 import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.common.item.firearm.Firearm
 import heckerpowered.lethal.gameplay.common.network.DivineParticlePayload
+import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
 object Divine : Firearm() {
     override val identifier: Identifier
@@ -28,7 +29,7 @@ object Divine : Firearm() {
     }
 
     override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long) {
-        // player.world.playSound(player.eyePosition, ModSounds.FortuneFire)
+        player.world.playSound(player.eyePosition, ModSounds.DivineFire)
 
         val damageSource = DamageSources.vanilla(VanillaDamageType.FellOutOfWorld, player, player)
         val damagePoints = 200000.0 * shotCount.toDouble()

@@ -9,6 +9,7 @@ import heckerpowered.bridge.adapter.item.creativetab.CreativeModeTabBlueprint
 import heckerpowered.bridge.adapter.item.creativetab.CreativeModeTabRegistry
 import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.common.item.Archaeopteryx
+import heckerpowered.lethal.gameplay.common.item.Divine
 import heckerpowered.lethal.gameplay.common.item.Fortune
 
 object ModCreativeModeTabs {
@@ -16,7 +17,7 @@ object ModCreativeModeTabs {
         identifier = Constants.identifier("main"),
         titleTranslationKey = "itemGroup.lethal",
         icon = Fortune,
-        items = listOf(Archaeopteryx, Fortune),
+        items = listOf(Archaeopteryx, Fortune, Divine),
     )
 
     fun register() {

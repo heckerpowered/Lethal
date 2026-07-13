@@ -1,5 +1,7 @@
 item.lethal.fortune.name=Fortune
 item.lethal.archaeopteryx.name=AK103
+item.lethal.divine.name=Divine
 lethal.sound.fortune_fire=Fortune fire
 lethal.sound.archaeopteryx_fire=Archaeopteryx fire
+lethal.sound.divine_fire=Divine fire
 itemGroup.lethal=Lethal
