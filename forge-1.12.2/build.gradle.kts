@@ -209,8 +209,16 @@ val reobfJar = renamer.classes("reobfJar", tasks.jar) {
 }
 
 tasks.processResources {
-    inputs.property("version", modVersion)
-    inputs.property("mcversion", minecraftVersion)
+    val properties = mapOf(
+        "version" to modVersion,
+        "mcversion" to minecraftVersion,
+    )
+
+    inputs.property("properties", properties)
+
+    filesMatching("mcmod.info") {
+        expand(properties)
+    }
 }
 
 tasks.assemble {
