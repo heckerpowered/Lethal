@@ -24,7 +24,6 @@ object BloomTest : ClientPostProcessRule {
 
     override fun onPostProcess(context: ClientPostProcessContext) {
         if (!Enabled || !context.isBloomSupported) return
-        BrightnessThreshold = 0.5F
         context.applyBloomToScene(BrightnessThreshold)
     }
 }
