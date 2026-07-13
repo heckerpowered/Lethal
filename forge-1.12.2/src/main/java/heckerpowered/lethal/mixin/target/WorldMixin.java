@@ -6,6 +6,7 @@
 package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.entity.EntityAccess;
+import heckerpowered.bridge.adapter.effect.ParticleEffect;
 import heckerpowered.bridge.adapter.sound.SoundPlayback;
 import heckerpowered.bridge.adapter.world.WorldAccess;
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket;
@@ -58,6 +59,10 @@ abstract class WorldMixin {
 
     public void worldAccess$playSound(@NotNull VectorView position, @NotNull SoundPlayback playback) {
         WorldAccessImpl.playSound(self(), position, playback);
+    }
+
+    public void worldAccess$spawnParticles(@NotNull VectorView position, @NotNull ParticleEffect effect) {
+        WorldAccessImpl.spawnParticles(self(), position, effect);
     }
 
     public boolean chunkAccess$isChunkLoadedForEntitySearch(int chunkX, int chunkZ, boolean allowEmpty) {
