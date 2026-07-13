@@ -8,9 +8,11 @@ package heckerpowered.lethal.platform.adapter.item
 import com.google.common.collect.HashMultimap
 import com.google.common.collect.Multimap
 import heckerpowered.bridge.adapter.item.*
+import heckerpowered.bridge.adapter.item.creativetab.CreativeModeTabRegistry
 import heckerpowered.bridge.math.Geometry
 import heckerpowered.lethal.platform.interop.*
 import net.minecraft.block.state.IBlockState
+import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.SharedMonsterAttributes
@@ -43,6 +45,7 @@ open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blue
         setMaxStackSize(blueprint.properties.effectiveMaxStackCount)
         setMaxDamage(blueprint.properties.maxDamagePoints)
         setCraftingRemainingItem()
+        setPrimaryCreativeModeTab()
     }
 
     override fun onItemRightClick(world: World, player: EntityPlayer, hand: EnumHand): ActionResult<ItemStack> {
@@ -90,6 +93,12 @@ open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blue
 
     override fun getItemUseAction(stack: ItemStack): EnumAction {
         return blueprint.getUseAnimation(stack.stack()).useAnimation()
+    }
+
+    override fun getCreativeTabs(): Array<CreativeTabs> {
+        val tabs = CreativeModeTabRegistry.findAll(blueprint)
+        if (tabs.isEmpty()) return super.getCreativeTabs()
+        return tabs.map { it.creativeModeTab() }.toTypedArray()
     }
 
     override fun getMaxItemUseDuration(stack: ItemStack): Int {
@@ -175,6 +184,11 @@ open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blue
         if (remainingItem == Items.AIR) return
 
         setContainerItem(remainingItem)
+    }
+
+    private fun setPrimaryCreativeModeTab() {
+        val primaryTab = CreativeModeTabRegistry.findAll(blueprint).firstOrNull() ?: return
+        setCreativeTab(primaryTab.creativeModeTab())
     }
 
     private fun attributeModifierId(name: String, slot: EntityEquipmentSlot): UUID {
