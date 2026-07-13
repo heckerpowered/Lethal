@@ -7,6 +7,7 @@ package heckerpowered.lethal.gameplay.common.item
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
 import heckerpowered.bridge.adapter.entity.PlayerAccess
+import heckerpowered.bridge.adapter.effect.ParticleEffect
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 import heckerpowered.bridge.adapter.sound.SoundPlayback
 import heckerpowered.bridge.adapter.world.WorldAccess
@@ -28,8 +29,8 @@ class FirearmSoundTest {
         val player = createPlayer(world, eyePosition)
         val weaponStack = createWeaponStack()
 
-        Fortune.shoot(player, weaponStack)
-        Archaeopteryx.shoot(player, weaponStack)
+        Fortune.shoot(player, weaponStack, 1)
+        Archaeopteryx.shoot(player, weaponStack, 1)
 
         assertSame(eyePosition, world.playedSounds[0].position)
         assertSame(ModSounds.FortuneFire, world.playedSounds[0].playback)
@@ -71,6 +72,9 @@ class FirearmSoundTest {
 
         override fun playSound(position: VectorView, playback: SoundPlayback) {
             playedSounds += PlayedSound(position, playback)
+        }
+
+        override fun spawnParticles(position: VectorView, effect: ParticleEffect) {
         }
     }
 
