@@ -6,16 +6,19 @@
 package heckerpowered.lethal.mixin.impl
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.effect.ParticleEffect
 import heckerpowered.bridge.adapter.sound.SoundPlayback
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket
 import heckerpowered.bridge.math.*
 import heckerpowered.lethal.platform.interop.box
 import heckerpowered.lethal.platform.interop.entity
+import heckerpowered.lethal.platform.interop.particle
 import heckerpowered.lethal.platform.interop.soundCategory
 import heckerpowered.lethal.platform.interop.soundEvent
 import net.minecraft.entity.Entity
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.world.World
+import net.minecraft.world.WorldServer
 import net.minecraft.world.chunk.Chunk
 import kotlin.math.floor
 import kotlin.math.max
@@ -47,6 +50,27 @@ object WorldAccessImpl {
     @JvmStatic
     fun playSound(world: World, position: VectorView, playback: SoundPlayback) {
         world.playSound(null, position.x, position.y, position.z, playback.sound.soundEvent(), playback.category.soundCategory(), playback.volume.toFloat(), playback.pitch.toFloat())
+    }
+
+    @JvmStatic
+    fun spawnParticles(world: World, position: VectorView, effect: ParticleEffect) {
+        val particle = effect.particle.particle()
+        val particleData = effect.data.toIntArray()
+
+        if (world is WorldServer) {
+            world.spawnParticle(particle, effect.longDistance, position.x, position.y, position.z, effect.count, effect.positionSpread.x, effect.positionSpread.y, effect.positionSpread.z, effect.velocitySpread, *particleData)
+            return
+        }
+
+        repeat(effect.count) {
+            val particleX = position.x + world.rand.nextGaussian() * effect.positionSpread.x
+            val particleY = position.y + world.rand.nextGaussian() * effect.positionSpread.y
+            val particleZ = position.z + world.rand.nextGaussian() * effect.positionSpread.z
+            val velocityX = world.rand.nextGaussian() * effect.velocitySpread
+            val velocityY = world.rand.nextGaussian() * effect.velocitySpread
+            val velocityZ = world.rand.nextGaussian() * effect.velocitySpread
+            world.spawnParticle(particle, effect.longDistance, particleX, particleY, particleZ, velocityX, velocityY, velocityZ, *particleData)
+        }
     }
 
     private fun getEntities(world: World, searchBox: AxisAlignedBB): Sequence<Entity> {
