@@ -20,7 +20,7 @@ object TestFirearmItem : Firearm() {
         return Frequency.perSecond(2)
     }
 
-    override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess) {
+    override fun shoot(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long) {
 
     }
 }
