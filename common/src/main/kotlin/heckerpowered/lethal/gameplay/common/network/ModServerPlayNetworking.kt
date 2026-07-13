@@ -12,6 +12,8 @@ object ModServerPlayNetworking {
     fun onInitialize() {
         PayloadTypeRegistry.ServerboundPlay.register(FireStatePayload.Type, FireStatePayload.Codec)
 
+        PayloadTypeRegistry.ClientboundPlay.register(DivineParticlePayload.Type, DivineParticlePayload.Codec)
+
         ServerPlayNetworking.registerReceiver(FireStatePayload.Type, FireStatePayload::handle)
     }
 }

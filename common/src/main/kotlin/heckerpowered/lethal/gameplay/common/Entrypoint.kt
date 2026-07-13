@@ -9,10 +9,7 @@ import heckerpowered.bridge.adapter.item.ItemRegistry
 import heckerpowered.bridge.platform.Services
 import heckerpowered.bridge.platform.services.Entrypoint
 import heckerpowered.lethal.gameplay.common.creativetab.ModCreativeModeTabs
-import heckerpowered.lethal.gameplay.common.item.Archaeopteryx
-import heckerpowered.lethal.gameplay.common.item.Fortune
-import heckerpowered.lethal.gameplay.common.item.TestFirearmItem
-import heckerpowered.lethal.gameplay.common.item.TestItem
+import heckerpowered.lethal.gameplay.common.item.*
 import heckerpowered.lethal.gameplay.common.network.ModServerPlayNetworking
 import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
@@ -32,5 +29,6 @@ class Entrypoint : Entrypoint {
 
         ItemRegistry.register(Archaeopteryx)
         ItemRegistry.register(Fortune)
+        ItemRegistry.register(Divine)
     }
 }

@@ -7,6 +7,7 @@ package heckerpowered.lethal.gameplay.client.event
 
 import heckerpowered.bridge.adapter.item.ItemRegistry
 import heckerpowered.lethal.gameplay.common.item.Archaeopteryx
+import heckerpowered.lethal.gameplay.common.item.Divine
 import heckerpowered.lethal.gameplay.common.item.Fortune
 import heckerpowered.lethal.platform.interop.ItemInterop
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
@@ -23,6 +24,7 @@ object ModelRegistrationEventHandler {
     fun onModelRegistry(event: ModelRegistryEvent) {
         registerRegularItemModel(ItemInterop.item(ItemRegistry[Archaeopteryx]!!))
         registerRegularItemModel(ItemInterop.item(ItemRegistry[Fortune]!!))
+        registerRegularItemModel(ItemInterop.item(ItemRegistry[Divine]!!))
     }
 
     private fun registerRegularItemModel(item: Item) {
