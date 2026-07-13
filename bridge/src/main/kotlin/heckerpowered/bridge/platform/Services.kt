@@ -7,6 +7,7 @@ package heckerpowered.bridge.platform
 
 import heckerpowered.bridge.adapter.item.ItemProvider
 import heckerpowered.bridge.adapter.item.ItemRegistrar
+import heckerpowered.bridge.adapter.item.creativetab.CreativeModeTabRegistrar
 import heckerpowered.bridge.adapter.sound.SoundRegistrar
 import heckerpowered.bridge.network.PayloadTransport
 import heckerpowered.bridge.platform.services.Entrypoint
@@ -19,6 +20,7 @@ object Services {
     val Platform by lazy { load<ModPlatform>() }
     val ItemProvider by lazy { load<ItemProvider>() }
     val ItemRegistrar by lazy { load<ItemRegistrar>() }
+    val CreativeModeTabRegistrar by lazy { load<CreativeModeTabRegistrar>() }
     val SoundRegistrar by lazy { load<SoundRegistrar>() }
     val PayloadTransport by lazy { load<PayloadTransport>() }
 
