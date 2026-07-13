@@ -6,6 +6,7 @@
 package heckerpowered.bridge.adapter.world
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.effect.ParticleEffect
 import heckerpowered.bridge.adapter.sound.SoundPlayback
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucketSource
 import heckerpowered.bridge.math.BoxView
@@ -37,4 +38,6 @@ interface WorldAccess : EntityRayBucketSource {
     fun getEntities(searchBox: BoxView): Sequence<EntityAccess>
 
     fun playSound(position: VectorView, playback: SoundPlayback)
+
+    fun spawnParticles(position: VectorView, effect: ParticleEffect)
 }
