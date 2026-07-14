@@ -25,17 +25,23 @@ internal object BloomEffect {
     private var initializationFailed = false
 
     val isSupported: Boolean
-        get() = !initializationFailed && OpenGlHelper.openGL21 && OpenGlHelper.areShadersSupported() && OpenGlHelper.isFramebufferEnabled()
+        get() {
+            val supported = !initializationFailed && OpenGlHelper.openGL21 && OpenGlHelper.areShadersSupported() && OpenGlHelper.isFramebufferEnabled()
+            BloomDiagnostics.logSupportState(initializationFailed, supported)
+            return supported
+        }
 
     fun prepare(width: Int, height: Int): Boolean {
         if (!isSupported) return false
 
         return try {
+            BloomDiagnostics.checkOpenGlErrors("before Bloom preparation")
             RenderStateIsolation.isolate {
                 ensurePrograms()
                 PostProcessRenderer.prepare()
                 ensureFramebuffers(width, height)
             }
+            BloomDiagnostics.checkOpenGlErrors("Bloom preparation")
             true
         } catch (throwable: Throwable) {
             disablePipeline("Failed to initialize the Bloom pipeline", throwable)
@@ -44,6 +50,7 @@ internal object BloomEffect {
     }
 
     fun apply(source: ColorRenderTarget, target: RenderSurface, brightnessThreshold: Float): Boolean {
+        BloomDiagnostics.logRequest("scene Bloom", source, target, null, brightnessThreshold)
         if (!prepare(source.width, source.height)) return false
 
         return try {
@@ -51,6 +58,9 @@ internal object BloomEffect {
                 val bloomFramebuffer = renderBloom(source, brightnessThreshold)
                 PostProcessRenderer.copy(bloomFramebuffer, target, Blending.AdditiveColor)
             }
+            BloomDiagnostics.checkOpenGlErrors("scene Bloom composite")
+            BloomDiagnostics.sampleSurface("scene Bloom composited target", target)
+            BloomDiagnostics.logSuccess("scene Bloom")
             true
         } catch (throwable: Throwable) {
             disablePipeline("Failed to render Bloom", throwable)
@@ -67,6 +77,8 @@ internal object BloomEffect {
     }
 
     private fun renderContent(target: RenderSurface, depthRenderbuffer: Int?, brightnessThreshold: Float, renderContent: () -> Unit): Boolean {
+        val operation = if (depthRenderbuffer == null) "isolated content Bloom" else "world content Bloom"
+        BloomDiagnostics.logRequest(operation, null, target, depthRenderbuffer, brightnessThreshold)
         if (!prepare(target.width, target.height)) return false
 
         val source = requireNotNull(contentFramebuffer)
@@ -93,6 +105,7 @@ internal object BloomEffect {
         } catch (throwable: Throwable) {
             contentFailure = throwable
         }
+        BloomDiagnostics.checkOpenGlErrors("$operation content rendering")
 
         val restorationFailure = restoreSurface(previousSurface)
         if (contentFailure != null) {
@@ -106,6 +119,7 @@ internal object BloomEffect {
     private fun clearContentFramebuffer(source: ManagedColorRenderTarget): Boolean {
         return try {
             RenderStateIsolation.isolate { PostProcessRenderer.clear(source) }
+            BloomDiagnostics.checkOpenGlErrors("Bloom content framebuffer clear")
             true
         } catch (throwable: Throwable) {
             disablePipeline("Failed to clear the Bloom content framebuffer", throwable)
@@ -116,6 +130,7 @@ internal object BloomEffect {
     private fun completeContentRendering(source: ManagedColorRenderTarget, target: RenderSurface, brightnessThreshold: Float, precedingFailure: Throwable?): Boolean {
         if (precedingFailure != null) return recoverContent(source, target, precedingFailure)
 
+        BloomDiagnostics.sampleTarget("Bloom content source", source)
         var contentCopied = false
         try {
             RenderStateIsolation.isolate {
@@ -124,6 +139,9 @@ internal object BloomEffect {
                 contentCopied = true
                 PostProcessRenderer.copy(bloomFramebuffer, target, Blending.Additive)
             }
+            BloomDiagnostics.checkOpenGlErrors("Bloom content composite")
+            BloomDiagnostics.sampleSurface("Bloom content composited target", target)
+            BloomDiagnostics.logSuccess("content Bloom")
         } catch (throwable: Throwable) {
             return recoverContent(source, target, throwable, contentCopied)
         }
@@ -217,19 +235,29 @@ internal object BloomEffect {
 
     private fun renderBloom(source: ColorRenderTarget, brightnessThreshold: Float): ManagedColorRenderTarget {
         clearBloomPasses()
+        BloomDiagnostics.checkOpenGlErrors("Bloom framebuffer clears")
         computeBloomPass(source, brightnessThreshold)
+        BloomDiagnostics.checkOpenGlErrors("Bloom brightness pass")
+        BloomDiagnostics.sampleTarget("Bloom brightness output", requireNotNull(brightFramebuffer))
         generateMipmaps()
-        return bloomUpFramebuffers.first()
+        BloomDiagnostics.checkOpenGlErrors("Bloom downsample and upsample passes")
+        val bloomOutput = bloomUpFramebuffers.first()
+        BloomDiagnostics.sampleTarget("Bloom pyramid output", bloomOutput)
+        return bloomOutput
     }
 
     private fun ensurePrograms() {
-        if (brightnessProgram != null && tentProgram != null) return
+        if (brightnessProgram != null && tentProgram != null) {
+            BloomDiagnostics.logProgramsReady(SCREEN_QUAD_VERTEX_SHADER, BRIGHTNESS_FRAGMENT_SHADER, TENT_FRAGMENT_SHADER)
+            return
+        }
 
         val newBrightnessProgram = BlitProgram(SCREEN_QUAD_VERTEX_SHADER, BRIGHTNESS_FRAGMENT_SHADER)
         try {
             val newTentProgram = BlitProgram(SCREEN_QUAD_VERTEX_SHADER, TENT_FRAGMENT_SHADER)
             brightnessProgram = newBrightnessProgram
             tentProgram = newTentProgram
+            BloomDiagnostics.logProgramsReady(SCREEN_QUAD_VERTEX_SHADER, BRIGHTNESS_FRAGMENT_SHADER, TENT_FRAGMENT_SHADER)
         } catch (throwable: Throwable) {
             newBrightnessProgram.close()
             throw throwable
@@ -248,6 +276,7 @@ internal object BloomEffect {
             pyramidDimensions.mapTo(bloomDownFramebuffers) { dimensions -> ManagedColorRenderTarget(dimensions.width, dimensions.height) }
             pyramidDimensions.mapTo(bloomUpFramebuffers) { dimensions -> ManagedColorRenderTarget(dimensions.width, dimensions.height) }
             framebufferDimensions = requestedDimensions
+            BloomDiagnostics.logFramebufferAllocation(requireNotNull(brightFramebuffer), requireNotNull(contentFramebuffer), bloomDownFramebuffers, bloomUpFramebuffers)
         } catch (throwable: Throwable) {
             closeFramebuffers()
             throw throwable
@@ -258,6 +287,7 @@ internal object BloomEffect {
         if (initializationFailed) return
 
         initializationFailed = true
+        BloomDiagnostics.logPipelineFailure(message)
         Logger.error(message, failure)
         val failedBrightnessProgram = brightnessProgram
         val failedTentProgram = tentProgram
