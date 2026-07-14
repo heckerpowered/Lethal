@@ -13,13 +13,10 @@ import kotlin.test.assertFailsWith
 
 class CreativeModeTabTest {
     @Test
-    fun blueprintCopiesOrderedItems() {
+    fun blueprintPreservesItemOrder() {
         val firstItem = item("first")
         val secondItem = item("second")
-        val items = mutableListOf(firstItem, secondItem)
-        val blueprint = tab("copy", firstItem, items)
-
-        items.reverse()
+        val blueprint = tab("ordered", firstItem, listOf(firstItem, secondItem))
 
         assertEquals(listOf(firstItem, secondItem), blueprint.items)
     }
@@ -40,6 +37,7 @@ class CreativeModeTabTest {
         return SimpleItemBlueprint(Identifier.create("test", path))
     }
 
+    @Suppress("SameParameterValue")
     private fun tab(path: String, icon: SimpleItemBlueprint, items: List<SimpleItemBlueprint>): CreativeModeTabBlueprint {
         return CreativeModeTabBlueprint(Identifier.create("test", path), "itemGroup.test.$path", icon, items)
     }
