@@ -85,6 +85,22 @@ internal class ManagedColorRenderTarget(override val width: Int, override val he
         }
     }
 
+    fun withDepthRenderbuffer(depthRenderbufferObject: Int, operation: () -> Unit) {
+        if (depthRenderbufferObject < 0) {
+            operation()
+            return
+        }
+
+        replaceDepthRenderbuffer(depthRenderbufferObject)
+        try {
+            requireCompleteFramebuffer()
+            operation()
+        } finally {
+            replaceDepthRenderbuffer(depthRenderbuffer)
+            requireCompleteFramebuffer()
+        }
+    }
+
     private fun createAttachments() {
         framebufferObject = OpenGlHelper.glGenFramebuffers()
         colorTexture = GL11.glGenTextures()
@@ -110,6 +126,16 @@ internal class ManagedColorRenderTarget(override val width: Int, override val he
             close()
             throw throwable
         }
+    }
+
+    private fun replaceDepthRenderbuffer(depthRenderbufferObject: Int) {
+        OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject)
+        OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, depthRenderbufferObject)
+    }
+
+    private fun requireCompleteFramebuffer() {
+        val framebufferStatus = OpenGlHelper.glCheckFramebufferStatus(OpenGlHelper.GL_FRAMEBUFFER)
+        check(framebufferStatus == OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) { "Bloom framebuffer is incomplete after changing its depth attachment: " + framebufferStatus }
     }
 
     private fun colorInternalFormat(): Int {
