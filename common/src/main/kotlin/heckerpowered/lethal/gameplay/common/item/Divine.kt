@@ -9,6 +9,7 @@ import heckerpowered.bridge.adapter.entity.PlayerAccess
 import heckerpowered.bridge.adapter.entity.ServerPlayerAccess
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSources
 import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageType
+import heckerpowered.bridge.adapter.item.EquipmentSlot
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 import heckerpowered.bridge.adapter.world.raycast.raycastEntityHits
 import heckerpowered.bridge.math.Geometry
@@ -37,6 +38,7 @@ object Divine : Firearm() {
             .forEach {
                 it.entity.hurt(damageSource, damagePoints)
             }
-        Services.PayloadTransport.sendToPlayer(player as? ServerPlayerAccess ?: return, DivineParticlePayload)
+        val isMainHand = player.getEquippedStack(EquipmentSlot.MainHand) === weaponStack
+        Services.PayloadTransport.sendToPlayer(player as? ServerPlayerAccess ?: return, DivineParticlePayload(isMainHand))
     }
 }
