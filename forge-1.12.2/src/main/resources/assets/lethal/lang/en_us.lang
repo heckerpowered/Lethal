@@ -1,7 +1,11 @@
 item.lethal.fortune.name=Fortune
 item.lethal.archaeopteryx.name=AK103
-item.lethal.divine.name=Divine
+item.lethal.zeus.name=Zeus
+item.lethal.zeus_golden.name=Zeus
+item.lethal.zeus_black.name=Zeus
+item.lethal.zeus_glow_squid.name=Zeus — Glow Squid
+item.lethal.zeus_sculk.name=Zeus — Sculk
 lethal.sound.fortune_fire=Fortune fire
 lethal.sound.archaeopteryx_fire=Archaeopteryx fire
-lethal.sound.divine_fire=Divine fire
+lethal.sound.zeus_fire=Zeus fire
 itemGroup.lethal=Lethal

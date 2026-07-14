@@ -12,7 +12,7 @@ object ModServerPlayNetworking {
     fun onInitialize() {
         PayloadTypeRegistry.ServerboundPlay.register(FireStatePayload.Type, FireStatePayload.Codec)
 
-        PayloadTypeRegistry.ClientboundPlay.register(DivineParticlePayload.Type, DivineParticlePayload.Codec)
+        PayloadTypeRegistry.ClientboundPlay.register(ZeusShotPayload.Type, ZeusShotPayload.Codec)
 
         ServerPlayNetworking.registerReceiver(FireStatePayload.Type, FireStatePayload::handle)
     }

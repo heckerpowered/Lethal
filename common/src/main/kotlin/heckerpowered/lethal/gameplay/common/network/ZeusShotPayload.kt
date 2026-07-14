@@ -11,21 +11,21 @@ import heckerpowered.bridge.network.Payload
 import heckerpowered.bridge.network.StreamCodecs
 import heckerpowered.bridge.network.codec.StreamCodec
 import heckerpowered.lethal.Constants
-import heckerpowered.lethal.gameplay.client.render.DivineShotEffect
+import heckerpowered.lethal.gameplay.client.render.ZeusShotEffect
 
-class DivineParticlePayload(val isMainHand: Boolean) : ClientboundPayload<DivineParticlePayload> {
+class ZeusShotPayload(val isMainHand: Boolean) : ClientboundPayload<ZeusShotPayload> {
     companion object {
-        val PayloadId = Constants.identifier("divine_particle")
+        val PayloadId = Constants.identifier("zeus_shot")
 
         @JvmField
-        val Type = Payload.Type<DivineParticlePayload>(PayloadId)
-        val Codec = StreamCodec.composite(StreamCodecs.Boolean, DivineParticlePayload::isMainHand, ::DivineParticlePayload)
+        val Type = Payload.Type<ZeusShotPayload>(PayloadId)
+        val Codec = StreamCodec.composite(StreamCodecs.Boolean, ZeusShotPayload::isMainHand, ::ZeusShotPayload)
     }
 
-    override val type: Payload.Type<DivineParticlePayload>
+    override val type: Payload.Type<ZeusShotPayload>
         get() = Type
 
     fun handle(context: Context) {
-        DivineShotEffect.play(context.player, isMainHand)
+        ZeusShotEffect.play(context.player, isMainHand)
     }
 }

@@ -29,6 +29,10 @@ class Entrypoint : Entrypoint {
 
         ItemRegistry.register(Archaeopteryx)
         ItemRegistry.register(Fortune)
-        ItemRegistry.register(Divine)
+        ItemRegistry.register(Zeus)
+        ItemRegistry.register(ZeusGolden)
+        ItemRegistry.register(ZeusBlack)
+        ItemRegistry.register(ZeusGlowSquid)
+        ItemRegistry.register(ZeusSculk)
     }
 }

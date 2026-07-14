@@ -19,6 +19,7 @@ import heckerpowered.bridge.math.VectorView
 import heckerpowered.lethal.gameplay.common.sound.ModSounds
 import java.lang.reflect.Proxy
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
 class FirearmSoundTest {
@@ -26,24 +27,33 @@ class FirearmSoundTest {
     fun firearmsPlayTheirOwnSoundsAtThePlayerEyePosition() {
         val world = RecordingWorld()
         val eyePosition = Geometry.vector(1.0, 2.0, 3.0)
-        val player = createPlayer(world, eyePosition)
         val weaponStack = createWeaponStack()
+        val player = createPlayer(world, eyePosition, weaponStack)
 
         Fortune.shoot(player, weaponStack, 1)
         Archaeopteryx.shoot(player, weaponStack, 1)
+        listOf(Zeus, ZeusGolden, ZeusBlack, ZeusGlowSquid, ZeusSculk).forEach { firearm ->
+            firearm.shoot(player, weaponStack, 1)
+        }
 
         assertSame(eyePosition, world.playedSounds[0].position)
         assertSame(ModSounds.FortuneFire, world.playedSounds[0].playback)
         assertSame(eyePosition, world.playedSounds[1].position)
         assertSame(ModSounds.ArchaeopteryxFire, world.playedSounds[1].playback)
+        assertEquals(7, world.playedSounds.size)
+        world.playedSounds.drop(2).forEach { playedSound ->
+            assertSame(eyePosition, playedSound.position)
+            assertSame(ModSounds.ZeusFire, playedSound.playback)
+        }
     }
 
-    private fun createPlayer(world: WorldAccess, eyePosition: VectorView): PlayerAccess {
+    private fun createPlayer(world: WorldAccess, eyePosition: VectorView, weaponStack: ItemStackAccess): PlayerAccess {
         return Proxy.newProxyInstance(PlayerAccess::class.java.classLoader, arrayOf(PlayerAccess::class.java)) { _, method, _ ->
             when (method.name) {
                 "getWorld" -> world
                 "getEyePosition" -> eyePosition
                 "getViewVector" -> Geometry.vector(0.0, 0.0, 1.0)
+                "getEquippedStack" -> weaponStack
                 else -> error("Unsupported PlayerAccess method: " + method.name)
             }
         } as PlayerAccess

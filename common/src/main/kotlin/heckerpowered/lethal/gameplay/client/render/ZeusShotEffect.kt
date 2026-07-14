@@ -14,7 +14,7 @@ import heckerpowered.bridge.rule.RuleRegistry
 import heckerpowered.bridge.rule.register
 import heckerpowered.lethal.gameplay.client.BloomTest
 
-object DivineShotEffect : ClientWorldRenderRule {
+object ZeusShotEffect : ClientWorldRenderRule {
     private const val EFFECT_DURATION_NANOSECONDS = 80_000_000L
     private const val BEAM_RANGE_BLOCKS = 1024.0
     private const val MUZZLE_FORWARD_OFFSET_BLOCKS = 0.9
@@ -42,7 +42,7 @@ object DivineShotEffect : ClientWorldRenderRule {
             field = value
         }
 
-    private val activeLines = mutableListOf<DivineShotLine>()
+    private val activeLines = mutableListOf<ZeusShotLine>()
 
     fun onInitialize() {
         RuleRegistry.register<ClientWorldRenderRule>(this)
@@ -79,11 +79,11 @@ object DivineShotEffect : ClientWorldRenderRule {
         }
     }
 
-    internal fun createShotLine(player: PlayerAccess, isMainHand: Boolean, startedAtNanoseconds: Long): DivineShotLine {
+    internal fun createShotLine(player: PlayerAccess, isMainHand: Boolean, startedAtNanoseconds: Long): ZeusShotLine {
         val viewDirection = player.viewVector.normalized()
         val muzzlePosition = calculateMuzzlePosition(player.eyePosition, viewDirection, player.yaw, isMainHand)
         val endPosition = muzzlePosition + viewDirection * BEAM_RANGE_BLOCKS
-        return DivineShotLine(player, endPosition, isMainHand, startedAtNanoseconds)
+        return ZeusShotLine(player, endPosition, isMainHand, startedAtNanoseconds)
     }
 
     internal fun calculateMuzzlePosition(eyePosition: VectorView, viewDirection: VectorView, yawDegrees: Double, isMainHand: Boolean): VectorView {
@@ -98,10 +98,10 @@ object DivineShotEffect : ClientWorldRenderRule {
     }
 }
 
-internal data class DivineShotLine(val player: PlayerAccess, val endPosition: VectorView, val isMainHand: Boolean, val startedAtNanoseconds: Long) {
+internal data class ZeusShotLine(val player: PlayerAccess, val endPosition: VectorView, val isMainHand: Boolean, val startedAtNanoseconds: Long) {
     fun startPosition(context: ClientWorldRenderContext): VectorView {
         val interpolatedRotation = context.interpolateRotation(player)
-        return DivineShotEffect.calculateMuzzlePosition(context.interpolateEyePosition(player), interpolatedRotation.toViewVector(), interpolatedRotation.yaw, isMainHand)
+        return ZeusShotEffect.calculateMuzzlePosition(context.interpolateEyePosition(player), interpolatedRotation.toViewVector(), interpolatedRotation.yaw, isMainHand)
     }
 
     fun opacityAt(currentTimeNanoseconds: Long, durationNanoseconds: Long): Float {

@@ -13,11 +13,11 @@
       "lethal:archaeopteryx_fire"
     ]
   },
-  "divine_fire": {
+  "zeus_fire": {
     "category": "player",
-    "subtitle": "lethal.sound.divine_fire",
+    "subtitle": "lethal.sound.zeus_fire",
     "sounds": [
-      "lethal:divine_fire"
+      "lethal:zeus_fire"
     ]
   }
 }

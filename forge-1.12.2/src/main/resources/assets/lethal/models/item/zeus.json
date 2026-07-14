@@ -5,8 +5,8 @@
     128
   ],
   "textures": {
-    "0": "lethal:items/divine",
-    "particle": "lethal:items/divine"
+    "0": "lethal:items/zeus",
+    "particle": "lethal:items/zeus"
   },
   "elements": [
     {

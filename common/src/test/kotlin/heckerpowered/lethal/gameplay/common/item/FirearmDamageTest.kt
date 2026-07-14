@@ -32,12 +32,21 @@ class FirearmDamageTest {
         verifyBatchedDamage(Fortune, shotCount = 3, expectedDamagePoints = 90000.0)
     }
 
+    @Test
+    fun zeusFamilyUsesConfiguredDamageWithoutRepeatingRaycast() {
+        verifyBatchedDamage(Zeus, shotCount = 2, expectedDamagePoints = 200_000.0)
+        verifyBatchedDamage(ZeusGolden, shotCount = 2, expectedDamagePoints = 1_000_000.0)
+        verifyBatchedDamage(ZeusBlack, shotCount = 1, expectedDamagePoints = 10_000_000.0)
+        verifyBatchedDamage(ZeusGlowSquid, shotCount = 1, expectedDamagePoints = 10_000_000.0)
+        verifyBatchedDamage(ZeusSculk, shotCount = 1, expectedDamagePoints = 10_000_000.0)
+    }
+
     private fun verifyBatchedDamage(firearm: Firearm, shotCount: Long, expectedDamagePoints: Double) {
         var receivedDamagePoints = 0.0
         val target = createTarget { damagePoints -> receivedDamagePoints = damagePoints }
         val world = TargetWorld(target)
-        val player = createPlayer(world)
         val weaponStack = proxy<ItemStackAccess>()
+        val player = createPlayer(world, weaponStack)
 
         firearm.shoot(player, weaponStack, shotCount)
 
@@ -45,12 +54,13 @@ class FirearmDamageTest {
         assertEquals(1, world.raycastSourceCallCount)
     }
 
-    private fun createPlayer(world: WorldAccess): PlayerAccess {
+    private fun createPlayer(world: WorldAccess, weaponStack: ItemStackAccess): PlayerAccess {
         return Proxy.newProxyInstance(PlayerAccess::class.java.classLoader, arrayOf(PlayerAccess::class.java)) { player, method, arguments ->
             when (method.name) {
                 "getWorld" -> world
                 "getEyePosition" -> Geometry.vector(0.0, 0.0, 0.0)
                 "getViewVector" -> Geometry.vector(0.0, 0.0, 1.0)
+                "getEquippedStack" -> weaponStack
                 "hashCode" -> System.identityHashCode(player)
                 "equals" -> player === arguments?.firstOrNull()
                 else -> error("Unsupported PlayerAccess method: " + method.name)
