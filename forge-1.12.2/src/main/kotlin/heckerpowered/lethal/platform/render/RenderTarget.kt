@@ -63,10 +63,12 @@ internal class ManagedColorRenderTarget(override val width: Int, override val he
         private set
     override var colorTexture = -1
         private set
+    val colorInternalFormat: Int
     private var depthRenderbuffer = -1
 
     init {
         require(width > 0 && height > 0) { "Framebuffer dimensions must be positive" }
+        colorInternalFormat = selectColorInternalFormat()
         createAttachments()
     }
 
@@ -93,11 +95,11 @@ internal class ManagedColorRenderTarget(override val width: Int, override val he
 
         replaceDepthRenderbuffer(depthRenderbufferObject)
         try {
-            requireCompleteFramebuffer()
+            requireCompleteFramebuffer(depthRenderbufferObject)
             operation()
         } finally {
             replaceDepthRenderbuffer(depthRenderbuffer)
-            requireCompleteFramebuffer()
+            requireCompleteFramebuffer(depthRenderbuffer)
         }
     }
 
@@ -112,7 +114,7 @@ internal class ManagedColorRenderTarget(override val width: Int, override val he
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR)
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE)
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE)
-            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, colorInternalFormat(), width, height, 0, GL11.GL_RGBA, GL11.GL_FLOAT, null as ByteBuffer?)
+            GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, colorInternalFormat, width, height, 0, GL11.GL_RGBA, GL11.GL_FLOAT, null as ByteBuffer?)
 
             OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, framebufferObject)
             OpenGlHelper.glFramebufferTexture2D(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, colorTexture, 0)
@@ -121,7 +123,7 @@ internal class ManagedColorRenderTarget(override val width: Int, override val he
             OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, depthRenderbuffer)
 
             val framebufferStatus = OpenGlHelper.glCheckFramebufferStatus(OpenGlHelper.GL_FRAMEBUFFER)
-            check(framebufferStatus == OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) { "Bloom framebuffer is incomplete: " + framebufferStatus }
+            check(framebufferStatus == OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) { "Bloom framebuffer is incomplete after creation: status=$framebufferStatus, framebuffer=$framebufferObject, colorTexture=$colorTexture, depthRenderbuffer=$depthRenderbuffer, colorInternalFormat=$colorInternalFormat, size=${width}x$height" }
         } catch (throwable: Throwable) {
             close()
             throw throwable
@@ -133,12 +135,12 @@ internal class ManagedColorRenderTarget(override val width: Int, override val he
         OpenGlHelper.glFramebufferRenderbuffer(OpenGlHelper.GL_FRAMEBUFFER, OpenGlHelper.GL_DEPTH_ATTACHMENT, OpenGlHelper.GL_RENDERBUFFER, depthRenderbufferObject)
     }
 
-    private fun requireCompleteFramebuffer() {
+    private fun requireCompleteFramebuffer(attachedDepthRenderbuffer: Int) {
         val framebufferStatus = OpenGlHelper.glCheckFramebufferStatus(OpenGlHelper.GL_FRAMEBUFFER)
-        check(framebufferStatus == OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) { "Bloom framebuffer is incomplete after changing its depth attachment: " + framebufferStatus }
+        check(framebufferStatus == OpenGlHelper.GL_FRAMEBUFFER_COMPLETE) { "Bloom framebuffer is incomplete after changing its depth attachment: status=$framebufferStatus, framebuffer=$framebufferObject, depthRenderbuffer=$attachedDepthRenderbuffer, colorInternalFormat=$colorInternalFormat, size=${width}x$height" }
     }
 
-    private fun colorInternalFormat(): Int {
+    private fun selectColorInternalFormat(): Int {
         val capabilities = GLContext.getCapabilities()
         if (capabilities.OpenGL30 || capabilities.GL_ARB_texture_float && capabilities.GL_ARB_color_buffer_float) {
             return ARBTextureFloat.GL_RGBA16F_ARB
