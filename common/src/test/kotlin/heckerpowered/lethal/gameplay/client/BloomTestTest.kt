@@ -14,7 +14,7 @@ import kotlin.test.assertNull
 class BloomTestTest {
     @AfterTest
     fun restoreDefaults() {
-        BloomTest.Enabled = true
+        BloomTest.Enabled = false
         BloomTest.BrightnessThreshold = 0.7F
     }
 
@@ -42,6 +42,7 @@ class BloomTestTest {
     @Test
     fun `unsupported Bloom skips post processing`() {
         val context = RecordingPostProcessContext(isBloomSupported = false)
+        BloomTest.Enabled = true
 
         BloomTest.onPostProcess(context)
 

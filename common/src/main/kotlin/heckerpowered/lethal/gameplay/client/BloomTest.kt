@@ -11,7 +11,7 @@ import heckerpowered.bridge.rule.RuleRegistry
 import heckerpowered.bridge.rule.register
 
 object BloomTest : ClientPostProcessRule {
-    var Enabled = true
+    var Enabled = false
     var BrightnessThreshold = 0.7F
         set(value) {
             require(value.isFinite()) { "Bloom brightness threshold must be finite" }

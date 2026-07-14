@@ -59,6 +59,14 @@ internal object BloomEffect {
     }
 
     fun renderContent(target: RenderSurface, brightnessThreshold: Float, renderContent: () -> Unit): Boolean {
+        return renderContent(target, null, brightnessThreshold, renderContent)
+    }
+
+    fun renderWorldContent(target: RenderSurface, depthRenderbuffer: Int, brightnessThreshold: Float, renderContent: () -> Unit): Boolean {
+        return renderContent(target, depthRenderbuffer, brightnessThreshold, renderContent)
+    }
+
+    private fun renderContent(target: RenderSurface, depthRenderbuffer: Int?, brightnessThreshold: Float, renderContent: () -> Unit): Boolean {
         if (!prepare(target.width, target.height)) return false
 
         val source = requireNotNull(contentFramebuffer)
@@ -81,7 +89,7 @@ internal object BloomEffect {
 
         var contentFailure: Throwable? = null
         try {
-            renderContent()
+            if (depthRenderbuffer == null) renderContent() else source.withDepthRenderbuffer(depthRenderbuffer, renderContent)
         } catch (throwable: Throwable) {
             contentFailure = throwable
         }
