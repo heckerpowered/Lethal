@@ -24,7 +24,7 @@ object DivineShotEffect : ClientWorldRenderRule {
     private const val BEAM_BRIGHTNESS_MULTIPLIER = 5F
     private val BeamColor = RenderColor(0.56F, 0.64F, 1.0F, 1.0F)
 
-    var LightningIntensity = 1.0F
+    var LightningIntensity = 3.0F
         set(value) {
             require(value.isFinite() && value >= 0.0F) { "Lightning intensity must be finite and non-negative" }
             field = value
