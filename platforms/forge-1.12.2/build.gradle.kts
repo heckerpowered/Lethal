@@ -5,12 +5,11 @@
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.zip.GZIPInputStream
 
 plugins {
     id("heckerpowered.convention.kotlin-jvm")
+    // Dynamic selectors are intentional: follow the newest version in each selected major line.
     id("net.minecraftforge.gradle") version "7.+"
     id("net.minecraftforge.renamer") version "1.+"
     id("com.gradleup.shadow") version "9.+"
@@ -19,27 +18,26 @@ plugins {
 val minecraftVersion = project.property("minecraftVersion").toString()
 val forgeVersion = project.property("forgeVersion").toString()
 val mixinVersion = project.property("mixinVersion").toString()
-val modId = project.property("modId").toString()
 val modVersion = project.property("modVersion").toString()
-val kotlinVersion = project.property("kotlinVersion").toString()
+val modId = providers.gradleProperty("modId").get()
 
 val archiveName = "$modId-mc$minecraftVersion-forge$forgeVersion"
 
 version = modVersion
 
 base {
-    archivesName.set(archiveName)
+    archivesName = archiveName
 }
 
 repositories {
     minecraft.mavenizer(this)
     maven(fg.minecraftLibsMaven)
     maven(fg.forgeMaven)
+    mavenCentral()
 }
 
 val attached = configurations.create("attached") {
     isCanBeResolved = true
-    assert(isCanBeResolved)
 }
 
 configurations.implementation {
@@ -48,7 +46,6 @@ configurations.implementation {
 
 dependencies {
     implementation(minecraft.dependency("net.minecraftforge:forge:$minecraftVersion-$forgeVersion"))
-    // annotationProcessor("net.minecraftforge:eventbus-validator:7.0.1")
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     testImplementation(kotlin("test"))
@@ -60,7 +57,8 @@ dependencies {
         exclude(group = "commons-io", module = "commons-io")
         exclude(group = "com.google.code.gson", module = "gson")
     }
-    attached("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+    // kotlin(...) uses the same version as the applied Kotlin Gradle plugin.
+    attached(kotlin("stdlib-jdk8"))
 }
 
 minecraft {
@@ -97,17 +95,10 @@ minecraft {
     }
 }
 
-sourceSets {
-    main {
-        resources {
-            srcDir("src/generated/resources")
-        }
-    }
-}
-
 java {
+    // Minecraft 1.12.2 requires Java 8, overriding the shared fallback toolchain.
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion = JavaLanguageVersion.of(8)
     }
 
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -125,13 +116,12 @@ kotlin {
 val mixinProcessorMappings = layout.buildDirectory.file("tmp/mixin/processor-mappings.tsrg")
 val mixinOutputMappings = layout.buildDirectory.file("tmp/mixin/generated-mappings.tsrg")
 val mixinRefmap = layout.buildDirectory.file("tmp/mixin/refmap.json")
+val mixinInputMappings = minecraft.dependency.toSrgFile
 
 val prepareMixinMappings = tasks.register("prepareMixinMappings") {
     description = "Extracts the ForgeGradle SRG mapping file for the Mixin annotation processor."
 
-    val inputMappings = minecraft.dependency.toSrgFile
-
-    inputs.file(inputMappings).withPropertyName("inputMappings")
+    inputs.file(mixinInputMappings).withPropertyName("inputMappings")
     outputs.file(mixinProcessorMappings).withPropertyName("mixinProcessorMappings")
 
     doLast {
@@ -150,6 +140,12 @@ val prepareMixinMappings = tasks.register("prepareMixinMappings") {
 
 tasks.compileJava {
     dependsOn(prepareMixinMappings)
+
+    // The annotation processor receives these paths as strings, so declare the files explicitly
+    // to make incremental builds and the build cache track the real inputs and outputs.
+    inputs.file(mixinProcessorMappings).withPropertyName("mixinProcessorMappings")
+    outputs.file(mixinOutputMappings).withPropertyName("mixinOutputMappings")
+    outputs.file(mixinRefmap).withPropertyName("mixinRefmap")
 
     // Use the UTF-8 charset for Java compilation
     // This is done by default in Java 18+, but this ensures it no matter the Java or Gradle version
@@ -183,14 +179,13 @@ val modManifestAttributes = mapOf(
     "Specification-Version" to "1",
     "Implementation-Title" to project.name,
     "Implementation-Version" to project.version,
-    "Implementation-Vendor" to "Heckerpowered",
-    "Implementation-Timestamp" to SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(Date())
+    "Implementation-Vendor" to "Heckerpowered"
 )
 
 tasks.jar {
-    archiveBaseName.set(archiveName)
-    archiveVersion.set(modVersion)
-    archiveClassifier.set("dev")
+    archiveBaseName = archiveName
+    archiveVersion = modVersion
+    archiveClassifier = "dev"
 
     manifest {
         attributes(modManifestAttributes)
@@ -205,7 +200,7 @@ val reobfJar = renamer.classes("reobfJar", tasks.jar) {
     dependsOn(reobfMappings)
     map = files(reobfMappings)
 
-    archiveClassifier.set("")
+    archiveClassifier = null
 }
 
 tasks.processResources {
@@ -225,18 +220,14 @@ tasks.assemble {
     dependsOn(reobfJar)
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 val shadowJar = tasks.named<ShadowJar>("shadowJar") {
-    configurations = project.configurations.named("attached").map { listOf(it) }
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    configurations = project.configurations.named("attached").map(::listOf)
+    duplicatesStrategy = DuplicatesStrategy.FAIL
 
     archiveBaseName = project.base.archivesName
     archiveClassifier = "shadow"
     archiveVersion = project.version.toString()
-    destinationDirectory.set(layout.buildDirectory.dir("tmp/shadowJar"))
+    destinationDirectory = layout.buildDirectory.dir("tmp/shadowJar")
 
     from(mixinRefmap) {
         into("")
@@ -255,7 +246,7 @@ val reobfShadowJar = renamer.classes("reobfShadowJar", shadowJar) {
     dependsOn(reobfMappings)
     map = files(reobfMappings)
 
-    archiveClassifier.set("shadow")
+    archiveClassifier = "shadow"
 }
 
 shadowJar.configure {
@@ -283,19 +274,5 @@ gradle.projectsEvaluated {
                 maven(fg.minecraftLibsMaven)
             }
         }
-    }
-}
-
-val isMacOs = System.getProperty("os.name")
-    .lowercase()
-    .contains("mac")
-val isAppleSilicon = System.getProperty("os.arch") == "aarch64"
-val x64JavaHome = providers.gradleProperty("minecraft_x64_java_home")
-
-tasks.configureEach {
-    if (name == "runClient" && isMacOs && isAppleSilicon && x64JavaHome.isPresent) {
-        // Minecraft 1.12.2 uses LWJGL 2 natives for macOS x86_64 only.
-        // On Apple Silicon, run the legacy client with an x86_64 JDK configured in the user's ~/.gradle/gradle.properties.
-        System.setProperty("org.gradle.java.home", x64JavaHome.get())
     }
 }
