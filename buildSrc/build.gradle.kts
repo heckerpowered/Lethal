@@ -10,11 +10,16 @@ plugins {
     `kotlin-dsl`
 }
 
-kotlin {
-    jvmToolchain(25)
+repositories {
+    mavenCentral()
 }
 
 dependencies {
     // Add a dependency on the Kotlin Gradle plugin, so that convention plugins can apply it.
     implementation(libs.kotlinGradlePlugin)
+    implementation("com.gradleup.shadow:shadow-gradle-plugin:9.+")
+}
+
+kotlin {
+    jvmToolchain(25)
 }
