@@ -18,6 +18,7 @@ dependencies {
 }
 
 java {
+    // Keep the shared bridge API usable by the legacy Forge 1.12.2 module.
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
     }
@@ -30,8 +31,4 @@ kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_1_8
     }
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
