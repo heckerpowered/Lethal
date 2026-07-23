@@ -5,13 +5,22 @@
 
 package heckerpowered.lethal.platform.interop
 
+import heckerpowered.bridge.adapter.block.BlockAccess
 import heckerpowered.bridge.adapter.block.BlockStateAccess
+import heckerpowered.lethal.platform.adapter.block.HostedBlockAccess
 import heckerpowered.lethal.platform.adapter.block.HostedBlockStateAccess
+import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 object BlockInterop {
+    @JvmStatic
+    fun block(block: Block): BlockAccess {
+        @Suppress("CAST_NEVER_SUCCEEDS")
+        return block as? BlockAccess ?: HostedBlockAccess(block)
+    }
+
     @JvmStatic
     fun blockState(access: BlockStateAccess): IBlockState {
         if (access is HostedBlockStateAccess) return access.state
