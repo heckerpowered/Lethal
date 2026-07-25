@@ -1,0 +1,35 @@
+{
+  "required": true,
+  "package": "heckerpowered.lethal.mixin.target",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "AABBMixin",
+    "BlockMixin",
+    "BlockPosMixin",
+    "BlockStateMixin",
+    "DamageSourceMixin",
+    "EnderDragonMixin",
+    "EntityMixin",
+    "ExperienceOrbMixin",
+    "ItemEntityMixin",
+    "ItemMixin",
+    "ItemStackMixin",
+    "LevelEntityGetterAdapterMixin",
+    "LevelMixin",
+    "LivingEntityMixin",
+    "PartEntityMixin",
+    "PlayerMixin",
+    "ResourceLocationMixin",
+    "ServerPlayerMixin",
+    "Vec3Mixin"
+  ],
+  "client": [
+    "LocalPlayerMixin",
+    "MinecraftMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
