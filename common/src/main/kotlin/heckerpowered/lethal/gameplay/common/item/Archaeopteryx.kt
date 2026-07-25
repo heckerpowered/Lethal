@@ -17,7 +17,7 @@ import heckerpowered.lethal.gameplay.common.item.firearm.RayTraceGun
 import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
 object Archaeopteryx : RayTraceGun() {
-    private val hitDamage = EntityHitDamage(VanillaDamageType.Generic, 7.0)
+    private val HitDamage = EntityHitDamage(VanillaDamageType.Generic, 7.0)
 
     override val identifier: Identifier
         get() = Constants.identifier("archaeopteryx")
@@ -32,6 +32,6 @@ object Archaeopteryx : RayTraceGun() {
 
     override fun onRayTrace(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long, entityHits: Sequence<EntityRayHit>) {
         player.world.playSound(player.eyePosition, ModSounds.ArchaeopteryxFire)
-        hitDamage.apply(player, weaponStack, shotCount, entityHits)
+        HitDamage.apply(player, weaponStack, shotCount, entityHits)
     }
 }
