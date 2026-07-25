@@ -9,10 +9,11 @@ import java.util.zip.GZIPInputStream
 
 plugins {
     id("heckerpowered.convention.kotlin-jvm")
+    id("heckerpowered.convention.shadow")
     // Dynamic selectors are intentional: follow the newest version in each selected major line.
     id("net.minecraftforge.gradle") version "7.+"
     id("net.minecraftforge.renamer") version "1.+"
-    id("com.gradleup.shadow") version "9.+"
+    kotlin("kapt")
 }
 
 val minecraftVersion = project.property("minecraftVersion").toString()
@@ -36,29 +37,21 @@ repositories {
     mavenCentral()
 }
 
-val attached = configurations.create("attached") {
-    isCanBeResolved = true
-}
-
-configurations.implementation {
-    extendsFrom(attached)
-}
-
 dependencies {
     implementation(minecraft.dependency("net.minecraftforge:forge:$minecraftVersion-$forgeVersion"))
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     testImplementation(kotlin("test"))
 
-    attached(project(":common"))
-    attached(project(":bridge"))
-    attached("org.spongepowered:mixin:$mixinVersion") {
+    attach(project(":common"))
+    attach(project(":bridge"))
+    attach("org.spongepowered:mixin:$mixinVersion") {
         exclude(group = "com.google.guava", module = "guava")
         exclude(group = "commons-io", module = "commons-io")
         exclude(group = "com.google.code.gson", module = "gson")
     }
     // kotlin(...) uses the same version as the applied Kotlin Gradle plugin.
-    attached(kotlin("stdlib-jdk8"))
+    attach(kotlin("stdlib"))
 }
 
 minecraft {
@@ -221,23 +214,13 @@ tasks.assemble {
 }
 
 val shadowJar = tasks.named<ShadowJar>("shadowJar") {
-    configurations = project.configurations.named("attached").map(::listOf)
-    duplicatesStrategy = DuplicatesStrategy.FAIL
-
-    archiveBaseName = project.base.archivesName
-    archiveClassifier = "shadow"
-    archiveVersion = project.version.toString()
+    // Renamer owns the final build/libs artifact, so Shadow writes only its reobfuscation input here.
     destinationDirectory = layout.buildDirectory.dir("tmp/shadowJar")
 
     from(mixinRefmap) {
         into("")
         rename("refmap\\.json", mixinRefmapName)
     }
-    // The mod tracks recent Kotlin releases and uses APIs that may be unavailable in the older runtime provided by the mod environment.
-    // Relocation isolates the bundled standard library and prevents linkage errors caused by incompatible Kotlin versions.
-    // Revalidate this setup before adding kotlin-reflect or libraries that inspect Kotlin metadata, as they are tightly coupled to the standard library package.
-    relocate("kotlin", "heckerpowered.lethal.shadow.kotlin")
-    mergeServiceFiles()
 }
 
 val reobfShadowJar = renamer.classes("reobfShadowJar", shadowJar) {
@@ -245,6 +228,14 @@ val reobfShadowJar = renamer.classes("reobfShadowJar", shadowJar) {
 
     dependsOn(reobfMappings)
     map = files(reobfMappings)
+
+    // The Shadow input already contains attached dependencies, so keep them out of Renamer's external library classpath.
+    // Supplying both definitions can make Renamer omit relocated classes from the output.
+    libraries.setFrom(
+        configurations.named("compileClasspath").map { compileClasspath ->
+            compileClasspath.minus(configurations.named("attach").get())
+        }
+    )
 
     archiveClassifier = "shadow"
 }
