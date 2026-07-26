@@ -22,15 +22,15 @@ import net.minecraft.util.text.ITextComponent
 
 internal fun attributedDamageSource(spec: VanillaDamageSourceSpec, nativeSource: DamageSource, directEntity: EntityAccess?, causingEntity: EntityAccess?, position: VectorView?): DamageSourceView {
     val attribution = DamageAttribution(spec, nativeSource, directEntity, causingEntity, position)
-    // Attribution must preserve information encoded by the native source type because host behavior may depend on it.
+    // Host behavior may branch on the native source's JVM category, so attribution must preserve it.
     return when (nativeSource) {
         is EntityDamageSourceIndirect -> AttributedIndirectDamageSource(attribution)
         is EntityDamageSource -> AttributedEntityDamageSource(attribution)
-        else -> AttributedDamageSource(attribution)
+        else -> AttributedPlainDamageSource(attribution)
     }
 }
 
-private class AttributedDamageSource(
+private class AttributedPlainDamageSource(
     private val attribution: DamageAttribution,
 ) : DamageSource(attribution.originalSource.damageType),
     DamageSourceView by attribution {
