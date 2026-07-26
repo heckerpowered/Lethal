@@ -18,11 +18,7 @@ import heckerpowered.lethal.gameplay.common.item.firearm.RayTraceGun
 import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
 object Chaos : RayTraceGun() {
-    private val hitDamage = EntityHitDamage(
-        VanillaDamageType.Generic,
-        30_000.0,
-        HeadshotExecutionEffect.Mythic,
-    )
+    private val HitDamage = EntityHitDamage(VanillaDamageType.Generic, 30_000.0, HeadshotExecutionEffect.Mythic)
 
     override val identifier: Identifier
         get() = Constants.identifier("chaos")
@@ -35,13 +31,8 @@ object Chaos : RayTraceGun() {
         return 100.0
     }
 
-    override fun onRayTrace(
-        player: PlayerAccess,
-        weaponStack: ItemStackAccess,
-        shotCount: Long,
-        entityHits: Sequence<EntityRayHit>,
-    ) {
+    override fun onRayTrace(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long, entityHits: Sequence<EntityRayHit>) {
         player.world.playSound(player.eyePosition, ModSounds.ChaosFire)
-        hitDamage.apply(player, weaponStack, shotCount, entityHits)
+        HitDamage.apply(player, weaponStack, shotCount, entityHits)
     }
 }
