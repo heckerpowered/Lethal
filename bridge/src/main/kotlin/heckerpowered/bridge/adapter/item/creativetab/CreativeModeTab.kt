@@ -9,17 +9,7 @@ import heckerpowered.bridge.adapter.item.ItemBlueprint
 import heckerpowered.bridge.resources.Identifier
 import java.util.*
 
-interface CreativeModeTabAccess {
-    val identifier: Identifier
-}
-
-class CreativeModeTabBlueprint(
-    override val identifier: Identifier,
-    val titleTranslationKey: String,
-    val icon: ItemBlueprint,
-    val items: List<ItemBlueprint>,
-) : CreativeModeTabAccess {
-
+class CreativeModeTabBlueprint(val identifier: Identifier, val titleTranslationKey: String, val icon: ItemBlueprint, val items: List<ItemBlueprint>) {
     init {
         require(titleTranslationKey.isNotBlank()) { "Creative mode tab title translation key must not be blank" }
 
