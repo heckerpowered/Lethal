@@ -15,13 +15,11 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 object BlockInterop {
-    @JvmStatic
     fun block(block: Block): BlockAccess {
         @Suppress("CAST_NEVER_SUCCEEDS")
         return block as? BlockAccess ?: HostedBlockAccess(block)
     }
 
-    @JvmStatic
     fun blockState(access: BlockStateAccess): IBlockState {
         if (access is HostedBlockStateAccess) return access.state
 
@@ -29,13 +27,11 @@ object BlockInterop {
         return access as? IBlockState ?: error("Unsupported BlockStateAccess implementation: ${access::class.java.name}")
     }
 
-    @JvmStatic
     fun blockStateOrNull(access: BlockStateAccess?): IBlockState? {
         if (access == null) return null
         return blockState(access)
     }
 
-    @JvmStatic
     fun blockState(state: IBlockState, world: World? = null, position: BlockPos? = null): BlockStateAccess {
         @Suppress("CAST_NEVER_SUCCEEDS")
         return state as? BlockStateAccess ?: HostedBlockStateAccess(state, world, position)
