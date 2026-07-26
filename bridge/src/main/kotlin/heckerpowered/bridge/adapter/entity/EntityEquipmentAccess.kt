@@ -8,6 +8,6 @@ package heckerpowered.bridge.adapter.entity
 import heckerpowered.bridge.adapter.item.EquipmentSlot
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 
-interface EntityEquipmentAccess : EntityAccess {
+interface EntityEquipmentAccess : LivingEntityAccess {
     fun getEquippedStack(slot: EquipmentSlot): ItemStackAccess
 }
