@@ -7,12 +7,7 @@ package heckerpowered.bridge.adapter.item.creativetab
 
 import heckerpowered.bridge.adapter.item.SimpleItemBlueprint
 import heckerpowered.bridge.resources.Identifier
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertSame
+import kotlin.test.*
 
 class CreativeModeTabRegistryTest {
     @BeforeTest
@@ -33,7 +28,7 @@ class CreativeModeTabRegistryTest {
 
         assertSame(firstTab, CreativeModeTabRegistry.register(firstTab))
         assertSame(secondTab, CreativeModeTabRegistry.register(secondTab))
-        assertEquals(listOf(firstTab, secondTab), CreativeModeTabRegistry.all())
+        assertEquals(expected = listOf(firstTab, secondTab), CreativeModeTabRegistry.all())
         assertEquals(listOf(firstTab, secondTab), CreativeModeTabRegistry.findAll(item))
     }
 
@@ -47,16 +42,12 @@ class CreativeModeTabRegistryTest {
         }
     }
 
+    @Suppress("SameParameterValue")
     private fun item(path: String): SimpleItemBlueprint {
         return SimpleItemBlueprint(Identifier.create("test", path))
     }
 
     private fun tab(path: String, item: SimpleItemBlueprint): CreativeModeTabBlueprint {
-        return CreativeModeTabBlueprint(
-            identifier = Identifier.create("test", path),
-            titleTranslationKey = "itemGroup.test.$path",
-            icon = item,
-            items = listOf(item),
-        )
+        return CreativeModeTabBlueprint(Identifier.create("test", path), "itemGroup.test.$path", item, listOf(item))
     }
 }
