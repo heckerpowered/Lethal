@@ -5,9 +5,10 @@
 
 package heckerpowered.lethal.gameplay.common.item.firearm
 
+import heckerpowered.bridge.adapter.entity.DeferredExperienceDropAccess
 import heckerpowered.bridge.adapter.entity.DroppedItemAccess
-import heckerpowered.bridge.adapter.entity.EntityInterop
 import heckerpowered.bridge.adapter.entity.ExperienceOrbAccess
+import heckerpowered.bridge.math.asPointBox
 import heckerpowered.bridge.math.expandedBy
 
 object CaptureEntityHitEffect : EntityHitEffect {
@@ -18,44 +19,20 @@ object CaptureEntityHitEffect : EntityHitEffect {
         val world = result.player.world
         if (world.isClientSide) return
 
-        val captureArea = target.boundingBox.expandedBy(CAPTURE_RADIUS_BLOCKS)
-        val experienceReceiver = EntityInterop.experienceReceiver(result.player)
-        val deferredExperienceDrops = if (target.health <= 0.0) {
-            EntityInterop.deferredExperienceDrops(target)
-        } else {
-            null
-        }
-        if (deferredExperienceDrops != null) {
-            val receiver = experienceReceiver
-                ?: error("Capture requires experience receiver access for player ${result.player.id}")
-            deferredExperienceDrops.sendDeferredExperienceTo(receiver)
-        }
+        val captureArea = target.position.asPointBox().expandedBy(CAPTURE_RADIUS_BLOCKS)
+        val deferredExperienceDrops = if (target.health <= 0.0) target as? DeferredExperienceDropAccess else null
+        deferredExperienceDrops?.sendDeferredExperienceTo(result.player)
 
-        val experienceOrbs = mutableListOf<ExperienceOrbAccess>()
-        val droppedItems = mutableListOf<DroppedItemAccess>()
-        for (entity in world.getEntities(captureArea)) {
-            val experienceOrb = EntityInterop.experienceOrb(entity)
-            if (experienceOrb != null) {
-                experienceOrbs += experienceOrb
-                continue
-            }
-
-            val droppedItem = EntityInterop.droppedItem(entity) ?: continue
-            droppedItems += droppedItem
-        }
-
-        /*
-         * Some hosts update their spatial entity storage immediately when an entity moves or is
-         * removed. Finish the lazy query before applying either mutation so its iterator stays valid.
-         */
-        if (experienceOrbs.isNotEmpty()) {
-            val receiver = experienceReceiver
-                ?: error("Capture requires experience receiver access for player ${result.player.id}")
-            for (experienceOrb in experienceOrbs) {
-                val experiencePoints = experienceOrb.experiencePoints
-                experienceOrb.consume()
-                receiver.addExperiencePoints(experiencePoints)
-            }
+        val (experienceOrbs, droppedItems) = world.getEntities(captureArea)
+            .filter { it is ExperienceOrbAccess || it is DroppedItemAccess }
+            .partition { it is ExperienceOrbAccess }
+            .let { (experienceOrbs, droppedItems) -> experienceOrbs.map { it as ExperienceOrbAccess } to droppedItems.map { it as DroppedItemAccess } }
+        // Some hosts update their spatial entity storage immediately when an entity moves or is
+        // removed. Finish the lazy query before applying either mutation so its iterator stays valid.
+        for (experienceOrb in experienceOrbs) {
+            val experiencePoints = experienceOrb.experiencePoints
+            experienceOrb.remove()
+            result.player.addExperiencePoints(experiencePoints)
         }
 
         for (droppedItem in droppedItems) {
