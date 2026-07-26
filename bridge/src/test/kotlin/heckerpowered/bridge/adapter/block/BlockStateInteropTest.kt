@@ -7,14 +7,14 @@ package heckerpowered.bridge.adapter.block
 
 import heckerpowered.bridge.resources.Identifier
 import kotlin.test.Test
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class BlockStateInteropTest {
     @Test
-    fun classificationRemainsAnIndependentCapability() {
-        assertFalse(BlockStateAccess::class.java.isAssignableFrom(BlockClassificationAccess::class.java))
+    fun classificationRetainsItsStableBlockStateBase() {
+        assertTrue(BlockStateAccess::class.java.isAssignableFrom(BlockClassificationAccess::class.java))
     }
 
     @Test
@@ -34,7 +34,7 @@ class BlockStateInteropTest {
         assertSame(ClassifiedBlock, ClassifiedBlockState.block)
     }
 
-    private object ClassifiedBlockState : BlockStateAccess, BlockClassificationAccess {
+    private object ClassifiedBlockState : BlockClassificationAccess {
         override val block = ClassifiedBlock
         override val isReplaceable = false
 
