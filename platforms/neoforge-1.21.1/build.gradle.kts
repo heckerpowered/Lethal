@@ -56,6 +56,7 @@ kotlin {
 
 neoForge {
     version = neoVersion
+    validateAccessTransformers = true
 
     parchment {
         minecraftVersion = parchmentMinecraftVersion
