@@ -6,11 +6,25 @@
       "lethal:fortune_fire"
     ]
   },
+  "fortune_perk_ultimate": {
+    "category": "player",
+    "subtitle": "lethal.sound.fortune_perk_ultimate",
+    "sounds": [
+      "lethal:fortune_perk_ultimate"
+    ]
+  },
   "archaeopteryx_fire": {
     "category": "player",
     "subtitle": "lethal.sound.archaeopteryx_fire",
     "sounds": [
       "lethal:archaeopteryx_fire"
+    ]
+  },
+  "chaos_fire": {
+    "category": "player",
+    "subtitle": "lethal.sound.chaos_fire",
+    "sounds": [
+      "lethal:chaos_fire"
     ]
   },
   "zeus_fire": {
