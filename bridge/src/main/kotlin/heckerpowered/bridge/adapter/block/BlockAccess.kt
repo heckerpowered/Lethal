@@ -5,9 +5,12 @@
 
 package heckerpowered.bridge.adapter.block
 
+import heckerpowered.bridge.adapter.BridgeAccess
 import heckerpowered.bridge.resources.Identifier
 
-interface BlockAccess {
-    /** Registry identity of this block. */
+interface BlockAccess : BridgeAccess {
+    /**
+     * Registry identity of this block.
+     */
     val identifier: Identifier
 }
