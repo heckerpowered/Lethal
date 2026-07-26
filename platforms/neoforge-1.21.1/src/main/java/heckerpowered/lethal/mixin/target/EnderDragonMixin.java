@@ -23,7 +23,7 @@ abstract class EnderDragonMixin {
     public abstract EnderDragonPart[] getSubEntities();
 
     @NotNull
-    public EntityPartAccess[] multipartEntityAccess$getParts() {
-        return (EntityPartAccess[]) (Object) getSubEntities();
+    public EntityPartAccess @NotNull [] multipartEntityAccess$getParts() {
+        return (EntityPartAccess[]) getSubEntities();
     }
 }
