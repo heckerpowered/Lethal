@@ -29,3 +29,8 @@ import heckerpowered.bridge.adapter.entity.LivingEntityAccess
  * it does not imply that every access interface should inherit it directly.
  */
 interface BridgeAccess
+
+/**
+ * Resolves a bridge view that the caller requires this value to expose.
+ */
+inline fun <reified View : BridgeAccess> BridgeAccess.asView(): View = this as View
