@@ -63,6 +63,9 @@ abstract class EntityMixin {
     public abstract Vec3d getPositionVector();
 
     @Shadow
+    public abstract void setPosition(double x, double y, double z);
+
+    @Shadow
     @NotNull
     public abstract AxisAlignedBB getEntityBoundingBox();
 
@@ -80,6 +83,9 @@ abstract class EntityMixin {
 
     @Shadow
     public abstract boolean attackEntityFrom(@NotNull DamageSource source, float amount);
+
+    @Shadow
+    public abstract void setDead();
 
     @Shadow
     public World world;
@@ -101,6 +107,10 @@ abstract class EntityMixin {
     @NotNull
     public VectorView entityAccess$getPosition() {
         return GeometryInterop.vector(getPositionVector());
+    }
+
+    public void entityAccess$setPosition(@NotNull VectorView value) {
+        setPosition(value.getX(), value.getY(), value.getZ());
     }
 
     @NotNull
@@ -162,5 +172,9 @@ abstract class EntityMixin {
 
     public boolean entityAccess$hurt(@NotNull DamageSourceView source, double damagePoints) {
         return attackEntityFrom(ObjectInterop.damageSource(source), (float) damagePoints);
+    }
+
+    public void entityAccess$remove() {
+        setDead();
     }
 }
