@@ -10,7 +10,6 @@ import heckerpowered.bridge.adapter.entity.damagesource.DamageFeature
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
 import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageSourceSpec
 import heckerpowered.bridge.math.VectorView
-import heckerpowered.bridge.resources.Identifier
 import heckerpowered.lethal.platform.interop.entityOrNull
 import heckerpowered.lethal.platform.interop.vector
 import net.minecraft.entity.Entity
@@ -21,45 +20,38 @@ import net.minecraft.util.EntityDamageSourceIndirect
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.text.ITextComponent
 
-internal fun attributedDamageSource(
-    spec: VanillaDamageSourceSpec,
-    nativeSource: DamageSource,
-    directEntity: EntityAccess?,
-    causingEntity: EntityAccess?,
-    position: VectorView?,
-): DamageSourceView {
+internal fun attributedDamageSource(spec: VanillaDamageSourceSpec, nativeSource: DamageSource, directEntity: EntityAccess?, causingEntity: EntityAccess?, position: VectorView?): DamageSourceView {
     val attribution = DamageAttribution(spec, nativeSource, directEntity, causingEntity, position)
-    return if (nativeSource is EntityDamageSourceIndirect) {
-        AttributedIndirectDamageSource(attribution)
-    } else {
-        AttributedDirectDamageSource(attribution)
+    // Attribution must preserve information encoded by the native source type because host behavior may depend on it.
+    return when (nativeSource) {
+        is EntityDamageSourceIndirect -> AttributedIndirectDamageSource(attribution)
+        is EntityDamageSource -> AttributedEntityDamageSource(attribution)
+        else -> AttributedDamageSource(attribution)
     }
 }
 
-private class AttributedDirectDamageSource(
+private class AttributedDamageSource(
     private val attribution: DamageAttribution,
-) : EntityDamageSource(
-    attribution.nativeSource.damageType,
-    attribution.causingNativeEntity ?: attribution.directNativeEntity,
-), DamageSourceView by attribution {
+) : DamageSource(attribution.originalSource.damageType),
+    DamageSourceView by attribution {
     init {
-        copyPropertiesFrom(attribution.nativeSource)
+        copyDamageFlagsFrom(attribution.originalSource)
     }
 
     override fun getImmediateSource(): Entity? {
-        return attribution.directNativeEntity
+        return attribution.nativeDirectEntity
     }
 
     override fun getTrueSource(): Entity? {
-        return attribution.causingNativeEntity
+        return attribution.nativeCausingEntity
     }
 
     override fun getHungerDamage(): Float {
-        return attribution.nativeSource.hungerDamage
+        return attribution.originalSource.hungerDamage
     }
 
     override fun isDifficultyScaled(): Boolean {
-        return attribution.nativeSource.isDifficultyScaled
+        return attribution.originalSource.isDifficultyScaled
     }
 
     override fun getDamageLocation(): Vec3d? {
@@ -67,29 +59,57 @@ private class AttributedDirectDamageSource(
     }
 
     override fun getDeathMessage(victim: EntityLivingBase): ITextComponent {
-        if (!attribution.hasAttributedEntity) return attribution.nativeSource.getDeathMessage(victim)
+        return attribution.originalSource.getDeathMessage(victim)
+    }
+}
 
-        return super.getDeathMessage(victim)
+private class AttributedEntityDamageSource(
+    private val attribution: DamageAttribution,
+) : EntityDamageSource(attribution.originalSource.damageType, attribution.nativeDeathMessageEntity),
+    DamageSourceView by attribution {
+    init {
+        copyDamageFlagsFrom(attribution.originalSource)
+    }
+
+    override fun getImmediateSource(): Entity? {
+        return attribution.nativeDirectEntity
+    }
+
+    override fun getTrueSource(): Entity? {
+        return attribution.nativeCausingEntity
+    }
+
+    override fun getHungerDamage(): Float {
+        return attribution.originalSource.hungerDamage
+    }
+
+    override fun isDifficultyScaled(): Boolean {
+        return attribution.originalSource.isDifficultyScaled
+    }
+
+    override fun getDamageLocation(): Vec3d? {
+        return attribution.damageLocation
+    }
+
+    override fun getDeathMessage(victim: EntityLivingBase): ITextComponent {
+        return if (attribution.hasAttributedEntity) super.getDeathMessage(victim) else attribution.originalSource.getDeathMessage(victim)
     }
 }
 
 private class AttributedIndirectDamageSource(
     private val attribution: DamageAttribution,
-) : EntityDamageSourceIndirect(
-    attribution.nativeSource.damageType,
-    attribution.directNativeEntity,
-    attribution.causingNativeEntity,
-), DamageSourceView by attribution {
+) : EntityDamageSourceIndirect(attribution.originalSource.damageType, attribution.nativeDirectEntity, attribution.nativeCausingEntity),
+    DamageSourceView by attribution {
     init {
-        copyPropertiesFrom(attribution.nativeSource)
+        copyDamageFlagsFrom(attribution.originalSource)
     }
 
     override fun getHungerDamage(): Float {
-        return attribution.nativeSource.hungerDamage
+        return attribution.originalSource.hungerDamage
     }
 
     override fun isDifficultyScaled(): Boolean {
-        return attribution.nativeSource.isDifficultyScaled
+        return attribution.originalSource.isDifficultyScaled
     }
 
     override fun getDamageLocation(): Vec3d? {
@@ -97,44 +117,33 @@ private class AttributedIndirectDamageSource(
     }
 
     override fun getDeathMessage(victim: EntityLivingBase): ITextComponent {
-        if (!attribution.hasAttributedEntity) return attribution.nativeSource.getDeathMessage(victim)
-
-        return super.getDeathMessage(victim)
+        return if (attribution.hasAttributedEntity) super.getDeathMessage(victim) else attribution.originalSource.getDeathMessage(victim)
     }
 }
 
 private class DamageAttribution(
     private val spec: VanillaDamageSourceSpec,
-    val nativeSource: DamageSource,
+    val originalSource: DamageSource,
     override val directEntity: EntityAccess?,
     override val causingEntity: EntityAccess?,
     override val position: VectorView?,
 ) : DamageSourceView {
-    val directNativeEntity = directEntity.entityOrNull()
-    val causingNativeEntity = causingEntity.entityOrNull()
-
-    val hasAttributedEntity: Boolean
-        get() = directNativeEntity != null || causingNativeEntity != null
+    val nativeDirectEntity = directEntity.entityOrNull()
+    val nativeCausingEntity = causingEntity.entityOrNull()
+    val nativeDeathMessageEntity = nativeCausingEntity ?: nativeDirectEntity
+    val hasAttributedEntity = nativeDeathMessageEntity != null
 
     val damageLocation: Vec3d?
-        get() {
-            if (position != null) return position.vector()
+        get() = position?.vector() ?: nativeDirectEntity?.positionVector ?: originalSource.damageLocation
 
-            val directEntity = directNativeEntity
-            if (directEntity != null) return Vec3d(directEntity.posX, directEntity.posY, directEntity.posZ)
-
-            return nativeSource.damageLocation
-        }
-
-    override val type: Identifier
-        get() = spec.type.identifier
+    override val type = spec.type.identifier
 
     override fun has(feature: DamageFeature): Boolean {
         return spec.type.has(feature)
     }
 }
 
-private fun EntityDamageSource.copyPropertiesFrom(source: DamageSource) {
+private fun DamageSource.copyDamageFlagsFrom(source: DamageSource) {
     if (source.isUnblockable) setDamageBypassesArmor()
     if (source.canHarmInCreative()) setDamageAllowedInCreativeMode()
     if (source.isDamageAbsolute) setDamageIsAbsolute()
@@ -142,5 +151,5 @@ private fun EntityDamageSource.copyPropertiesFrom(source: DamageSource) {
     if (source.isProjectile) setProjectile()
     if (source.isMagicDamage) setMagicDamage()
     if (source.isExplosion) setExplosion()
-    if ((source as? EntityDamageSource)?.isThornsDamage == true) setIsThornsDamage()
+    if (this is EntityDamageSource && source is EntityDamageSource && source.isThornsDamage) setIsThornsDamage()
 }
