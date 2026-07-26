@@ -1,0 +1,33 @@
+# Normalize all text files to LF in the repository.
+* text=auto eol=lf
+
+# Windows command scripts require CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Unix scripts must use LF.
+*.sh text eol=lf
+gradlew text eol=lf
+
+# Binary files must not be modified or merged as text.
+*.class binary
+*.jar binary
+*.zip binary
+*.7z binary
+*.gz binary
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+
+*.ogg binary
+*.mp3 binary
+*.wav binary
