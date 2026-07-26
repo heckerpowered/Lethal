@@ -5,13 +5,12 @@
 
 package heckerpowered.lethal.gameplay.common.entity.damagesource
 
-import heckerpowered.bridge.adapter.entity.EntityAccess
 import heckerpowered.bridge.adapter.entity.damagesource.DamageFeature
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
 import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageSourceSpec
 import heckerpowered.bridge.math.VectorView
-import heckerpowered.lethal.platform.interop.entityOrNull
-import heckerpowered.lethal.platform.interop.vector
+import heckerpowered.lethal.platform.interop.asHost
+import heckerpowered.lethal.platform.interop.asView
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.util.DamageSource
@@ -20,7 +19,7 @@ import net.minecraft.util.EntityDamageSourceIndirect
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.text.ITextComponent
 
-internal fun attributedDamageSource(spec: VanillaDamageSourceSpec, nativeSource: DamageSource, directEntity: EntityAccess?, causingEntity: EntityAccess?, position: VectorView?): DamageSourceView {
+internal fun attributedDamageSource(spec: VanillaDamageSourceSpec, nativeSource: DamageSource, directEntity: Entity?, causingEntity: Entity?, position: VectorView?): DamageSourceView {
     val attribution = DamageAttribution(spec, nativeSource, directEntity, causingEntity, position)
     // Host behavior may branch on the native source's JVM category, so attribution must preserve it.
     return when (nativeSource) {
@@ -124,17 +123,21 @@ private class AttributedIndirectDamageSource(
 private class DamageAttribution(
     private val spec: VanillaDamageSourceSpec,
     val originalSource: DamageSource,
-    override val directEntity: EntityAccess?,
-    override val causingEntity: EntityAccess?,
+    val nativeDirectEntity: Entity?,
+    val nativeCausingEntity: Entity?,
     override val position: VectorView?,
 ) : DamageSourceView {
-    val nativeDirectEntity = directEntity.entityOrNull()
-    val nativeCausingEntity = causingEntity.entityOrNull()
+    override val directEntity
+        get() = nativeDirectEntity.asView()
+
+    override val causingEntity
+        get() = nativeCausingEntity.asView()
+
     val nativeDeathMessageEntity = nativeCausingEntity ?: nativeDirectEntity
     val hasAttributedEntity = nativeDeathMessageEntity != null
 
     val damageLocation: Vec3d?
-        get() = position?.vector() ?: nativeDirectEntity?.positionVector ?: originalSource.damageLocation
+        get() = position?.asHost() ?: nativeDirectEntity?.positionVector ?: originalSource.damageLocation
 
     override val type = spec.type.identifier
 
