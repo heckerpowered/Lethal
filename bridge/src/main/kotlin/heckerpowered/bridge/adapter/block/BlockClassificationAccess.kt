@@ -8,10 +8,10 @@ package heckerpowered.bridge.adapter.block
 /**
  * Exposes host block classifications that are not part of a block state's stable identity.
  *
- * This capability remains independent from [BlockStateAccess] because older hosts may need
- * contextual or compatibility-specific rules to answer the same classification.
+ * Classification remains a separate capability because hosts derive it through different rules.
+ * Extending [BlockStateAccess] preserves the capability's stable ownership by the block state.
  */
-interface BlockClassificationAccess {
+interface BlockClassificationAccess : BlockStateAccess {
     val isReplaceable: Boolean
 
     fun isIn(category: BlockCategory): Boolean
