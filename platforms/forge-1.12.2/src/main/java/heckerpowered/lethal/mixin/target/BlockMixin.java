@@ -26,7 +26,7 @@ abstract class BlockMixin {
             throw new IllegalStateException("Block is not registered");
         }
 
-        return IdentifierInterop.identifier(registryName);
+        return IdentifierInterop.asView(registryName);
     }
 
     @Unique
