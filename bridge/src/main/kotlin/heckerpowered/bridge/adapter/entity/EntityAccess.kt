@@ -16,7 +16,7 @@ interface EntityAccess : UniquelyIdentifiable {
 
     val world: WorldAccess
 
-    val position: VectorView
+    var position: VectorView
     var velocity: VectorView
     var boundingBox: BoxView
 
