@@ -11,10 +11,15 @@ plugins {
     id("heckerpowered.convention.kotlin-jvm")
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     testImplementation(kotlin("test"))
 
     implementation(project(":bridge"))
+    implementation(project(":render-hardware-interface"))
 }
 
 java {
