@@ -119,67 +119,54 @@ object BlockPositions {
     val UnitY: BlockPositionView = Provider.position(0, 1, 0)
     val UnitZ: BlockPositionView = Provider.position(0, 0, 1)
 
-    @JvmStatic
     fun of(x: Int, y: Int, z: Int): BlockPositionView {
         return Provider.position(x, y, z)
     }
 
-    @JvmStatic
     fun containing(x: Double, y: Double, z: Double): BlockPositionView {
         return Provider.containing(x, y, z)
     }
 
-    @JvmStatic
     fun fromPackedLong(value: Long): BlockPositionView {
         return Provider.fromPackedLong(value)
     }
 
-    @JvmStatic
     fun fromPackedLong(value: Long, format: BlockPositionPackingFormat): BlockPositionView {
         return FreestandingBlockPositionProvider.fromPackedLong(value, format)
     }
 
-    @JvmStatic
     fun asLong(position: BlockPositionView): Long {
         return Provider.asLong(position)
     }
 
-    @JvmStatic
     fun asLong(position: BlockPositionView, format: BlockPositionPackingFormat): Long {
         return FreestandingBlockPositionProvider.asLong(position, format)
     }
 
-    @JvmStatic
     fun min(first: BlockPositionView, second: BlockPositionView): BlockPositionView {
         return first.componentMin(second)
     }
 
-    @JvmStatic
     fun max(first: BlockPositionView, second: BlockPositionView): BlockPositionView {
         return first.componentMax(second)
     }
 
-    @JvmStatic
     fun distanceSquared(first: BlockPositionView, second: BlockPositionView): Long {
         return first.distanceSquaredTo(second)
     }
 
-    @JvmStatic
     fun manhattanDistance(first: BlockPositionView, second: BlockPositionView): Int {
         return first.manhattanDistanceTo(second)
     }
 
-    @JvmStatic
     fun cross(first: BlockPositionView, second: BlockPositionView): BlockPositionView {
         return first.cross(second)
     }
 
-    @JvmStatic
     fun betweenClosed(first: BlockPositionView, second: BlockPositionView): Sequence<BlockPositionView> {
         return betweenClosed(first.x, first.y, first.z, second.x, second.y, second.z)
     }
 
-    @JvmStatic
     fun betweenClosed(firstX: Int, firstY: Int, firstZ: Int, secondX: Int, secondY: Int, secondZ: Int): Sequence<BlockPositionView> {
         val minimumX = minOf(firstX, secondX)
         val minimumY = minOf(firstY, secondY)
@@ -200,12 +187,10 @@ object BlockPositions {
         }
     }
 
-    @JvmStatic
     fun firstBetweenClosed(first: BlockPositionView, second: BlockPositionView, predicate: (BlockPositionView) -> Boolean): BlockPositionView? {
         return betweenClosed(first, second).firstOrNull(predicate)
     }
 
-    @JvmStatic
     fun withinManhattan(origin: BlockPositionView, reachX: Int, reachY: Int, reachZ: Int): Sequence<BlockPositionView> {
         val maximumDepth = reachX + reachY + reachZ
 
@@ -234,7 +219,6 @@ object BlockPositions {
         }
     }
 
-    @JvmStatic
     fun withinManhattan(originX: Int, originY: Int, originZ: Int, reachX: Int, reachY: Int, reachZ: Int): Sequence<BlockPositionView> {
         return withinManhattan(of(originX, originY, originZ), reachX, reachY, reachZ)
     }
@@ -448,22 +432,18 @@ object BlockPositionPacking {
     const val HORIZONTAL_MASK: Long = (1L shl HORIZONTAL_BITS) - 1L
     const val VERTICAL_MASK: Long = (1L shl VERTICAL_BITS) - 1L
 
-    @JvmStatic
     fun pack(x: Int, y: Int, z: Int, format: BlockPositionPackingFormat = BlockPositionPackingFormats.Auto): Long {
         return format.pack(x, y, z)
     }
 
-    @JvmStatic
     fun unpackX(value: Long, format: BlockPositionPackingFormat = BlockPositionPackingFormats.Auto): Int {
         return format.unpackX(value)
     }
 
-    @JvmStatic
     fun unpackY(value: Long, format: BlockPositionPackingFormat = BlockPositionPackingFormats.Auto): Int {
         return format.unpackY(value)
     }
 
-    @JvmStatic
     fun unpackZ(value: Long, format: BlockPositionPackingFormat = BlockPositionPackingFormats.Auto): Int {
         return format.unpackZ(value)
     }
