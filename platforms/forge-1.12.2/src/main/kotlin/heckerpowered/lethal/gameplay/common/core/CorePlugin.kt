@@ -25,9 +25,7 @@ class CorePlugin : IFMLLoadingPlugin {
 
             MixinService.getService()
                 .transformerProvider
-                .addTransformerExclusion(
-                    "wiresegal.thicc.asm.ThiccAsmTransformer",
-                )
+                .addTransformerExclusion("wiresegal.thicc.asm.ThiccAsmTransformer")
         }
     }
 
@@ -38,16 +36,8 @@ class CorePlugin : IFMLLoadingPlugin {
      */
     fun secureLaunchMixin() {
         val applicationClassLoader = Launch::class.java.classLoader
-        MethodUtils.invokeMethod(
-            applicationClassLoader,
-            true,
-            "addURL",
-            javaClass.protectionDomain.codeSource.location
-        )
-        MethodUtils.invokeStaticMethod(
-            applicationClassLoader.loadClass(javaClass.name),
-            "launchMixin"
-        )
+        MethodUtils.invokeMethod(applicationClassLoader, true, "addURL", javaClass.protectionDomain.codeSource.location)
+        MethodUtils.invokeStaticMethod(applicationClassLoader.loadClass(javaClass.name), "launchMixin")
     }
 
     override fun getASMTransformerClass(): Array<out String> = emptyArray()
