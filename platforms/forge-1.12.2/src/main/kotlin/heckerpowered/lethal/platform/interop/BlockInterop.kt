@@ -7,45 +7,21 @@ package heckerpowered.lethal.platform.interop
 
 import heckerpowered.bridge.adapter.block.BlockAccess
 import heckerpowered.bridge.adapter.block.BlockStateAccess
-import heckerpowered.lethal.platform.adapter.block.HostedBlockAccess
-import heckerpowered.lethal.platform.adapter.block.HostedBlockStateAccess
+import heckerpowered.lethal.platform.adapter.block.ForgeBlockClassificationView
 import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
-object BlockInterop {
-    fun block(block: Block): BlockAccess {
-        @Suppress("CAST_NEVER_SUCCEEDS")
-        return block as? BlockAccess ?: HostedBlockAccess(block)
-    }
+fun Block.asView(): BlockAccess = requireAccess(this)
 
-    fun blockState(access: BlockStateAccess): IBlockState {
-        if (access is HostedBlockStateAccess) return access.state
-
-        @Suppress("CAST_NEVER_SUCCEEDS")
-        return access as? IBlockState ?: error("Unsupported BlockStateAccess implementation: ${access::class.java.name}")
-    }
-
-    fun blockStateOrNull(access: BlockStateAccess?): IBlockState? {
-        if (access == null) return null
-        return blockState(access)
-    }
-
-    fun blockState(state: IBlockState, world: World? = null, position: BlockPos? = null): BlockStateAccess {
-        @Suppress("CAST_NEVER_SUCCEEDS")
-        return state as? BlockStateAccess ?: HostedBlockStateAccess(state, world, position)
-    }
+fun BlockStateAccess.asHost(): IBlockState {
+    return if (this is ForgeBlockClassificationView) state else requireHost(this)
 }
 
-fun BlockStateAccess.blockState(): IBlockState {
-    return BlockInterop.blockState(this)
-}
+@JvmName("asNullableBlockStateHost")
+fun BlockStateAccess?.asHost(): IBlockState? = this?.asHost()
 
-fun BlockStateAccess?.blockStateOrNull(): IBlockState? {
-    return BlockInterop.blockStateOrNull(this)
-}
+fun IBlockState.asView(): BlockStateAccess = requireAccess(this)
 
-fun IBlockState.blockState(world: World? = null, position: BlockPos? = null): BlockStateAccess {
-    return BlockInterop.blockState(this, world, position)
-}
+fun IBlockState.asView(world: World, position: BlockPos): BlockStateAccess = ForgeBlockClassificationView(this, world, position)
