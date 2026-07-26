@@ -7,7 +7,6 @@ package heckerpowered.bridge.adapter.block
 
 /** Resolves optional block-state capabilities at a single boundary. */
 object BlockStateInterop {
-    @JvmStatic
     fun classification(blockState: BlockStateAccess?): BlockClassificationAccess? {
         return blockState as? BlockClassificationAccess
     }
