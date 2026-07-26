@@ -70,11 +70,7 @@ interface BlockPositionProvider {
     }
 
     fun containing(x: Double, y: Double, z: Double): BlockPositionView {
-        return position(
-            floor(x).toInt(),
-            floor(y).toInt(),
-            floor(z).toInt(),
-        )
+        return position(floor(x).toInt(), floor(y).toInt(), floor(z).toInt())
     }
 
     fun fromPackedLong(value: Long): BlockPositionView {
@@ -265,11 +261,7 @@ fun BlockPositionView.offset(direction: BlockDirection, steps: Int = 1): BlockPo
         return this
     }
 
-    return offset(
-        direction.stepX * steps,
-        direction.stepY * steps,
-        direction.stepZ * steps,
-    )
+    return offset(direction.stepX * steps, direction.stepY * steps, direction.stepZ * steps)
 }
 
 fun BlockPositionView.above(steps: Int = 1): BlockPositionView {
@@ -318,43 +310,23 @@ fun BlockPositionView.rotate(rotation: BlockRotation): BlockPositionView {
 }
 
 fun BlockPositionView.cross(other: BlockPositionView): BlockPositionView {
-    return BlockPositions.of(
-        y * other.z - z * other.y,
-        z * other.x - x * other.z,
-        x * other.y - y * other.x,
-    )
+    return BlockPositions.of(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
 }
 
 fun BlockPositionView.componentMin(other: BlockPositionView): BlockPositionView {
-    return BlockPositions.of(
-        minOf(x, other.x),
-        minOf(y, other.y),
-        minOf(z, other.z),
-    )
+    return BlockPositions.of(minOf(x, other.x), minOf(y, other.y), minOf(z, other.z))
 }
 
 fun BlockPositionView.componentMax(other: BlockPositionView): BlockPositionView {
-    return BlockPositions.of(
-        maxOf(x, other.x),
-        maxOf(y, other.y),
-        maxOf(z, other.z),
-    )
+    return BlockPositions.of(maxOf(x, other.x), maxOf(y, other.y), maxOf(z, other.z))
 }
 
 operator fun BlockPositionView.plus(other: BlockPositionView): BlockPositionView {
-    return BlockPositions.of(
-        x + other.x,
-        y + other.y,
-        z + other.z,
-    )
+    return BlockPositions.of(x + other.x, y + other.y, z + other.z)
 }
 
 operator fun BlockPositionView.minus(other: BlockPositionView): BlockPositionView {
-    return BlockPositions.of(
-        x - other.x,
-        y - other.y,
-        z - other.z,
-    )
+    return BlockPositions.of(x - other.x, y - other.y, z - other.z)
 }
 
 operator fun BlockPositionView.unaryMinus(): BlockPositionView {
@@ -365,19 +337,11 @@ operator fun BlockPositionView.times(scale: Int): BlockPositionView {
     return when (scale) {
         0 -> BlockPositions.Zero
         1 -> this
-        else -> BlockPositions.of(
-            x * scale,
-            y * scale,
-            z * scale,
-        )
+        else -> BlockPositions.of(x * scale, y * scale, z * scale)
     }
 }
 
-enum class BlockDirection(
-    val stepX: Int,
-    val stepY: Int,
-    val stepZ: Int,
-) {
+enum class BlockDirection(val stepX: Int, val stepY: Int, val stepZ: Int) {
     Down(0, -1, 0),
     Up(0, 1, 0),
     North(0, 0, -1),
