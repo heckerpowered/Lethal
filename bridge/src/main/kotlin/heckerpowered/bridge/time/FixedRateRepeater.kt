@@ -8,11 +8,11 @@ package heckerpowered.bridge.time
 import kotlin.math.floor
 import kotlin.time.Duration
 
-class FixedRateRepeater(
-    var frequency: Frequency,
-    initialCredit: Double = 1.0,
-    private val inactiveCreditLimit: Double = 1.0,
-) {
+class FixedRateRepeater(var frequency: Frequency, initialCredit: Double = 1.0, private val inactiveCreditLimit: Double = 1.0) {
+    init {
+        require(inactiveCreditLimit >= 0.0) { "inactiveCreditLimit must be non-negative" }
+    }
+
     var paused: Boolean = false
 
     private var credit: Double = initialCredit
@@ -37,7 +37,9 @@ class FixedRateRepeater(
         if (paused) return 0L
 
         credit += deltaTime.inWholeNanoseconds.toDouble() / frequency.intervalNanos.toDouble()
-        val operations = floor(credit).toLong().coerceAtMost(maxOperations)
+        val operations = floor(credit)
+            .toLong()
+            .coerceAtMost(maxOperations)
         credit -= operations.toDouble()
 
         return operations
