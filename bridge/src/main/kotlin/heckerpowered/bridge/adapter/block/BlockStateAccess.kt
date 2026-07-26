@@ -5,7 +5,9 @@
 
 package heckerpowered.bridge.adapter.block
 
-interface BlockStateAccess {
+import heckerpowered.bridge.adapter.BridgeAccess
+
+interface BlockStateAccess : BridgeAccess {
     /** Block that owns this state. */
     val block: BlockAccess
 }
