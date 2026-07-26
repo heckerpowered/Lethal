@@ -31,9 +31,7 @@ data class VirtualDamageSourceSpec(
     val features: EnumSet<DamageFeature>,
 ) : DamageSourceSpec, VirtualRepresentation
 
-data class VanillaDamageSourceSpec(
-    val type: VanillaDamageType,
-) : DamageSourceSpec, QuantumRepresentation
+data class VanillaDamageSourceSpec(val type: VanillaDamageType) : DamageSourceSpec, QuantumRepresentation
 
 data class VirtualDamageSource(
     val spec: VirtualDamageSourceSpec,
@@ -52,7 +50,7 @@ data class VirtualDamageSource(
 
 data class QuantumVanillaDamageSource(
     val source: VanillaDamageType,
-
+    
     override val directEntity: EntityAccess?,
     override val causingEntity: EntityAccess?,
     override val position: VectorView?,
