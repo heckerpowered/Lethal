@@ -7,8 +7,9 @@ package heckerpowered.lethal.gameplay
 
 import heckerpowered.bridge.platform.Services
 import heckerpowered.bridge.platform.services.Entrypoint
+import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.common.CommonProxy
-import net.minecraft.util.ResourceLocation
+import heckerpowered.lethal.platform.adapter.item.creativetab.ForgeCreativeModeTabs
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.SidedProxy
@@ -17,35 +18,25 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 
 @Mod(
-    modid = LethalMod.MOD_ID,
-    name = LethalMod.NAME,
-    version = LethalMod.VERSION
+    modid = Constants.MOD_ID,
+    name = "Lethal Mod"
 )
 class LethalMod {
     companion object {
-        const val MOD_ID = "lethal"
-        const val NAME = "Lethal Mod"
-        const val VERSION = "1.0"
-
         @SidedProxy(
             serverSide = "heckerpowered.lethal.gameplay.common.CommonProxy",
             clientSide = "heckerpowered.lethal.gameplay.client.ClientProxy"
         )
         @JvmStatic
         lateinit var proxy: CommonProxy
-
-        @JvmStatic
-        fun resource(path: String): ResourceLocation {
-            return ResourceLocation(MOD_ID, path)
-        }
     }
 
     @EventHandler
     fun preInitialize(event: FMLPreInitializationEvent) {
         proxy.preInitialize(event)
         Services.callEntrypoints<Entrypoint>()
+        ForgeCreativeModeTabs.initialize()
     }
-
 
     @EventHandler
     fun initialize(event: FMLInitializationEvent) {
