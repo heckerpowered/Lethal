@@ -3,17 +3,22 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-kotlin = "2.4.0"
-kotlinxDatetime = "0.7.1"
-kotlinxSerializationJSON = "1.9.0"
-kotlinxCoroutines = "1.10.2"
-versions-plugin = "0.54.0"
+# The Kotlin plugin and standard library intentionally follow the newest available 2.x version together.
+kotlin = "2.+"
+kotlinxDatetime = "0.+"
+kotlinxSerializationJSON = "1.+"
+kotlinxCoroutines = "1.+"
+# RHI's compile-time LWJGL does not replace the runtime binding supplied by each game host.
+lwjgl = "3.4.1"
+ksp = "2.+"
 
 [libraries]
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJSON" }
 kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+lwjglOpenGL = { module = "org.lwjgl:lwjgl-opengl", version.ref = "lwjgl" }
+kspSymbolProcessingAPI = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 
 # Libraries can be bundled together for easier import
 [bundles]
@@ -21,4 +26,4 @@ kotlinxEcosystem = ["kotlinxDatetime", "kotlinxSerialization", "kotlinxCoroutine
 
 [plugins]
 kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
