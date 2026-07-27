@@ -7,7 +7,7 @@ package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.block.BlockAccess;
 import heckerpowered.bridge.resources.Identifier;
-import heckerpowered.lethal.platform.interop.MixinInterop;
+import heckerpowered.bridge.MixinInterop;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
