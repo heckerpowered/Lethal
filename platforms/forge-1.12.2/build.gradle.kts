@@ -13,7 +13,6 @@ plugins {
     // Dynamic selectors are intentional: follow the newest version in each selected major line.
     id("net.minecraftforge.gradle") version "7.+"
     id("net.minecraftforge.renamer") version "1.+"
-    kotlin("kapt")
 }
 
 val minecraftVersion = project.property("minecraftVersion").toString()
