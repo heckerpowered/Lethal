@@ -6,6 +6,8 @@
 package heckerpowered.lethal.platform.interop
 
 import heckerpowered.bridge.adapter.block.BlockStateAccess
+import heckerpowered.bridge.requireAccess
+import heckerpowered.bridge.requireHost
 import net.minecraft.world.level.block.state.BlockState
 
 fun BlockStateAccess.asHost() = requireHost<BlockState>(this)
