@@ -9,7 +9,7 @@ import heckerpowered.bridge.adapter.block.BlockAccess;
 import heckerpowered.bridge.adapter.block.BlockCategory;
 import heckerpowered.bridge.adapter.block.BlockClassificationAccess;
 import heckerpowered.bridge.adapter.block.BlockStateAccess;
-import heckerpowered.lethal.platform.interop.MixinInterop;
+import heckerpowered.bridge.MixinInterop;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
