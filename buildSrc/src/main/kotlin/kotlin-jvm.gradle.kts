@@ -6,7 +6,6 @@
 package heckerpowered.convention
 
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin in JVM projects.
@@ -14,7 +13,8 @@ plugins {
 }
 
 kotlin {
-    // Use a specific Java version to make it easier to work in different environments.
+    // This is only the fallback for modules that do not choose a toolchain themselves.
+    // A module-level jvmToolchain declaration overrides this default.
     jvmToolchain(25)
 }
 
@@ -28,19 +28,6 @@ tasks.withType<Test>().configureEach {
             TestLogEvent.FAILED,
             TestLogEvent.PASSED,
             TestLogEvent.SKIPPED
-        )
-    }
-}
-
-kotlin {
-    compilerOptions {
-        apiVersion = KotlinVersion.KOTLIN_2_4
-        languageVersion = KotlinVersion.KOTLIN_2_4
-
-        freeCompilerArgs.addAll(
-            listOf(
-                "-Xcollection-literals"
-            )
         )
     }
 }
