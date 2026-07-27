@@ -128,10 +128,10 @@ private class DamageAttribution(
     override val position: VectorView?,
 ) : DamageSourceView {
     override val directEntity
-        get() = nativeDirectEntity.asView()
+        get() = nativeDirectEntity?.asView()
 
     override val causingEntity
-        get() = nativeCausingEntity.asView()
+        get() = nativeCausingEntity?.asView()
 
     val nativeDeathMessageEntity = nativeCausingEntity ?: nativeDirectEntity
     val hasAttributedEntity = nativeDeathMessageEntity != null
