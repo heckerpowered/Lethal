@@ -37,4 +37,8 @@ object ClientInput {
             rule.onMouseButtonInput(event)
         }
     }
+
+    fun handle(event: KeyBindingPressedEvent) {
+        RuleRegistry.forEach<KeyBindingInputRule> { it.onKeyBindingInput(event) }
+    }
 }
