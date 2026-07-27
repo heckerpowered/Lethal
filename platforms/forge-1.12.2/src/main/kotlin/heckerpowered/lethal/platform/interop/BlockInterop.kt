@@ -5,7 +5,10 @@
 
 package heckerpowered.lethal.platform.interop
 
+import heckerpowered.bridge.requireAccess
+import heckerpowered.bridge.requireHost
 import heckerpowered.bridge.adapter.block.BlockAccess
+import heckerpowered.bridge.adapter.block.BlockClassificationAccess
 import heckerpowered.bridge.adapter.block.BlockStateAccess
 import heckerpowered.lethal.platform.adapter.block.ForgeBlockClassificationView
 import net.minecraft.block.Block
@@ -19,9 +22,6 @@ fun BlockStateAccess.asHost(): IBlockState {
     return if (this is ForgeBlockClassificationView) state else requireHost(this)
 }
 
-@JvmName("asNullableBlockStateHost")
-fun BlockStateAccess?.asHost(): IBlockState? = this?.asHost()
-
 fun IBlockState.asView(): BlockStateAccess = requireAccess(this)
 
-fun IBlockState.asView(world: World, position: BlockPos): BlockStateAccess = ForgeBlockClassificationView(this, world, position)
+fun IBlockState.asClassificationView(world: World, position: BlockPos): BlockClassificationAccess = ForgeBlockClassificationView(this, world, position)
