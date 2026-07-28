@@ -23,10 +23,8 @@ abstract class EntityDragonMixin {
 
     @NotNull
     public EntityPartAccess[] multipartEntityAccess$getParts() {
-        /*
-         * MultiPartEntityPartMixin makes every native part implement EntityPartAccess before this
-         * method runs. The native array can therefore be reused directly.
-         */
+        // MultiPartEntityPartMixin makes every native part implement EntityPartAccess before this
+        // method runs. The native array can therefore be reused directly.
         return (EntityPartAccess[]) dragonPartArray;
     }
 }
