@@ -10,10 +10,11 @@ import heckerpowered.bridge.resources.Identifier
 /**
  * Provides namespaced primitive state that survives host serialization.
  *
- * Reads must not create or otherwise mutate host storage. This capability is independent from
- * [ItemStackAccess] because a host may expose stack state through a separate adapter.
+ * Reads must not create or otherwise mutate host storage. Persistent data remains a separate
+ * capability because hosts expose it through different storage APIs. Extending [ItemStackAccess]
+ * preserves the capability's stable ownership by the item stack.
  */
-interface PersistentDataAccess {
+interface PersistentDataAccess : ItemStackAccess {
     fun getLong(key: Identifier): Long?
 
     fun setLong(key: Identifier, value: Long)
