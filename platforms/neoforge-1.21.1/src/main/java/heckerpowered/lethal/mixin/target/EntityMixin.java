@@ -6,12 +6,11 @@
 package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.entity.EntityAccess;
-import heckerpowered.bridge.adapter.entity.EntityRemovalAccess;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView;
 import heckerpowered.bridge.adapter.world.WorldAccess;
 import heckerpowered.bridge.math.BoxView;
 import heckerpowered.bridge.math.VectorView;
-import heckerpowered.lethal.platform.interop.MixinInterop;
+import heckerpowered.bridge.MixinInterop;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -27,10 +26,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.UUID;
 
 @Mixin(Entity.class)
-@Implements({
-        @Interface(iface = EntityAccess.class, prefix = "entityAccess$"),
-        @Interface(iface = EntityRemovalAccess.class, prefix = "entityRemovalAccess$")
-})
+@Implements(@Interface(iface = EntityAccess.class, prefix = "entityAccess$"))
 abstract class EntityMixin {
     @Shadow
     public abstract int getId();
@@ -189,7 +185,7 @@ abstract class EntityMixin {
         return isOnFire();
     }
 
-    public void entityRemovalAccess$remove() {
+    public void entityAccess$remove() {
         discard();
     }
 }

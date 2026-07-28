@@ -101,12 +101,12 @@ abstract class EntityMixin {
 
     @NotNull
     public WorldAccess entityAccess$getWorld() {
-        return WorldInterop.world(world);
+        return WorldInterop.asView(world);
     }
 
     @NotNull
     public VectorView entityAccess$getPosition() {
-        return GeometryInterop.vector(getPositionVector());
+        return GeometryInterop.asView(getPositionVector());
     }
 
     public void entityAccess$setPosition(@NotNull VectorView value) {
@@ -119,7 +119,7 @@ abstract class EntityMixin {
     }
 
     public void entityAccess$setVelocity(@NotNull VectorView value) {
-        final Vec3d velocity = GeometryInterop.vector(value);
+        final Vec3d velocity = GeometryInterop.asHost(value);
         motionX = velocity.x;
         motionY = velocity.y;
         motionZ = velocity.z;
@@ -127,11 +127,11 @@ abstract class EntityMixin {
 
     @NotNull
     public BoxView entityAccess$getBoundingBox() {
-        return GeometryInterop.box(getEntityBoundingBox());
+        return GeometryInterop.asView(getEntityBoundingBox());
     }
 
     public void entityAccess$setBoundingBox(@NotNull BoxView value) {
-        setEntityBoundingBox(GeometryInterop.box(value));
+        setEntityBoundingBox(GeometryInterop.asHost(value));
     }
 
     public double entityAccess$getPitch() {
@@ -171,7 +171,7 @@ abstract class EntityMixin {
     }
 
     public boolean entityAccess$hurt(@NotNull DamageSourceView source, double damagePoints) {
-        return attackEntityFrom(ObjectInterop.damageSource(source), (float) damagePoints);
+        return attackEntityFrom(ObjectInterop.asHost(source), (float) damagePoints);
     }
 
     public void entityAccess$remove() {
