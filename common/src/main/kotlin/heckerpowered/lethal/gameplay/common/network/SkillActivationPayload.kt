@@ -19,11 +19,8 @@ class SkillActivationPayload(val slot: SkillSlot) : ServerboundPayload<SkillActi
     companion object {
         val PayloadId = Constants.identifier("skill_activation")
         val Type = Payload.Type<SkillActivationPayload>(PayloadId)
-        private val skillSlotCodec = StreamCodecs.Byte.map(
-            decodeMapping = SkillSlot::fromNetworkId,
-            encodeMapping = SkillSlot::networkId,
-        )
-        val Codec = StreamCodec.composite(skillSlotCodec, SkillActivationPayload::slot, ::SkillActivationPayload)
+        private val SkillSlotCodec = StreamCodecs.Byte.map(SkillSlot::fromNetworkId, SkillSlot::networkId)
+        val Codec = StreamCodec.composite(SkillSlotCodec, SkillActivationPayload::slot, ::SkillActivationPayload)
     }
 
     override val type: Payload.Type<SkillActivationPayload>

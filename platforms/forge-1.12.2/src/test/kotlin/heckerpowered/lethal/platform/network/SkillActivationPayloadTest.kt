@@ -6,7 +6,6 @@
 package heckerpowered.lethal.platform.network
 
 import heckerpowered.bridge.adapter.entity.PlayerAccess
-import heckerpowered.bridge.adapter.entity.SpectatorAccess
 import heckerpowered.bridge.network.ServerPlayNetworking
 import heckerpowered.bridge.network.StreamCodecs
 import heckerpowered.bridge.rule.RuleRegistry
@@ -32,8 +31,8 @@ class SkillActivationPayloadTest {
                 val streamBuffer = ByteBufStreamBuffer(nativeBuffer)
                 SkillActivationPayload.Codec.encode(streamBuffer, SkillActivationPayload(slot))
 
-                assertEquals(slot, SkillActivationPayload.Codec.decode(streamBuffer).slot)
-                assertEquals(0, nativeBuffer.readableBytes())
+                assertEquals(expected = slot, actual = SkillActivationPayload.Codec.decode(streamBuffer).slot)
+                assertEquals(expected = 0, actual = nativeBuffer.readableBytes())
             } finally {
                 nativeBuffer.release()
             }
@@ -69,13 +68,13 @@ class SkillActivationPayloadTest {
         SkillActivationPayload(SkillSlot.Secondary).handle(ServerPlayNetworking.Context(player))
 
         assertSame(player, receivedRequest?.player)
-        assertEquals(SkillSlot.Secondary, receivedRequest?.slot)
+        assertEquals(expected = SkillSlot.Secondary, actual = receivedRequest?.slot)
     }
 
     private fun player(): PlayerAccess {
         return Proxy.newProxyInstance(
             PlayerAccess::class.java.classLoader,
-            arrayOf(PlayerAccess::class.java, SpectatorAccess::class.java),
+            arrayOf(PlayerAccess::class.java),
         ) { instance, method, arguments ->
             when (method.name) {
                 "isAlive" -> true
