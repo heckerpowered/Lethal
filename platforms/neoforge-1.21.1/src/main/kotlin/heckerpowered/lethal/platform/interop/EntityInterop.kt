@@ -6,10 +6,10 @@
 package heckerpowered.lethal.platform.interop
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.requireAccess
+import heckerpowered.bridge.requireHost
 import net.minecraft.world.entity.Entity
 
-fun Entity.entity() = requireAccess<EntityAccess>(this)
+fun Entity.asView() = requireAccess<EntityAccess>(this)
 
-fun EntityAccess.entity() = requireHost<Entity>(this)
-
-fun EntityAccess?.entityOrNull() = this?.entity()
+fun EntityAccess.asHost() = requireHost<Entity>(this)
