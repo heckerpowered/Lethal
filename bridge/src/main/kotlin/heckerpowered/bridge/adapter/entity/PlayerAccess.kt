@@ -5,4 +5,8 @@
 
 package heckerpowered.bridge.adapter.entity
 
-interface PlayerAccess : EntityAccess, EntityEquipmentAccess
+interface PlayerAccess : LivingEntityAccess {
+    val isSpectator: Boolean
+
+    fun addExperiencePoints(points: Int)
+}
