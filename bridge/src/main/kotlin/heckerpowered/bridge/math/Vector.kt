@@ -176,16 +176,10 @@ fun VectorView.normalized2D(): VectorView {
 }
 
 fun VectorView.reciprocal(): VectorView {
-    return Geometry.vector(
-        1.0 / x,
-        1.0 / y,
-        1.0 / z
-    )
+    return Geometry.vector(1.0 / x, 1.0 / y, 1.0 / z)
 }
 
-fun VectorView.safeReciprocal(
-    resultIfZero: VectorView = Geometry.vector(1.0E30, 1.0E30, 1.0E30),
-): VectorView {
+fun VectorView.safeReciprocal(resultIfZero: VectorView = Geometry.vector(1.0E30, 1.0E30, 1.0E30)): VectorView {
     fun safeReciprocalComponent(value: Double, resultIfZero: Double): Double {
         if (value == .0) return if (value.toRawBits() < 0L) -resultIfZero else resultIfZero
 
@@ -198,7 +192,7 @@ fun VectorView.safeReciprocal(
     return Geometry.vector(
         safeReciprocalComponent(x, resultIfZero.x),
         safeReciprocalComponent(y, resultIfZero.y),
-        safeReciprocalComponent(z, resultIfZero.z),
+        safeReciprocalComponent(z, resultIfZero.z)
     )
 }
 
@@ -206,16 +200,10 @@ fun VectorView.requireReciprocal(): VectorView {
     val x = x
     val y = y
     val z = z
-    require(x != 0.0 && y != 0.0 && z != 0.0) {
-        "Cannot take reciprocal of vector with zero component: $this"
-    }
+    require(x != 0.0 && y != 0.0 && z != 0.0) { "Cannot take reciprocal of vector with zero component: $this" }
 
     // Do not use .reciprocal(), potential TOCTOU
-    return Geometry.vector(
-        1.0 / x,
-        1.0 / y,
-        1.0 / z
-    )
+    return Geometry.vector(1.0 / x, 1.0 / y, 1.0 / z)
 }
 
 fun VectorView.reciprocalOrNull(): VectorView? {
@@ -227,11 +215,7 @@ fun VectorView.reciprocalOrNull(): VectorView? {
     }
 
     // Do not use .reciprocal(), potential TOCTOU
-    return Geometry.vector(
-        1.0 / x,
-        1.0 / y,
-        1.0 / z
-    )
+    return Geometry.vector(1.0 / x, 1.0 / y, 1.0 / z)
 }
 
 
@@ -249,22 +233,14 @@ fun VectorView.abs(): VectorView = Geometry.vector(abs(x), abs(y), abs(z))
  * Gets the component-wise min of two vectors
  */
 fun VectorView.componentMin(vector: VectorView): VectorView {
-    return Geometry.vector(
-        minOf(x, vector.x),
-        minOf(y, vector.y),
-        minOf(z, vector.z)
-    )
+    return Geometry.vector(minOf(x, vector.x), minOf(y, vector.y), minOf(z, vector.z))
 }
 
 /**
  * Gets the component-wise max of two vectors
  */
 fun VectorView.componentMax(vector: VectorView): VectorView {
-    return Geometry.vector(
-        maxOf(x, vector.x),
-        maxOf(y, vector.y),
-        maxOf(z, vector.z)
-    )
+    return Geometry.vector(maxOf(x, vector.x), maxOf(y, vector.y), maxOf(z, vector.z))
 }
 
 fun VectorView.withX(x: Double): VectorView = Geometry.vector(x, y, z)
@@ -283,11 +259,12 @@ fun VectorView.coerceIn(min: VectorView, max: VectorView): VectorView {
     )
 }
 
-fun VectorView.coerceComponentsIn(min: Double, max: Double): VectorView = Geometry.vector(
-    x.coerceIn(min, max),
-    y.coerceIn(min, max),
-    z.coerceIn(min, max)
-)
+fun VectorView.coerceComponentsIn(min: Double, max: Double): VectorView =
+    Geometry.vector(
+        x.coerceIn(min, max),
+        y.coerceIn(min, max),
+        z.coerceIn(min, max)
+    )
 
 fun VectorView.coerceComponentsIn(radius: Double): VectorView = coerceComponentsIn(-radius, radius)
 
@@ -394,12 +371,11 @@ fun VectorView.rotateAroundAxisRadians(angleRadians: Double, axis: VectorView): 
 
     val dot = dot(axis)
     val cross = axis.cross(this)
+    val rotatedX = x * cos + cross.x * sin + axis.x * dot * oneMinusCos
+    val rotatedY = y * cos + cross.y * sin + axis.y * dot * oneMinusCos
+    val rotatedZ = z * cos + cross.z * sin + axis.z * dot * oneMinusCos
 
-    return Geometry.vector(
-        x * cos + cross.x * sin + axis.x * dot * oneMinusCos,
-        y * cos + cross.y * sin + axis.y * dot * oneMinusCos,
-        z * cos + cross.z * sin + axis.z * dot * oneMinusCos
-    )
+    return Geometry.vector(rotatedX, rotatedY, rotatedZ)
 }
 
 /**
@@ -452,22 +428,21 @@ fun VectorView.horizontalHeadingRadians(): Double {
 fun VectorView.toRotator(): RotatorView {
     val horizontalLength = sqrt(x * x + z * z)
     return Geometry.rotator(
-        pitch = Math.toDegrees(atan2(-y, horizontalLength)),
-        yaw = Math.toDegrees(-atan2(x, z)),
-        roll = 0.0
+        Math.toDegrees(atan2(-y, horizontalLength)),
+        Math.toDegrees(-atan2(x, z)),
+        0.0
     )
 }
 
 fun VectorView.createPerpendicularBasis(): Basis3dView {
     val forward = normalized()
-    val temporaryRight = if (abs(forward.z) > abs(forward.x) && abs(forward.z) > abs(forward.y)) {
-        Vectors.UnitX
-    } else {
-        Vectors.UnitZ
-    }
+    val temporaryRight = if (abs(forward.z) > abs(forward.x) && abs(forward.z) > abs(forward.y)) Vectors.UnitX else Vectors.UnitZ
 
-    val right = (temporaryRight - forward * temporaryRight.dot(forward)).normalized()
-    val up = forward.cross(right).normalized()
+    val right = (temporaryRight - forward * temporaryRight.dot(forward))
+        .normalized()
+    val up = forward
+        .cross(right)
+        .normalized()
 
     return Basis3d(right, up, forward)
 }
@@ -493,19 +468,11 @@ object Vectors {
     }
 
     fun min(a: VectorView, b: VectorView): VectorView {
-        return Geometry.vector(
-            min(a.x, b.x),
-            min(a.y, b.y),
-            min(a.z, b.z)
-        )
+        return Geometry.vector(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z))
     }
 
     fun max(a: VectorView, b: VectorView): VectorView {
-        return Geometry.vector(
-            max(a.x, b.x),
-            max(a.y, b.y),
-            max(a.z, b.z)
-        )
+        return Geometry.vector(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z))
     }
 
     fun distanceSquared(a: VectorView, b: VectorView) = a.distanceSquaredTo(b)
