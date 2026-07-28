@@ -19,16 +19,19 @@ import heckerpowered.lethal.gameplay.common.item.firearm.EntityHitDamage
 import heckerpowered.lethal.gameplay.common.item.firearm.HeadshotExecutionEffect
 import heckerpowered.lethal.gameplay.common.item.firearm.RayTraceGun
 import heckerpowered.lethal.gameplay.common.sound.ModSounds
+import heckerpowered.lethal.gameplay.common.skill.FortunePrimary
+import heckerpowered.lethal.gameplay.common.skill.FortuneSkillTooltip
+import heckerpowered.lethal.gameplay.common.skill.FortuneSonicBoom
+import heckerpowered.lethal.gameplay.common.skill.FortuneUltimateSkill
 import heckerpowered.lethal.gameplay.common.skill.SkillSlot
 import heckerpowered.lethal.gameplay.common.skill.SkillWeapon
+import heckerpowered.lethal.gameplay.common.skill.StarJudgementKind
 import heckerpowered.lethal.gameplay.common.skill.WeaponSkill
-import heckerpowered.lethal.gameplay.common.skill.EnhancedFortuneTooltip
-import heckerpowered.lethal.gameplay.common.skill.EnhancedFortuneUltimate
-import heckerpowered.lethal.gameplay.common.skill.FortunePrimary
-import heckerpowered.lethal.gameplay.common.skill.FortuneSonicBoom
 
-object EnhancedFortune : RayTraceGun(), SkillWeapon, ItemTooltip by EnhancedFortuneTooltip, ItemGlint {
-    private val HitDamage = EntityHitDamage(VanillaDamageType.FellOutOfWorld, 42_000.0, HeadshotExecutionEffect.Legendary, FortuneSonicBoom, EnhancedFortuneUltimate)
+object EnhancedFortune : RayTraceGun(), SkillWeapon, ItemTooltip, ItemGlint {
+    private val Ultimate = FortuneUltimateSkill(2_000.0, StarJudgementKind.Enhanced)
+    private val Tooltip = FortuneSkillTooltip(FortunePrimary, FortuneSonicBoom, Ultimate)
+    private val HitDamage = EntityHitDamage(VanillaDamageType.FellOutOfWorld, 42_000.0, HeadshotExecutionEffect.Legendary, FortuneSonicBoom, Ultimate)
 
     override val identifier: Identifier
         get() = Constants.identifier("enhanced_fortune")
@@ -45,9 +48,11 @@ object EnhancedFortune : RayTraceGun(), SkillWeapon, ItemTooltip by EnhancedFort
         return when (slot) {
             SkillSlot.Primary -> FortunePrimary
             SkillSlot.Secondary -> FortuneSonicBoom
-            SkillSlot.Ultimate -> EnhancedFortuneUltimate
+            SkillSlot.Ultimate -> Ultimate
         }
     }
+
+    override fun getTooltipLines(stack: ItemStackAccess) = Tooltip.getTooltipLines(stack)
 
     override fun isRayBlockedBy(player: PlayerAccess, weaponStack: ItemStackAccess, blockHit: BlockHitResult): Boolean {
         return FortunePrimary.isRayBlockedBy(player, weaponStack, blockHit)
