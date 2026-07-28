@@ -12,46 +12,34 @@ import net.minecraft.client.resources.I18n
 import net.minecraft.util.text.TextFormatting
 import kotlin.math.roundToInt
 
-object TooltipInterop {
-    @JvmStatic
-    fun text(line: TooltipLine): String {
-        return text(line) { key, arguments -> I18n.format(key, *arguments.toTypedArray()) }
-    }
+fun TooltipLine.asHost(): String = asHost { key, arguments -> I18n.format(key, *arguments.toTypedArray()) }
 
-    internal fun text(
-        line: TooltipLine,
-        translate: (key: String, arguments: List<Any>) -> String,
-    ): String {
-        val text = line.content.joinToString(separator = "") { content ->
-            when (content) {
-                is TooltipText.Literal -> content.value
-                is TooltipText.Translatable -> translate(content.key, content.arguments)
-            }
-        }
-        val baseFormatting = line.color?.formatting()?.toString().orEmpty()
-        val progress = line.progress ?: return baseFormatting + text
-        val completedLength = (text.length * progress.completedFraction).roundToInt()
-        if (completedLength <= 0) return baseFormatting + text
-        if (completedLength >= text.length) return progress.color.formatting().toString() + text
-
-        return buildString {
-            append(progress.color.formatting())
-            append(text, 0, completedLength)
-            append(TextFormatting.RESET)
-            append(baseFormatting)
-            append(text, completedLength, text.length)
+internal fun TooltipLine.asHost(translate: (key: String, arguments: List<Any>) -> String): String {
+    val text = content.joinToString("") { content ->
+        when (content) {
+            is TooltipText.Literal -> content.value
+            is TooltipText.Translatable -> translate(content.key, content.arguments)
         }
     }
+    val baseFormatting = color?.asHost()?.toString().orEmpty()
+    val progress = progress ?: return baseFormatting + text
+    val completedLength = (text.length * progress.completedFraction).roundToInt()
+    if (completedLength <= 0) return baseFormatting + text
+    if (completedLength >= text.length) return progress.color.asHost().toString() + text
 
-    private fun TooltipColor.formatting(): TextFormatting {
-        return when (this) {
-            TooltipColor.Gray -> TextFormatting.GRAY
-            TooltipColor.Gold -> TextFormatting.GOLD
-            TooltipColor.Green -> TextFormatting.GREEN
-        }
+    return buildString {
+        append(progress.color.asHost())
+        append(text, 0, completedLength)
+        append(TextFormatting.RESET)
+        append(baseFormatting)
+        append(text, completedLength, text.length)
     }
 }
 
-fun TooltipLine.tooltipText(): String {
-    return TooltipInterop.text(this)
+private fun TooltipColor.asHost(): TextFormatting {
+    return when (this) {
+        TooltipColor.Gray -> TextFormatting.GRAY
+        TooltipColor.Gold -> TextFormatting.GOLD
+        TooltipColor.Green -> TextFormatting.GREEN
+    }
 }
