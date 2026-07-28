@@ -5,9 +5,7 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.bridge.adapter.entity.ExperienceReceiverAccess;
 import heckerpowered.bridge.adapter.entity.PlayerAccess;
-import heckerpowered.bridge.adapter.entity.SpectatorAccess;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -16,11 +14,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Player.class)
-@Implements({
-        @Interface(iface = PlayerAccess.class, prefix = "playerAccess$"),
-        @Interface(iface = SpectatorAccess.class, prefix = "spectatorAccess$"),
-        @Interface(iface = ExperienceReceiverAccess.class, prefix = "experienceReceiverAccess$")
-})
+@Implements(@Interface(iface = PlayerAccess.class, prefix = "playerAccess$"))
 abstract class PlayerMixin {
     @Shadow
     public abstract boolean isSpectator();
@@ -29,11 +23,11 @@ abstract class PlayerMixin {
     public abstract void giveExperiencePoints(int points);
 
     @Intrinsic
-    public boolean spectatorAccess$isSpectator() {
+    public boolean playerAccess$isSpectator() {
         return isSpectator();
     }
 
-    public void experienceReceiverAccess$addExperiencePoints(int points) {
+    public void playerAccess$addExperiencePoints(int points) {
         giveExperiencePoints(points);
     }
 }
