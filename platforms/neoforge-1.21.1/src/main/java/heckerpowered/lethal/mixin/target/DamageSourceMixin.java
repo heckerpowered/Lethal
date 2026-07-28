@@ -5,13 +5,13 @@
 
 package heckerpowered.lethal.mixin.target;
 
+import heckerpowered.bridge.MixinInterop;
 import heckerpowered.bridge.adapter.entity.EntityAccess;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageFeature;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView;
 import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageType;
 import heckerpowered.bridge.math.VectorView;
 import heckerpowered.bridge.resources.Identifier;
-import heckerpowered.lethal.platform.interop.MixinInterop;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
@@ -22,10 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 @Mixin(DamageSource.class)
 @Implements(@Interface(iface = DamageSourceView.class, prefix = "damageSourceView$"))
@@ -119,6 +116,7 @@ abstract class DamageSourceMixin {
         };
     }
 
+    @Unique
     @Nullable
     private static EntityAccess lethal$entity(@Nullable Entity entity) {
         if (entity == null) {
