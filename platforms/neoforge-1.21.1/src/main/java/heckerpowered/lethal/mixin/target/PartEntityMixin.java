@@ -7,7 +7,7 @@ package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.entity.EntityAccess;
 import heckerpowered.bridge.adapter.entity.EntityPartAccess;
-import heckerpowered.lethal.platform.interop.MixinInterop;
+import heckerpowered.bridge.MixinInterop;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.entity.PartEntity;
 import org.jetbrains.annotations.NotNull;
