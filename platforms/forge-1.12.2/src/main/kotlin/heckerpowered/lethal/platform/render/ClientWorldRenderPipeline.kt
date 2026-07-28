@@ -20,6 +20,8 @@ object ClientWorldRenderPipeline {
     @JvmStatic
     fun onRenderWorldLast(event: RenderWorldLastEvent) {
         val context = ForgeClientWorldRenderContext(event.partialTicks)
-        RuleRegistry.forEach<ClientWorldRenderRule> { rule -> rule.onWorldRender(context) }
+        ForgeClientWorldRenderFrame().use { frame ->
+            RuleRegistry.forEach<ClientWorldRenderRule> { rule -> rule.onWorldRender(context, frame) }
+        }
     }
 }
