@@ -6,6 +6,8 @@
 package heckerpowered.bridge.adapter.world.raycast
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.entity.EntityPartAccess
+import heckerpowered.bridge.adapter.entity.MultipartEntityAccess
 import heckerpowered.bridge.adapter.world.WorldAccess
 import heckerpowered.bridge.math.Geometry
 import heckerpowered.bridge.math.RayIntersectionContext
@@ -28,21 +30,14 @@ fun Sequence<EntityRayBucket>.raycastEntityHitsOrdered(ray: RayView, length: Dou
 fun Sequence<EntityRayBucket>.raycastEntityHitsOrdered(context: RayIntersectionContext, excluded: EntityAccess? = null): Sequence<EntityRayHit> = sequence {
     val iterator = iterator()
     var bucket = iterator.nextOrNull()
-    val hits = PriorityQueue(compareBy<EntityRayHit> { it.time })
+    val hits = PriorityQueue(compareBy(EntityRayHit::time))
+    val visitedEntityIds = HashSet<Int>()
     var previousLowerBound = Double.NEGATIVE_INFINITY
 
     while (bucket != null) {
-        require(bucket.lowerBoundTime >= previousLowerBound) {
-            "Entity ray buckets must be ordered by lowerBoundTime"
-        }
+        require(bucket.lowerBoundTime >= previousLowerBound) { "Entity ray buckets must be ordered by lowerBoundTime" }
         previousLowerBound = bucket.lowerBoundTime
-
-        for (entity in bucket.entities) {
-            if (entity == excluded) continue
-
-            val intersection = entity.boundingBox.intersect(context) ?: continue
-            hits += EntityRayHit(entity, intersection)
-        }
+        bucket.addRaycastHitsTo(hits, context, excluded, visitedEntityIds)
 
         val nextBucket = iterator.nextOrNull()
         val futureLowerBound = nextBucket?.lowerBoundTime ?: Double.POSITIVE_INFINITY
@@ -59,21 +54,52 @@ fun Sequence<EntityRayBucket>.raycastEntityHitsOrdered(context: RayIntersectionC
     }
 }
 
+private fun EntityRayBucket.addRaycastHitsTo(hits: MutableCollection<EntityRayHit>, context: RayIntersectionContext, excluded: EntityAccess?, visitedEntityIds: MutableSet<Int>) {
+    for (candidate in entities) {
+        candidate.forEachRaycastTarget { entity ->
+            if (!visitedEntityIds.add(entity.id) || entity.isExcluded(excluded)) return@forEachRaycastTarget
+
+            val intersection = entity.boundingBox.intersect(context) ?: return@forEachRaycastTarget
+            hits += EntityRayHit(entity, intersection)
+        }
+    }
+}
+
 private fun <Element> Iterator<Element>.nextOrNull(): Element? {
     return if (hasNext()) next() else null
 }
 
 private fun Sequence<EntityAccess>.asEntityRayHits(context: RayIntersectionContext, excluded: EntityAccess?): Sequence<EntityRayHit> {
-    return mapNotNull { entity ->
-        if (entity == excluded) return@mapNotNull null
+    return sequence {
+        val visitedEntityIds = HashSet<Int>()
+        for (candidate in this@asEntityRayHits) {
+            candidate.forEachRaycastTarget { entity ->
+                if (!visitedEntityIds.add(entity.id) || entity.isExcluded(excluded)) return@forEachRaycastTarget
 
-        val intersection = entity.boundingBox.intersect(context)
-            ?: return@mapNotNull null
+                val intersection = entity.boundingBox.intersect(context) ?: return@forEachRaycastTarget
+                yield(EntityRayHit(entity, intersection))
+            }
+        }
+    }.sortedBy(EntityRayHit::time)
+}
 
-        EntityRayHit(entity, intersection)
-    }.sortedBy {
-        it.time
+private inline fun EntityAccess.forEachRaycastTarget(action: (EntityAccess) -> Unit) {
+    val parts = (this as? MultipartEntityAccess)?.parts
+    if (parts.isNullOrEmpty()) {
+        action(this)
+        return
     }
+
+    for (part in parts) {
+        action(part)
+    }
+}
+
+private fun EntityAccess.isExcluded(excluded: EntityAccess?): Boolean {
+    if (excluded == null) return false
+    if (id == excluded.id) return true
+
+    return (this as? EntityPartAccess)?.parent?.id == excluded.id
 }
 
 fun WorldAccess.raycastEntityHits(ray: RayView, distance: Double, excluded: EntityAccess? = null): Sequence<EntityRayHit> {
@@ -94,7 +120,9 @@ fun WorldAccess.raycastEntityHits(ray: RayView, distance: Double, excluded: Enti
             val endX = context.originX + context.directionX * context.maximumTime
             val endY = context.originY + context.directionY * context.maximumTime
             val endZ = context.originZ + context.directionZ * context.maximumTime
-            val searchBox = Geometry.box(min(context.originX, endX), min(context.originY, endY), min(context.originZ, endZ), max(context.originX, endX), max(context.originY, endY), max(context.originZ, endZ))
+            val minimum = Geometry.vector(min(context.originX, endX), min(context.originY, endY), min(context.originZ, endZ))
+            val maximum = Geometry.vector(max(context.originX, endX), max(context.originY, endY), max(context.originZ, endZ))
+            val searchBox = Geometry.box(minimum, maximum)
 
             getEntities(searchBox)
                 .asEntityRayHits(context, excluded)
