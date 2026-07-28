@@ -18,7 +18,7 @@ class CreativeModeTabTest {
         val secondItem = item("second")
         val blueprint = tab("ordered", firstItem, listOf(firstItem, secondItem))
 
-        assertEquals(listOf(firstItem, secondItem), blueprint.items)
+        assertEquals(expected = listOf(firstItem, secondItem), actual = blueprint.items)
     }
 
     @Test

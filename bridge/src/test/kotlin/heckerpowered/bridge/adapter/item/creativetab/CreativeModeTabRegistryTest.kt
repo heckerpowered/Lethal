@@ -28,8 +28,8 @@ class CreativeModeTabRegistryTest {
 
         assertSame(firstTab, CreativeModeTabRegistry.register(firstTab))
         assertSame(secondTab, CreativeModeTabRegistry.register(secondTab))
-        assertEquals(expected = listOf(firstTab, secondTab), CreativeModeTabRegistry.all())
-        assertEquals(listOf(firstTab, secondTab), CreativeModeTabRegistry.findAll(item))
+        assertEquals(expected = listOf(firstTab, secondTab), actual = CreativeModeTabRegistry.all())
+        assertEquals(expected = listOf(firstTab, secondTab), actual = CreativeModeTabRegistry.findAll(item))
     }
 
     @Test

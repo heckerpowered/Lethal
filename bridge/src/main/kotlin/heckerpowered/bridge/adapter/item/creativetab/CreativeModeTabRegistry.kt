@@ -6,35 +6,35 @@
 package heckerpowered.bridge.adapter.item.creativetab
 
 import heckerpowered.bridge.adapter.item.ItemBlueprint
-import heckerpowered.bridge.platform.Services
-import java.util.IdentityHashMap
+import java.util.*
 
-object CreativeModeTabRegistry : CreativeModeTabRegistrar {
-    private val registrations = IdentityHashMap<CreativeModeTabBlueprint, CreativeModeTabAccess>()
-    private val registrationsByIdentifier = mutableMapOf<String, CreativeModeTabAccess>()
-    private val tabsByItem = IdentityHashMap<ItemBlueprint, MutableList<CreativeModeTabAccess>>()
+object CreativeModeTabRegistry {
+    private val blueprintsByIdentifier = LinkedHashMap<String, CreativeModeTabBlueprint>()
+    private val tabsByItem = IdentityHashMap<ItemBlueprint, MutableList<CreativeModeTabBlueprint>>()
 
-    override fun register(blueprint: CreativeModeTabBlueprint): CreativeModeTabAccess {
+    fun register(blueprint: CreativeModeTabBlueprint): CreativeModeTabBlueprint {
         val identifier = blueprint.identifier.asString()
-        require(blueprint !in registrations) { "Creative mode tab blueprint has already been registered" }
-        require(identifier !in registrationsByIdentifier) { "Creative mode tab identifier has already been registered: $identifier" }
+        require(identifier !in blueprintsByIdentifier) { "Creative mode tab identifier has already been registered: $identifier" }
 
-        val tab = Services.CreativeModeTabRegistrar.register(blueprint)
-        registrations[blueprint] = tab
-        registrationsByIdentifier[identifier] = tab
-
+        blueprintsByIdentifier[identifier] = blueprint
         for (item in blueprint.items) {
-            tabsByItem.getOrPut(item) { mutableListOf() } += tab
+            tabsByItem.getOrPut(item) { mutableListOf() } += blueprint
         }
 
-        return tab
+        return blueprint
     }
 
-    operator fun get(blueprint: CreativeModeTabBlueprint): CreativeModeTabAccess? {
-        return registrations[blueprint]
+    fun all(): List<CreativeModeTabBlueprint> {
+        return blueprintsByIdentifier.values.toList()
     }
 
-    fun findAll(item: ItemBlueprint): List<CreativeModeTabAccess> {
-        return tabsByItem[item] ?: emptyList()
+    fun findAll(item: ItemBlueprint): List<CreativeModeTabBlueprint> {
+        return tabsByItem[item]?.toList() ?: emptyList()
+    }
+
+    // TODO: clear doesn't seems make sense. If it's for testing, use @VisibleForTesting
+    internal fun clear() {
+        blueprintsByIdentifier.clear()
+        tabsByItem.clear()
     }
 }
