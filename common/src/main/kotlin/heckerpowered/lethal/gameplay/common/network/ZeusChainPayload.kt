@@ -16,15 +16,16 @@ import heckerpowered.bridge.network.codec.StreamCodec
 import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.client.render.ZeusChainEffect
 
-data class ZeusChainSegment(val startPosition: VectorView, val endPosition: VectorView)
+data class ZeusChainSegment(
+    val startPosition: VectorView,
+    val endPosition: VectorView,
+)
 
 class ZeusChainPayload(chainSegments: List<ZeusChainSegment>) : ClientboundPayload<ZeusChainPayload> {
     val chainSegments = chainSegments.toList()
 
     init {
-        require(this.chainSegments.isNotEmpty()) {
-            "Zeus chain requires at least one segment"
-        }
+        require(this.chainSegments.isNotEmpty()) { "Zeus chain requires at least one segment" }
     }
 
     companion object {
@@ -33,41 +34,35 @@ class ZeusChainPayload(chainSegments: List<ZeusChainSegment>) : ClientboundPaylo
         @JvmField
         val Type = Payload.Type<ZeusChainPayload>(PayloadId)
 
-        private val vectorCodec = StreamCodec.composite(
-            StreamCodecs.Double, { vector: VectorView -> vector.x },
-            StreamCodecs.Double, { vector: VectorView -> vector.y },
-            StreamCodecs.Double, { vector: VectorView -> vector.z },
-            Geometry::vector,
+        private val VectorCodec = StreamCodec.composite(
+            StreamCodecs.Double, VectorView::x,
+            StreamCodecs.Double, VectorView::y,
+            StreamCodecs.Double, VectorView::z,
+            Geometry::vector
         )
-        private val chainSegmentCodec = StreamCodec.composite(
-            vectorCodec, ZeusChainSegment::startPosition,
-            vectorCodec, ZeusChainSegment::endPosition,
-            ::ZeusChainSegment,
+        private val ChainSegmentCodec = StreamCodec.composite(
+            VectorCodec, ZeusChainSegment::startPosition,
+            VectorCodec, ZeusChainSegment::endPosition,
+            ::ZeusChainSegment
         )
-        private val chainSegmentsCodec = StreamCodec.of<StreamBuffer, List<ZeusChainSegment>>(
-            encoder = { output, segments ->
-                require(segments.isNotEmpty()) {
-                    "Zeus chain requires at least one segment"
-                }
+        private val ChainSegmentsCodec = StreamCodec.of<StreamBuffer, List<ZeusChainSegment>>(
+            { output, segments ->
+                require(segments.isNotEmpty()) { "Zeus chain requires at least one segment" }
 
                 StreamCodecs.VarInt.encode(output, segments.size)
-                segments.forEach { segment -> chainSegmentCodec.encode(output, segment) }
+                segments.forEach { ChainSegmentCodec.encode(output, it) }
             },
-            decoder = { input ->
+            { input ->
                 val segmentCount = StreamCodecs.VarInt.decode(input)
-                require(segmentCount >= 1) {
-                    "Zeus chain segment count must be positive: $segmentCount"
-                }
+                require(segmentCount >= 1) { "Zeus chain segment count must be positive: $segmentCount" }
 
                 val maximumReadableSegmentCount = input.readableByteCount / SEGMENT_BYTE_COUNT
-                require(segmentCount <= maximumReadableSegmentCount) {
-                    "Zeus chain segment count $segmentCount exceeds readable data for $maximumReadableSegmentCount segment(s)"
-                }
+                require(segmentCount <= maximumReadableSegmentCount) { "Zeus chain segment count $segmentCount exceeds readable data for $maximumReadableSegmentCount segment(s)" }
 
-                List(segmentCount) { chainSegmentCodec.decode(input) }
+                List(segmentCount) { ChainSegmentCodec.decode(input) }
             },
         )
-        val Codec = StreamCodec.composite(chainSegmentsCodec, ZeusChainPayload::chainSegments, ::ZeusChainPayload)
+        val Codec = StreamCodec.composite(ChainSegmentsCodec, ZeusChainPayload::chainSegments, ::ZeusChainPayload)
     }
 
     override val type: Payload.Type<ZeusChainPayload>

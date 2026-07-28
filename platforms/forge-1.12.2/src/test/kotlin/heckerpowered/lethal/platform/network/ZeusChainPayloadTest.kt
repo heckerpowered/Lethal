@@ -32,12 +32,12 @@ class ZeusChainPayloadTest {
             ZeusChainPayload.Codec.encode(streamBuffer, payload)
             val decodedPayload = ZeusChainPayload.Codec.decode(streamBuffer)
 
-            assertEquals(payload.chainSegments.size, decodedPayload.chainSegments.size)
+            assertEquals(expected = payload.chainSegments.size, actual = decodedPayload.chainSegments.size)
             payload.chainSegments.zip(decodedPayload.chainSegments).forEach { (expected, actual) ->
                 assertVectorEquals(expected.startPosition, actual.startPosition)
                 assertVectorEquals(expected.endPosition, actual.endPosition)
             }
-            assertEquals(0, nativeBuffer.readableBytes())
+            assertEquals(expected = 0, actual = nativeBuffer.readableBytes())
         } finally {
             nativeBuffer.release()
         }
@@ -67,8 +67,8 @@ class ZeusChainPayloadTest {
     }
 
     private fun assertVectorEquals(expected: VectorView, actual: VectorView) {
-        assertEquals(expected.x, actual.x)
-        assertEquals(expected.y, actual.y)
-        assertEquals(expected.z, actual.z)
+        assertEquals(expected = expected.x, actual = actual.x)
+        assertEquals(expected = expected.y, actual = actual.y)
+        assertEquals(expected = expected.z, actual = actual.z)
     }
 }
