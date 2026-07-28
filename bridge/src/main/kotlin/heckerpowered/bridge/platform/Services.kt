@@ -5,11 +5,8 @@
 
 package heckerpowered.bridge.platform
 
-import heckerpowered.bridge.adapter.item.ItemProvider
-import heckerpowered.bridge.adapter.item.ItemRegistrar
-import heckerpowered.bridge.adapter.item.creativetab.CreativeModeTabRegistrar
-import heckerpowered.bridge.adapter.sound.SoundRegistrar
 import heckerpowered.bridge.network.PayloadTransport
+import heckerpowered.bridge.platform.services.ClientPlatform
 import heckerpowered.bridge.platform.services.Entrypoint
 import heckerpowered.bridge.platform.services.ModPlatform
 import heckerpowered.bridge.platform.services.PlatformLogger
@@ -18,15 +15,11 @@ import java.util.*
 object Services {
     val Logger by lazy { load<PlatformLogger>() }
     val Platform by lazy { load<ModPlatform>() }
-    val ItemProvider by lazy { load<ItemProvider>() }
-    val ItemRegistrar by lazy { load<ItemRegistrar>() }
-    val CreativeModeTabRegistrar by lazy { load<CreativeModeTabRegistrar>() }
-    val SoundRegistrar by lazy { load<SoundRegistrar>() }
+    val ClientPlatform by lazy { load<ClientPlatform>() }
     val PayloadTransport by lazy { load<PayloadTransport>() }
 
     fun <T : Any> load(type: Class<T>): T {
-        return loadOrNull(type)
-            ?: error("Failed to load service for ${type.name}")
+        return loadOrNull(type) ?: error("Failed to load service for ${type.name}")
     }
 
     fun <T : Any> loadOrNull(type: Class<T>): T? {
@@ -39,11 +32,10 @@ object Services {
     }
 
     inline fun <reified T : Entrypoint> callEntrypoints() {
-        val entrypoints = Services.loads<T>()
-        val entrypointCount = entrypoints.count()
+        val entrypoints = Services.loads<T>().toList()
+        val entrypointCount = entrypoints.size
 
         Logger.info("Found $entrypointCount entrypoint(s).")
-        // Logger.info("Classloader(${Services::class.java.name})=${Services::class.java.classLoader}, ${T::class.java.name})=${T::class.java.classLoader}")
         for ((index, entrypoint) in entrypoints.withIndex()) {
             Logger.info("Calling entrypoint (${index + 1}/$entrypointCount): ${entrypoint.javaClass.name}")
             entrypoint.onEntrypoint()
