@@ -5,12 +5,13 @@
 
 package heckerpowered.bridge.adapter.entity
 
+import heckerpowered.bridge.adapter.BridgeAccess
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
 import heckerpowered.bridge.adapter.world.WorldAccess
 import heckerpowered.bridge.math.*
 import java.util.*
 
-interface EntityAccess : UniquelyIdentifiable {
+interface EntityAccess : BridgeAccess, UniquelyIdentifiable {
     val id: Int
     override val uuid: UUID
 
@@ -43,6 +44,7 @@ interface EntityAccess : UniquelyIdentifiable {
     }
 
     fun hurt(source: DamageSourceView, damagePoints: Double): Boolean
+    fun remove()
 
     val isAlive: Boolean
     val isRemoved: Boolean
