@@ -15,21 +15,11 @@ import heckerpowered.bridge.platform.load
  * Creates the host entity that owns a persistent Star Judgement effect.
  */
 fun interface StarJudgementSpawner {
-    fun spawn(
-        world: WorldAccess,
-        owner: PlayerAccess,
-        position: VectorView,
-        kind: StarJudgementKind,
-    )
+    fun spawn(world: WorldAccess, owner: PlayerAccess, position: VectorView, kind: StarJudgementKind)
 }
 
 internal object HostingStarJudgementSpawner : StarJudgementSpawner {
-    override fun spawn(
-        world: WorldAccess,
-        owner: PlayerAccess,
-        position: VectorView,
-        kind: StarJudgementKind,
-    ) {
+    override fun spawn(world: WorldAccess, owner: PlayerAccess, position: VectorView, kind: StarJudgementKind) {
         Services.load<StarJudgementSpawner>().spawn(world, owner, position, kind)
     }
 }
