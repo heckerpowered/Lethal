@@ -8,10 +8,7 @@ package heckerpowered.bridge.adapter.entity.damagesource
 import heckerpowered.bridge.resources.Identifier
 import java.util.*
 
-enum class VanillaDamageType(
-    path: String,
-    private val assignedFeatures: EnumSet<DamageFeature>,
-) {
+enum class VanillaDamageType(path: String, private val assignedFeatures: EnumSet<DamageFeature>) {
     Generic(
         "generic",
         features(
