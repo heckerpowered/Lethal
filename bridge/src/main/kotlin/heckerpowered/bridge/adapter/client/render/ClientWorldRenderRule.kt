@@ -6,5 +6,5 @@
 package heckerpowered.bridge.adapter.client.render
 
 interface ClientWorldRenderRule {
-    fun onWorldRender(context: ClientWorldRenderContext)
+    fun onWorldRender(context: ClientWorldRenderContext, frame: ClientWorldRenderFrame)
 }
