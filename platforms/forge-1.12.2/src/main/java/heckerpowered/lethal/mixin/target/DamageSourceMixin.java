@@ -41,12 +41,12 @@ class DamageSourceMixin {
 
     @Nullable
     public EntityAccess damageSourceView$getDirectEntity() {
-        return ObjectInterop.entityOrNull(getImmediateSource());
+        return ObjectInterop.asView(getImmediateSource());
     }
 
     @Nullable
     public EntityAccess damageSourceView$getCausingEntity() {
-        return ObjectInterop.entityOrNull(getTrueSource());
+        return ObjectInterop.asView(getTrueSource());
     }
 
     @Nullable
@@ -54,7 +54,7 @@ class DamageSourceMixin {
         final Vec3d position = getDamageLocation();
         if (position == null) return null;
 
-        return GeometryInterop.vector(position);
+        return GeometryInterop.asView(position);
     }
 
     @NotNull
