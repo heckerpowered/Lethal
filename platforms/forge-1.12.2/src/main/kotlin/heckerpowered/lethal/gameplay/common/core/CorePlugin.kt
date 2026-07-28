@@ -30,9 +30,8 @@ class CorePlugin : IFMLLoadingPlugin {
     }
 
     /**
-     * Securely launch mixin, due to mixin cannot be initialized directly here, plugins and mixin are loaded by
-     * different class loaders. There may be side effects. If problems occur, try switching to the Tweaker Mod to
-     * boot Mixin!
+     * The core plugin and Mixin use different class loaders, so initialize Mixin through the
+     * application class loader that will own it.
      */
     fun secureLaunchMixin() {
         val applicationClassLoader = Launch::class.java.classLoader
