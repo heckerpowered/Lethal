@@ -21,6 +21,6 @@ object ClientPostProcessPipeline {
     @JvmStatic
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Pre) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return
-        RuleRegistry.forEach<ClientPostProcessRule> { rule -> rule.onPostProcess(ForgeClientPostProcessContext) }
+        ForgeClientPostProcessFrame().use { frame -> RuleRegistry.forEach<ClientPostProcessRule> { rule -> rule.onPostProcess(frame) } }
     }
 }
