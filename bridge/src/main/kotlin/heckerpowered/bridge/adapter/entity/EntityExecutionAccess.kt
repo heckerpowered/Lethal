@@ -10,9 +10,9 @@ import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
 /**
  * Executes an entity independently of ordinary damage immunity.
  *
- * Implementations must attribute death to [source], invoke the host's normal death processing,
+ * Implementations must attribute death to source, invoke the host's normal death processing,
  * and keep the entity's observable health at zero while it remains in the world.
  */
-interface EntityExecutionAccess {
+interface EntityExecutionAccess : LivingEntityAccess {
     fun execute(source: DamageSourceView)
 }
