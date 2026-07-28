@@ -17,48 +17,48 @@ class ParticleEffectTest {
     fun defaultsCreateOneStationaryShortDistanceParticle() {
         val effect = ParticleEffect(VanillaParticle.Flame)
 
-        assertEquals(1, effect.count)
-        assertEquals(Vectors.Zero, effect.positionSpread)
-        assertEquals(0.0, effect.velocitySpread)
+        assertEquals(expected = 1, actual = effect.count)
+        assertEquals(expected = Vectors.Zero, actual = effect.positionSpread)
+        assertEquals(expected = 0.0, actual = effect.velocitySpread)
         assertFalse(effect.longDistance)
-        assertEquals(emptyList(), effect.data)
+        assertEquals(expected = emptyList(), actual = effect.data)
     }
 
     @Test
     fun countMustBePositive() {
-        assertFailsWith<IllegalArgumentException> { ParticleEffect(VanillaParticle.Flame, count = 0) }
-        assertFailsWith<IllegalArgumentException> { ParticleEffect(VanillaParticle.Flame, count = -1) }
+        assertFailsWith<IllegalArgumentException> { ParticleEffect(VanillaParticle.Flame, 0) }
+        assertFailsWith<IllegalArgumentException> { ParticleEffect(VanillaParticle.Flame, -1) }
     }
 
     @Test
     fun spreadsMustBeFiniteAndNonNegative() {
         assertFailsWith<IllegalArgumentException> {
-            ParticleEffect(VanillaParticle.Flame, positionSpread = Geometry.vector(-1.0, 0.0, 0.0))
+            ParticleEffect(VanillaParticle.Flame, 1, Geometry.vector(-1.0, 0.0, 0.0))
         }
         assertFailsWith<IllegalArgumentException> {
-            ParticleEffect(VanillaParticle.Flame, positionSpread = Geometry.vector(0.0, Double.NaN, 0.0))
+            ParticleEffect(VanillaParticle.Flame, 1, Geometry.vector(0.0, Double.NaN, 0.0))
         }
         assertFailsWith<IllegalArgumentException> {
-            ParticleEffect(VanillaParticle.Flame, velocitySpread = Double.POSITIVE_INFINITY)
+            ParticleEffect(VanillaParticle.Flame, 1, Vectors.Zero, Double.POSITIVE_INFINITY)
         }
     }
 
     @Test
     fun dataCountMustMatchVanillaParticle() {
         assertFailsWith<IllegalArgumentException> { ParticleEffect(VanillaParticle.BlockCrack) }
-        assertFailsWith<IllegalArgumentException> { ParticleEffect(VanillaParticle.Flame, data = listOf(1)) }
+        assertFailsWith<IllegalArgumentException> { ParticleEffect(VanillaParticle.Flame, 1, Vectors.Zero, 0.0, false, listOf(1)) }
 
-        val effect = ParticleEffect(VanillaParticle.BlockCrack, data = listOf(1))
-        assertEquals(listOf(1), effect.data)
+        val effect = ParticleEffect(VanillaParticle.BlockCrack, 1, Vectors.Zero, 0.0, false, listOf(1))
+        assertEquals(expected = listOf(1), actual = effect.data)
     }
 
     @Test
     fun particleDataIsCopied() {
         val data = mutableListOf(1)
-        val effect = ParticleEffect(VanillaParticle.BlockDust, data = data)
+        val effect = ParticleEffect(VanillaParticle.BlockDust, 1, Vectors.Zero, 0.0, false, data)
 
         data[0] = 2
 
-        assertEquals(listOf(1), effect.data)
+        assertEquals(expected = listOf(1), actual = effect.data)
     }
 }

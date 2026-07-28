@@ -8,14 +8,7 @@ package heckerpowered.bridge.adapter.effect
 import heckerpowered.bridge.math.VectorView
 import heckerpowered.bridge.math.Vectors
 
-class ParticleEffect(
-    val particle: VanillaParticle,
-    val count: Int = 1,
-    val positionSpread: VectorView = Vectors.Zero,
-    val velocitySpread: Double = 0.0,
-    val longDistance: Boolean = false,
-    data: List<Int> = emptyList(),
-) {
+class ParticleEffect(val particle: VanillaParticle, val count: Int = 1, val positionSpread: VectorView = Vectors.Zero, val velocitySpread: Double = 0.0, val longDistance: Boolean = false, data: List<Int> = emptyList()) {
     val data = data.toList()
 
     init {
