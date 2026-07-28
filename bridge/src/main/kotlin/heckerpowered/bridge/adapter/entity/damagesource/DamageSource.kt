@@ -50,7 +50,7 @@ data class VirtualDamageSource(
 
 data class QuantumVanillaDamageSource(
     val source: VanillaDamageType,
-    
+
     override val directEntity: EntityAccess?,
     override val causingEntity: EntityAccess?,
     override val position: VectorView?,
