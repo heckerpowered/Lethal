@@ -5,10 +5,12 @@
 
 package heckerpowered.lethal.mixin.impl
 
+import heckerpowered.bridge.adapter.world.raycast.BlockHitResult
 import heckerpowered.bridge.adapter.world.raycast.BlockRaycastShape
 import heckerpowered.bridge.math.BlockDirection
 import heckerpowered.bridge.math.BlockPositions
 import heckerpowered.bridge.math.Geometry
+import heckerpowered.lethal.platform.interop.asHost
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.init.Bootstrap
@@ -39,15 +41,15 @@ class WorldAccessImplTest {
 
         val hits = WorldAccessImpl.raycastBlockHits(world, ray, 6.0).toList()
 
-        assertEquals(listOf(2, 4), hits.map { hit -> hit.blockPosition.z })
-        assertEquals(listOf("minecraft:stone", "minecraft:glass"), hits.map { hit -> hit.blockState.block.identifier.asString() })
-        assertEquals(listOf(BlockDirection.North, BlockDirection.North), hits.map { hit -> hit.face })
-        assertEquals(0.75, hits[0].time, 1.0E-9)
-        assertEquals(1.75, hits[1].time, 1.0E-9)
+        assertEquals(expected = listOf(2, 4), actual = hits.map { it.blockPosition.z })
+        assertEquals(expected = listOf("minecraft:stone", "minecraft:glass"), actual = hits.map { it.blockState.asHost().block.registryName.toString() })
+        assertEquals(expected = listOf(BlockDirection.North, BlockDirection.North), actual = hits.map(BlockHitResult::face))
+        assertEquals(expected = 0.75, actual = hits[0].time, absoluteTolerance = 1.0E-9)
+        assertEquals(expected = 1.75, actual = hits[1].time, absoluteTolerance = 1.0E-9)
 
         val nativeHit = assertNotNull(world.rayTraceBlocks(Vec3d(0.5, 0.5, 0.5), Vec3d(0.5, 0.5, 6.5), false, true, false))
-        assertEquals(nativeHit.blockPos.z, hits.first().blockPosition.z)
-        assertEquals(nativeHit.hitVec.z, hits.first().point.z, 1.0E-9)
+        assertEquals(expected = nativeHit.blockPos.z, actual = hits.first().blockPosition.z)
+        assertEquals(expected = nativeHit.hitVec.z, actual = hits.first().point.z, absoluteTolerance = 1.0E-9)
     }
 
     @Test
@@ -67,7 +69,7 @@ class WorldAccessImplTest {
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 4.0, BlockRaycastShape.Outline).single()
 
-        assertEquals(3, hit.blockPosition.z)
+        assertEquals(expected = 3, actual = hit.blockPosition.z)
     }
 
     @Test
@@ -83,7 +85,7 @@ class WorldAccessImplTest {
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 512.0).first()
 
-        assertEquals(2, hit.blockPosition.z)
+        assertEquals(expected = 2, actual = hit.blockPosition.z)
     }
 
     @Test
@@ -94,10 +96,10 @@ class WorldAccessImplTest {
 
         val hits = WorldAccessImpl.raycastBlockHits(world, ray, 6.0).toList()
 
-        assertEquals(listOf(3, 1), hits.map { hit -> hit.blockPosition.z })
-        assertEquals(listOf(BlockDirection.South, BlockDirection.South), hits.map { hit -> hit.face })
-        assertEquals(0.75, hits[0].time, 1.0E-9)
-        assertEquals(1.75, hits[1].time, 1.0E-9)
+        assertEquals(expected = listOf(3, 1), actual = hits.map { it.blockPosition.z })
+        assertEquals(expected = listOf(BlockDirection.South, BlockDirection.South), actual = hits.map(BlockHitResult::face))
+        assertEquals(expected = 0.75, actual = hits[0].time, absoluteTolerance = 1.0E-9)
+        assertEquals(expected = 1.75, actual = hits[1].time, absoluteTolerance = 1.0E-9)
     }
 
     @Test
@@ -113,8 +115,8 @@ class WorldAccessImplTest {
         assertTrue(hits.any { hit -> hit.blockPosition.x == -1 && hit.blockPosition.y == -1 && hit.blockPosition.z == 0 })
         assertTrue(hits.none { hit -> hit.blockPosition.x == 0 && hit.blockPosition.y == -1 && hit.blockPosition.z == -1 })
         assertTrue(hits.all { hit -> hit.time >= 0.0 })
-        assertEquals(hits.map { hit -> hit.time }.sorted(), hits.map { hit -> hit.time })
-        assertEquals(hits.map { hit -> hit.blockPosition }.distinct().size, hits.size)
+        assertEquals(expected = hits.map(BlockHitResult::time).sorted(), actual = hits.map(BlockHitResult::time))
+        assertEquals(expected = hits.map(BlockHitResult::blockPosition).distinct().size, actual = hits.size)
     }
 
     @Test
@@ -125,8 +127,8 @@ class WorldAccessImplTest {
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 2.0).single()
 
-        assertEquals(-1, hit.blockPosition.x)
-        assertEquals(0.0, hit.time, 1.0E-9)
+        assertEquals(expected = -1, actual = hit.blockPosition.x)
+        assertEquals(expected = 0.0, actual = hit.time, absoluteTolerance = 1.0E-9)
     }
 
     @Test
@@ -146,7 +148,7 @@ class WorldAccessImplTest {
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 260.0).single()
 
-        assertEquals(250, hit.blockPosition.z)
+        assertEquals(expected = 250, actual = hit.blockPosition.z)
     }
 
     @Test
@@ -157,8 +159,8 @@ class WorldAccessImplTest {
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 4.0).single()
 
-        assertEquals(6, hit.blockPosition.z)
-        assertEquals(4.0, hit.time, 1.0E-9)
+        assertEquals(expected = 6, actual = hit.blockPosition.z)
+        assertEquals(expected = 4.0, actual = hit.time, absoluteTolerance = 1.0E-9)
     }
 
     @Test
@@ -166,19 +168,13 @@ class WorldAccessImplTest {
         val world = RecordingDestructionWorld()
         val position = BlockPositions.of(1, 2, 3)
 
-        assertTrue(WorldAccessImpl.destroyBlock(world, position, dropItems = false))
+        assertTrue(WorldAccessImpl.destroyBlock(world, position, false))
 
-        assertEquals(BlockPos(1, 2, 3), world.destroyedPosition)
+        assertEquals(expected = BlockPos(1, 2, 3), actual = world.destroyedPosition)
         assertFalse(world.dropItems)
     }
 
-    private open class TestWorld(private val blockStates: Map<BlockPos, IBlockState>) : World(
-        SaveHandlerMP(),
-        WorldInfo(WorldSettings(0L, GameType.SURVIVAL, false, false, WorldType.DEFAULT), "test"),
-        WorldProviderSurface(),
-        Profiler(),
-        false,
-    ) {
+    private open class TestWorld(private val blockStates: Map<BlockPos, IBlockState>) : World(SaveHandlerMP(), WorldInfo(WorldSettings(0L, GameType.SURVIVAL, false, false, WorldType.DEFAULT), "test"), WorldProviderSurface(), Profiler(), false) {
         override fun getBlockState(position: BlockPos): IBlockState {
             return blockStates[position] ?: Blocks.AIR.defaultState
         }
