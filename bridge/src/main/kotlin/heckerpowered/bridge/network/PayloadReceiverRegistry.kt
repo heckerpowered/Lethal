@@ -20,10 +20,7 @@ class PayloadReceiverRegistry<C> {
         registration.handle(payload, context)
     }
 
-    private class PayloadHandlerRegistration<T : Payload<T>, C>(
-        private val type: Payload.Type<T>,
-        private val handler: (T, C) -> Unit,
-    ) {
+    private class PayloadHandlerRegistration<T : Payload<T>, C>(private val type: Payload.Type<T>, private val handler: (T, C) -> Unit) {
         fun handle(payload: Payload<*>, context: C) {
             check(payload.type === type) { "Payload type instance does not match its registered handler" }
 
