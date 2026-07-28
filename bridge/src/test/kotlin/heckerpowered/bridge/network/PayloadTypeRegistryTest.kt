@@ -24,9 +24,9 @@ class PayloadTypeRegistryTest {
         registry.encode(buffer, payload)
         buffer.prepareForReading()
 
-        assertEquals(payload, registry.decode(TestPayload.type.id, buffer))
+        assertEquals(expected = payload, actual = registry.decode(TestPayload.type.id, buffer))
         assertTrue(registry.isRegistered(TestPayload.type))
-        assertEquals(0, buffer.readableByteCount)
+        assertEquals(expected = 0, actual = buffer.readableByteCount)
     }
 
     @Test
@@ -79,9 +79,9 @@ class StreamCodecsTest {
         val decodedIntegers = List(integerValues.size) { StreamCodecs.VarInt.decode(buffer) }
         val decodedLongs = List(longValues.size) { StreamCodecs.VarLong.decode(buffer) }
 
-        assertEquals(integerValues, decodedIntegers)
-        assertEquals(longValues, decodedLongs)
-        assertEquals(0, buffer.readableByteCount)
+        assertEquals(expected = integerValues, actual = decodedIntegers)
+        assertEquals(expected = longValues, actual = decodedLongs)
+        assertEquals(expected = 0, actual = buffer.readableByteCount)
     }
 
     @Test
@@ -96,9 +96,9 @@ class StreamCodecsTest {
         byteArrayCodec.encode(buffer, bytes)
         buffer.prepareForReading()
 
-        assertEquals(string, stringCodec.decode(buffer))
+        assertEquals(expected = string, actual = stringCodec.decode(buffer))
         assertContentEquals(bytes, byteArrayCodec.decode(buffer))
-        assertEquals(0, buffer.readableByteCount)
+        assertEquals(expected = 0, actual = buffer.readableByteCount)
     }
 
     @Test
