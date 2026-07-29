@@ -20,8 +20,8 @@ class ItemTooltipTest {
         arguments += 20.0
         content += TooltipText.Literal("changed")
 
-        assertEquals(listOf(12.5), translated.arguments)
-        assertEquals(listOf(translated), line.content)
+        assertEquals(expected = listOf(12.5), actual = translated.arguments)
+        assertEquals(expected = listOf(translated), actual = line.content)
     }
 
     @Test
