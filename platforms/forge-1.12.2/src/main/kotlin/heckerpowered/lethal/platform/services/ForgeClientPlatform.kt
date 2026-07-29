@@ -7,9 +7,10 @@ package heckerpowered.lethal.platform.services
 
 import heckerpowered.bridge.adapter.client.MinecraftAccess
 import heckerpowered.bridge.platform.services.ClientPlatform
+import heckerpowered.bridge.requireAccess
 import net.minecraft.client.Minecraft
 
 class ForgeClientPlatform : ClientPlatform {
     override val minecraft: MinecraftAccess
-        get() = Minecraft.getMinecraft() as MinecraftAccess
+        get() = requireAccess<MinecraftAccess>(Minecraft.getMinecraft())
 }
