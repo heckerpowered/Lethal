@@ -168,7 +168,7 @@ class NativeStructDefinitionTest {
 
             package your.package
 
-            import heckerpowered.render.CommandScope
+            import heckerpowered.render.CommandEncoder
             import heckerpowered.render.Matrix4
             import heckerpowered.render.ShaderField
             import heckerpowered.render.ShaderValueType
@@ -207,7 +207,7 @@ class NativeStructDefinitionTest {
                 }
             }
 
-            internal inline fun CommandScope.writeUniformData(
+            internal inline fun CommandEncoder.writeUniformData(
                 write: context(MemoryFrame) UniformDataWriter.() -> Unit,
             ): UniformBinding {
                 return memoryStack.frame {

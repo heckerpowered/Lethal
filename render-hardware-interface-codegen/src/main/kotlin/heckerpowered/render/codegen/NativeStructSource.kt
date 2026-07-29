@@ -17,7 +17,7 @@ internal fun NativeStructDefinition.render(layout: NativeStructLayout = layout()
             if (!isGpuBufferData && pushConstantBlock == null) add("$MEMORY_PACKAGE.MemoryStack")
         }
         if (isGpuBufferData && packageName != RENDER_PACKAGE) {
-            add("$RENDER_PACKAGE.CommandScope")
+            add("$RENDER_PACKAGE.CommandEncoder")
             add("$RENDER_PACKAGE.ShaderField")
             add("$RENDER_PACKAGE.ShaderValueType")
             add("$RENDER_PACKAGE.UniformBinding")
@@ -148,7 +148,7 @@ private fun StringBuilder.appendShaderDataWriterFunction(name: String, component
 
 private fun StringBuilder.appendGpuBufferWriteFunction(definition: NativeStructDefinition, layout: NativeStructLayout) = with(definition) {
     appendLine()
-    appendLine("${visibilityPrefix()}inline fun CommandScope.$writeFunctionName(")
+    appendLine("${visibilityPrefix()}inline fun CommandEncoder.$writeFunctionName(")
     appendLine("    write: context(MemoryFrame) $gpuWriterName.() -> Unit,")
     appendLine("): UniformBinding {")
     appendLine("    return memoryStack.frame {")
