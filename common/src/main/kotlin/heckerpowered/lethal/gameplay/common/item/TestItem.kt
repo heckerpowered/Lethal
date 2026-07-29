@@ -59,7 +59,8 @@ object TestItem : ItemBlueprint {
 
                 val elapsedNanoseconds = kotlin.system.measureNanoTime {
                     repeat(iterations) {
-                        val hit = world.raycastEntityHits(ray, distance, user, policy).firstOrNull()
+                        val hit = world.raycastEntityHits(ray, distance, user, policy)
+                            .firstOrNull()
 
                         if (hit != null) {
                             hits++
@@ -97,7 +98,8 @@ object TestItem : ItemBlueprint {
             var autoHits = 0
             val autoElapsedNanoseconds = kotlin.system.measureNanoTime {
                 repeat(iterations) {
-                    val hit = world.raycastEntityHits(ray, distance, user, learnedPolicy).firstOrNull()
+                    val hit = world.raycastEntityHits(ray, distance, user, learnedPolicy)
+                        .firstOrNull()
 
                     if (hit != null) {
                         autoHits++
