@@ -5,6 +5,7 @@
 
 package heckerpowered.lethal.gameplay.common.item.firearm
 
+import heckerpowered.bridge.adapter.entity.EntityEquipmentAccess
 import heckerpowered.bridge.adapter.entity.PlayerAccess
 import heckerpowered.bridge.adapter.item.EquipmentSlot
 import heckerpowered.bridge.adapter.item.ItemAccess
@@ -25,10 +26,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 
 class FireStateTrackerTest {
-    private val emptyStack = TestItemStack(
-        item = TestRegularItem,
-        count = 0,
-    )
+    private val emptyStack = TestItemStack(TestRegularItem, 0)
 
     @BeforeTest
     fun setUp() {
@@ -44,36 +42,36 @@ class FireStateTrackerTest {
     fun heldTriggerFiresImmediatelyAndThenFollowsFrequency() {
         val gun = TestGun(Frequency.perMinute(600))
         val weaponStack = TestItemStack(gun)
-        val player = createPlayer(mainHandStack = { weaponStack }, offHandStack = { emptyStack })
+        val player = createPlayer({ weaponStack }, { emptyStack })
         FireStateTracker.setFiring(player, true)
 
         FireStateTracker.tick()
-        assertEquals(1, gun.fireCount)
+        assertEquals(expected = 1, actual = gun.fireCount)
 
         FireStateTracker.tick()
-        assertEquals(2, gun.fireCount)
+        assertEquals(expected = 2, actual = gun.fireCount)
 
         FireStateTracker.tick()
-        assertEquals(2, gun.fireCount)
+        assertEquals(expected = 2, actual = gun.fireCount)
     }
 
     @Test
     fun registeredServerUpdateAdvancesFiring() {
         val gun = TestGun(Frequency.perMinute(600))
         val weaponStack = TestItemStack(gun)
-        val player = createPlayer(mainHandStack = { weaponStack }, offHandStack = { emptyStack })
+        val player = createPlayer({ weaponStack }, { emptyStack })
         FireStateTracker.setFiring(player, true)
 
         RuleRegistry.forEach<ServerUpdateRule> { it.onServerUpdate() }
 
-        assertEquals(1, gun.fireCount)
+        assertEquals(expected = 1, actual = gun.fireCount)
     }
 
     @Test
     fun pressingAgainDoesNotResetFireProgress() {
         val gun = TestGun(Frequency.perMinute(600))
         val weaponStack = TestItemStack(gun)
-        val player = createPlayer(mainHandStack = { weaponStack }, offHandStack = { emptyStack })
+        val player = createPlayer({ weaponStack }, { emptyStack })
         FireStateTracker.setFiring(player, true)
         FireStateTracker.tick()
 
@@ -81,10 +79,10 @@ class FireStateTrackerTest {
         FireStateTracker.setFiring(player, true)
         FireStateTracker.tick(25.milliseconds)
 
-        assertEquals(1, gun.fireCount)
+        assertEquals(expected = 1, actual = gun.fireCount)
 
         FireStateTracker.tick(25.milliseconds)
-        assertEquals(2, gun.fireCount)
+        assertEquals(expected = 2, actual = gun.fireCount)
     }
 
     @Test
@@ -92,23 +90,23 @@ class FireStateTrackerTest {
         val firstGun = TestGun(Frequency.perMinute(600))
         val secondGun = TestGun(Frequency.perMinute(600))
         var mainHandStack = TestItemStack(firstGun)
-        val player = createPlayer(mainHandStack = { mainHandStack }, offHandStack = { emptyStack })
+        val player = createPlayer({ mainHandStack }, { emptyStack })
         FireStateTracker.setFiring(player, true)
 
         FireStateTracker.tick()
         mainHandStack = TestItemStack(secondGun)
         FireStateTracker.tick()
 
-        assertEquals(1, firstGun.fireCount)
-        assertEquals(1, secondGun.fireCount)
+        assertEquals(expected = 1, actual = firstGun.fireCount)
+        assertEquals(expected = 1, actual = secondGun.fireCount)
         assertTrue(FireStateTracker.isFiring(player))
     }
 
     @Test
     fun blockedGunDoesNotAccumulateOperations() {
-        val gun = TestGun(Frequency.perMinute(6000), firingAllowed = false)
+        val gun = TestGun(Frequency.perMinute(6000), false)
         val weaponStack = TestItemStack(gun)
-        val player = createPlayer(mainHandStack = { weaponStack }, offHandStack = { emptyStack })
+        val player = createPlayer({ weaponStack }, { emptyStack })
         FireStateTracker.setFiring(player, true)
 
         repeat(20) {
@@ -117,19 +115,19 @@ class FireStateTrackerTest {
         gun.firingAllowed = true
         FireStateTracker.tick()
 
-        assertEquals(6, gun.fireCount)
+        assertEquals(expected = 6, actual = gun.fireCount)
     }
 
     @Test
     fun highFrequencyIsNotLimitedByTheTracker() {
         val gun = TestGun(Frequency.perMinute(24000))
         val weaponStack = TestItemStack(gun)
-        val player = createPlayer(mainHandStack = { weaponStack }, offHandStack = { emptyStack })
+        val player = createPlayer({ weaponStack }, { emptyStack })
         FireStateTracker.setFiring(player, true)
 
         FireStateTracker.tick()
 
-        assertEquals(21, gun.fireCount)
+        assertEquals(expected = 21, actual = gun.fireCount)
     }
 
     @Test
@@ -137,13 +135,13 @@ class FireStateTrackerTest {
         val gun = TestGun(Frequency.perMinute(6000))
         gun.maximumSuccessfulFireCount = 1
         val weaponStack = TestItemStack(gun)
-        val player = createPlayer(mainHandStack = { weaponStack }, offHandStack = { emptyStack })
+        val player = createPlayer({ weaponStack }, { emptyStack })
         FireStateTracker.setFiring(player, true)
 
         FireStateTracker.tick()
 
-        assertEquals(1, gun.fireCount)
-        assertEquals(1, gun.fireCallCount)
+        assertEquals(expected = 1, actual = gun.fireCount)
+        assertEquals(expected = 1, actual = gun.fireCallCount)
     }
 
     @Test
@@ -152,22 +150,19 @@ class FireStateTrackerTest {
         val offHandGun = TestGun(Frequency.perMinute(600))
         val mainHandStack = TestItemStack(mainHandGun)
         val offHandStack = TestItemStack(offHandGun)
-        val player = createPlayer(
-            mainHandStack = { mainHandStack },
-            offHandStack = { offHandStack },
-        )
+        val player = createPlayer({ mainHandStack }, { offHandStack })
         FireStateTracker.setFiring(player, true)
 
         FireStateTracker.tick()
 
-        assertEquals(1, mainHandGun.fireCount)
-        assertEquals(1, offHandGun.fireCount)
+        assertEquals(expected = 1, actual = mainHandGun.fireCount)
+        assertEquals(expected = 1, actual = offHandGun.fireCount)
     }
 
     private fun createPlayer(mainHandStack: () -> ItemStackAccess, offHandStack: () -> ItemStackAccess): PlayerAccess {
         return Proxy.newProxyInstance(
             PlayerAccess::class.java.classLoader,
-            arrayOf(PlayerAccess::class.java),
+            arrayOf(PlayerAccess::class.java, EntityEquipmentAccess::class.java),
         ) { player, method, arguments ->
             when (method.name) {
                 "getEquippedStack" -> when (arguments?.firstOrNull() as EquipmentSlot) {
@@ -184,10 +179,7 @@ class FireStateTrackerTest {
         } as PlayerAccess
     }
 
-    private class TestGun(
-        private val frequency: Frequency,
-        var firingAllowed: Boolean = true,
-    ) : Firearm() {
+    private class TestGun(private val frequency: Frequency, var firingAllowed: Boolean = true) : Firearm() {
         override val identifier: Identifier
             get() = error("Identifier is not used by this test")
         override val properties: ItemProperties = ItemProperties()
@@ -218,13 +210,7 @@ class FireStateTrackerTest {
         }
     }
 
-    private class TestItemStack(
-        override val item: ItemAccess,
-        override var count: Int = 1,
-        override var damagePoints: Int = 0,
-        override val maxStackCount: Int = 1,
-        override val maxDamagePoints: Int = 0,
-    ) : ItemStackAccess
+    private class TestItemStack(override val item: ItemAccess, override var count: Int = 1, override var damagePoints: Int = 0, override val maxStackCount: Int = 1, override val maxDamagePoints: Int = 0) : ItemStackAccess
 
     private object TestRegularItem : ItemAccess {
         override val identifier: Identifier

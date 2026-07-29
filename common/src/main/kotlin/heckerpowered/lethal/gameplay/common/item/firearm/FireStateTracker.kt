@@ -5,6 +5,7 @@
 
 package heckerpowered.lethal.gameplay.common.item.firearm
 
+import heckerpowered.bridge.adapter.entity.EntityEquipmentAccess
 import heckerpowered.bridge.adapter.entity.PlayerAccess
 import heckerpowered.bridge.adapter.item.Hand
 import heckerpowered.bridge.adapter.item.asSlot
@@ -18,7 +19,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 object FireStateTracker : ServerUpdateRule {
-    private val defaultTickDuration = 50.milliseconds
+    private val DefaultTickDuration = 50.milliseconds
 
     private val firingPlayers: MutableSet<PlayerAccess> = Collections.newSetFromMap(WeakHashMap())
     private val weaponStates: MutableMap<ItemStackAccess, FixedRateRepeater> = IdentityHashMap()
@@ -57,7 +58,7 @@ object FireStateTracker : ServerUpdateRule {
      * Advances authoritative firing state by one logical game-time slice.
      * The trigger snapshot is resolved before scheduling so every tracked weapon state advances exactly once.
      */
-    fun tick(deltaTime: Duration = defaultTickDuration) {
+    fun tick(deltaTime: Duration = DefaultTickDuration) {
         require(deltaTime >= Duration.ZERO)
 
         val triggeredWeapons = collectTriggeredWeapons()
@@ -92,8 +93,9 @@ object FireStateTracker : ServerUpdateRule {
      * Resolves both hands while preserving stack identity so distinct weapon instances keep independent cadence.
      */
     private fun addTriggeredWeapons(player: PlayerAccess, triggeredWeapons: IdentityHashMap<ItemStackAccess, TriggeredWeapon>) {
+        val equipment = player as? EntityEquipmentAccess ?: return
         for (hand in Hand.entries) {
-            val weaponStack = player.getEquippedStack(hand.asSlot())
+            val weaponStack = equipment.getEquippedStack(hand.asSlot())
             val item = weaponStack.item
             val gun = item as? Gun ?: item.form as? Gun ?: continue
             triggeredWeapons[weaponStack] = TriggeredWeapon(player, gun)
