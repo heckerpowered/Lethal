@@ -22,7 +22,7 @@ interface CommandScope {
      */
     fun writeUniform(layout: UniformBufferLayout, sourceAddress: NativeAddress): UniformBinding
 
-    fun renderPass(description: RenderPassDescription, commands: RenderPass.() -> Unit)
+    fun renderPass(description: RenderPassDescription, encode: RenderPass.() -> Unit)
 }
 
 /**
