@@ -23,6 +23,6 @@ class MinecraftMixin {
     @Intrinsic
     @Nullable
     public ClientPlayerAccess minecraftAccess$getPlayer() {
-        return (ClientPlayerAccess) ObjectInterop.entityOrNull(player);
+        return (ClientPlayerAccess) ObjectInterop.asView(player);
     }
 }
