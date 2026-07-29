@@ -62,6 +62,7 @@ class OpenGLMatricesTest {
             ),
         )
 
+        @Suppress("SameParameterValue")
         private fun translationMatrixValues(translationX: Float, translationY: Float, translationZ: Float): FloatArray {
             return floatArrayOf(
                 1.0F, 0.0F, 0.0F, 0.0F,
