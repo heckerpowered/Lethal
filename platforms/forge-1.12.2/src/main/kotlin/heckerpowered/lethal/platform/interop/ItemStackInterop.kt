@@ -5,30 +5,19 @@
 
 package heckerpowered.lethal.platform.interop
 
+import heckerpowered.bridge.requireAccess
+import heckerpowered.bridge.requireHost
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
-import heckerpowered.lethal.platform.adapter.item.HostedItemStackAccess
 import net.minecraft.item.ItemStack
 
 object ItemStackInterop {
     @JvmStatic
-    fun stack(access: ItemStackAccess): ItemStack {
-        if (access is HostedItemStackAccess) return access.stack
-
-        @Suppress("CAST_NEVER_SUCCEEDS")
-        return access as? ItemStack ?: error("Unsupported ItemStackAccess implementation: ${access::class.java.name}")
-    }
+    fun asHost(access: ItemStackAccess): ItemStack = access.asHost()
 
     @JvmStatic
-    fun stack(stack: ItemStack): ItemStackAccess {
-        @Suppress("CAST_NEVER_SUCCEEDS")
-        return stack as? ItemStackAccess ?: HostedItemStackAccess(stack)
-    }
+    fun asView(stack: ItemStack): ItemStackAccess = stack.asView()
 }
 
-fun ItemStackAccess.stack(): ItemStack {
-    return ItemStackInterop.stack(this)
-}
+fun ItemStackAccess.asHost(): ItemStack = requireHost(this)
 
-fun ItemStack.stack(): ItemStackAccess {
-    return ItemStackInterop.stack(this)
-}
+fun ItemStack.asView(): ItemStackAccess = requireAccess(this)
