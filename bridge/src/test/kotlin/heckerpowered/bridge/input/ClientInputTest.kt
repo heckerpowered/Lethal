@@ -5,23 +5,22 @@
 
 package heckerpowered.bridge.input
 
+import heckerpowered.bridge.resources.IdentifierProvider
 import heckerpowered.bridge.rule.RuleRegistry
 import heckerpowered.bridge.rule.register
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class ClientInputTest {
     @BeforeTest
     fun setUp() {
         clearMouseButtonInputRules()
+        clearKeyBindingInputRules()
     }
 
     @AfterTest
     fun tearDown() {
         clearMouseButtonInputRules()
+        clearKeyBindingInputRules()
     }
 
     @Test
@@ -34,7 +33,7 @@ class ClientInputTest {
         ClientInput.handle(leftPress)
         ClientInput.handle(rightRelease)
 
-        assertEquals(listOf(leftPress, rightRelease), receivedEvents)
+        assertEquals(expected = listOf(leftPress, rightRelease), actual = receivedEvents)
     }
 
     @Test
@@ -47,8 +46,8 @@ class ClientInputTest {
         val event = MouseButtonEvent(MouseButton.Left, InputAction.Press)
         ClientInput.handle(event)
 
-        assertEquals(listOf(event), firstRuleEvents)
-        assertEquals(listOf(event), secondRuleEvents)
+        assertEquals(expected = listOf(event), actual = firstRuleEvents)
+        assertEquals(expected = listOf(event), actual = secondRuleEvents)
     }
 
     @Test
@@ -74,8 +73,30 @@ class ClientInputTest {
         assertTrue(followingRuleObservedCancellation)
     }
 
+    @Test
+    fun registeredRuleReceivesKeyBindingPressedEvents() {
+        val receivedEvents = mutableListOf<KeyBindingPressedEvent>()
+        val rule = object : KeyBindingInputRule {
+            override fun onKeyBindingInput(event: KeyBindingPressedEvent) {
+                receivedEvents += event
+            }
+        }
+        RuleRegistry.register<KeyBindingInputRule>(rule)
+        val event = KeyBindingPressedEvent(
+            IdentifierProvider.Freestanding.identifier("lethal", "skill/primary"),
+        )
+
+        ClientInput.handle(event)
+
+        assertEquals(expected = listOf(event), actual = receivedEvents)
+    }
+
     private fun clearMouseButtonInputRules() {
         RuleRegistry.rules.remove(MouseButtonInputRule::class.java)
+    }
+
+    private fun clearKeyBindingInputRules() {
+        RuleRegistry.rules.remove(KeyBindingInputRule::class.java)
     }
 
     private class RecordingMouseButtonInputRule(private val receivedEvents: MutableList<MouseButtonEvent>) : MouseButtonInputRule {
