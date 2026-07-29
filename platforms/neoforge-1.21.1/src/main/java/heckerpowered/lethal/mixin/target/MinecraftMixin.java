@@ -7,7 +7,7 @@ package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.client.MinecraftAccess;
 import heckerpowered.bridge.adapter.entity.ClientPlayerAccess;
-import heckerpowered.lethal.platform.interop.MixinInterop;
+import heckerpowered.bridge.MixinInterop;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
