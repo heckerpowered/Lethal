@@ -19,6 +19,6 @@ class MouseEventHandlerInitializationTest {
 
         val registrations = RuleRegistry.all<MouseButtonInputRule>()
             .count { rule -> rule === MouseEventHandler }
-        assertEquals(1, registrations)
+        assertEquals(expected = 1, actual = registrations)
     }
 }
