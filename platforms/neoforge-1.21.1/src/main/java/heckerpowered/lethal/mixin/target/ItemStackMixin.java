@@ -5,21 +5,17 @@
 
 package heckerpowered.lethal.mixin.target;
 
+import heckerpowered.bridge.MixinInterop;
 import heckerpowered.bridge.adapter.item.ItemAccess;
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess;
 import heckerpowered.bridge.adapter.item.stack.PersistentDataAccess;
 import heckerpowered.bridge.resources.Identifier;
 import heckerpowered.lethal.platform.adapter.item.ItemStackPersistentData;
-import heckerpowered.lethal.platform.interop.MixinInterop;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 @Mixin(ItemStack.class)
 @Implements({
@@ -125,6 +121,7 @@ abstract class ItemStackMixin {
         ItemStackPersistentData.remove(lethal$self(), key);
     }
 
+    @Unique
     private ItemStack lethal$self() {
         return (ItemStack) (Object) this;
     }
