@@ -5,25 +5,33 @@
 
 package heckerpowered.bridge.adapter.item
 
-import heckerpowered.bridge.platform.Services
-import java.util.*
+object ItemRegistry {
+    private val blueprintsByIdentifier = LinkedHashMap<String, ItemBlueprint>()
 
-object ItemRegistry : ItemRegistrar {
-    private val registrations = IdentityHashMap<ItemBlueprint, ItemAccess>()
+    fun <T : ItemBlueprint> register(blueprint: T): T {
+        val identifier = blueprint.identifier.asString()
+        require(identifier !in blueprintsByIdentifier) { "Item identifier has already been registered: $identifier" }
 
-    override fun register(blueprint: ItemBlueprint): ItemAccess {
-        require(blueprint !in registrations) { "Item blueprint has already been registered" }
-
-        val item = Services.ItemRegistrar.register(blueprint)
-        registrations[blueprint] = item
-        return item
+        blueprintsByIdentifier[identifier] = blueprint
+        return blueprint
     }
 
-    operator fun get(blueprint: ItemBlueprint): ItemAccess? {
-        return registrations[blueprint]
+    fun all(): List<ItemBlueprint> {
+        return blueprintsByIdentifier.values.toList()
     }
 
-    fun find(blueprint: ItemBlueprint): ItemAccess? {
-        return registrations[blueprint]
+    // TODO: Delete this. Production registries are not test fixtures.
+    //  This method exists only so tests can mutate global production state back into a
+    //  convenient shape after each run. That is not lifecycle design; it is test code
+    //  forcing a reset button into the real API because the tests were built around
+    //  shared mutable state.
+    //  Tests must create a fresh registry, replace the dependency with a test-owned
+    //  instance, or isolate the global state at the test boundary. They must not invent
+    //  destructive production operations that have no legitimate runtime caller.
+    //  Stop designing production APIs around teardown convenience. If no production
+    //  behavior requires this registry to forget every blueprint at once, clear() has no
+    //  business existing here.
+    internal fun clear() {
+        blueprintsByIdentifier.clear()
     }
 }
