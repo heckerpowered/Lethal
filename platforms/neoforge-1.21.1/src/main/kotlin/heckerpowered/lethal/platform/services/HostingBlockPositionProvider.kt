@@ -7,21 +7,19 @@ package heckerpowered.lethal.platform.services
 
 import heckerpowered.bridge.math.BlockPositionProvider
 import heckerpowered.bridge.math.BlockPositionView
-import heckerpowered.lethal.platform.interop.asHost
-import net.minecraft.util.math.BlockPos
+import heckerpowered.lethal.platform.interop.asView
+import net.minecraft.core.BlockPos
 
 class HostingBlockPositionProvider : BlockPositionProvider {
     override fun position(x: Int, y: Int, z: Int): BlockPositionView {
-        @Suppress("CAST_NEVER_SUCCEEDS")
-        return BlockPos(x, y, z) as? BlockPositionView ?: BlockPositionProvider.Freestanding.position(x, y, z)
+        return BlockPos(x, y, z).asView()
     }
 
     override fun fromPackedLong(value: Long): BlockPositionView {
-        @Suppress("CAST_NEVER_SUCCEEDS")
-        return BlockPos.fromLong(value) as? BlockPositionView ?: BlockPositionProvider.Freestanding.fromPackedLong(value)
+        return BlockPos.of(value).asView()
     }
 
     override fun asLong(position: BlockPositionView): Long {
-        return position.asHost().toLong()
+        return BlockPos.asLong(position.x, position.y, position.z)
     }
 }

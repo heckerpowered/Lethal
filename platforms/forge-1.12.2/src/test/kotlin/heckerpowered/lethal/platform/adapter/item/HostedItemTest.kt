@@ -16,6 +16,7 @@ import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 import heckerpowered.bridge.resources.Identifier
 import heckerpowered.bridge.time.Frequency
 import heckerpowered.lethal.gameplay.common.item.firearm.Firearm
+import heckerpowered.lethal.platform.interop.asHost
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.Bootstrap
 import net.minecraft.item.EnumAction
@@ -31,9 +32,12 @@ import net.minecraft.world.WorldType
 import net.minecraft.world.chunk.IChunkProvider
 import net.minecraft.world.storage.SaveHandlerMP
 import net.minecraft.world.storage.WorldInfo
+import java.lang.reflect.Proxy
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class HostedItemTest {
@@ -43,18 +47,19 @@ class HostedItemTest {
         val item = HostedItem(TestContinuousUseItem)
         val stack = ItemStack(item)
 
-        assertEquals(EnumAction.BOW, item.getItemUseAction(stack))
-        assertEquals(Int.MAX_VALUE, item.getMaxItemUseDuration(stack))
+        assertEquals(expected = EnumAction.BOW, actual = item.getItemUseAction(stack))
+        assertEquals(expected = Int.MAX_VALUE, actual = item.getMaxItemUseDuration(stack))
     }
 
     @Test
     fun firearmDoesNotUseTheNativeChargeState() {
         Bootstrap.register()
         val item = HostedItem(TestFirearm)
-        val stack = ItemStack(item)
+        val stack = proxy<ItemStackAccess>()
 
-        assertEquals(EnumAction.NONE, item.getItemUseAction(stack))
-        assertEquals(0, item.getMaxItemUseDuration(stack))
+        assertFalse(item.blueprint is ContinuousUseItem)
+        assertEquals(expected = EnumAction.NONE, actual = item.blueprint.getUseAnimation(stack).asHost())
+        assertEquals(expected = 0, actual = item.blueprint.getUseDurationTicks(stack, null))
     }
 
     @Test
@@ -68,17 +73,18 @@ class HostedItemTest {
 
         val result = item.onItemRightClick(world, player, EnumHand.MAIN_HAND)
 
-        assertEquals(EnumActionResult.SUCCESS, result.type)
+        assertEquals(expected = EnumActionResult.SUCCESS, actual = result.type)
         assertTrue(player.isHandActive)
-        assertEquals(EnumHand.MAIN_HAND, player.activeHand)
+        assertEquals(expected = EnumHand.MAIN_HAND, actual = player.activeHand)
     }
 
     @Test
     fun optionalGlintCapabilityControlsHostedItemPresentation() {
         Bootstrap.register()
         val item = HostedItem(TestGlintItem)
+        val itemGlint = assertIs<ItemGlint>(item.blueprint)
 
-        assertTrue(item.hasEffect(ItemStack(item)))
+        assertTrue(itemGlint.hasGlint(proxy()))
     }
 
     private object TestContinuousUseItem : ItemBlueprint, ContinuousUseItem {
@@ -108,18 +114,19 @@ class HostedItemTest {
         }
     }
 
+    private inline fun <reified Access : Any> proxy(): Access {
+        val proxy = Proxy.newProxyInstance(Access::class.java.classLoader, arrayOf(Access::class.java)) { _, method, _ ->
+            error("Unsupported ${Access::class.java.simpleName} method: ${method.name}")
+        }
+        return Access::class.java.cast(proxy)
+    }
+
     private class TestPlayer(world: World) : EntityPlayer(world, GameProfile(UUID.randomUUID(), "continuous-use-test")) {
         override fun isSpectator() = false
         override fun isCreative() = false
     }
 
-    private class TestWorld : World(
-        SaveHandlerMP(),
-        WorldInfo(WorldSettings(0L, GameType.SURVIVAL, false, false, WorldType.DEFAULT), "test"),
-        WorldProviderSurface(),
-        Profiler(),
-        false,
-    ) {
+    private class TestWorld : World(SaveHandlerMP(), WorldInfo(WorldSettings(0L, GameType.SURVIVAL, false, false, WorldType.DEFAULT), "test"), WorldProviderSurface(), Profiler(), false) {
         init {
             provider.setWorld(this)
         }

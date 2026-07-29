@@ -8,10 +8,13 @@ package heckerpowered.lethal.platform.adapter.item
 import com.google.common.collect.HashMultimap
 import com.google.common.collect.Multimap
 import heckerpowered.bridge.adapter.item.*
-import heckerpowered.bridge.adapter.item.creativetab.CreativeModeTabRegistry
 import heckerpowered.bridge.math.Geometry
-import heckerpowered.lethal.platform.interop.*
+import heckerpowered.lethal.platform.adapter.item.creativetab.ForgeCreativeModeTabs
+import heckerpowered.lethal.platform.interop.asHost
+import heckerpowered.lethal.platform.interop.asView
+import heckerpowered.lethal.platform.interop.toolClass
 import net.minecraft.block.state.IBlockState
+import net.minecraft.client.util.ITooltipFlag
 import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
@@ -39,7 +42,7 @@ import java.util.*
  */
 open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blueprint {
     init {
-        registryName = blueprint.identifier.identifier()
+        registryName = blueprint.identifier.asHost()
 
         setTranslationKey(blueprint.properties.descriptionKey ?: defaultDescriptionKey())
         setMaxStackSize(blueprint.properties.effectiveMaxStackCount)
@@ -50,63 +53,84 @@ open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blue
 
     override fun onItemRightClick(world: World, player: EntityPlayer, hand: EnumHand): ActionResult<ItemStack> {
         val stack = player.getHeldItem(hand)
-        val result = blueprint.use(stack.stack(), world.world(), player.entity(), hand.hand())
+        if (blueprint is ContinuousUseItem) {
+            player.setActiveHand(hand)
+            return ActionResult(EnumActionResult.SUCCESS, stack)
+        }
 
-        return ActionResult(result.interactionResult(), stack)
+        val result = blueprint.use(stack.asView(), world.asView(), player.asView(), hand.asView())
+
+        return ActionResult(result.asHost(), stack)
     }
 
     override fun onItemUse(player: EntityPlayer, world: World, position: BlockPos, hand: EnumHand, facing: EnumFacing, hitOffsetX: Float, hitOffsetY: Float, hitOffsetZ: Float): EnumActionResult {
         val stack = player.getHeldItem(hand)
         val blockState = world.getBlockState(position)
-        val result = blueprint.useOnBlock(stack.stack(), world.world(), player.entity(), hand.hand(), position.blockPosition(), blockState.blockState(world, position), facing.blockDirection(), Geometry.vector(hitOffsetX.toDouble(), hitOffsetY.toDouble(), hitOffsetZ.toDouble()))
+        val blockStateAccess = blockState.asView()
+        val hitPosition = Geometry.vector(hitOffsetX.toDouble(), hitOffsetY.toDouble(), hitOffsetZ.toDouble())
+        val result = blueprint.useOnBlock(stack.asView(), world.asView(), player.asView(), hand.asView(), position.asView(), blockStateAccess, facing.asView(), hitPosition)
 
-        return result.interactionResult()
+        return result.asHost()
     }
 
     override fun itemInteractionForEntity(stack: ItemStack, player: EntityPlayer, target: EntityLivingBase, hand: EnumHand): Boolean {
-        val result = blueprint.interactLivingEntity(stack.stack(), player.world.world(), player.entity(), target.entity(), hand.hand())
+        val result = blueprint.interactLivingEntity(stack.asView(), player.world.asView(), player.asView(), target.asView(), hand.asView())
 
         return result != ItemInteractionResult.Pass
     }
 
     override fun onUsingTick(stack: ItemStack, player: EntityLivingBase, count: Int) {
-        blueprint.onUseTick(stack.stack(), player.world.world(), player.entity(), count)
+        blueprint.onUseTick(stack.asView(), player.world.asView(), player.asView(), count)
     }
 
     override fun onItemUseFinish(stack: ItemStack, world: World, livingEntity: EntityLivingBase): ItemStack {
-        val result = blueprint.finishUsing(stack.stack(), world.world(), livingEntity.entity())
+        val result = blueprint.finishUsing(stack.asView(), world.asView(), livingEntity.asView())
 
-        return result.stack()
+        return result.asHost()
     }
 
     override fun onPlayerStoppedUsing(stack: ItemStack, world: World, livingEntity: EntityLivingBase, remainingUseTicks: Int) {
-        blueprint.releaseUsing(stack.stack(), world.world(), livingEntity.entity(), remainingUseTicks)
+        blueprint.releaseUsing(stack.asView(), world.asView(), livingEntity.asView(), remainingUseTicks)
     }
 
     override fun onUpdate(stack: ItemStack, world: World, owner: Entity, slotIndex: Int, isSelected: Boolean) {
-        blueprint.inventoryTick(stack.stack(), world.world(), owner.entity(), if (isSelected) EquipmentSlot.MainHand else null, slotIndex, isSelected)
+        val equipmentSlot = if (isSelected) EquipmentSlot.MainHand else null
+        blueprint.inventoryTick(stack.asView(), world.asView(), owner.asView(), equipmentSlot, slotIndex, isSelected)
     }
 
     override fun onCreated(stack: ItemStack, world: World, player: EntityPlayer) {
-        blueprint.onCrafted(stack.stack(), world.world(), player.entity())
+        blueprint.onCrafted(stack.asView(), world.asView(), player.asView())
     }
 
     override fun getItemUseAction(stack: ItemStack): EnumAction {
-        return blueprint.getUseAnimation(stack.stack()).useAnimation()
+        if (blueprint is ContinuousUseItem) return EnumAction.BOW
+        return blueprint.getUseAnimation(stack.asView()).asHost()
     }
 
     override fun getCreativeTabs(): Array<CreativeTabs> {
-        val tabs = CreativeModeTabRegistry.findAll(blueprint)
+        val tabs = ForgeCreativeModeTabs.findAll(blueprint)
         if (tabs.isEmpty()) return super.getCreativeTabs()
-        return tabs.map { it.creativeModeTab() }.toTypedArray()
+        return tabs.toTypedArray()
     }
 
     override fun getMaxItemUseDuration(stack: ItemStack): Int {
-        return blueprint.getUseDurationTicks(stack.stack(), null)
+        if (blueprint is ContinuousUseItem) return Int.MAX_VALUE
+        return blueprint.getUseDurationTicks(stack.asView(), null)
+    }
+
+    override fun addInformation(stack: ItemStack, world: World?, tooltip: MutableList<String>, flag: ITooltipFlag) {
+        val itemTooltip = blueprint as? ItemTooltip ?: return
+        tooltip += itemTooltip.getTooltipLines(stack.asView())
+            .map(TooltipLine::asHost)
+    }
+
+    override fun hasEffect(stack: ItemStack): Boolean {
+        val itemGlint = blueprint as? ItemGlint ?: return super.hasEffect(stack)
+        return super.hasEffect(stack) || itemGlint.hasGlint(stack.asView())
     }
 
     override fun getDestroySpeed(stack: ItemStack, state: IBlockState): Float {
-        return blueprint.getDestroySpeed(stack.stack(), state.blockState()).toFloat()
+        return blueprint.getDestroySpeed(stack.asView(), state.asView()).toFloat()
     }
 
     override fun canHarvestBlock(state: IBlockState): Boolean {
@@ -114,7 +138,7 @@ open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blue
     }
 
     override fun canHarvestBlock(state: IBlockState, stack: ItemStack): Boolean {
-        return blueprint.canHarvest(stack.stack(), state.blockState())
+        return blueprint.canHarvest(stack.asView(), state.asView())
     }
 
     override fun getHarvestLevel(stack: ItemStack, toolClass: String, player: EntityPlayer?, blockState: IBlockState?): Int {
@@ -122,7 +146,7 @@ open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blue
         if (itemForm !is ItemForm.MiningTool) return super.getHarvestLevel(stack, toolClass, player, blockState)
         if (itemForm.miningCategory.toolClass() != toolClass) return -1
 
-        return blueprint.getMiningLevel(stack.stack(), blockState?.blockState(), player?.entity())
+        return blueprint.getMiningLevel(stack.asView(), blockState?.asView(), player?.asView())
     }
 
     override fun getToolClasses(stack: ItemStack): Set<String> {
@@ -132,34 +156,34 @@ open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blue
     }
 
     override fun onBlockDestroyed(stack: ItemStack, world: World, state: IBlockState, position: BlockPos, livingEntity: EntityLivingBase): Boolean {
-        return blueprint.mineBlock(stack.stack(), world.world(), state.blockState(world, position), position.blockPosition(), livingEntity.entity())
+        return blueprint.mineBlock(stack.asView(), world.asView(), state.asView(), position.asView(), livingEntity.asView())
     }
 
     override fun hitEntity(stack: ItemStack, target: EntityLivingBase, attacker: EntityLivingBase): Boolean {
-        val result = blueprint.hurtEnemy(stack.stack(), attacker.world.world(), target.entity(), attacker.entity())
-        blueprint.postHurtEnemy(stack.stack(), attacker.world.world(), target.entity(), attacker.entity())
+        val result = blueprint.hurtEnemy(stack.asView(), attacker.world.asView(), target.asView(), attacker.asView())
+        blueprint.postHurtEnemy(stack.asView(), attacker.world.asView(), target.asView(), attacker.asView())
 
         return result
     }
 
     override fun isValidArmor(stack: ItemStack, armorType: EntityEquipmentSlot, entity: Entity): Boolean {
-        val equipmentSlot = blueprint.getEquipmentSlot(stack.stack(), armorType.equipmentSlot(), entity.entity())
-        return equipmentSlot.equipmentSlot() == armorType
+        val equipmentSlot = blueprint.getEquipmentSlot(stack.asView(), armorType.asView(), entity.asView())
+        return equipmentSlot?.asHost() == armorType
     }
 
     override fun getEquipmentSlot(stack: ItemStack): EntityEquipmentSlot? {
-        val equipmentSlot = blueprint.getEquipmentSlot(stack.stack(), null, null)
-        return equipmentSlot.equipmentSlot()
+        val equipmentSlot = blueprint.getEquipmentSlot(stack.asView(), null, null)
+        return equipmentSlot?.asHost()
     }
 
     override fun getAttributeModifiers(slot: EntityEquipmentSlot, stack: ItemStack): Multimap<String, AttributeModifier> {
         val modifiers = HashMultimap.create(super.getAttributeModifiers(slot, stack))
-        val equipmentSlot = blueprint.getEquipmentSlot(stack.stack(), slot.equipmentSlot(), null)
+        val equipmentSlot = blueprint.getEquipmentSlot(stack.asView(), slot.asView(), null)
 
-        if (equipmentSlot.equipmentSlot() != slot) return modifiers
+        if (equipmentSlot?.asHost() != slot) return modifiers
 
-        val protectionPoints = blueprint.getArmorProtectionPoints(stack.stack(), equipmentSlot, null)
-        val toughnessPoints = blueprint.getArmorToughnessPoints(stack.stack(), equipmentSlot, null)
+        val protectionPoints = blueprint.getArmorProtectionPoints(stack.asView(), equipmentSlot, null)
+        val toughnessPoints = blueprint.getArmorToughnessPoints(stack.asView(), equipmentSlot, null)
 
         if (protectionPoints > 0) {
             modifiers.put(SharedMonsterAttributes.ARMOR.name, AttributeModifier(attributeModifierId("armor", slot), "Armor modifier", protectionPoints.toDouble(), 0))
@@ -180,15 +204,16 @@ open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blue
 
     private fun setCraftingRemainingItem() {
         val remainingIdentifier = blueprint.properties.craftingRemainingItem ?: return
-        val remainingItem = REGISTRY.getObject(remainingIdentifier.identifier())
+        val remainingItem = REGISTRY.getObject(remainingIdentifier.asHost())
         if (remainingItem == Items.AIR) return
 
         setContainerItem(remainingItem)
     }
 
     private fun setPrimaryCreativeModeTab() {
-        val primaryTab = CreativeModeTabRegistry.findAll(blueprint).firstOrNull() ?: return
-        setCreativeTab(primaryTab.creativeModeTab())
+        val primaryTab = ForgeCreativeModeTabs.findAll(blueprint)
+            .firstOrNull() ?: return
+        setCreativeTab(primaryTab)
     }
 
     private fun attributeModifierId(name: String, slot: EntityEquipmentSlot): UUID {

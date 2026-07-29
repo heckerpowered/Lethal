@@ -3,4 +3,4 @@
 # Copyright (c) 2026 heckerpowered
 #
 
-heckerpowered.lethal.gameplay.common.Entrypoint
+heckerpowered.lethal.gameplay.common.GameplayEntrypoint
