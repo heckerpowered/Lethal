@@ -9,20 +9,20 @@ import heckerpowered.bridge.resources.Identifier
 import net.minecraft.util.ResourceLocation
 
 object IdentifierInterop {
-    fun identifier(identifier: Identifier): ResourceLocation {
+    fun asHost(identifier: Identifier): ResourceLocation {
         return identifier as? ResourceLocation ?: ResourceLocation(identifier.namespace, identifier.path)
     }
 
     @JvmStatic
-    fun identifier(identifier: ResourceLocation): Identifier {
+    fun asView(identifier: ResourceLocation): Identifier {
         return identifier as? Identifier ?: Identifier.create(identifier.namespace, identifier.path)
     }
 }
 
-fun Identifier.identifier(): ResourceLocation {
-    return IdentifierInterop.identifier(this)
+fun Identifier.asHost(): ResourceLocation {
+    return IdentifierInterop.asHost(this)
 }
 
-fun ResourceLocation.identifier(): Identifier {
-    return IdentifierInterop.identifier(this)
+fun ResourceLocation.asView(): Identifier {
+    return IdentifierInterop.asView(this)
 }

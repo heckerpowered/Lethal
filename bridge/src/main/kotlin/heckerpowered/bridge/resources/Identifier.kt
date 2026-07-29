@@ -23,19 +23,16 @@ interface Identifier {
 
         val Provider = IdentifierProvider.Auto
 
-        @JvmStatic
         fun create(namespace: String, path: String): Identifier {
             check(isValidNamespace(namespace))
             check(isValidPath(path))
             return Provider.identifier(namespace, path)
         }
 
-        @JvmStatic
         fun parse(value: String): Untrusted<Identifier> {
             return parseOrNull(value) ?: error("Invalid identifier")
         }
 
-        @JvmStatic
         fun tryParse(value: String): Untrusted<Identifier>? {
             return parseOrNull(value)
         }
