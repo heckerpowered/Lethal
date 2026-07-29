@@ -31,18 +31,18 @@ class GameplayContentInitializationTest {
         entrypoint.onEntrypoint()
 
         assertEquals(
-            listOf(
+            expected = listOf(
                 ModSounds.FortuneFire.sound,
                 ModSounds.FortunePerkUltimate.sound,
                 ModSounds.ArchaeopteryxFire.sound,
                 ModSounds.ChaosFire.sound,
                 ModSounds.ZeusFire.sound,
             ),
-            SoundRegistry.all(),
+            actual = SoundRegistry.all(),
         )
-        assertEquals(listOf(ModCreativeModeTabs.Lethal), CreativeModeTabRegistry.all())
+        assertEquals(expected = listOf(ModCreativeModeTabs.Lethal), actual = CreativeModeTabRegistry.all())
         assertEquals(
-            listOf(
+            expected = listOf(
                 Archaeopteryx,
                 Fortune,
                 EnhancedFortune,
@@ -53,7 +53,7 @@ class GameplayContentInitializationTest {
                 ZeusGlowSquid,
                 ZeusSculk,
             ),
-            ItemRegistry.all(),
+            actual = ItemRegistry.all(),
         )
     }
 }
