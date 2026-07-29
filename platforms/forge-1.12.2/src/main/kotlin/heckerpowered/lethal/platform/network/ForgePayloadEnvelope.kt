@@ -5,10 +5,11 @@
 
 package heckerpowered.lethal.platform.network
 
+import heckerpowered.bridge.adapter.asView
 import heckerpowered.bridge.adapter.entity.PlayerAccess
 import heckerpowered.bridge.network.*
 import heckerpowered.bridge.resources.Identifier
-import heckerpowered.lethal.platform.interop.ObjectInterop
+import heckerpowered.lethal.platform.interop.asView
 import io.netty.buffer.ByteBuf
 import net.minecraft.client.Minecraft
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage
@@ -65,7 +66,7 @@ internal class ClientboundForgePacketEnvelopeHandler : IMessageHandler<Clientbou
         val client = Minecraft.getMinecraft()
         client.addScheduledTask {
             val player = client.player ?: return@addScheduledTask
-            val context = ClientPlayNetworking.Context(ObjectInterop.entity<PlayerAccess>(player))
+            val context = ClientPlayNetworking.Context(player.asView().asView<PlayerAccess>())
             ClientPlayNetworking.handle(message.payload, context)
         }
         return null
@@ -76,7 +77,7 @@ internal class ServerboundForgePacketEnvelopeHandler : IMessageHandler<Serverbou
     override fun onMessage(message: ServerboundForgePayloadEnvelope, context: MessageContext): IMessage? {
         val player = context.serverHandler.player
         player.serverWorld.addScheduledTask {
-            val context = ServerPlayNetworking.Context(ObjectInterop.entity<PlayerAccess>(player))
+            val context = ServerPlayNetworking.Context(player.asView().asView<PlayerAccess>())
             ServerPlayNetworking.handle(message.payload, context)
         }
         return null
