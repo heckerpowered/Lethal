@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.gameplay.common.skill
 
-import heckerpowered.bridge.adapter.entity.EntityInterop
+import heckerpowered.bridge.adapter.entity.EntityEquipmentAccess
 import heckerpowered.bridge.adapter.item.Hand
 import heckerpowered.bridge.adapter.item.ItemAccess
 import heckerpowered.bridge.adapter.item.asSlot
@@ -21,7 +21,7 @@ object WeaponSkillActivation : SkillActivationRule {
     }
 
     override fun onSkillActivation(request: SkillActivationRequest) {
-        val equipment = EntityInterop.equipment(request.player) ?: return
+        val equipment = request.player as? EntityEquipmentAccess ?: return
 
         for (hand in Hand.entries) {
             val weaponStack = equipment.getEquippedStack(hand.asSlot())
