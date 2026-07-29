@@ -15,8 +15,9 @@ import heckerpowered.bridge.adapter.entity.damagesource.VirtualDamageProvider
 import heckerpowered.bridge.adapter.entity.damagesource.VirtualDamageSourceSpec
 import heckerpowered.bridge.math.VectorView
 import heckerpowered.lethal.gameplay.common.entity.damagesource.attributedDamageSource
-import heckerpowered.lethal.platform.interop.damageSource
-import heckerpowered.lethal.platform.interop.entityOrNull
+import heckerpowered.lethal.platform.interop.asHost
+import heckerpowered.lethal.platform.interop.asView
+import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.projectile.EntityArrow
@@ -26,17 +27,25 @@ import net.minecraft.util.EntityDamageSource
 import net.minecraft.util.EntityDamageSourceIndirect
 
 class ForgeDamageProvider : DamageProvider {
-    private fun vanilla(spec: VanillaDamageSourceSpec, directEntity: EntityAccess?, causingEntity: EntityAccess?, position: VectorView?): DamageSourceView {
-        val nativeSource = native(spec, directEntity, causingEntity)
-            ?: return virtual(spec, directEntity, causingEntity, position)
+    override fun source(spec: DamageSourceSpec, directEntity: EntityAccess?, causingEntity: EntityAccess?, position: VectorView?): DamageSourceView {
+        return when (spec) {
+            is VanillaDamageSourceSpec -> ForgeDamageSources.source(spec, directEntity?.asHost(), causingEntity?.asHost(), position)
+            is VirtualDamageSourceSpec -> VirtualDamageProvider.source(spec, directEntity, causingEntity, position)
+        }
+    }
+}
+
+internal object ForgeDamageSources {
+    fun source(spec: VanillaDamageSourceSpec, directEntity: Entity?, causingEntity: Entity?, position: VectorView? = null): DamageSourceView {
+        val nativeSource = native(spec, directEntity, causingEntity) ?: return virtual(spec, directEntity, causingEntity, position)
         if (directEntity == null && causingEntity == null && position == null) {
-            return nativeSource.damageSource()
+            return nativeSource.asView()
         }
 
         return attributedDamageSource(spec, nativeSource, directEntity, causingEntity, position)
     }
 
-    private fun native(spec: VanillaDamageSourceSpec, directEntity: EntityAccess?, causingEntity: EntityAccess?): DamageSource? {
+    private fun native(spec: VanillaDamageSourceSpec, directEntity: Entity?, causingEntity: Entity?): DamageSource? {
         return when (spec.type) {
             VanillaDamageType.InFire -> DamageSource.IN_FIRE
             VanillaDamageType.LightningBolt -> DamageSource.LIGHTNING_BOLT
@@ -58,30 +67,23 @@ class ForgeDamageProvider : DamageProvider {
             VanillaDamageType.FallingBlock -> DamageSource.FALLING_BLOCK
             VanillaDamageType.DragonBreath -> DamageSource.DRAGON_BREATH
             VanillaDamageType.Fireworks -> DamageSource.FIREWORKS
-            VanillaDamageType.MobAttack -> DamageSource.causeMobDamage(causingEntity.entityOrNull() as? EntityLivingBase)
-            VanillaDamageType.MobProjectile -> EntityDamageSourceIndirect("mob", directEntity.entityOrNull(), causingEntity.entityOrNull()).setProjectile()
-            VanillaDamageType.PlayerAttack -> DamageSource.causePlayerDamage(causingEntity.entityOrNull() as? EntityPlayer)
-            VanillaDamageType.Arrow -> DamageSource.causeArrowDamage(directEntity.entityOrNull() as? EntityArrow, causingEntity.entityOrNull())
-            VanillaDamageType.Fireball -> EntityDamageSourceIndirect("fireball", directEntity.entityOrNull() as? EntityFireball, causingEntity.entityOrNull()).setFireDamage().setProjectile()
+            VanillaDamageType.MobAttack -> DamageSource.causeMobDamage(causingEntity as? EntityLivingBase)
+            VanillaDamageType.MobProjectile -> EntityDamageSourceIndirect("mob", directEntity, causingEntity).setProjectile()
+            VanillaDamageType.PlayerAttack -> DamageSource.causePlayerDamage(causingEntity as? EntityPlayer)
+            VanillaDamageType.Arrow -> DamageSource.causeArrowDamage(directEntity as? EntityArrow, causingEntity)
+            VanillaDamageType.Fireball -> EntityDamageSourceIndirect("fireball", directEntity as? EntityFireball, causingEntity).setFireDamage().setProjectile()
             VanillaDamageType.UnattributedFireball -> null
-            VanillaDamageType.Thrown -> DamageSource.causeThrownDamage(directEntity.entityOrNull(), causingEntity.entityOrNull())
-            VanillaDamageType.IndirectMagic -> DamageSource.causeIndirectMagicDamage(directEntity.entityOrNull(), causingEntity.entityOrNull())
-            VanillaDamageType.Thorns -> DamageSource.causeThornsDamage(causingEntity.entityOrNull())
+            VanillaDamageType.Thrown -> DamageSource.causeThrownDamage(directEntity, causingEntity)
+            VanillaDamageType.IndirectMagic -> DamageSource.causeIndirectMagicDamage(directEntity, causingEntity)
+            VanillaDamageType.Thorns -> DamageSource.causeThornsDamage(causingEntity)
             VanillaDamageType.Explosion -> explosion()
-            VanillaDamageType.PlayerExplosion -> EntityDamageSource("explosion.player", causingEntity.entityOrNull()).setDifficultyScaled().setExplosion()
+            VanillaDamageType.PlayerExplosion -> EntityDamageSource("explosion.player", causingEntity).setDifficultyScaled().setExplosion()
             else -> null
         }
     }
 
-    override fun source(spec: DamageSourceSpec, directEntity: EntityAccess?, causingEntity: EntityAccess?, position: VectorView?): DamageSourceView {
-        return when (spec) {
-            is VanillaDamageSourceSpec -> vanilla(spec, directEntity, causingEntity, position)
-            is VirtualDamageSourceSpec -> VirtualDamageProvider.source(spec, directEntity, causingEntity, position)
-        }
-    }
-
-    private fun virtual(spec: VanillaDamageSourceSpec, directEntity: EntityAccess?, causingEntity: EntityAccess?, position: VectorView?): DamageSourceView {
-        return VirtualDamageProvider.source(spec, directEntity, causingEntity, position)
+    private fun virtual(spec: VanillaDamageSourceSpec, directEntity: Entity?, causingEntity: Entity?, position: VectorView?): DamageSourceView {
+        return VirtualDamageProvider.source(spec, directEntity?.asView(), causingEntity?.asView(), position)
     }
 
     private fun explosion(): DamageSource {
