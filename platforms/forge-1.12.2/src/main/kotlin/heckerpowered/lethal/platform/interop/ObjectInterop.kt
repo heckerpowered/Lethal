@@ -7,35 +7,29 @@ package heckerpowered.lethal.platform.interop
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
 import heckerpowered.bridge.adapter.entity.damagesource.*
+import heckerpowered.bridge.requireAccess
+import heckerpowered.bridge.requireHost
 import heckerpowered.bridge.resources.Identifier
 import heckerpowered.lethal.gameplay.common.entity.damagesource.VirtualDamageSource
-import heckerpowered.lethal.platform.EntityAccessor
 import net.minecraft.entity.Entity
 import net.minecraft.util.DamageSource
 import java.util.*
 import heckerpowered.bridge.adapter.entity.damagesource.VirtualDamageSource as BridgeVirtualDamageSource
 
 object ObjectInterop {
-    fun source(source: DamageSourceView): DamageSource {
-        return damageSource(source)
-    }
-
     @JvmStatic
-    fun damageSource(source: DamageSourceView): DamageSource {
+    fun asHost(source: DamageSourceView): DamageSource {
         if (source is DamageSource) return source
 
-        return VirtualDamageSource(
-            spec = source.toVirtualDamageSourceSpec(),
-            directEntity = entityOrNull(source.directEntity),
-            causingEntity = entityOrNull(source.causingEntity),
-            position = source.position?.let { GeometryInterop.vector(it) }
-        )
+        val spec = source.toVirtualDamageSourceSpec()
+        val directEntity = source.directEntity?.asHost()
+        val causingEntity = source.causingEntity?.asHost()
+        val position = source.position?.let(GeometryInterop::asHost)
+        return VirtualDamageSource(spec, directEntity, causingEntity, position)
     }
 
     @JvmStatic
-    fun damageSource(source: DamageSource): DamageSourceView {
-        return source as DamageSourceView
-    }
+    fun asView(source: DamageSource): DamageSourceView = source.asView()
 
     @JvmStatic
     fun damageSourceType(source: DamageSource): Identifier {
@@ -50,9 +44,7 @@ object ObjectInterop {
     @JvmStatic
     fun hasDamageFeature(source: DamageSource, feature: DamageFeature): Boolean {
         val vanillaType = vanillaDamageType(source)
-        if (vanillaType != null && vanillaType.has(feature)) return true
-
-        return when (feature) {
+        return vanillaType != null && vanillaType.has(feature) || when (feature) {
             DamageFeature.BypassesArmor -> source.isUnblockable
             DamageFeature.BypassesInvulnerability -> source.canHarmInCreative()
             DamageFeature.BypassesEffects,
@@ -70,7 +62,7 @@ object ObjectInterop {
 
     private fun DamageSourceView.toVirtualDamageSourceSpec(): VirtualDamageSourceSpec {
         return when (this) {
-            is BridgeVirtualDamageSource -> spec.copy(features = spec.features.clone())
+            is BridgeVirtualDamageSource -> VirtualDamageSourceSpec(spec.type, spec.features.clone())
             is QuantumVanillaDamageSource -> VirtualDamageSourceSpec(source.identifier, source.copyFeatures())
             else -> VirtualDamageSourceSpec(type, collectFeatures())
         }
@@ -83,43 +75,10 @@ object ObjectInterop {
     }
 
     @JvmStatic
-    fun entity(entity: Entity): EntityAccess {
-        return entity as? EntityAccess ?: EntityAccessor(entity) // TODO: Consider remove EntityAccessor
-    }
-
-    @JvmName("entityExact")
-    inline fun <reified T : EntityAccess> entity(entity: Entity): T {
-        return entity as? T ?: error("Unsupported EntityAccess(${T::class.java.name}) implementation: ${entity.javaClass.name}")
-    }
+    fun asView(entity: Entity?): EntityAccess? = entity?.asView()
 
     @JvmStatic
-    fun entityOrNull(entity: Entity?): EntityAccess? {
-        if (entity == null) return null
-        return entity(entity)
-    }
-
-    @JvmStatic
-    fun entity(entity: EntityAccess): Entity {
-        return when (entity) {
-            is Entity -> entity
-            is EntityAccessor -> entity.entity
-            else -> error("Unsupported entity access implementation: ${entity::class.java.name}")
-        }
-    }
-
-    @JvmName("entityExact")
-    inline fun <reified T : Entity> entity(entity: EntityAccess): T {
-        return when (entity) {
-            is Entity -> entity
-            is EntityAccessor -> entity.entity
-            else -> error("Unsupported entity access implementation: ${entity::class.java.name}")
-        } as T
-    }
-
-    @JvmStatic
-    fun entityOrNull(entity: EntityAccess?): Entity? {
-        return entity(entity ?: return null)
-    }
+    fun asHost(entity: EntityAccess?): Entity? = entity?.asHost()
 
     private fun damageSourceType(damageType: String): Identifier {
         require(damageType.isNotEmpty()) { "Damage type must not be empty" }
@@ -129,18 +88,10 @@ object ObjectInterop {
             return Identifier.create("minecraft", damageType)
         }
 
-        require(separator > 0 && separator < damageType.lastIndex) {
-            "Damage type must not have an empty namespace or path: $damageType"
-        }
+        require(separator > 0 && separator < damageType.lastIndex) { "Damage type must not have an empty namespace or path: $damageType" }
+        require(damageType.indexOf(':', separator + 1) < 0) { "Damage type must contain at most one namespace separator: $damageType" }
 
-        require(damageType.indexOf(':', separator + 1) < 0) {
-            "Damage type must contain at most one namespace separator: $damageType"
-        }
-
-        return Identifier.create(
-            damageType.substring(0, separator),
-            damageType.substring(separator + 1)
-        )
+        return Identifier.create(damageType.substring(0, separator), damageType.substring(separator + 1))
     }
 
     private fun vanillaDamageType(source: DamageSource): VanillaDamageType? {
@@ -179,12 +130,12 @@ object ObjectInterop {
     }
 }
 
-fun DamageSourceView.damageSource(): DamageSource {
-    return ObjectInterop.damageSource(this)
+fun DamageSourceView.asHost(): DamageSource {
+    return ObjectInterop.asHost(this)
 }
 
-fun DamageSource.damageSource(): DamageSourceView {
-    return ObjectInterop.damageSource(this)
+fun DamageSource.asView(): DamageSourceView {
+    return ObjectInterop.asView(this)
 }
 
 fun DamageSource.damageSourceType(): Identifier {
@@ -195,18 +146,10 @@ fun DamageSource.hasDamageFeature(feature: DamageFeature): Boolean {
     return ObjectInterop.hasDamageFeature(this, feature)
 }
 
-fun Entity.entity(): EntityAccess {
-    return ObjectInterop.entity(this)
+fun Entity.asView(): EntityAccess {
+    return requireAccess(this)
 }
 
-fun Entity?.entityOrNull(): EntityAccess? {
-    return ObjectInterop.entityOrNull(this)
-}
-
-fun EntityAccess.entity(): Entity {
-    return ObjectInterop.entity(this)
-}
-
-fun EntityAccess?.entityOrNull(): Entity? {
-    return ObjectInterop.entityOrNull(this)
+fun EntityAccess.asHost(): Entity {
+    return requireHost(this)
 }
