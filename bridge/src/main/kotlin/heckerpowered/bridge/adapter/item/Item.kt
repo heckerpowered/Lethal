@@ -5,6 +5,7 @@
 
 package heckerpowered.bridge.adapter.item
 
+import heckerpowered.bridge.adapter.BridgeAccess
 import heckerpowered.bridge.adapter.block.BlockStateAccess
 import heckerpowered.bridge.adapter.entity.EntityAccess
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
@@ -14,7 +15,7 @@ import heckerpowered.bridge.math.BlockPositionView
 import heckerpowered.bridge.math.VectorView
 import heckerpowered.bridge.resources.Identifier
 
-interface ItemAccess {
+interface ItemAccess : BridgeAccess {
     val identifier: Identifier
     val form: ItemForm
 
