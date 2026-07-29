@@ -14,7 +14,18 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-// TODO:
+// LOOK:
+//
+// This is what GPT-5.6 Sol Max did.
+//
+// It used a Mixin to make a class written by this project implement an interface
+// also written by this project, forwarding a getter that already existed on the
+// target class.
+//
+// One `implements` clause would have solved the entire problem.
+//
+// Do not remove this.
+// Industrial miracles deserve preservation.
 //
 // We wrote the class.
 // We wrote the interface.
