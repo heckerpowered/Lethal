@@ -12,14 +12,14 @@ import net.minecraftforge.fml.client.registry.ClientRegistry
 import org.lwjgl.input.Keyboard
 
 object ForgeKeyBindings {
-    private val registry = ForgeKeyBindingRegistry(ClientRegistry::registerKeyBinding)
+    private val Registry = ForgeKeyBindingRegistry(ClientRegistry::registerKeyBinding)
 
     fun registerAll() {
-        registry.registerAll(KeyBindingRegistry.all())
+        Registry.registerAll(KeyBindingRegistry.all())
     }
 
     fun dispatchPressedBindings() {
-        for ((blueprint, nativeBinding) in registry.all()) {
+        for ((blueprint, nativeBinding) in Registry.all()) {
             while (nativeBinding.isPressed) {
                 ClientInput.handle(KeyBindingPressedEvent(blueprint.identifier))
             }
@@ -27,9 +27,7 @@ object ForgeKeyBindings {
     }
 }
 
-internal class ForgeKeyBindingRegistry(
-    private val registerNativeBinding: (KeyBinding) -> Unit,
-) {
+internal class ForgeKeyBindingRegistry(private val registerNativeBinding: (KeyBinding) -> Unit) {
     private val registrations = LinkedHashMap<String, RegisteredKeyBinding>()
 
     fun registerAll(blueprints: Iterable<KeyBindingBlueprint>) {
@@ -46,12 +44,7 @@ internal class ForgeKeyBindingRegistry(
         val identifier = blueprint.identifier.asString()
         if (identifier in registrations) return
 
-        val nativeBinding = KeyBinding(
-            blueprint.translationKey,
-            KeyConflictContext.IN_GAME,
-            blueprint.defaultKey.toForgeKeyCode(),
-            blueprint.categoryTranslationKey,
-        )
+        val nativeBinding = KeyBinding(blueprint.translationKey, KeyConflictContext.IN_GAME, blueprint.defaultKey.toForgeKeyCode(), blueprint.categoryTranslationKey)
         registerNativeBinding(nativeBinding)
         registrations[identifier] = RegisteredKeyBinding(blueprint, nativeBinding)
     }
