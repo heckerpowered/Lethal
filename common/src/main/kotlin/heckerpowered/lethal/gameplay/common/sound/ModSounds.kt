@@ -12,13 +12,17 @@ import heckerpowered.bridge.adapter.sound.SoundRegistry
 import heckerpowered.lethal.Constants
 
 object ModSounds {
-    val FortuneFire = SoundPlayback(SoundEventSpec(Constants.identifier("fortune_fire")), SoundCategory.Players)
-    val ArchaeopteryxFire = SoundPlayback(SoundEventSpec(Constants.identifier("archaeopteryx_fire")), SoundCategory.Players)
-    val ZeusFire = SoundPlayback(SoundEventSpec(Constants.identifier("zeus_fire")), SoundCategory.Players)
+    val FortuneFire = register("fortune_fire")
+    val FortunePerkUltimate = register("fortune_perk_ultimate")
+    val ArchaeopteryxFire = register("archaeopteryx_fire")
+    val ChaosFire = register("chaos_fire")
+    val ZeusFire = register("zeus_fire")
 
-    fun register() {
-        SoundRegistry.register(FortuneFire.sound)
-        SoundRegistry.register(ArchaeopteryxFire.sound)
-        SoundRegistry.register(ZeusFire.sound)
+    fun onInitialize() {
+    }
+
+    private fun register(path: String): SoundPlayback {
+        val sound = SoundRegistry.register(SoundEventSpec(Constants.identifier(path)))
+        return SoundPlayback(sound, SoundCategory.Players)
     }
 }
