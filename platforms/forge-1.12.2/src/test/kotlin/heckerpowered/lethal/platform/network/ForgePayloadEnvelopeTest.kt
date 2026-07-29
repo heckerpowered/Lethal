@@ -7,7 +7,7 @@ package heckerpowered.lethal.platform.network
 
 import heckerpowered.bridge.network.ClientboundPayload
 import heckerpowered.bridge.network.Payload
-import heckerpowered.bridge.network.PayloadRegistrar
+import heckerpowered.bridge.network.PayloadTypeRegistry
 import heckerpowered.bridge.network.StreamCodecs
 import heckerpowered.bridge.network.codec.StreamCodec
 import heckerpowered.bridge.resources.IdentifierProvider
@@ -18,7 +18,7 @@ import kotlin.test.assertEquals
 class ForgePayloadEnvelopeTest {
     @Test
     fun envelopeRoundTripsARegisteredPacketThroughByteBuf() {
-        PayloadRegistrar.registerClientbound(TestClientboundPayload.type, TestClientboundPayload.codec)
+        PayloadTypeRegistry.ClientboundPlay.register(TestClientboundPayload.type, TestClientboundPayload.codec)
         val packet = TestClientboundPayload(42, 120L)
         val buffer = Unpooled.buffer()
 
@@ -28,8 +28,8 @@ class ForgePayloadEnvelopeTest {
             val decodedEnvelope = ClientboundForgePayloadEnvelope()
             decodedEnvelope.fromBytes(buffer)
 
-            assertEquals(packet, decodedEnvelope.payload)
-            assertEquals(0, buffer.readableBytes())
+            assertEquals(expected = packet, actual = decodedEnvelope.payload)
+            assertEquals(expected = 0, actual = buffer.readableBytes())
         } finally {
             buffer.release()
         }

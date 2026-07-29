@@ -25,8 +25,8 @@ class ForgeKeyBindingRegistryTest {
         registry.registerAll(listOf(blueprint))
         registry.registerAll(listOf(blueprint))
 
-        assertEquals(1, nativeBindings.size)
-        assertEquals(listOf(blueprint), registry.all().map { it.blueprint })
+        assertEquals(expected = 1, actual = nativeBindings.size)
+        assertEquals(expected = listOf(blueprint), actual = registry.all().map(RegisteredKeyBinding::blueprint))
     }
 
     @Test
@@ -38,17 +38,13 @@ class ForgeKeyBindingRegistryTest {
         registry.registerAll(listOf(blueprint))
 
         val nativeBinding = nativeBindings.single()
-        assertEquals(blueprint.translationKey, nativeBinding.keyDescription)
-        assertEquals(blueprint.categoryTranslationKey, nativeBinding.keyCategory)
-        assertEquals(Keyboard.KEY_C, nativeBinding.keyCodeDefault)
+        assertEquals(expected = blueprint.translationKey, actual = nativeBinding.keyDescription)
+        assertEquals(expected = blueprint.categoryTranslationKey, actual = nativeBinding.keyCategory)
+        assertEquals(expected = Keyboard.KEY_C, actual = nativeBinding.keyCodeDefault)
         assertSame(KeyConflictContext.IN_GAME, nativeBinding.keyConflictContext)
     }
 
     private fun keyBinding(path: String, defaultKey: KeyboardKey): KeyBindingBlueprint {
-        return KeyBindingBlueprint(
-            identifier = IdentifierProvider.Freestanding.identifier("lethal", path),
-            category = IdentifierProvider.Freestanding.identifier("lethal", "weapon/skills"),
-            defaultKey = defaultKey,
-        )
+        return KeyBindingBlueprint(IdentifierProvider.Freestanding.identifier("lethal", path), IdentifierProvider.Freestanding.identifier("lethal", "weapon/skills"), defaultKey)
     }
 }
