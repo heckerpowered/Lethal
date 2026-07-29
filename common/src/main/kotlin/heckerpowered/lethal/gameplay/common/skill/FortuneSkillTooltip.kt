@@ -12,29 +12,9 @@ import heckerpowered.bridge.adapter.item.TooltipProgress
 import heckerpowered.bridge.adapter.item.TooltipText
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 
-internal val fortuneSkillTooltip = FortuneSkillTooltip(
-    fortunePrimarySkill,
-    fortuneSonicBoomSkill,
-    fortuneUltimateSkill,
-)
-
-internal val enhancedFortuneSkillTooltip = FortuneSkillTooltip(
-    fortunePrimarySkill,
-    fortuneSonicBoomSkill,
-    enhancedFortuneUltimateSkill,
-)
-
-internal class FortuneSkillTooltip(
-    private val primarySkill: FortunePrimarySkill,
-    private val sonicBoomSkill: FortuneSonicBoomSkill,
-    private val ultimateSkill: FortuneUltimateSkill,
-) : ItemTooltip {
+internal class FortuneSkillTooltip(private val primarySkill: FortunePrimarySkill, private val sonicBoomSkill: FortuneSonicBoomSkill, private val ultimateSkill: FortuneUltimateSkill) : ItemTooltip {
     override fun getTooltipLines(stack: ItemStackAccess): List<TooltipLine> {
-        return createFortuneSkillTooltipLines(
-            primarySkill.status(stack),
-            sonicBoomSkill.chargeStatus(stack),
-            ultimateSkill.chargeStatus(stack),
-        )
+        return createFortuneSkillTooltipLines(primarySkill.status(stack), sonicBoomSkill.chargeStatus(stack), ultimateSkill.chargeStatus(stack))
     }
 }
 
@@ -44,9 +24,7 @@ internal data class FortuneSkillChargeStatus(
 ) {
     init {
         require(accumulatedDamagePoints.isFinite()) { "Accumulated skill damage must be finite" }
-        require(requiredDamagePoints.isFinite() && requiredDamagePoints > 0.0) {
-            "Required skill damage must be finite and positive"
-        }
+        require(requiredDamagePoints.isFinite() && requiredDamagePoints > 0.0) { "Required skill damage must be finite and positive" }
     }
 
     val remainingDamagePoints: Double
@@ -59,11 +37,7 @@ internal data class FortuneSkillChargeStatus(
         get() = remainingDamagePoints <= 0.0
 }
 
-internal fun createFortuneSkillTooltipLines(
-    primaryStatus: FortunePrimarySkillStatus,
-    sonicBoomStatus: FortuneSkillChargeStatus,
-    ultimateStatus: FortuneSkillChargeStatus,
-): List<TooltipLine> {
+internal fun createFortuneSkillTooltipLines(primaryStatus: FortunePrimarySkillStatus, sonicBoomStatus: FortuneSkillChargeStatus, ultimateStatus: FortuneSkillChargeStatus): List<TooltipLine> {
     return listOf(
         TooltipLine(listOf(translatable("lethal.perk"))),
         primaryTooltipLine(primaryStatus),
@@ -73,37 +47,28 @@ internal fun createFortuneSkillTooltipLines(
 }
 
 private fun primaryTooltipLine(status: FortunePrimarySkillStatus): TooltipLine {
-    val stateText = if (status.cooldownRemainingMilliseconds > 0L) {
-        translatable("lethal.cooldown.seconds", status.cooldownRemainingMilliseconds / MillisecondsPerSecond)
-    } else {
-        translatable("lethal.cooldown.ready")
-    }
+    val cooldownSeconds = status.cooldownRemainingMilliseconds / MILLISECONDS_PER_SECOND
+    val stateText = if (status.cooldownRemainingMilliseconds > 0L) translatable("lethal.cooldown.seconds", cooldownSeconds) else translatable("lethal.cooldown.ready")
     val content = skillStatusContent("lethal.perk.fortune", stateText)
     if (status.isActive) {
-        val activeProgress = (status.activeRemainingMilliseconds / PrimaryActiveDurationMilliseconds)
+        val activeProgress = (status.activeRemainingMilliseconds / PRIMARY_ACTIVE_DURATION_MILLISECONDS)
             .coerceIn(0.0, 1.0)
-        return TooltipLine(content, progress = TooltipProgress(activeProgress, TooltipColor.Gold))
+        return TooltipLine(content, null, TooltipProgress(activeProgress, TooltipColor.Gold))
     }
 
     val color = if (status.cooldownRemainingMilliseconds <= 0L) TooltipColor.Green else TooltipColor.Gray
-    return TooltipLine(content, color = color)
+    return TooltipLine(content, color)
 }
 
 private fun damageChargeTooltipLine(skillTranslationKey: String, status: FortuneSkillChargeStatus): TooltipLine {
     if (status.isReady) {
-        return TooltipLine(
-            skillStatusContent(skillTranslationKey, translatable("lethal.cooldown.ready")),
-            color = TooltipColor.Green,
-        )
+        val content = skillStatusContent(skillTranslationKey, translatable("lethal.cooldown.ready"))
+        return TooltipLine(content, TooltipColor.Green)
     }
 
-    return TooltipLine(
-        skillStatusContent(
-            skillTranslationKey,
-            translatable("lethal.precondition.damage", status.remainingDamagePoints),
-        ),
-        progress = TooltipProgress(status.progress, TooltipColor.Green),
-    )
+    val content = skillStatusContent(skillTranslationKey, translatable("lethal.precondition.damage", status.remainingDamagePoints))
+    val progress = TooltipProgress(status.progress, TooltipColor.Green)
+    return TooltipLine(content, null, progress)
 }
 
 private fun skillStatusContent(skillTranslationKey: String, status: TooltipText): List<TooltipText> {
@@ -114,5 +79,5 @@ private fun translatable(key: String, vararg arguments: Any): TooltipText.Transl
     return TooltipText.Translatable(key, arguments.toList())
 }
 
-private const val MillisecondsPerSecond = 1_000.0
-private const val PrimaryActiveDurationMilliseconds = 60_000.0
+private const val MILLISECONDS_PER_SECOND = 1_000.0
+private const val PRIMARY_ACTIVE_DURATION_MILLISECONDS = 60_000.0
