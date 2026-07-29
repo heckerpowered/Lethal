@@ -6,10 +6,8 @@
 package heckerpowered.bridge.adapter.entity
 
 /**
- * An experience orb entity with stable value and consumption behavior.
+ * An experience orb entity with a stable experience value.
  */
 interface ExperienceOrbAccess : EntityAccess {
     val experiencePoints: Int
-
-    fun consume()
 }

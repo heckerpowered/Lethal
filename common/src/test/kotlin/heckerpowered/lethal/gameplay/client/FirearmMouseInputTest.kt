@@ -26,7 +26,7 @@ class FirearmMouseInputTest {
 
         assertFalse(press.isCanceled)
         assertFalse(release.isCanceled)
-        assertEquals(emptyList(), firingStates)
+        assertEquals(expected = emptyList(), actual = firingStates)
     }
 
     @Test
@@ -43,7 +43,7 @@ class FirearmMouseInputTest {
 
         assertFalse(press.isCanceled)
         assertFalse(release.isCanceled)
-        assertEquals(emptyList(), firingStates)
+        assertEquals(expected = emptyList(), actual = firingStates)
     }
 
     @Test
@@ -60,7 +60,7 @@ class FirearmMouseInputTest {
 
         assertTrue(press.isCanceled)
         assertTrue(release.isCanceled)
-        assertEquals(listOf(true, false), firingStates)
+        assertEquals(expected = listOf(true, false), actual = firingStates)
     }
 
     @Test
@@ -72,7 +72,7 @@ class FirearmMouseInputTest {
         input.onMouseButtonInput(release)
 
         assertFalse(release.isCanceled)
-        assertEquals(emptyList(), firingStates)
+        assertEquals(expected = emptyList(), actual = firingStates)
     }
 
     @Test
@@ -92,7 +92,7 @@ class FirearmMouseInputTest {
         assertTrue(firstPress.isCanceled)
         assertFalse(secondPress.isCanceled)
         assertFalse(release.isCanceled)
-        assertEquals(listOf(true, false), firingStates)
+        assertEquals(expected = listOf(true, false), actual = firingStates)
     }
 
     @Test
@@ -108,6 +108,6 @@ class FirearmMouseInputTest {
 
         assertTrue(press.isCanceled)
         assertFalse(release.isCanceled)
-        assertEquals(emptyList(), firingStates)
+        assertEquals(expected = emptyList(), actual = firingStates)
     }
 }
