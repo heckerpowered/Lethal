@@ -55,7 +55,7 @@ abstract class LevelMixin {
 
     @NotNull
     public Sequence<EntityAccess> worldAccess$getEntities(@NotNull BoxView searchBox) {
-        return WorldAccessImpl.getEntities(lethal$self(), searchBox);
+        return WorldAccessImpl.getEntities(lethal$self(), getEntities(), searchBox);
     }
 
     @NotNull
@@ -81,7 +81,7 @@ abstract class LevelMixin {
 
     @NotNull
     public Sequence<EntityRayBucket> worldAccess$getEntityRayBuckets(@NotNull RayView ray, double length) {
-        return WorldAccessImpl.getEntityRayBuckets(lethal$self(), ray, length);
+        return WorldAccessImpl.getEntityRayBuckets(lethal$self(), getEntities(), ray, length);
     }
 
     @Unique
