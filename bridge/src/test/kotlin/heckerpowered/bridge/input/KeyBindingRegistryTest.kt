@@ -6,12 +6,7 @@
 package heckerpowered.bridge.input
 
 import heckerpowered.bridge.resources.IdentifierProvider
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertSame
+import kotlin.test.*
 
 class KeyBindingRegistryTest {
     @BeforeTest
@@ -32,7 +27,7 @@ class KeyBindingRegistryTest {
         assertSame(primarySkill, KeyBindingRegistry.register(primarySkill))
         assertSame(secondarySkill, KeyBindingRegistry.register(secondarySkill))
 
-        assertEquals(listOf(primarySkill, secondarySkill), KeyBindingRegistry.all())
+        assertEquals(expected = listOf(primarySkill, secondarySkill), actual = KeyBindingRegistry.all())
     }
 
     @Test
@@ -48,15 +43,11 @@ class KeyBindingRegistryTest {
     fun languageKeysAreDerivedFromIdentifiers() {
         val keyBinding = keyBinding("skill/primary", KeyboardKey.X)
 
-        assertEquals("key.lethal.skill.primary", keyBinding.translationKey)
-        assertEquals("key.category.lethal.weapon.skills", keyBinding.categoryTranslationKey)
+        assertEquals(expected = "key.lethal.skill.primary", actual = keyBinding.translationKey)
+        assertEquals(expected = "key.category.lethal.weapon.skills", actual = keyBinding.categoryTranslationKey)
     }
 
     private fun keyBinding(path: String, defaultKey: KeyboardKey): KeyBindingBlueprint {
-        return KeyBindingBlueprint(
-            identifier = IdentifierProvider.Freestanding.identifier("lethal", path),
-            category = IdentifierProvider.Freestanding.identifier("lethal", "weapon/skills"),
-            defaultKey = defaultKey,
-        )
+        return KeyBindingBlueprint(IdentifierProvider.Freestanding.identifier("lethal", path), IdentifierProvider.Freestanding.identifier("lethal", "weapon/skills"), defaultKey)
     }
 }
