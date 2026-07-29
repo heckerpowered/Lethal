@@ -26,8 +26,8 @@ class FirearmRenderEventHandlerTest {
 
         applyHeldFirearmPose(model, EnumHandSide.RIGHT, firearmStack(), ItemStack.EMPTY)
 
-        assertEquals(ModelBiped.ArmPose.BOW_AND_ARROW, model.rightArmPose)
-        assertEquals(ModelBiped.ArmPose.EMPTY, model.leftArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.BOW_AND_ARROW, actual = model.rightArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.EMPTY, actual = model.leftArmPose)
     }
 
     @Test
@@ -37,8 +37,8 @@ class FirearmRenderEventHandlerTest {
 
         applyHeldFirearmPose(model, EnumHandSide.LEFT, firearmStack(), ItemStack.EMPTY)
 
-        assertEquals(ModelBiped.ArmPose.EMPTY, model.rightArmPose)
-        assertEquals(ModelBiped.ArmPose.BOW_AND_ARROW, model.leftArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.EMPTY, actual = model.rightArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.BOW_AND_ARROW, actual = model.leftArmPose)
     }
 
     @Test
@@ -48,8 +48,8 @@ class FirearmRenderEventHandlerTest {
 
         applyHeldFirearmPose(model, EnumHandSide.RIGHT, ItemStack.EMPTY, firearmStack())
 
-        assertEquals(ModelBiped.ArmPose.EMPTY, model.rightArmPose)
-        assertEquals(ModelBiped.ArmPose.BOW_AND_ARROW, model.leftArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.EMPTY, actual = model.rightArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.BOW_AND_ARROW, actual = model.leftArmPose)
     }
 
     @Test
@@ -59,8 +59,8 @@ class FirearmRenderEventHandlerTest {
 
         applyHeldFirearmPose(model, EnumHandSide.RIGHT, firearmStack(), firearmStack())
 
-        assertEquals(ModelBiped.ArmPose.BOW_AND_ARROW, model.rightArmPose)
-        assertEquals(ModelBiped.ArmPose.EMPTY, model.leftArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.BOW_AND_ARROW, actual = model.rightArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.EMPTY, actual = model.leftArmPose)
     }
 
     @Test
@@ -69,8 +69,8 @@ class FirearmRenderEventHandlerTest {
 
         applyHeldFirearmPose(model, EnumHandSide.RIGHT, ItemStack.EMPTY, ItemStack.EMPTY)
 
-        assertEquals(ModelBiped.ArmPose.EMPTY, model.rightArmPose)
-        assertEquals(ModelBiped.ArmPose.EMPTY, model.leftArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.EMPTY, actual = model.rightArmPose)
+        assertEquals(expected = ModelBiped.ArmPose.EMPTY, actual = model.leftArmPose)
     }
 
     private fun firearmStack(): ItemStack {

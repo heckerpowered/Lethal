@@ -6,16 +6,21 @@
 package heckerpowered.lethal.gameplay.common.item
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.entity.EntityEquipmentAccess
 import heckerpowered.bridge.adapter.entity.PlayerAccess
 import heckerpowered.bridge.adapter.effect.ParticleEffect
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 import heckerpowered.bridge.adapter.sound.SoundPlayback
 import heckerpowered.bridge.adapter.world.WorldAccess
+import heckerpowered.bridge.adapter.world.raycast.BlockHitResult
+import heckerpowered.bridge.adapter.world.raycast.BlockRaycastShape
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket
 import heckerpowered.bridge.math.BoxView
+import heckerpowered.bridge.math.BlockPositionView
 import heckerpowered.bridge.math.Geometry
 import heckerpowered.bridge.math.RayView
 import heckerpowered.bridge.math.VectorView
+import heckerpowered.lethal.gameplay.common.item.firearm.Firearm
 import heckerpowered.lethal.gameplay.common.sound.ModSounds
 import java.lang.reflect.Proxy
 import kotlin.test.Test
@@ -30,25 +35,33 @@ class FirearmSoundTest {
         val weaponStack = createWeaponStack()
         val player = createPlayer(world, eyePosition, weaponStack)
 
-        Fortune.shoot(player, weaponStack, 1)
-        Archaeopteryx.shoot(player, weaponStack, 1)
-        listOf(Zeus, ZeusGolden, ZeusBlack, ZeusGlowSquid, ZeusSculk).forEach { firearm ->
+        val expectedSounds = listOf<Pair<Firearm, SoundPlayback>>(
+            Fortune to ModSounds.FortuneFire,
+            Archaeopteryx to ModSounds.ArchaeopteryxFire,
+            EnhancedFortune to ModSounds.FortuneFire,
+            Chaos to ModSounds.ChaosFire,
+            Zeus to ModSounds.ZeusFire,
+            ZeusGolden to ModSounds.ZeusFire,
+            ZeusBlackGold to ModSounds.ZeusFire,
+            ZeusGlowSquid to ModSounds.ZeusFire,
+            ZeusSculk to ModSounds.ZeusFire,
+        )
+        expectedSounds.forEach { (firearm, _) ->
             firearm.shoot(player, weaponStack, 1)
         }
 
-        assertSame(eyePosition, world.playedSounds[0].position)
-        assertSame(ModSounds.FortuneFire, world.playedSounds[0].playback)
-        assertSame(eyePosition, world.playedSounds[1].position)
-        assertSame(ModSounds.ArchaeopteryxFire, world.playedSounds[1].playback)
-        assertEquals(7, world.playedSounds.size)
-        world.playedSounds.drop(2).forEach { playedSound ->
+        assertEquals(expected = expectedSounds.size, actual = world.playedSounds.size)
+        expectedSounds.zip(world.playedSounds).forEach { (expected, playedSound) ->
             assertSame(eyePosition, playedSound.position)
-            assertSame(ModSounds.ZeusFire, playedSound.playback)
+            assertSame(expected.second, playedSound.playback)
         }
     }
 
     private fun createPlayer(world: WorldAccess, eyePosition: VectorView, weaponStack: ItemStackAccess): PlayerAccess {
-        return Proxy.newProxyInstance(PlayerAccess::class.java.classLoader, arrayOf(PlayerAccess::class.java)) { _, method, _ ->
+        return Proxy.newProxyInstance(
+            PlayerAccess::class.java.classLoader,
+            arrayOf(PlayerAccess::class.java, EntityEquipmentAccess::class.java),
+        ) { _, method, _ ->
             when (method.name) {
                 "getWorld" -> world
                 "getEyePosition" -> eyePosition
@@ -78,6 +91,14 @@ class FirearmSoundTest {
 
         override fun getEntityRayBuckets(ray: RayView, length: Double): Sequence<EntityRayBucket> {
             return emptySequence()
+        }
+
+        override fun raycastBlockHits(ray: RayView, distanceBlocks: Double, shape: BlockRaycastShape): Sequence<BlockHitResult> {
+            return emptySequence()
+        }
+
+        override fun destroyBlock(position: BlockPositionView, dropItems: Boolean): Boolean {
+            return false
         }
 
         override fun playSound(position: VectorView, playback: SoundPlayback) {

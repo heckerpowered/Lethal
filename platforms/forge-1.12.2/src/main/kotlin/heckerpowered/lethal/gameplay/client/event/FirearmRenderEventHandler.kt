@@ -31,12 +31,7 @@ object FirearmRenderEventHandler {
     }
 }
 
-internal fun applyHeldFirearmPose(
-    model: ModelBiped,
-    primaryHand: EnumHandSide,
-    mainHandStack: ItemStack,
-    offHandStack: ItemStack,
-) {
+internal fun applyHeldFirearmPose(model: ModelBiped, primaryHand: EnumHandSide, mainHandStack: ItemStack, offHandStack: ItemStack) {
     val firearmSide = when {
         mainHandStack.holdsFirearm() -> primaryHand
         offHandStack.holdsFirearm() -> primaryHand.opposite()
