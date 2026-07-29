@@ -11,7 +11,7 @@ import heckerpowered.bridge.input.KeyboardKey
 import heckerpowered.lethal.Constants
 
 object ModKeyBindings {
-    private val skillCategory = Constants.identifier("weapon/skills")
+    private val SkillCategory = Constants.identifier("weapon/skills")
 
     val PrimarySkill = register("skill/primary", KeyboardKey.X)
     val SecondarySkill = register("skill/secondary", KeyboardKey.C)
@@ -21,12 +21,6 @@ object ModKeyBindings {
     }
 
     private fun register(path: String, defaultKey: KeyboardKey): KeyBindingBlueprint {
-        return KeyBindingRegistry.register(
-            KeyBindingBlueprint(
-                identifier = Constants.identifier(path),
-                category = skillCategory,
-                defaultKey = defaultKey,
-            ),
-        )
+        return KeyBindingRegistry.register(KeyBindingBlueprint(Constants.identifier(path), SkillCategory, defaultKey))
     }
 }
