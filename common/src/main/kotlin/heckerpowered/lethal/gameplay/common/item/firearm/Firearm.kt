@@ -13,7 +13,7 @@ import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 
 abstract class Firearm : ItemBlueprint, ItemForm, Gun {
     override val properties: ItemProperties
-        get() = ItemProperties(1, 0, null)
+        get() = ItemProperties(1)
     override val form: ItemForm
         get() = this
 
