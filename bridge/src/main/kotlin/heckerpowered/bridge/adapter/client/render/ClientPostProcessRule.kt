@@ -6,5 +6,5 @@
 package heckerpowered.bridge.adapter.client.render
 
 interface ClientPostProcessRule {
-    fun onPostProcess(context: ClientPostProcessContext)
+    fun onPostProcess(frame: ClientPostProcessFrame)
 }
