@@ -6,12 +6,7 @@
 package heckerpowered.bridge.adapter.item
 
 import heckerpowered.bridge.resources.Identifier
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertSame
+import kotlin.test.*
 
 class ItemRegistryTest {
     @BeforeTest
@@ -31,7 +26,7 @@ class ItemRegistryTest {
 
         assertSame(firstItem, ItemRegistry.register(firstItem))
         assertSame(secondItem, ItemRegistry.register(secondItem))
-        assertEquals(listOf(firstItem, secondItem), ItemRegistry.all())
+        assertEquals(expected = listOf(firstItem, secondItem), actual = ItemRegistry.all())
     }
 
     @Test
