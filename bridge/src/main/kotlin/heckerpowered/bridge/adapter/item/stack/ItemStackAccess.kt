@@ -5,9 +5,10 @@
 
 package heckerpowered.bridge.adapter.item.stack
 
+import heckerpowered.bridge.adapter.BridgeAccess
 import heckerpowered.bridge.adapter.item.ItemAccess
 
-interface ItemStackAccess {
+interface ItemStackAccess : BridgeAccess {
     val item: ItemAccess
     var count: Int
     var damagePoints: Int
