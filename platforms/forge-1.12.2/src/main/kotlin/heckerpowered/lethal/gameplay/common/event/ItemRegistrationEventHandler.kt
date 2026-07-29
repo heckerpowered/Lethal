@@ -14,14 +14,12 @@ import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID)
-class ItemRegistrationEventHandler private constructor() {
-    companion object {
-        @SubscribeEvent
-        @JvmStatic
-        fun onRegisterItems(event: RegistryEvent.Register<Item>) {
-            for (blueprint in ItemRegistry.all()) {
-                event.registry.register(HostedItem(blueprint))
-            }
+object ItemRegistrationEventHandler {
+    @SubscribeEvent
+    @JvmStatic
+    fun onRegisterItems(event: RegistryEvent.Register<Item>) {
+        for (blueprint in ItemRegistry.all()) {
+            event.registry.register(HostedItem(blueprint))
         }
     }
 }
