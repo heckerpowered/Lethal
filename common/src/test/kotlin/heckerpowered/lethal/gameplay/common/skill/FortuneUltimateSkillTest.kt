@@ -50,15 +50,15 @@ class FortuneUltimateSkillTest {
         val standard = FortuneUltimateSkill(1_200.0, StarJudgementKind.Standard, RecordingSpawner())
         val enhanced = FortuneUltimateSkill(2_000.0, StarJudgementKind.Enhanced, RecordingSpawner())
 
-        standard.apply(damageResult(player, standardStack, target, requestedDamagePoints = 30_000.0, actualDamagePoints = 17.0))
-        enhanced.apply(damageResult(player, enhancedStack, target, requestedDamagePoints = 42_000.0, actualDamagePoints = 17.0))
-        assertEquals(17.0, standard.currentCharge(standardStack))
-        assertEquals(17.0, enhanced.currentCharge(enhancedStack))
+        standard.apply(damageResult(player, standardStack, target, 30_000.0, 17.0))
+        enhanced.apply(damageResult(player, enhancedStack, target, 42_000.0, 17.0))
+        assertEquals(expected = 17.0, actual = standard.currentCharge(standardStack))
+        assertEquals(expected = 17.0, actual = enhanced.currentCharge(enhancedStack))
 
-        standard.apply(damageResult(player, standardStack, target, requestedDamagePoints = 30_000.0, actualDamagePoints = 3_000.0))
-        enhanced.apply(damageResult(player, enhancedStack, target, requestedDamagePoints = 42_000.0, actualDamagePoints = 3_000.0))
-        assertEquals(1_200.0, standard.currentCharge(standardStack))
-        assertEquals(2_000.0, enhanced.currentCharge(enhancedStack))
+        standard.apply(damageResult(player, standardStack, target, 30_000.0, 3_000.0))
+        enhanced.apply(damageResult(player, enhancedStack, target, 42_000.0, 3_000.0))
+        assertEquals(expected = 1_200.0, actual = standard.currentCharge(standardStack))
+        assertEquals(expected = 2_000.0, actual = enhanced.currentCharge(enhancedStack))
     }
 
     @Test
@@ -69,14 +69,14 @@ class FortuneUltimateSkillTest {
         val target = createLivingTarget()
         val spawner = RecordingSpawner()
         val skill = FortuneUltimateSkill(1_200.0, StarJudgementKind.Standard, spawner)
-        skill.apply(damageResult(player, stack, target, requestedDamagePoints = 399.0, actualDamagePoints = 399.0))
+        skill.apply(damageResult(player, stack, target, 399.0, 399.0))
 
         skill.activate(player, stack)
 
-        assertEquals(399.0, skill.currentCharge(stack))
-        assertEquals(0, world.blockRaycastCount)
-        assertEquals(emptyList(), spawner.spawns)
-        assertEquals(emptyList(), world.playedSounds)
+        assertEquals(expected = 399.0, actual = skill.currentCharge(stack))
+        assertEquals(expected = 0, actual = world.blockRaycastCount)
+        assertEquals(expected = emptyList(), actual = spawner.spawns)
+        assertEquals(expected = emptyList(), actual = world.playedSounds)
     }
 
     @Test
@@ -87,16 +87,16 @@ class FortuneUltimateSkillTest {
         val target = createLivingTarget()
         val spawner = RecordingSpawner()
         val skill = FortuneUltimateSkill(1_200.0, StarJudgementKind.Standard, spawner)
-        skill.apply(damageResult(player, stack, target, requestedDamagePoints = 400.0, actualDamagePoints = 400.0))
+        skill.apply(damageResult(player, stack, target, 400.0, 400.0))
 
         skill.activate(player, stack)
 
-        assertEquals(400.0, skill.currentCharge(stack))
-        assertEquals(1, world.blockRaycastCount)
-        assertEquals(BlockRaycastShape.Outline, world.lastBlockRaycastShape)
-        assertEquals(512.0, world.lastBlockRaycastDistance)
-        assertEquals(emptyList(), spawner.spawns)
-        assertEquals(emptyList(), world.playedSounds)
+        assertEquals(expected = 400.0, actual = skill.currentCharge(stack))
+        assertEquals(expected = 1, actual = world.blockRaycastCount)
+        assertEquals(expected = BlockRaycastShape.Outline, actual = world.lastBlockRaycastShape)
+        assertEquals(expected = 512.0, actual = world.lastBlockRaycastDistance)
+        assertEquals(expected = emptyList(), actual = spawner.spawns)
+        assertEquals(expected = emptyList(), actual = world.playedSounds)
     }
 
     @Test
@@ -111,50 +111,34 @@ class FortuneUltimateSkillTest {
             val spawner = RecordingSpawner()
             val maximumCharge = if (kind == StarJudgementKind.Standard) 1_200.0 else 2_000.0
             val skill = FortuneUltimateSkill(maximumCharge, kind, spawner)
-            skill.apply(damageResult(player, stack, target, requestedDamagePoints = 475.0, actualDamagePoints = 475.0))
+            skill.apply(damageResult(player, stack, target, 475.0, 475.0))
 
             skill.activate(player, stack)
 
-            assertEquals(75.0, skill.currentCharge(stack))
+            assertEquals(expected = 75.0, actual = skill.currentCharge(stack))
             val spawn = spawner.spawns.single()
             assertSame(world, spawn.world)
             assertSame(player, spawn.owner)
             assertSame(hitPoint, spawn.position)
-            assertEquals(kind, spawn.kind)
+            assertEquals(expected = kind, actual = spawn.kind)
         }
 
-        assertEquals(2, world.blockRaycastCount)
-        assertEquals(BlockRaycastShape.Outline, world.lastBlockRaycastShape)
-        assertEquals(512.0, world.lastBlockRaycastDistance)
-        assertEquals(Geometry.vector(1.0, 2.0, 3.0), world.lastRay?.origin)
-        assertEquals(Geometry.vector(0.0, 0.0, 2.0), world.lastRay?.direction)
-        assertEquals(listOf(hitPoint, hitPoint), world.playedSounds.map { sound -> sound.position })
+        assertEquals(expected = 2, actual = world.blockRaycastCount)
+        assertEquals(expected = BlockRaycastShape.Outline, actual = world.lastBlockRaycastShape)
+        assertEquals(expected = 512.0, actual = world.lastBlockRaycastDistance)
+        assertEquals(expected = Geometry.vector(1.0, 2.0, 3.0), actual = world.lastRay?.origin)
+        assertEquals(expected = Geometry.vector(0.0, 0.0, 2.0), actual = world.lastRay?.direction)
+        assertEquals(expected = listOf(hitPoint, hitPoint), actual = world.playedSounds.map(PlayedSound::position))
         assertEquals(
-            listOf(ModSounds.FortunePerkUltimate, ModSounds.FortunePerkUltimate),
-            world.playedSounds.map { sound -> sound.playback },
+            expected = listOf(ModSounds.FortunePerkUltimate, ModSounds.FortunePerkUltimate),
+            actual = world.playedSounds.map(PlayedSound::playback),
         )
     }
 
-    private fun damageResult(
-        player: PlayerAccess,
-        stack: ItemStackAccess,
-        target: LivingEntityAccess,
-        requestedDamagePoints: Double,
-        actualDamagePoints: Double,
-    ): EntityDamageResult {
+    private fun damageResult(player: PlayerAccess, stack: ItemStackAccess, target: LivingEntityAccess, requestedDamagePoints: Double, actualDamagePoints: Double): EntityDamageResult {
         val ray = Geometry.ray(Geometry.vector(0.0, 0.0, 0.0), Geometry.vector(0.0, 0.0, 1.0))
         val intersection = requireNotNull(target.boundingBox.intersect(ray, 10.0))
-        return EntityDamageResult(
-            player = player,
-            weaponStack = stack,
-            hit = EntityRayHit(target, intersection),
-            targetEntity = target,
-            livingTarget = target,
-            damageSource = DamageSources.vanilla(VanillaDamageType.FellOutOfWorld, player, player),
-            requestedDamagePoints = requestedDamagePoints,
-            actualDamagePoints = actualDamagePoints,
-            damageAccepted = true,
-        )
+        return EntityDamageResult(player, stack, EntityRayHit(target, intersection), target, target, DamageSources.vanilla(VanillaDamageType.FellOutOfWorld, player, player), requestedDamagePoints, actualDamagePoints, true)
     }
 
     private fun createPlayer(world: WorldAccess): PlayerAccess {
@@ -219,12 +203,7 @@ class FortuneUltimateSkillTest {
     private class RecordingSpawner : StarJudgementSpawner {
         val spawns = mutableListOf<Spawn>()
 
-        override fun spawn(
-            world: WorldAccess,
-            owner: PlayerAccess,
-            position: VectorView,
-            kind: StarJudgementKind,
-        ) {
+        override fun spawn(world: WorldAccess, owner: PlayerAccess, position: VectorView, kind: StarJudgementKind) {
             spawns += Spawn(world, owner, position, kind)
         }
     }
@@ -266,11 +245,7 @@ class FortuneUltimateSkillTest {
 
         override fun getEntityRayBuckets(ray: RayView, length: Double): Sequence<EntityRayBucket> = emptySequence()
 
-        override fun raycastBlockHits(
-            ray: RayView,
-            distanceBlocks: Double,
-            shape: BlockRaycastShape,
-        ): Sequence<BlockHitResult> {
+        override fun raycastBlockHits(ray: RayView, distanceBlocks: Double, shape: BlockRaycastShape): Sequence<BlockHitResult> {
             blockRaycastCount++
             lastRay = ray
             lastBlockRaycastDistance = distanceBlocks
