@@ -10,6 +10,6 @@ package heckerpowered.bridge.adapter.entity
  *
  * Hosts that create experience during the death callback do not need to expose this capability.
  */
-interface DeferredExperienceDropAccess {
-    fun sendDeferredExperienceTo(receiver: ExperienceReceiverAccess)
+interface DeferredExperienceDropAccess : LivingEntityAccess {
+    fun sendDeferredExperienceTo(receiver: PlayerAccess)
 }
