@@ -13,14 +13,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.EntityEntry
 
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID)
-class EntityRegistrationEventHandler private constructor() {
-    companion object {
-        @SubscribeEvent
-        @JvmStatic
-        fun onRegisterEntities(event: RegistryEvent.Register<EntityEntry>) {
-            for (entityType in ForgeEntityTypes.all()) {
-                event.registry.register(entityType)
-            }
+object EntityRegistrationEventHandler {
+    @SubscribeEvent
+    @JvmStatic
+    fun onRegisterEntities(event: RegistryEvent.Register<EntityEntry>) {
+        for (entityType in ForgeEntityTypes.all()) {
+            event.registry.register(entityType)
         }
     }
 }
