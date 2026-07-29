@@ -27,18 +27,18 @@ class GpuBufferDataTest {
 
     @Test
     fun generatedCommandWritesTheCompleteAlignedStructure() {
-        val commands = CapturingCommandScope()
-        commands.memoryStack.alloc(floats(4)) { address -> storeFloat4(address, 1.0F, 1.0F, 1.0F, 1.0F) }
+        val encoder = CapturingCommandEncoder()
+        encoder.memoryStack.alloc(floats(4)) { address -> storeFloat4(address, 1.0F, 1.0F, 1.0F, 1.0F) }
 
-        commands.writeTestBufferData {
+        encoder.writeTestBufferData {
             opacity = 0.25F
             sampleCount = 7
         }
 
-        assertEquals(expected = CapturedBufferData(0.25F, 7, 0.0F, 0.0F, 16, 0), actual = commands.captured)
+        assertEquals(expected = CapturedBufferData(0.25F, 7, 0.0F, 0.0F, 16, 0), actual = encoder.captured)
     }
 
-    private class CapturingCommandScope : CommandScope {
+    private class CapturingCommandEncoder : CommandEncoder {
         override val memoryStack = MemoryStack()
         var captured: CapturedBufferData? = null
 
@@ -49,7 +49,7 @@ class GpuBufferDataTest {
             return CapturedUniformBinding(layout)
         }
 
-        override fun renderPass(description: RenderPassDescription, encode: RenderPass.() -> Unit) = Unit
+        override fun renderPass(description: RenderPassDescription, commands: RenderPass.() -> Unit) = Unit
     }
 
     private data class CapturedBufferData(

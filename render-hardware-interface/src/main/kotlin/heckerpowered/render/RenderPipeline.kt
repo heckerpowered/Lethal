@@ -60,21 +60,3 @@ enum class CullMode {
     None,
     Back,
 }
-
-data class RenderPipelineDescription(
-    val label: String,
-    val vertexShader: ShaderModule,
-    val fragmentShader: ShaderModule,
-    val vertexBufferLayout: VertexBufferLayout,
-    val primitiveTopology: PrimitiveTopology,
-    val blendState: BlendState,
-    val depthState: DepthState,
-    val cullMode: CullMode,
-    val descriptorSetLayouts: List<DescriptorSetLayout> = emptyList(),
-    val pushConstants: PushConstantLayout? = null,
-) {
-    init {
-        require(vertexShader.stage == ShaderStage.Vertex) { "Graphics pipeline requires a vertex shader in the vertex slot" }
-        require(fragmentShader.stage == ShaderStage.Fragment) { "Graphics pipeline requires a fragment shader in the fragment slot" }
-    }
-}
