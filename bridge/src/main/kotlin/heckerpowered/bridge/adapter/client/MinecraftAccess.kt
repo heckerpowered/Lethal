@@ -5,8 +5,9 @@
 
 package heckerpowered.bridge.adapter.client
 
+import heckerpowered.bridge.adapter.BridgeAccess
 import heckerpowered.bridge.adapter.entity.ClientPlayerAccess
 
-interface MinecraftAccess {
+interface MinecraftAccess : BridgeAccess {
     val player: ClientPlayerAccess?
 }
