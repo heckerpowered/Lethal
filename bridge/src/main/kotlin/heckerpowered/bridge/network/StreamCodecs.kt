@@ -22,11 +22,7 @@ object StreamCodecs {
     val VarInt = StreamCodec.of(::writeVarInt, ::readVarInt)
     val VarLong = StreamCodec.of(::writeVarLong, ::readVarLong)
 
-    val Uuid = StreamCodec.composite(
-        Long, UUID::getMostSignificantBits,
-        Long, UUID::getLeastSignificantBits,
-        ::UUID
-    )
+    val Uuid = StreamCodec.composite(Long, UUID::getMostSignificantBits, Long, UUID::getLeastSignificantBits, ::UUID)
 
     val ByteArray = byteArray(1_048_576)
     val StringUTF8 = stringUtf8(32_767)
@@ -35,17 +31,17 @@ object StreamCodecs {
         require(maximumByteCount >= 0) { "Maximum byte count must not be negative" }
 
         return StreamCodec.of(
-            encoder = { output, value ->
+            { output, value ->
                 require(value.size <= maximumByteCount) { "Byte array size ${value.size} exceeds maximum $maximumByteCount" }
 
                 VarInt.encode(output, value.size)
                 output.writeBytes(value)
             },
-            decoder = { input ->
+            { input ->
                 val byteCount = VarInt.decode(input)
                 require(byteCount >= 0) { "Byte array size must not be negative: $byteCount" }
                 require(byteCount <= maximumByteCount) { "Byte array size $byteCount exceeds maximum $maximumByteCount" }
-                require(byteCount <= input.readableByteCount) { "Byte array size $byteCount exceeds readable bytes ${input.readableByteCount}"}
+                require(byteCount <= input.readableByteCount) { "Byte array size $byteCount exceeds readable bytes ${input.readableByteCount}" }
 
                 input.readBytes(byteCount)
             },
@@ -58,7 +54,7 @@ object StreamCodecs {
 
         val maximumByteCount = maximumCharacterCount * 4
         return StreamCodec.of(
-            encoder = { output, value ->
+            { output, value ->
                 require(value.length <= maximumCharacterCount) { "String length ${value.length} exceeds maximum $maximumCharacterCount" }
 
                 val bytes = value.toByteArray(Charsets.UTF_8)
@@ -67,7 +63,7 @@ object StreamCodecs {
                 VarInt.encode(output, bytes.size)
                 output.writeBytes(bytes)
             },
-            decoder = { input ->
+            { input ->
                 val byteCount = VarInt.decode(input)
                 require(byteCount >= 0) { "UTF-8 byte count must not be negative: $byteCount" }
                 require(byteCount <= maximumByteCount) { "UTF-8 byte count $byteCount exceeds maximum $maximumByteCount" }

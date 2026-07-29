@@ -22,27 +22,18 @@ interface StreamCodec<Buffer, Value> {
 
     fun <TargetValue> map(decodeMapping: (Value) -> TargetValue, encodeMapping: (TargetValue) -> Value): StreamCodec<Buffer, TargetValue> {
         val sourceCodec = this
-        return of(
-            encoder = { output, value -> sourceCodec.encode(output, encodeMapping(value)) },
-            decoder = { input -> decodeMapping(sourceCodec.decode(input)) },
-        )
+        return of({ output, value -> sourceCodec.encode(output, encodeMapping(value)) }, { input -> decodeMapping(sourceCodec.decode(input)) })
     }
 
     fun <TargetBuffer> mapStream(bufferMapping: (TargetBuffer) -> Buffer): StreamCodec<TargetBuffer, Value> {
         val sourceCodec = this
-        return of(
-            encoder = { output, value -> sourceCodec.encode(bufferMapping(output), value) },
-            decoder = { input -> sourceCodec.decode(bufferMapping(input)) },
-        )
+        return of({ output, value -> sourceCodec.encode(bufferMapping(output), value) }, { input -> sourceCodec.decode(bufferMapping(input)) })
     }
 
-    fun <DispatchedValue> dispatch(
-        typeGetter: (DispatchedValue) -> Value,
-        codecSelector: (Value) -> StreamCodec<in Buffer, out DispatchedValue>,
-    ): StreamCodec<Buffer, DispatchedValue> {
+    fun <DispatchedValue> dispatch(typeGetter: (DispatchedValue) -> Value, codecSelector: (Value) -> StreamCodec<in Buffer, out DispatchedValue>): StreamCodec<Buffer, DispatchedValue> {
         val typeCodec = this
         return of(
-            encoder = { output, value ->
+            { output, value ->
                 val type = typeGetter(value)
                 val selectedCodec = codecSelector(type)
                 typeCodec.encode(output, type)
@@ -50,7 +41,7 @@ interface StreamCodec<Buffer, Value> {
                 @Suppress("UNCHECKED_CAST")
                 (selectedCodec as StreamCodec<Buffer, DispatchedValue>).encode(output, value)
             },
-            decoder = { input ->
+            { input ->
                 val type = typeCodec.decode(input)
                 codecSelector(type).decode(input)
             },
@@ -75,10 +66,7 @@ interface StreamCodec<Buffer, Value> {
         }
 
         fun <Buffer, Value> ofMember(encoder: StreamMemberEncoder<Buffer, Value>, decoder: StreamDecoder<Buffer, Value>): StreamCodec<Buffer, Value> {
-            return of(
-                encoder = { output, value -> encoder(value, output) },
-                decoder = decoder,
-            )
+            return of({ output, value -> encoder(value, output) }, decoder)
         }
 
         fun <Buffer, Value> unit(instance: Value): StreamCodec<Buffer, Value> {
@@ -93,35 +81,25 @@ interface StreamCodec<Buffer, Value> {
             }
         }
 
-        fun <Buffer, CompositeValue, FirstField> composite(
-            firstCodec: StreamCodec<in Buffer, FirstField>,
-            firstGetter: (CompositeValue) -> FirstField,
-            constructor: (FirstField) -> CompositeValue,
-        ): StreamCodec<Buffer, CompositeValue> {
+        fun <Buffer, CompositeValue, FirstField> composite(firstCodec: StreamCodec<in Buffer, FirstField>, firstGetter: (CompositeValue) -> FirstField, constructor: (FirstField) -> CompositeValue): StreamCodec<Buffer, CompositeValue> {
             return of(
-                encoder = { output, value ->
+                { output, value ->
                     firstCodec.encode(output, firstGetter(value))
                 },
-                decoder = { input ->
+                { input ->
                     val firstField = firstCodec.decode(input)
                     constructor(firstField)
                 },
             )
         }
 
-        fun <Buffer, CompositeValue, FirstField, SecondField> composite(
-            firstCodec: StreamCodec<in Buffer, FirstField>,
-            firstGetter: (CompositeValue) -> FirstField,
-            secondCodec: StreamCodec<in Buffer, SecondField>,
-            secondGetter: (CompositeValue) -> SecondField,
-            constructor: (FirstField, SecondField) -> CompositeValue,
-        ): StreamCodec<Buffer, CompositeValue> {
+        fun <Buffer, CompositeValue, FirstField, SecondField> composite(firstCodec: StreamCodec<in Buffer, FirstField>, firstGetter: (CompositeValue) -> FirstField, secondCodec: StreamCodec<in Buffer, SecondField>, secondGetter: (CompositeValue) -> SecondField, constructor: (FirstField, SecondField) -> CompositeValue): StreamCodec<Buffer, CompositeValue> {
             return of(
-                encoder = { output, value ->
+                { output, value ->
                     firstCodec.encode(output, firstGetter(value))
                     secondCodec.encode(output, secondGetter(value))
                 },
-                decoder = { input ->
+                { input ->
                     val firstField = firstCodec.decode(input)
                     val secondField = secondCodec.decode(input)
                     constructor(firstField, secondField)
@@ -129,22 +107,14 @@ interface StreamCodec<Buffer, Value> {
             )
         }
 
-        fun <Buffer, CompositeValue, FirstField, SecondField, ThirdField> composite(
-            firstCodec: StreamCodec<in Buffer, FirstField>,
-            firstGetter: (CompositeValue) -> FirstField,
-            secondCodec: StreamCodec<in Buffer, SecondField>,
-            secondGetter: (CompositeValue) -> SecondField,
-            thirdCodec: StreamCodec<in Buffer, ThirdField>,
-            thirdGetter: (CompositeValue) -> ThirdField,
-            constructor: (FirstField, SecondField, ThirdField) -> CompositeValue,
-        ): StreamCodec<Buffer, CompositeValue> {
+        fun <Buffer, CompositeValue, FirstField, SecondField, ThirdField> composite(firstCodec: StreamCodec<in Buffer, FirstField>, firstGetter: (CompositeValue) -> FirstField, secondCodec: StreamCodec<in Buffer, SecondField>, secondGetter: (CompositeValue) -> SecondField, thirdCodec: StreamCodec<in Buffer, ThirdField>, thirdGetter: (CompositeValue) -> ThirdField, constructor: (FirstField, SecondField, ThirdField) -> CompositeValue): StreamCodec<Buffer, CompositeValue> {
             return of(
-                encoder = { output, value ->
+                { output, value ->
                     firstCodec.encode(output, firstGetter(value))
                     secondCodec.encode(output, secondGetter(value))
                     thirdCodec.encode(output, thirdGetter(value))
                 },
-                decoder = { input ->
+                { input ->
                     val firstField = firstCodec.decode(input)
                     val secondField = secondCodec.decode(input)
                     val thirdField = thirdCodec.decode(input)
@@ -153,25 +123,15 @@ interface StreamCodec<Buffer, Value> {
             )
         }
 
-        fun <Buffer, CompositeValue, FirstField, SecondField, ThirdField, FourthField> composite(
-            firstCodec: StreamCodec<in Buffer, FirstField>,
-            firstGetter: (CompositeValue) -> FirstField,
-            secondCodec: StreamCodec<in Buffer, SecondField>,
-            secondGetter: (CompositeValue) -> SecondField,
-            thirdCodec: StreamCodec<in Buffer, ThirdField>,
-            thirdGetter: (CompositeValue) -> ThirdField,
-            fourthCodec: StreamCodec<in Buffer, FourthField>,
-            fourthGetter: (CompositeValue) -> FourthField,
-            constructor: (FirstField, SecondField, ThirdField, FourthField) -> CompositeValue,
-        ): StreamCodec<Buffer, CompositeValue> {
+        fun <Buffer, CompositeValue, FirstField, SecondField, ThirdField, FourthField> composite(firstCodec: StreamCodec<in Buffer, FirstField>, firstGetter: (CompositeValue) -> FirstField, secondCodec: StreamCodec<in Buffer, SecondField>, secondGetter: (CompositeValue) -> SecondField, thirdCodec: StreamCodec<in Buffer, ThirdField>, thirdGetter: (CompositeValue) -> ThirdField, fourthCodec: StreamCodec<in Buffer, FourthField>, fourthGetter: (CompositeValue) -> FourthField, constructor: (FirstField, SecondField, ThirdField, FourthField) -> CompositeValue): StreamCodec<Buffer, CompositeValue> {
             return of(
-                encoder = { output, value ->
+                { output, value ->
                     firstCodec.encode(output, firstGetter(value))
                     secondCodec.encode(output, secondGetter(value))
                     thirdCodec.encode(output, thirdGetter(value))
                     fourthCodec.encode(output, fourthGetter(value))
                 },
-                decoder = { input ->
+                { input ->
                     val firstField = firstCodec.decode(input)
                     val secondField = secondCodec.decode(input)
                     val thirdField = thirdCodec.decode(input)

@@ -15,10 +15,10 @@ class StreamCodecTest {
     @Test
     fun compositeEncodesAndDecodesFieldsInDeclarationOrder() {
         val codec = StreamCodec.composite(
-            stringCodec, ChannelPayload::magicId,
-            integerCodec, ChannelPayload::entityId,
-            longCodec, ChannelPayload::channelTimeTicks,
-            booleanCodec, ChannelPayload::clientPrediction,
+            StringCodec, ChannelPayload::magicId,
+            IntegerCodec, ChannelPayload::entityId,
+            LongCodec, ChannelPayload::channelTimeTicks,
+            BooleanCodec, ChannelPayload::clientPrediction,
             ::ChannelPayload,
         )
         val payload = ChannelPayload("matrix:magic", 42, 80L, true)
@@ -26,44 +26,41 @@ class StreamCodecTest {
 
         codec.encode(buffer, payload)
 
-        assertEquals(listOf("matrix:magic", 42, 80L, true), buffer.values())
-        assertEquals(payload, codec.decode(buffer))
+        assertEquals(expected = listOf("matrix:magic", 42, 80L, true), actual = buffer.values())
+        assertEquals(expected = payload, actual = codec.decode(buffer))
         assertTrue(buffer.isEmpty())
     }
 
     @Test
     fun mapTransformsBothCodecDirections() {
-        val codec = integerCodec.map(Int::toString, String::toInt)
+        val codec = IntegerCodec.map(Int::toString, String::toInt)
         val buffer = ValueBuffer()
 
         codec.encode(buffer, "27")
 
-        assertEquals(listOf(27), buffer.values())
-        assertEquals("27", codec.decode(buffer))
+        assertEquals(expected = listOf(27), actual = buffer.values())
+        assertEquals(expected = "27", actual = codec.decode(buffer))
     }
 
     @Test
     fun mapStreamAdaptsAnotherBufferRepresentation() {
-        val codec = integerCodec.mapStream(WrappedValueBuffer::buffer)
+        val codec = IntegerCodec.mapStream(WrappedValueBuffer::buffer)
         val buffer = WrappedValueBuffer(ValueBuffer())
 
         codec.encode(buffer, 64)
 
-        assertEquals(64, codec.decode(buffer))
+        assertEquals(expected = 64, actual = codec.decode(buffer))
     }
 
     @Test
     fun ofMemberUsesTheValueAsTheEncodingReceiver() {
-        val codec = StreamCodec.ofMember<ValueBuffer, MemberEncodedValue>(
-            encoder = MemberEncodedValue::encode,
-            decoder = { input -> MemberEncodedValue(integerCodec.decode(input)) },
-        )
+        val codec = StreamCodec.ofMember<ValueBuffer, MemberEncodedValue>(MemberEncodedValue::encode) { input -> MemberEncodedValue(IntegerCodec.decode(input)) }
         val value = MemberEncodedValue(19)
         val buffer = ValueBuffer()
 
         codec.encode(buffer, value)
 
-        assertEquals(value, codec.decode(buffer))
+        assertEquals(expected = value, actual = codec.decode(buffer))
     }
 
     @Test
@@ -73,7 +70,7 @@ class StreamCodecTest {
 
         codec.encode(buffer, "ready")
 
-        assertEquals("ready", codec.decode(buffer))
+        assertEquals(expected = "ready", actual = codec.decode(buffer))
         assertFailsWith<IllegalStateException> {
             codec.encode(buffer, "different")
         }
@@ -81,39 +78,36 @@ class StreamCodecTest {
 
     @Test
     fun dispatchSelectsTheCodecWrittenByItsTypeCodec() {
-        val numberCodec = integerCodec.map(::NumberPayload, NumberPayload::number)
-        val textCodec = stringCodec.map(::TextPayload, TextPayload::text)
-        val codec = stringCodec.dispatch<DispatchedPayload>(
-            typeGetter = DispatchedPayload::type,
-            codecSelector = { type ->
-                when (type) {
-                    NumberPayload.type -> numberCodec
-                    TextPayload.type -> textCodec
-                    else -> error("Unknown dispatched payload type: $type")
-                }
-            },
-        )
+        val numberCodec = IntegerCodec.map(::NumberPayload, NumberPayload::number)
+        val textCodec = StringCodec.map(::TextPayload, TextPayload::text)
+        val codec = StringCodec.dispatch<DispatchedPayload>(DispatchedPayload::type) { type ->
+            when (type) {
+                NumberPayload.TYPE -> numberCodec
+                TextPayload.TYPE -> textCodec
+                else -> error("Unknown dispatched payload type: $type")
+            }
+        }
         val buffer = ValueBuffer()
 
         codec.encode(buffer, NumberPayload(12))
         codec.encode(buffer, TextPayload("payload"))
 
-        assertEquals(listOf(NumberPayload.type, 12, TextPayload.type, "payload"), buffer.values())
-        assertEquals(NumberPayload(12), codec.decode(buffer))
-        assertEquals(TextPayload("payload"), codec.decode(buffer))
+        assertEquals(expected = listOf(NumberPayload.TYPE, 12, TextPayload.TYPE, "payload"), actual = buffer.values())
+        assertEquals(expected = NumberPayload(12), actual = codec.decode(buffer))
+        assertEquals(expected = TextPayload("payload"), actual = codec.decode(buffer))
     }
 
     @Test
     fun recursiveBuildsSelfReferentialCodecsLazily() {
         val codec = StreamCodec.recursive<ValueBuffer, Tree> { recursiveCodec ->
-            stringCodec.dispatch(
-                typeGetter = { tree ->
+            StringCodec.dispatch(
+                { tree ->
                     when (tree) {
                         is Tree.Branch -> "branch"
                         is Tree.Leaf -> "leaf"
                     }
                 },
-                codecSelector = { type ->
+                { type ->
                     when (type) {
                         "branch" -> StreamCodec.composite(
                             recursiveCodec, Tree.Branch::left,
@@ -121,7 +115,7 @@ class StreamCodecTest {
                             Tree::Branch,
                         )
 
-                        "leaf" -> integerCodec.map(Tree::Leaf, Tree.Leaf::value)
+                        "leaf" -> IntegerCodec.map(Tree::Leaf, Tree.Leaf::value)
                         else -> error("Unknown tree type: $type")
                     }
                 },
@@ -132,7 +126,7 @@ class StreamCodecTest {
 
         codec.encode(buffer, tree)
 
-        assertEquals(tree, codec.decode(buffer))
+        assertEquals(expected = tree, actual = codec.decode(buffer))
     }
 
     private data class ChannelPayload(
@@ -154,19 +148,19 @@ class StreamCodecTest {
 
     private data class NumberPayload(val number: Int) : DispatchedPayload {
         override val type: String
-            get() = NumberPayload.type
+            get() = NumberPayload.TYPE
 
         companion object {
-            const val type = "number"
+            const val TYPE = "number"
         }
     }
 
     private data class TextPayload(val text: String) : DispatchedPayload {
         override val type: String
-            get() = TextPayload.type
+            get() = TextPayload.TYPE
 
         companion object {
-            const val type = "text"
+            const val TYPE = "text"
         }
     }
 
@@ -192,10 +186,10 @@ class StreamCodecTest {
     )
 
     private companion object {
-        val integerCodec = storedValueCodec<Int>()
-        val longCodec = storedValueCodec<Long>()
-        val booleanCodec = storedValueCodec<Boolean>()
-        val stringCodec = storedValueCodec<String>()
+        val IntegerCodec = storedValueCodec<Int>()
+        val LongCodec = storedValueCodec<Long>()
+        val BooleanCodec = storedValueCodec<Boolean>()
+        val StringCodec = storedValueCodec<String>()
     }
 }
 
@@ -223,8 +217,8 @@ private data class WrappedValueBuffer(val buffer: ValueBuffer)
 
 private inline fun <reified Value : Any> storedValueCodec(): StreamCodec<ValueBuffer, Value> {
     return StreamCodec.of(
-        encoder = { output, value -> output.write(value) },
-        decoder = { input ->
+        { output, value -> output.write(value) },
+        { input ->
             val value = input.read()
             require(value is Value)
             value
