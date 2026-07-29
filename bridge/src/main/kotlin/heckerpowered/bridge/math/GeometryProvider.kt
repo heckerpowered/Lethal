@@ -38,16 +38,12 @@ object Geometry {
     @JvmStatic
     fun vector(x: Double, y: Double, z: Double) = Provider.vector(x, y, z)
 
-    @JvmStatic
     fun box(min: VectorView, max: VectorView) = Provider.box(min, max)
 
-    @JvmStatic
     fun box(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double) = Provider.box(minX, minY, minZ, maxX, maxY, maxZ)
 
-    @JvmStatic
     fun rotator(pitch: Double, yaw: Double, roll: Double = 0.0) = Provider.rotator(pitch, yaw, roll)
 
-    @JvmStatic
     fun ray(origin: VectorView, direction: VectorView) = Provider.ray(origin, direction)
 }
 
@@ -57,7 +53,15 @@ private data class FreestandingVector(
     override val z: Double,
 ) : VectorView, FreestandingRepresentation
 
-private data class FreestandingBox(override val minX: Double, override val minY: Double, override val minZ: Double, override val maxX: Double, override val maxY: Double, override val maxZ: Double) : BoxView, FreestandingRepresentation {
+private data class FreestandingBox(
+    override val minX: Double,
+    override val minY: Double,
+    override val minZ: Double,
+
+    override val maxX: Double,
+    override val maxY: Double,
+    override val maxZ: Double,
+) : BoxView, FreestandingRepresentation {
     override val min: VectorView
         get() = FreestandingGeometryProvider.vector(minX, minY, minZ)
 
