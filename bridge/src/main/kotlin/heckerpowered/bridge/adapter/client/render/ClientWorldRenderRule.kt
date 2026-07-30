@@ -5,6 +5,9 @@
 
 package heckerpowered.bridge.adapter.client.render
 
+/**
+ * Encodes ordinary world content before the world post-processing stage.
+ */
 interface ClientWorldRenderRule {
-    fun onWorldRender(context: ClientWorldRenderContext, frame: ClientWorldRenderFrame)
+    fun ClientWorldRenderEncoder.render(context: ClientWorldRenderContext)
 }
