@@ -41,12 +41,12 @@ class DamageSourceMixin {
 
     @Nullable
     public EntityAccess damageSourceView$getDirectEntity() {
-        return ObjectInterop.asView(getImmediateSource());
+        return ObjectInterop.asViewOrNull(getImmediateSource());
     }
 
     @Nullable
     public EntityAccess damageSourceView$getCausingEntity() {
-        return ObjectInterop.asView(getTrueSource());
+        return ObjectInterop.asViewOrNull(getTrueSource());
     }
 
     @Nullable
