@@ -21,8 +21,8 @@ class EntityHitDamage(private val damageType: VanillaDamageType, private val dam
         val damagePoints = damagePointsPerShot * shotCount
         val results = mutableListOf<EntityDamageResult>()
 
-        for (entityHit in entityHits.distinctBy { it.logicalTarget.id }) {
-            val result = damage(player, weaponStack, entityHit, damageSource, damagePoints)
+        for ((entityHit, target) in entityHits.distinctLogicalTargets()) {
+            val result = damage(player, weaponStack, entityHit, target, damageSource, damagePoints)
             hitEffects.forEach { it.apply(result) }
             results += result
         }
@@ -30,12 +30,9 @@ class EntityHitDamage(private val damageType: VanillaDamageType, private val dam
         return results
     }
 
-    private fun damage(player: PlayerAccess, weaponStack: ItemStackAccess, entityHit: EntityRayHit, damageSource: DamageSourceView, damagePoints: Double): EntityDamageResult {
-        val target = entityHit.logicalTarget
+    private fun damage(player: PlayerAccess, weaponStack: ItemStackAccess, entityHit: EntityRayHit, target: EntityAccess, damageSource: DamageSourceView, damagePoints: Double): EntityDamageResult {
         val livingTarget = target as? LivingEntityAccess
-        val healthBeforeDamage = livingTarget?.health
-        val damageAccepted = target.hurt(damageSource, damagePoints)
-        val actualDamagePoints = livingTarget?.let { (healthBeforeDamage!! - it.health).coerceIn(0.0, it.maximumHealth) } ?: 0.0
+        val (damageAccepted, actualDamagePoints) = entityHit.entity.hurtAndMeasureDamage(livingTarget, damageSource, damagePoints)
 
         return EntityDamageResult(player, weaponStack, entityHit, target, livingTarget, damageSource, damagePoints, actualDamagePoints, damageAccepted)
     }

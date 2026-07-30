@@ -80,7 +80,7 @@ abstract class EntityLivingBaseMixin {
     }
 
     public void statusEffectAccess$addStatusEffect(@NotNull StatusEffectInstance effect) {
-        StatusEffectInterop.add(lethal$self(), effect);
+        lethal$self().addPotionEffect(StatusEffectInterop.asHost(effect));
     }
 
     public void entityExecutionAccess$execute(@NotNull DamageSourceView source) {
