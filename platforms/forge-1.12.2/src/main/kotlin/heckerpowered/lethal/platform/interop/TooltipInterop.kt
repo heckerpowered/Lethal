@@ -5,34 +5,46 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.bridge.adapter.item.TooltipColor
-import heckerpowered.bridge.adapter.item.TooltipLine
-import heckerpowered.bridge.adapter.item.TooltipText
+import heckerpowered.bridge.adapter.item.*
 import net.minecraft.client.resources.I18n
 import net.minecraft.util.text.TextFormatting
 import kotlin.math.roundToInt
 
-fun TooltipLine.asHost(): String = asHost { key, arguments -> I18n.format(key, *arguments.toTypedArray()) }
+fun TooltipLinePresentation.asHost(): String = asHost { key, arguments -> I18n.format(key, *arguments.toTypedArray()) }
 
-internal fun TooltipLine.asHost(translate: (key: String, arguments: List<Any>) -> String): String {
-    val text = content.joinToString("") { content ->
-        when (content) {
-            is TooltipText.Literal -> content.value
-            is TooltipText.Translatable -> translate(content.key, content.arguments)
-        }
+internal fun TooltipLinePresentation.asHost(translate: (key: String, arguments: List<Any>) -> String): String {
+    return when (this) {
+        is TooltipLine -> render(translate)
+        is TooltipProgress -> render(translate)
     }
-    val baseFormatting = color?.asHost()?.toString().orEmpty()
-    val progress = progress ?: return baseFormatting + text
-    val completedLength = (text.length * progress.completedFraction).roundToInt()
+}
+
+private fun TooltipLine.render(translate: (key: String, arguments: List<Any>) -> String): String {
+    return color?.asHost()?.toString().orEmpty() + renderText(translate)
+}
+
+private fun TooltipProgress.render(translate: (key: String, arguments: List<Any>) -> String): String {
+    val text = line.renderText(translate)
+    val baseFormatting = line.color?.asHost()?.toString().orEmpty()
+    val completedLength = (text.length * completedFraction).roundToInt()
     if (completedLength <= 0) return baseFormatting + text
-    if (completedLength >= text.length) return progress.color.asHost().toString() + text
+    if (completedLength >= text.length) return color.asHost().toString() + text
 
     return buildString {
-        append(progress.color.asHost())
+        append(color.asHost())
         append(text, 0, completedLength)
         append(TextFormatting.RESET)
         append(baseFormatting)
         append(text, completedLength, text.length)
+    }
+}
+
+private fun TooltipLine.renderText(translate: (key: String, arguments: List<Any>) -> String): String {
+    return content.joinToString("") { content ->
+        when (content) {
+            is TooltipText.Literal -> content.value
+            is TooltipText.Translatable -> translate(content.key, content.arguments)
+        }
     }
 }
 
