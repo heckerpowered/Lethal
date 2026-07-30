@@ -6,11 +6,13 @@
 package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.entity.EntityAccess;
+import heckerpowered.bridge.adapter.entity.EntityTypeAccess;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView;
 import heckerpowered.bridge.adapter.world.WorldAccess;
 import heckerpowered.bridge.math.BoxView;
 import heckerpowered.bridge.math.Geometry;
 import heckerpowered.bridge.math.VectorView;
+import heckerpowered.lethal.platform.interop.EntityTypeInterop;
 import heckerpowered.lethal.platform.interop.GeometryInterop;
 import heckerpowered.lethal.platform.interop.ObjectInterop;
 import heckerpowered.lethal.platform.interop.WorldInterop;
@@ -40,6 +42,21 @@ abstract class EntityMixin {
     public double motionZ;
 
     @Shadow
+    public double lastTickPosX;
+
+    @Shadow
+    public double lastTickPosY;
+
+    @Shadow
+    public double lastTickPosZ;
+
+    @Shadow
+    public float prevRotationPitch;
+
+    @Shadow
+    public float prevRotationYaw;
+
+    @Shadow
     public float rotationPitch;
 
     @Shadow
@@ -50,6 +67,9 @@ abstract class EntityMixin {
 
     @Shadow
     public boolean onGround;
+
+    @Shadow
+    public int ticksExisted;
 
     @Shadow
     public abstract int getEntityId();
@@ -105,6 +125,20 @@ abstract class EntityMixin {
     }
 
     @NotNull
+    public EntityTypeAccess entityAccess$getType() {
+        return EntityTypeInterop.typeOf((Entity) (Object) this);
+    }
+
+    public int entityAccess$getAge() {
+        return ticksExisted;
+    }
+
+    @NotNull
+    public VectorView entityAccess$getPreviousPosition() {
+        return Geometry.vector(lastTickPosX, lastTickPosY, lastTickPosZ);
+    }
+
+    @NotNull
     public VectorView entityAccess$getPosition() {
         return GeometryInterop.asView(getPositionVector());
     }
@@ -132,6 +166,14 @@ abstract class EntityMixin {
 
     public void entityAccess$setBoundingBox(@NotNull BoxView value) {
         setEntityBoundingBox(GeometryInterop.asHost(value));
+    }
+
+    public double entityAccess$getPreviousPitch() {
+        return prevRotationPitch;
+    }
+
+    public double entityAccess$getPreviousYaw() {
+        return prevRotationYaw;
     }
 
     public double entityAccess$getPitch() {
