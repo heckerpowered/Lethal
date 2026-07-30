@@ -61,7 +61,7 @@ open class Zeus protected constructor(identifierPath: String, damagePointsPerSho
 
     override fun onRayTrace(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long, entityHits: Sequence<EntityRayHit>) {
         player.world.playSound(player.eyePosition, ModSounds.ZeusFire)
-        val firstDamageResult = hitDamage.apply(player, weaponStack, shotCount, entityHits)
+        val firstDamageResult = hitDamage.apply(player, weaponStack, shotCount, entityHits).firstOrNull()
         val mainTarget = firstDamageResult?.targetEntity
         val chainStartPosition = if (firstDamageResult?.livingTarget != null) firstDamageResult.hit.entity.boundingBox.center else null
         val chainPayload = if (mainTarget == null || chainStartPosition == null) null else applyChainDamage(player, mainTarget.id, chainStartPosition, shotCount)
