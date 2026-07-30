@@ -5,23 +5,21 @@
 
 package heckerpowered.lethal.mixin.target;
 
+import heckerpowered.bridge.MixinInterop;
 import heckerpowered.bridge.adapter.entity.EntityAccess;
+import heckerpowered.bridge.adapter.entity.EntityTypeAccess;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView;
 import heckerpowered.bridge.adapter.world.WorldAccess;
 import heckerpowered.bridge.math.BoxView;
 import heckerpowered.bridge.math.VectorView;
-import heckerpowered.bridge.MixinInterop;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.UUID;
 
@@ -29,11 +27,33 @@ import java.util.UUID;
 @Implements(@Interface(iface = EntityAccess.class, prefix = "entityAccess$"))
 abstract class EntityMixin {
     @Shadow
+    public double xo;
+
+    @Shadow
+    public double yo;
+
+    @Shadow
+    public double zo;
+
+    @Shadow
+    public float xRotO;
+
+    @Shadow
+    public float yRotO;
+
+    @Shadow
+    public int tickCount;
+
+    @Shadow
     public abstract int getId();
 
     @Shadow
     @NotNull
     public abstract UUID getUUID();
+
+    @Shadow
+    @NotNull
+    public abstract EntityType<?> getType();
 
     @Shadow
     @NotNull
@@ -109,6 +129,20 @@ abstract class EntityMixin {
     }
 
     @NotNull
+    public EntityTypeAccess entityAccess$getType() {
+        return MixinInterop.requireAccess(getType(), EntityTypeAccess.class);
+    }
+
+    public int entityAccess$getAge() {
+        return tickCount;
+    }
+
+    @NotNull
+    public VectorView entityAccess$getPreviousPosition() {
+        return MixinInterop.requireAccess(new Vec3(xo, yo, zo), VectorView.class);
+    }
+
+    @NotNull
     public VectorView entityAccess$getPosition() {
         return MixinInterop.requireAccess(position(), VectorView.class);
     }
@@ -140,6 +174,14 @@ abstract class EntityMixin {
                 boundingBox.getMaxY(),
                 boundingBox.getMaxZ()
         ));
+    }
+
+    public double entityAccess$getPreviousPitch() {
+        return xRotO;
+    }
+
+    public double entityAccess$getPreviousYaw() {
+        return yRotO;
     }
 
     public double entityAccess$getPitch() {
