@@ -52,9 +52,7 @@ interface VectorView : Interpolatable<VectorView> {
     fun isNormalized(epsilon: Double = 1.0E-6): Boolean = isNearlyNormalized(epsilon)
 
     fun isFinite(): Boolean {
-        return !x.isFinite() ||
-                !y.isFinite() ||
-                !z.isFinite()
+        return x.isFinite() && y.isFinite() && z.isFinite()
     }
 
     fun containsNan(): Boolean {
@@ -217,7 +215,6 @@ fun VectorView.reciprocalOrNull(): VectorView? {
     // Do not use .reciprocal(), potential TOCTOU
     return Geometry.vector(1.0 / x, 1.0 / y, 1.0 / z)
 }
-
 
 fun VectorView.cross(other: VectorView): VectorView {
     return Geometry.vector(
