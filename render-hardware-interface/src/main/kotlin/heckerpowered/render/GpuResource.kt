@@ -15,7 +15,10 @@ interface GpuBuffer : GpuResource {
     val usage: Set<BufferUsage>
 }
 
-interface GpuTexture : GpuResource {
+/**
+ * Non-owning texture binding exposed by a render target or another resource owner.
+ */
+interface GpuTexture {
     val width: Int
     val height: Int
     val format: TextureFormat
@@ -33,7 +36,7 @@ interface DepthAttachment {
     val height: Int
 }
 
-interface RenderTarget : GpuResource {
+interface RenderTarget {
     val width: Int
     val height: Int
     val hasDepthAttachment: Boolean
@@ -43,3 +46,8 @@ interface RenderTarget : GpuResource {
 interface TextureRenderTarget : RenderTarget {
     val colorTexture: GpuTexture
 }
+
+/**
+ * Texture render target whose attachments are owned by the caller.
+ */
+interface OwnedTextureRenderTarget : TextureRenderTarget, GpuResource
