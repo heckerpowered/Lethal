@@ -3,6 +3,8 @@
  * Copyright (c) 2026 heckerpowered
  */
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("heckerpowered.convention.kotlin-jvm")
 }
@@ -13,8 +15,26 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":render:render-hardware-interface"))
-    implementation(libs.bundles.lwjgl3)
+    implementation(project(":render:render-hardware-interface-opengl"))
+    compileOnly(libs.lwjgl3Core)
+    compileOnly(libs.lwjgl3OpenGL)
 
     testImplementation(kotlin("test"))
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+kotlin {
+    jvmToolchain(8)
+
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_1_8
+    }
 }
