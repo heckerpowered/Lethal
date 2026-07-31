@@ -25,8 +25,8 @@ repositories {
 dependencies {
     compileOnly(libs.lwjglOpenGL)
 
-    add("ksp", project(":render-hardware-interface-codegen"))
-    add("kspTest", project(":render-hardware-interface-codegen"))
+    add("ksp", project(":render:render-hardware-interface-codegen"))
+    add("kspTest", project(":render:render-hardware-interface-codegen"))
 
     testImplementation(kotlin("test"))
 }

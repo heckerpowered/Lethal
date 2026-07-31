@@ -44,7 +44,7 @@ dependencies {
 
     attach(project(":common"))
     attach(project(":bridge"))
-    attach(project(":render-hardware-interface"))
+    attach(project(":render:render-hardware-interface"))
     attach("org.spongepowered:mixin:$mixinVersion") {
         exclude(group = "com.google.guava", module = "guava")
         exclude(group = "commons-io", module = "commons-io")

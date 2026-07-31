@@ -17,12 +17,12 @@ repositories {
 }
 
 dependencies {
-    add("ksp", project(":render-hardware-interface-codegen"))
+    add("ksp", project(":render:render-hardware-interface-codegen"))
 
     testImplementation(kotlin("test"))
 
     implementation(project(":bridge"))
-    implementation(project(":render-hardware-interface"))
+    implementation(project(":render:render-hardware-interface"))
 }
 
 java {

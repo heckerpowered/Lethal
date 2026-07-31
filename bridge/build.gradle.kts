@@ -16,7 +16,7 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
 
-    implementation(project(":render-hardware-interface"))
+    implementation(project(":render:render-hardware-interface"))
 }
 
 java {
