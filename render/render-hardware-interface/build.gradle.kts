@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.lwjgl3.core)
+    compileOnly(libs.bundles.lwjgl3)
 
     add("ksp", project(":render:render-hardware-interface-codegen"))
     add("kspTest", project(":render:render-hardware-interface-codegen"))
