@@ -5,6 +5,8 @@
 
 package heckerpowered.render.shader
 
+import heckerpowered.render.GraphicsDevice
+
 /**
  * Human-readable shader source code that must be compiled by the graphics backend.
  *
@@ -13,7 +15,7 @@ package heckerpowered.render.shader
  * explicitly provided elsewhere by the RHI implementation.
  *
  * A source object does not represent a compiled GPU resource. Compilation occurs when it is passed
- * to [heckerpowered.render.GraphicsDevice.createShaderModule].
+ * to [GraphicsDevice.createShaderModule].
  */
 data class ShaderSource(
     /**
