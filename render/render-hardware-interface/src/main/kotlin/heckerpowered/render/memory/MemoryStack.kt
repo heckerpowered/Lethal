@@ -9,6 +9,7 @@ import java.lang.reflect.Method
 import java.nio.Buffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.concurrent.getOrSet
 
 /**
  * Allocates short-lived native memory from one fixed-capacity region.
@@ -136,7 +137,7 @@ class MemoryStack @PublishedApi internal constructor(capacity: Int, addressOf: (
         return offset.toInt()
     }
 
-    private companion object {
+    companion object {
         private val NATIVE_ORDER = ByteOrder.nativeOrder()
 
         private const val DEFAULT_CAPACITY = 64 * 1024
@@ -171,3 +172,8 @@ private class UnsafeDirectBufferAddress {
 
     fun address(buffer: ByteBuffer): Long = getLong.invoke(unsafe, buffer, addressOffset) as Long
 }
+
+private val threadMemoryLocal = ThreadLocal<MemoryStack>()
+
+val memoryStack: MemoryStack
+    get() = threadMemoryLocal.getOrSet { MemoryStack() }
