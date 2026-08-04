@@ -10,6 +10,7 @@
     "DamageSourceMixin",
     "EnderDragonMixin",
     "EntityMixin",
+    "EntityTypeMixin",
     "ExperienceOrbMixin",
     "ItemEntityMixin",
     "ItemMixin",
