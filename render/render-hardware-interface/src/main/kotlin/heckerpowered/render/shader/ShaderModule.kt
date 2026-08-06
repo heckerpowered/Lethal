@@ -19,4 +19,9 @@ interface ShaderModule : GpuResource {
      * Shader stage for which this module was compiled.
      */
     val stage: ShaderStage
+
+    /**
+     * Entry point selected when this module was created.
+     */
+    val entryPoint: String
 }
