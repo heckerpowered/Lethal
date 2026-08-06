@@ -19,7 +19,28 @@ import heckerpowered.render.ShaderSource
  * same code object.
  */
 data class ShaderModuleDescription(
+    /**
+     * Shader stage for which the module is created.
+     */
     val stage: ShaderStage,
+
+    /**
+     * Source or binary shader representation used to create the module.
+     */
     val source: ShaderSource,
+
+    /**
+     * Name of the shader entry point selected from [code].
+     *
+     * The entry point must be compatible with [stage]. Typical GLSL source uses `"main"`, while
+     * binary representations such as SPIR-V may contain multiple named entry points.
+     */
+    val entryPoint: String = "main",
+
+    /**
+     * Human-readable name of the resulting shader module.
+     *
+     * The label is used only for diagnostics, debugging, and backend object naming.
+     */
     val label: String = source.label,
 )
