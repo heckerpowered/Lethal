@@ -5,6 +5,8 @@
 
 package heckerpowered.render.opengl
 
+import heckerpowered.render.shader.ShaderStage
+
 /**
  * The name of an OpenGL shader object.
  *
@@ -12,7 +14,11 @@ package heckerpowered.render.opengl
  * that object or manage its lifetime.
  */
 @JvmInline
-value class ShaderName(val value: Int)
+value class ShaderName(val value: Int) {
+    companion object {
+        val None = ShaderName(0)
+    }
+}
 
 /** The name of an OpenGL program object. */
 @JvmInline
@@ -164,8 +170,23 @@ enum class PrimitiveMode {
     TriangleStrip,
 }
 
+/** Basic equations accepted by OpenGL blend-equation state. */
+enum class BlendEquation {
+    Add,
+    Subtract,
+    ReverseSubtract,
+    Min,
+    Max,
+}
+
 /** Shader-output color-clamping modes used by the backend. */
 enum class ColorClampMode {
-    Unclamped,
+    Always,
     FixedOnly,
+    Never,
+}
+
+fun ShaderStage.toOpenGLShaderType(): ShaderType = when (this) {
+    ShaderStage.Vertex -> ShaderType.Vertex
+    ShaderStage.Fragment -> ShaderType.Fragment
 }
