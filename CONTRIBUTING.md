@@ -81,7 +81,7 @@ failure contracts.
 
 ### `close()` must not expose failures to callers
 
-Every project-defined `close()` implementation must wrap its complete cleanup body in `runOrTerminate`:
+Every project-defined `close()` implementation must wrap its complete cleanup body in `terminateOnFailure`:
 
 ```kotlin
 override fun close() = runOrTerminate {
@@ -170,8 +170,10 @@ Therefore:
 - a destructor failure is fatal and must terminate the process;
 - callers must not catch, suppress, ignore, or retry destructor failures;
 - `addSuppressed` must not be used to disguise failed cleanup as recoverable;
-- catching `Throwable` is restricted to the centralized `runOrTerminate` implementation, where the only valid action is
+- catching `Throwable` is restricted to the centralized `terminateOnFailure` implementation, where the only valid action
+  is
   immediate termination.
 
-`runOrTerminate` uses `Runtime.halt`, bypassing normal exception propagation and shutdown hooks. Once the fatal boundary
+`terminateOnFailure` uses `Runtime.halt`, bypassing normal exception propagation and shutdown hooks. Once the fatal
+boundary
 is entered, control must never return to ordinary execution.
