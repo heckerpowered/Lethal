@@ -20,3 +20,15 @@ interface OpenGLVertexArrayFunctions {
     fun bindVertexArray(vertexArray: VertexArrayName)
     fun deleteVertexArray(vertexArray: VertexArrayName)
 }
+
+context(function: OpenGLVertexArrayFunctions)
+fun createVertexArray(): VertexArrayName = function.createVertexArray()
+
+context(function: OpenGLVertexArrayFunctions)
+fun getBoundVertexArray(): VertexArrayName = function.getBoundVertexArray()
+
+context(function: OpenGLVertexArrayFunctions)
+fun bindVertexArray(vertexArray: VertexArrayName) = function.bindVertexArray(vertexArray)
+
+context(function: OpenGLVertexArrayFunctions)
+fun deleteVertexArray(vertexArray: VertexArrayName) = function.deleteVertexArray(vertexArray)
