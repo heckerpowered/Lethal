@@ -19,3 +19,19 @@ interface OpenGLVertexInputFunctions {
 
     fun vertexAttributePointer(index: VertexAttributeIndex, componentCount: Int, type: Int, normalized: Boolean, strideBytes: Int, offsetBytes: Long)
 }
+
+context(function: OpenGLVertexInputFunctions)
+fun enableVertexAttribute(index: VertexAttributeIndex) = function.enableVertexAttribute(index)
+
+context(function: OpenGLVertexInputFunctions)
+fun disableVertexAttribute(index: VertexAttributeIndex) = function.disableVertexAttribute(index)
+
+context(function: OpenGLVertexInputFunctions)
+fun vertexAttributePointer(
+    index: VertexAttributeIndex,
+    componentCount: Int,
+    type: Int,
+    normalized: Boolean,
+    strideBytes: Int,
+    offsetBytes: Long,
+) = function.vertexAttributePointer(index, componentCount, type, normalized, strideBytes, offsetBytes)
