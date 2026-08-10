@@ -60,4 +60,10 @@ interface OpenGLFunctions :
      * are unsupported.
      */
     val shaderColorClamping: OpenGLShaderColorClampingFunctions?
+
+    /**
+     * SPIR-V shader loading and specialization, or `null` when the current
+     * adapter and context cannot consume SPIR-V shader modules.
+     */
+    val spirVShaders: OpenGLSpirVShaderFunctions?
 }
