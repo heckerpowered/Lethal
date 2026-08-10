@@ -29,3 +29,34 @@ interface OpenGLUniformBufferFunctions {
     fun getBoundUniformBuffer(binding: UniformBufferBindingIndex): BufferName
     fun bindUniformBuffer(binding: UniformBufferBindingIndex, buffer: BufferName)
 }
+
+context(function: OpenGLUniformBufferFunctions)
+fun getBoundUniformBuffer(): BufferName = function.getBoundUniformBuffer()
+
+context(function: OpenGLUniformBufferFunctions)
+fun bindUniformBuffer(buffer: BufferName) = function.bindUniformBuffer(buffer)
+
+context(function: OpenGLUniformBufferFunctions)
+fun uniformBufferData(sizeBytes: Long, usage: BufferUsage) = function.uniformBufferData(sizeBytes, usage)
+
+context(function: OpenGLUniformBufferFunctions)
+fun uniformBufferData(data: ByteBuffer, usage: BufferUsage) = function.uniformBufferData(data, usage)
+
+context(function: OpenGLUniformBufferFunctions)
+fun uniformBufferSubData(offsetBytes: Long, data: ByteBuffer) = function.uniformBufferSubData(offsetBytes, data)
+
+context(function: OpenGLUniformBufferFunctions)
+fun getUniformBlockIndex(program: ProgramName, name: CharSequence): UniformBlockIndex =
+    function.getUniformBlockIndex(program, name)
+
+context(function: OpenGLUniformBufferFunctions)
+fun bindUniformBlock(program: ProgramName, block: UniformBlockIndex, binding: UniformBufferBindingIndex) =
+    function.bindUniformBlock(program, block, binding)
+
+context(function: OpenGLUniformBufferFunctions)
+fun getBoundUniformBuffer(binding: UniformBufferBindingIndex): BufferName =
+    function.getBoundUniformBuffer(binding)
+
+context(function: OpenGLUniformBufferFunctions)
+fun bindUniformBuffer(binding: UniformBufferBindingIndex, buffer: BufferName) =
+    function.bindUniformBuffer(binding, buffer)
