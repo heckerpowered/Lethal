@@ -20,3 +20,9 @@ interface OpenGLSpirVShaderFunctions {
 
     fun specializeShader(shader: ShaderName, entryPoint: String)
 }
+
+context(function: OpenGLSpirVShaderFunctions)
+fun shaderBinary(shader: ShaderName, binary: ByteBuffer) = function.shaderBinary(shader, binary)
+
+context(function: OpenGLSpirVShaderFunctions)
+fun specializeShader(shader: ShaderName, entryPoint: String) = function.specializeShader(shader, entryPoint)
