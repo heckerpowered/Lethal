@@ -20,3 +20,9 @@ interface OpenGLShaderColorClampingFunctions {
     fun clampVertexColor(mode: ColorClampMode)
     fun clampFragmentColor(mode: ColorClampMode)
 }
+
+context(function: OpenGLShaderColorClampingFunctions)
+fun clampVertexColor(mode: ColorClampMode) = function.clampVertexColor(mode)
+
+context(function: OpenGLShaderColorClampingFunctions)
+fun clampFragmentColor(mode: ColorClampMode) = function.clampFragmentColor(mode)
