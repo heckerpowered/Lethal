@@ -9,8 +9,17 @@ package heckerpowered.render.texture
  * Identifies the exact storage format of texture texels.
  *
  * Each entry fixes the component order, component bit widths, numeric interpretation, and any
- * color encoding applied by texture operations. Formats are not freely assembled from independent
- * properties, so every representable [TextureFormat] corresponds to a valid concrete format.
+ * color encoding associated with formatted color access. Formats are not freely assembled from
+ * independent properties, so every [TextureFormat] value denotes one valid concrete format.
+ *
+ * Component names such as `R`, `G`, `B`, and `A` identify logical component slots rather than
+ * the application-level meaning of the stored data. An `R` format may therefore store a height,
+ * mask, luminance, or any other scalar value.
+ *
+ * When a color texel is exposed through a four-component interface, missing `G` and `B`
+ * components are zero and a missing `A` component is one. For example, an `R` format is exposed
+ * as `(r, 0, 0, 1)`, while an `Rg` format is exposed as `(r, g, 0, 1)`. When writing to a format
+ * with fewer than four components, only the components present in the format are stored.
  *
  * The presence of a format in this enumeration does not guarantee that every graphics device
  * supports every use of it. Sampling, filtering, rendering, blending, storage access, and
@@ -152,4 +161,159 @@ enum class TextureFormat {
      * blue-green-red-alpha.
      */
     Bgra8UnsignedNormalizedSrgb,
+
+    /**
+     * A single-channel format that stores one 16-bit floating-point red component per texel.
+     *
+     * Unlike an unsigned-normalized format, this format can represent negative values and values
+     * greater than one. Its largest finite magnitude is `65,504`, but its precision is lower than
+     * that of a 32-bit float and varies with the magnitude of the stored value. Values that cannot
+     * be represented exactly are rounded when stored.
+     *
+     * Typical uses include HDR luminance, height fields, and scalar intermediate data that requires
+     * more range than [R8UnsignedNormalized].
+     *
+     * Each texel occupies 2 bytes.
+     */
+    R16Float,
+
+    /**
+     * A two-channel format that stores 16-bit floating-point red and green components per texel.
+     *
+     * Both components have the same range and precision characteristics as [R16Float]. Typical uses
+     * include motion vectors, two-dimensional simulation fields, and other signed vector data that
+     * does not require four components.
+     *
+     * Each texel occupies 4 bytes.
+     */
+    Rg16Float,
+
+    /**
+     * A four-channel format that stores 16-bit floating-point red, green, blue, and alpha components
+     * per texel.
+     *
+     * This format is commonly used for linear HDR colors and intermediate render results such as
+     * lighting, bloom, and post-processing buffers. It preserves negative values and values greater
+     * than one instead of restricting every component to the `[0, 1]` range.
+     *
+     * Compared with [Rgba8UnsignedNormalized], this format provides substantially greater range and
+     * precision but uses twice as much storage and memory bandwidth. When used for color, its
+     * components represent linear values; no sRGB transfer encoding is applied.
+     *
+     * Each texel occupies 8 bytes.
+     */
+    Rgba16Float,
+
+    /**
+     * A single-component format that stores one 32-bit floating-point `R` value per texel.
+     *
+     * Compared with [R16Float], this format provides substantially greater range and precision.
+     * Finite values extend to approximately `3.4e38` in magnitude, with about seven significant
+     * decimal digits of precision. It supports negative values and values greater than one, and
+     * applies no sRGB color encoding.
+     *
+     * This format is intended for scalar data where rounding to [R16Float] would be numerically
+     * significant, such as linear depth explicitly stored as color data, large-range height data,
+     * or high-precision compute intermediates.
+     *
+     * Using 32-bit floating-point values in shader calculations does not by itself require this
+     * storage format. Values stored in [R16Float] are converted to shader floating-point values when
+     * read, so this format should be preferred only when the stored data itself requires 32-bit
+     * range or precision.
+     *
+     * Each texel occupies 4 bytes.
+     */
+    R32Float,
+
+    /**
+     * A two-component format that stores 32-bit floating-point `R` and `G` values per texel.
+     *
+     * Both components have the same range and precision as [R32Float]. Compared with [Rg16Float],
+     * this format provides substantially greater precision and range but uses twice as much storage
+     * per texel. It applies no sRGB color encoding.
+     *
+     * Typical uses include high-precision two-dimensional vector fields, pairs of simulation values,
+     * and complex-number data where rounding either component to 16-bit floating point would be
+     * numerically significant.
+     *
+     * [Rg16Float] is usually sufficient for motion vectors and ordinary post-processing data.
+     * This format should be preferred only when the stored values themselves require 32-bit range or
+     * precision.
+     *
+     * Each texel occupies 8 bytes.
+     */
+    Rg32Float,
+
+    /**
+     * A four-component format that stores 32-bit floating-point `R`, `G`, `B`, and `A` values per
+     * texel.
+     *
+     * Every component has the same range and precision as [R32Float]. When used for color, the
+     * components represent linear values and no sRGB color encoding is applied.
+     *
+     * This format is intended for four-component data where repeated storage at 16-bit precision
+     * would introduce unacceptable rounding error, such as high-precision simulation state,
+     * numerical accumulation, or compute intermediates spanning a large dynamic range.
+     *
+     * Most real-time HDR rendering, including lighting, bloom, and post-processing buffers, should
+     * prefer [Rgba16Float]. This format provides greater precision but doubles the storage required
+     * by [Rgba16Float] and uses four times as much storage as [Rgba8UnsignedNormalized].
+     *
+     * Each texel occupies 16 bytes.
+     */
+    Rgba32Float,
+
+    /**
+     * Stores one 24-bit unsigned-normalized depth component per texel.
+     *
+     * The stored integer range is mapped uniformly to `[0.0, 1.0]`, providing 16,777,216 distinct
+     * depth values. Values produced by depth clears and fragment depth writes are automatically
+     * quantized to this representation; sampling the texture returns the corresponding normalized
+     * floating-point value.
+     *
+     * This format is a conventional choice for ordinary scene depth buffers when 24-bit fixed-point
+     * precision is sufficient. Compared with 16-bit depth, it greatly reduces visible depth
+     * quantization without requiring the additional precision and range characteristics of a
+     * floating-point format.
+     *
+     * Although its encoded depth component contains 24 bits, this does not guarantee a smaller
+     * physical allocation or lower bandwidth than [Depth32Float], because a device may store it in a
+     * wider aligned representation. Choose it primarily for its precision and format requirements,
+     * not as a guaranteed memory optimization.
+     *
+     * The normalized representation is uniform in stored depth, but perspective projection generally
+     * makes that precision nonuniform in view-space distance. Choosing sensible near and far clipping
+     * planes therefore remains important. Prefer [Depth32Float] when a large depth range, reverse
+     * depth, or depth-sensitive post-processing requires greater effective precision.
+     *
+     * This format contains only a depth aspect and no color or stencil components.
+     */
+    Depth24UnsignedNormalized,
+
+    /**
+     * Stores one 32-bit floating-point depth component per texel.
+     *
+     * Unlike an unsigned-normalized depth format, this format does not distribute its representable
+     * values uniformly across the depth interval. Floating-point values become progressively denser
+     * toward zero, while depth attachment writes are rounded to the nearest representable value.
+     * Sampling the texture returns the stored floating-point depth value.
+     *
+     * This format is intended for rendering that benefits from greater effective depth precision. It
+     * is especially well suited to reverse-depth projection, where distant geometry is mapped toward
+     * zero. The increasing floating-point precision in that region counteracts the precision loss
+     * normally caused by perspective projection and allows very large view-space depth ranges to be
+     * represented more reliably.
+     *
+     * It is also useful when later passes sample depth to reconstruct positions, detect surface
+     * discontinuities, or perform other depth-sensitive calculations, because reduced quantization
+     * error makes those calculations more stable.
+     *
+     * This format does not by itself correct an unsuitable projection or poorly chosen clipping
+     * planes. For a conventional scene depth buffer whose precision requirements are already met by
+     * [Depth24UnsignedNormalized], the 24-bit format remains a sufficient and simpler requirement.
+     * Neither format guarantees a particular physical allocation size or bandwidth cost.
+     *
+     * This format contains only a depth aspect and no color or stencil components.
+     */
+    Depth32Float,
 }
