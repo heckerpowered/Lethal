@@ -30,19 +30,17 @@ enum class ShaderBinaryFormat(
     val byteOrder: ByteOrder,
 ) {
     /**
-     * One complete SPIR-V module encoded as a little-endian sequence of 32-bit words.
+     * A SPIR-V module encoded as a little-endian sequence of 32-bit words.
      *
-     * The encoded byte sequence must satisfy the following requirements:
+     * The binary must contain a valid SPIR-V module for the execution environment in which it
+     * will be consumed. [ShaderBinary] only represents the encoded bytes and does not perform
+     * SPIR-V validation.
      *
-     * - it contains at least the five-word SPIR-V header;
-     * - its size is a multiple of four bytes;
-     * - its first word is the SPIR-V magic number `0x07230203`;
-     * - it contains exactly one complete SPIR-V module;
-     * - it contains no external header, byte-order mark, compression wrapper, or trailing
-     *   application metadata.
+     * Some graphics APIs require SPIR-V to have been validated before it is submitted. In
+     * particular, OpenGL permits invalid SPIR-V modules to result in undefined behavior.
      *
-     * SPIR-V is an intermediate representation rather than guaranteed native GPU machine code.
-     * A graphics backend may still validate, specialize, translate, optimize, or compile it.
+     * See [SPIR-V Unified Specification](https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html)
+     * and [ARB_gl_spirv](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_gl_spirv.txt).
      */
     SpirV(ByteOrder.LITTLE_ENDIAN),
 }
