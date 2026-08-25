@@ -24,7 +24,7 @@ interface GpuTexture : GpuResource {
     /**
      * Width in texels of mip level zero.
      *
-     * Lower mip levels have successively reduced dimensions. The width of mip level [level] is
+     * Lower mip levels have successively reduced dimensions. The width of mip level `level` is
      * `max(1, width >> level)`.
      *
      * This is the base width of the complete texture, not necessarily the width exposed by a
@@ -35,7 +35,7 @@ interface GpuTexture : GpuResource {
     /**
      * Height in texels of mip level zero.
      *
-     * Lower mip levels have successively reduced dimensions. The height of mip level [level] is
+     * Lower mip levels have successively reduced dimensions. The height of mip level `level` is
      * `max(1, height >> level)`.
      *
      * This is the base height of the complete texture, not necessarily the height exposed by a
