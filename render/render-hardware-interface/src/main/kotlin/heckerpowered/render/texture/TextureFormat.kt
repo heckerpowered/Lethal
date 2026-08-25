@@ -6,26 +6,38 @@
 package heckerpowered.render.texture
 
 /**
- * Identifies the exact storage format of texture texels.
+ * Identifies the exact formatted representation of a texture texel.
  *
- * Each entry fixes the component order, component bit widths, numeric interpretation, and any
- * color encoding associated with formatted color access. Formats are not freely assembled from
- * independent properties, so every [TextureFormat] value denotes one valid concrete format.
+ * Each entry fixes whether the texel contains color, depth, or stencil data, as well as its
+ * component order, component bit widths, numeric interpretation, and any color transfer encoding
+ * applied by formatted access. Formats are not freely assembled from independent properties, so
+ * every [TextureFormat] value denotes one valid concrete format.
  *
- * Component names such as `R`, `G`, `B`, and `A` identify logical component slots rather than
- * the application-level meaning of the stored data. An `R` format may therefore store a height,
- * mask, luminance, or any other scalar value.
+ * Selecting a format requests these exact semantics. An implementation must report an unsupported
+ * format or usage rather than silently substitute a format with different component widths,
+ * numeric behavior, or color encoding.
  *
- * When a color texel is exposed through a four-component interface, missing `G` and `B`
- * components are zero and a missing `A` component is one. For example, an `R` format is exposed
- * as `(r, 0, 0, 1)`, while an `Rg` format is exposed as `(r, g, 0, 1)`. When writing to a format
- * with fewer than four components, only the components present in the format are stored.
+ * These guarantees describe the formatted texel representation, not the physical image layout.
+ * Tiling, row pitch, alignment, padding, and total memory allocation remain device-dependent.
+ *
+ * ### Color component semantics
+ *
+ * Component names such as `R`, `G`, `B`, and `A` identify logical component slots rather than the
+ * application-level meaning of the stored data. An `R` format may therefore store a height, mask,
+ * luminance, or any other scalar value.
+ *
+ * When a color texel is exposed through a four-component interface, missing `G` and `B` components
+ * are zero and a missing `A` component is one. For example, an `R` format is exposed as
+ * `(r, 0, 0, 1)`, while an `Rg` format is exposed as `(r, g, 0, 1)`. When writing to a format with
+ * fewer than four components, only the components present in the format are stored.
+ *
+ * ### Format capabilities
  *
  * The presence of a format in this enumeration does not guarantee that every graphics device
- * supports every use of it. Sampling, filtering, rendering, blending, storage access, and
- * multisampling may impose additional capability requirements.
+ * supports every use of it. Sampling, filtering, rendering, blending, storage access, transfers,
+ * and multisampling may impose additional capability requirements.
  */
-enum class TextureFormat {
+enum class TextureFormat(private val kind: Kind) {
     /**
      * One 8-bit unsigned-normalized red component.
      *
@@ -35,7 +47,7 @@ enum class TextureFormat {
      * This format is commonly used for masks, monochrome data, coverage values, and other
      * single-component texture data.
      */
-    R8UnsignedNormalized,
+    R8UnsignedNormalized(Kind.Color),
 
     /**
      * Two 8-bit unsigned-normalized components in red-green order.
@@ -43,7 +55,7 @@ enum class TextureFormat {
      * Each component stores a value in the range `0.0` through `1.0`. This format is useful for
      * paired masks, two-component lookup data, or vectors encoded into an unsigned range.
      */
-    Rg8UnsignedNormalized,
+    Rg8UnsignedNormalized(Kind.Color),
 
     /**
      * Four 8-bit unsigned-normalized components in red-green-blue-alpha order.
@@ -52,7 +64,7 @@ enum class TextureFormat {
      * color values that should remain in their stored numeric representation during ordinary
      * texture access.
      */
-    Rgba8UnsignedNormalized,
+    Rgba8UnsignedNormalized(Kind.Color),
 
     /**
      * Four 8-bit components in red-green-blue-alpha order with sRGB-encoded color components.
@@ -135,7 +147,7 @@ enum class TextureFormat {
      * Automatic encoding and decoding do not make storage lossless. Values are still quantized to
      * eight bits whenever they are stored.
      */
-    Rgba8UnsignedNormalizedSrgb,
+    Rgba8UnsignedNormalizedSrgb(Kind.Color),
 
     /**
      * Four 8-bit unsigned-normalized components in blue-green-red-alpha storage order.
@@ -147,7 +159,7 @@ enum class TextureFormat {
      * textures, but it may also be used for ordinary textures when the graphics device supports the
      * requested usage.
      */
-    Bgra8UnsignedNormalized,
+    Bgra8UnsignedNormalized(Kind.Color),
 
     /**
      * Four 8-bit components in blue-green-red-alpha storage order with sRGB-encoded color
@@ -160,7 +172,7 @@ enum class TextureFormat {
      * This format is particularly common for presentation surfaces whose native component order is
      * blue-green-red-alpha.
      */
-    Bgra8UnsignedNormalizedSrgb,
+    Bgra8UnsignedNormalizedSrgb(Kind.Color),
 
     /**
      * A single-channel format that stores one 16-bit floating-point red component per texel.
@@ -173,9 +185,9 @@ enum class TextureFormat {
      * Typical uses include HDR luminance, height fields, and scalar intermediate data that requires
      * more range than [R8UnsignedNormalized].
      *
-     * Each texel occupies 2 bytes.
+     * The encoded texel size is 2 bytes.
      */
-    R16Float,
+    R16Float(Kind.Color),
 
     /**
      * A two-channel format that stores 16-bit floating-point red and green components per texel.
@@ -184,9 +196,9 @@ enum class TextureFormat {
      * include motion vectors, two-dimensional simulation fields, and other signed vector data that
      * does not require four components.
      *
-     * Each texel occupies 4 bytes.
+     * The encoded texel size is 4 bytes.
      */
-    Rg16Float,
+    Rg16Float(Kind.Color),
 
     /**
      * A four-channel format that stores 16-bit floating-point red, green, blue, and alpha components
@@ -200,9 +212,9 @@ enum class TextureFormat {
      * precision but uses twice as much storage and memory bandwidth. When used for color, its
      * components represent linear values; no sRGB transfer encoding is applied.
      *
-     * Each texel occupies 8 bytes.
+     * The encoded texel size is 8 bytes.
      */
-    Rgba16Float,
+    Rgba16Float(Kind.Color),
 
     /**
      * A single-component format that stores one 32-bit floating-point `R` value per texel.
@@ -221,9 +233,9 @@ enum class TextureFormat {
      * read, so this format should be preferred only when the stored data itself requires 32-bit
      * range or precision.
      *
-     * Each texel occupies 4 bytes.
+     * The encoded texel size is 4 bytes.
      */
-    R32Float,
+    R32Float(Kind.Color),
 
     /**
      * A two-component format that stores 32-bit floating-point `R` and `G` values per texel.
@@ -240,9 +252,9 @@ enum class TextureFormat {
      * This format should be preferred only when the stored values themselves require 32-bit range or
      * precision.
      *
-     * Each texel occupies 8 bytes.
+     * The encoded texel size is 8 bytes.
      */
-    Rg32Float,
+    Rg32Float(Kind.Color),
 
     /**
      * A four-component format that stores 32-bit floating-point `R`, `G`, `B`, and `A` values per
@@ -259,9 +271,9 @@ enum class TextureFormat {
      * prefer [Rgba16Float]. This format provides greater precision but doubles the storage required
      * by [Rgba16Float] and uses four times as much storage as [Rgba8UnsignedNormalized].
      *
-     * Each texel occupies 16 bytes.
+     * The encoded texel size is 16 bytes.
      */
-    Rgba32Float,
+    Rgba32Float(Kind.Color),
 
     /**
      * Stores one 24-bit unsigned-normalized depth component per texel.
@@ -288,7 +300,7 @@ enum class TextureFormat {
      *
      * This format contains only a depth aspect and no color or stencil components.
      */
-    Depth24UnsignedNormalized,
+    Depth24UnsignedNormalized(Kind.Depth),
 
     /**
      * Stores one 32-bit floating-point depth component per texel.
@@ -315,5 +327,18 @@ enum class TextureFormat {
      *
      * This format contains only a depth aspect and no color or stencil components.
      */
-    Depth32Float,
+    Depth32Float(Kind.Depth);
+
+    /** Whether this format represents ordinary color components. */
+    val isColor: Boolean
+        get() = kind == Kind.Color
+
+    /** Whether this format contains a depth component. */
+    val hasDepth: Boolean
+        get() = kind == Kind.Depth
+
+    private enum class Kind {
+        Color,
+        Depth
+    }
 }
