@@ -327,18 +327,62 @@ enum class TextureFormat(private val kind: Kind) {
      *
      * This format contains only a depth aspect and no color or stencil components.
      */
-    Depth32Float(Kind.Depth);
+    Depth32Float(Kind.Depth),
 
-    /** Whether this format represents ordinary color components. */
+    /**
+     * Stores a 24-bit unsigned-normalized depth component and an 8-bit unsigned-integer stencil
+     * component per texel.
+     *
+     * The depth component has the same numeric behavior as [Depth24UnsignedNormalized]. The stencil
+     * component stores exact integer values from `0` through `255`; it is not normalized and has no
+     * predefined application-level meaning.
+     *
+     * This is the ordinary choice when rendering needs both conventional scene depth and a per-pixel
+     * stencil mask or classification. Typical uses include marking geometry for later passes,
+     * restricting effects to selected regions, drawing outlines, and constructing portal or clipping
+     * masks.
+     *
+     * Depth and stencil remain independent logical aspects. Updating depth does not modify stencil,
+     * and updating stencil does not modify depth. Selecting this format also does not enable either
+     * test; their comparison and write behavior are configured by [DepthStencilState].
+     *
+     * Prefer [Depth24UnsignedNormalized] when stencil is not needed. The combined format introduces a
+     * stencil capability requirement, but does not guarantee any particular physical allocation or
+     * bandwidth difference from the depth-only format.
+     */
+    Depth24UnsignedNormalizedStencil8(Kind.DepthStencil),
+
+    /**
+     * Stores a 32-bit floating-point depth component and an 8-bit unsigned-integer stencil component
+     * per texel.
+     *
+     * The depth component has the same range and precision characteristics as [Depth32Float]. The
+     * stencil component stores exact integer values from `0` through `255` and otherwise behaves like
+     * the stencil component of [Depth24UnsignedNormalizedStencil8].
+     *
+     * Choose this format when rendering genuinely requires both floating-point depth—such as for a
+     * large depth range or reverse-depth projection—and stencil-based masking or classification.
+     * Prefer [Depth24UnsignedNormalizedStencil8] when 24-bit normalized depth already
+     * provides sufficient precision, and prefer [Depth32Float] when stencil is not required.
+     *
+     * Although the logical components contain 32 depth bits and 8 stencil bits, callers must not infer
+     * a five-byte texel or any particular packed memory layout. Alignment, padding, allocation size,
+     * and bandwidth remain device-dependent.
+     */
+    Depth32FloatStencil8UnsignedInteger(Kind.DepthStencil);
+
     val isColor: Boolean
         get() = kind == Kind.Color
 
-    /** Whether this format contains a depth component. */
     val hasDepth: Boolean
-        get() = kind == Kind.Depth
+        get() = kind == Kind.Depth || kind == Kind.DepthStencil
+
+    val hasStencil: Boolean
+        get() = kind == Kind.DepthStencil
 
     private enum class Kind {
         Color,
-        Depth
+        Depth,
+        DepthStencil,
     }
 }
