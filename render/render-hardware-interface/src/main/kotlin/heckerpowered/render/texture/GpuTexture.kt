@@ -6,7 +6,6 @@
 package heckerpowered.render.texture
 
 import heckerpowered.render.GpuResource
-import heckerpowered.render.TextureFormat
 
 /**
  * GPU-resident texture storage containing one or more mip levels and array layers.
