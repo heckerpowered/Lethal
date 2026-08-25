@@ -18,7 +18,7 @@ import java.nio.ReadOnlyBufferException
  * Instances are created through [viewOf] or [copyOf], which make the underlying storage ownership
  * explicit.
  */
-class ShaderBinary(
+class ShaderBinary private constructor(
     val storage: ByteBuffer,
     val format: ShaderBinaryFormat,
     override val label: String,
@@ -63,12 +63,10 @@ class ShaderBinary(
          * storage with [bytes]. The caller must ensure that the shared bytes remain valid and
          * unchanged for the entire lifetime of the resulting [ShaderBinary].
          *
-         * The bytes must contain exactly one shader binary encoded according to [format].
+         * The selected bytes are interpreted according to [format]. This operation does not
+         * validate the encoded shader contents.
          *
          * This operation does not copy the encoded binary.
-         *
-         * @throws IllegalArgumentException if the selected byte range does not satisfy the basic
-         * structural requirements of [format].
          */
         fun viewOf(bytes: ByteBuffer, format: ShaderBinaryFormat, label: String): ShaderBinary {
             val storage = bytes
