@@ -2,6 +2,32 @@
 
 Thank you for contributing to this project.
 
+## KDoc and API documentation
+
+KDoc is encouraged for public APIs when it provides context that names and types cannot express. It is not required for
+every self-explanatory declaration and must not be added merely to satisfy a documentation quota.
+
+Useful KDoc should serve readers at two levels:
+
+- Give newcomers a simple and accurate mental model of what the API represents and what problem it solves.
+- Give experienced readers the non-obvious constraints, tradeoffs, interactions, and failure cases that affect correct
+  use.
+
+When relevant, explain:
+
+- typical use cases and why this API would be chosen over nearby alternatives;
+- surprising edge cases, invalid combinations, lifetime or ownership rules, and interactions with other state;
+- concrete examples, diagrams, tables, or formulas when they make behavior easier to understand.
+
+Do not begin with an exhaustive execution specification when a plain-language explanation would establish the concept
+more effectively. Introduce precise formulas and processing rules after the reader has a useful mental model.
+
+Do not merely translate an identifier into prose. Keep documentation proportional to the concept:
+simple values should remain concise, while complex or easily misunderstood behavior deserves more detail. Do not invent
+filler use cases or edge cases when none meaningfully exist.
+
+Use complete, descriptive names in formulas and examples rather than unexplained abbreviations.
+
 ## Mixin Rules
 
 ### Do not directly implement interfaces
