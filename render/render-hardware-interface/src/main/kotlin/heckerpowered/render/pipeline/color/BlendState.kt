@@ -3,11 +3,8 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pipeline
+package heckerpowered.render.pipeline.color
 
-import heckerpowered.render.pipeline.color.BlendComponent
-import heckerpowered.render.pipeline.color.BlendFactor
-import heckerpowered.render.pipeline.color.ColorTargetState
 import heckerpowered.render.texture.TextureFormat
 
 /**
