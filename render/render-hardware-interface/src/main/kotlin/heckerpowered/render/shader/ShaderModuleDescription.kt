@@ -6,35 +6,28 @@
 package heckerpowered.render.shader
 
 /**
- * Description used to create a stage-specific [ShaderModule].
+ * Selects the shader code, stage, and entry point used to create one [ShaderModule].
  *
- * [code] provides the shader representation, while [stage] and [entryPoint] select the shader
- * entry point represented by the resulting module.
- *
- * [label] identifies the resulting logical GPU resource for diagnostics and debugging. It does
- * not affect shader compilation or execution.
+ * [stage] determines where the resulting module executes in the graphics pipeline, while
+ * [entryPoint] selects the function at which execution begins. A single [ShaderCode] may be used
+ * to create several modules when it provides entry points for different stages or purposes, but
+ * each resulting module represents only the stage and entry point selected here.
  */
 data class ShaderModuleDescription(
     /**
-     * Shader stage for which the module is created.
+     * Pipeline stage for which the module is created.
      *
-     * The selected entry point in [code] must be compatible with this stage.
+     * The selected entry point must be compatible with this stage. When the shader representation
+     * declares its entry-point stage explicitly, that declaration must agree with this value.
      */
     val stage: ShaderStage,
-
-    /**
-     * Source or binary shader representation used to create the module.
-     */
     val code: ShaderCode,
 
     /**
-     * Name of the shader entry point selected from [code].
+     * Name of the entry point selected from [code].
      *
-     * Typical GLSL source uses `"main"`, while representations such as SPIR-V may contain
-     * multiple named entry points.
-     *
-     * Whether arbitrary entry-point names are supported depends on the shader representation and
-     * graphics backend.
+     * `"main"` is the conventional default. Some shader representations expose only a fixed entry
+     * point and do not support selecting another name.
      */
     val entryPoint: String = "main",
 
@@ -42,7 +35,7 @@ data class ShaderModuleDescription(
      * Human-readable name of the resulting shader module.
      *
      * By default, this inherits [ShaderCode.label]. The label does not need to be unique and is
-     * used only for diagnostics, debugging, and backend object naming.
+     * used only for diagnostics, debugging, and device object naming.
      */
     val label: String = code.label,
 )
