@@ -5,8 +5,6 @@
 
 package heckerpowered.render.pipeline.color
 
-import heckerpowered.render.pipeline.BlendState
-
 /**
  * Selects the arithmetic operation used to combine the factor-scaled source and
  * destination terms of a [BlendComponent].
