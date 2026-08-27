@@ -2,35 +2,253 @@
 
 Thank you for contributing to this project.
 
-## KDoc and API documentation
+## Comments & Documentation
 
-KDoc is encouraged for public APIs when it provides context that names and types cannot express. It is not required for
-every self-explanatory declaration and must not be added merely to satisfy a documentation quota.
+Code is the primary way to express program structure, behavior, and intent. Prefer clear names, types, structure, and
+abstraction boundaries over comments that compensate for unclear code.
 
-Useful KDoc should serve readers at two levels:
+Comments and documentation should add context that the code cannot communicate clearly or efficiently on its own. Do not
+mechanically restate declarations, identifiers, or execution steps.
 
-- Give newcomers a simple and accurate mental model of what the API represents and what problem it solves.
-- Give experienced readers the non-obvious constraints, tradeoffs, interactions, and failure cases that affect correct
-  use.
+Documentation is not required merely because something is public, complex-looking, or otherwise appears to "need
+comments". Likewise, comments should not be added to satisfy a documentation quota. If the code already communicates
+everything a reader needs to know, additional prose may only add noise and another source of information that can become
+outdated.
+
+This does not mean that documentation should contain only facts that are impossible to derive from the implementation. A
+reader should not need to reconstruct an entire implementation before understanding the concept it represents.
+Plain-language explanations are useful when they communicate a mental model, purpose, or relationship more clearly than
+the code can.
+
+For example, this comment adds no information:
+
+```kotlin
+// Increment the retry count.
+retryCount++
+```
+
+If the operation itself is difficult to understand, improve the code rather than narrating it.
+
+By contrast:
+
+```kotlin
+// Count the initial attempt so the configured limit represents
+// the total number of attempts, not only retries.
+attemptCount++
+```
+
+adds a reason that is not apparent from the statement itself.
+
+The important question is not whether information can theoretically be recovered from the implementation, but whether
+the code communicates it clearly and efficiently on its own.
+
+### Explain the concept before the mechanics
+
+Documentation should help readers understand not only *what* something is, but also *why it exists*, *what problem it
+solves*, and *when it matters*.
+
+Do not assume that contributors already know the surrounding terminology or concepts. When something represents a
+non-trivial idea, begin with a simple and accurate mental model before introducing detailed processing rules, formulas,
+edge cases, or implementation details.
+
+For example:
+
+```kotlin
+/**
+ * Stores cached values.
+ */
+class Cache
+```
+
+describes the structure, but gives a reader little reason to care about it.
+
+A more useful introduction would be:
+
+```kotlin
+/**
+ * Reuses previously computed values so repeated requests can avoid
+ * performing the same expensive work again.
+ *
+ * Entries may disappear when they expire or when space needs to be reclaimed.
+ */
+class Cache
+```
+
+The implementation may make these facts discoverable, but a reader should not need to inspect lookup and eviction logic
+merely to understand what role the abstraction serves.
+
+Useful documentation often answers questions such as:
+
+- What does this concept represent?
+- Why does it exist?
+- What problem does it solve?
+- When would I use, extend, or modify it?
+- How does it relate to nearby concepts or alternatives?
+
+Do not begin with an exhaustive execution specification when a plain-language explanation would establish the concept
+more effectively.
+
+For example, an exponential backoff policy should usually not begin with:
+
+```text
+delay(attempt) = min(maxDelay, initialDelay * 2^attempt)
+```
+
+before explaining that retries become progressively less frequent to avoid repeatedly overwhelming a failing service.
+
+Establish the idea first. Precise formulas and processing rules can follow once the reader knows what they describe and
+why they matter.
+
+### Document what the code cannot express well
+
+After establishing the concept, document the non-obvious information needed to use or modify it correctly.
 
 When relevant, explain:
 
-- typical use cases and why this API would be chosen over nearby alternatives;
-- surprising edge cases, invalid combinations, lifetime or ownership rules, and interactions with other state;
-- concrete examples, diagrams, tables, or formulas when they make behavior easier to understand.
-- caller-visible behavior that the API's types and structure do not already make clear or enforce, such as state changes
-  and their scope, ordering constraints, failure behavior, resource ownership and lifetime, thread-safety or
-  synchronization requirements, and significant performance costs.
+- caller-visible behavior that names, types, and structure do not make clear or enforce;
+- invariants and ordering constraints;
+- interactions with other state;
+- surprising edge cases and invalid combinations;
+- ownership, lifetime, and invalidation rules;
+- failure behavior and recovery expectations;
+- thread-safety and synchronization requirements;
+- significant performance characteristics or resource costs;
+- important tradeoffs or reasons for choosing one design over nearby alternatives.
 
-Do not begin with an exhaustive execution specification when a plain-language explanation would establish the concept
-more effectively. Introduce precise formulas and processing rules after the reader has a useful mental model.
+For example, this declaration does not communicate the lifetime of its result:
 
-Do not merely translate an identifier into prose. Keep documentation proportional to the concept:
-simple values should remain concise, while complex or easily misunderstood behavior deserves more detail. Do not invent
-filler use cases or edge cases when none meaningfully exist.
+```kotlin
+fun currentText(): CharSequence
+```
 
-Use complete, descriptive names in formulas and examples rather than unexplained abbreviations.
+If the returned value refers to reusable internal storage, that should be documented:
 
+```kotlin
+/**
+ * Returns a view of the current text.
+ *
+ * The returned value is backed by internal storage and remains valid
+ * only until the next call to parse().
+ */
+fun currentText(): CharSequence
+```
+
+Ordering guarantees are another common example:
+
+```kotlin
+/**
+ * Submits a task for execution.
+ *
+ * Tasks submitted by the same producer are processed in submission order.
+ * No ordering is guaranteed between different producers.
+ */
+fun submit(task: Task)
+```
+
+The method name already tells the reader *what operation is being requested*. The documentation adds the contract
+required to reason about its behavior.
+
+Documentation should remain proportional to the concept. Simple declarations should stay concise, while complex or
+easily misunderstood behavior deserves more detail.
+
+For example, if this property has only one non-obvious special case:
+
+```kotlin
+val maxRetries: Int
+```
+
+then this may be all the documentation it needs:
+
+```kotlin
+/**
+ * Maximum number of retries. `0` disables retries.
+ */
+val maxRetries: Int
+```
+
+Do not invent filler use cases, edge cases, parameter descriptions, or other prose merely to make documentation appear
+more complete.
+
+Use examples, diagrams, tables, or formulas when they communicate behavior more clearly than prose alone. In formulas
+and examples, prefer complete and descriptive names over unexplained abbreviations.
+
+### Comments
+
+Implementation comments should primarily explain *why* the code is written a particular way when that reason is not
+apparent from the code itself.
+
+Useful comments commonly record:
+
+- a non-obvious invariant;
+- why an apparently simpler implementation would be incorrect;
+- an external constraint or workaround;
+- a concurrency, lifetime, or ordering requirement;
+- a deliberate performance tradeoff;
+- code whose necessity could otherwise be mistaken for accidental complexity.
+
+Avoid comments that merely narrate the next statement:
+
+```kotlin
+// Remove the entry.
+entries.remove(key)
+```
+
+Instead, explain the reason when it matters:
+
+```kotlin
+// Remove the listener before closing the connection.
+// close() may synchronously invoke the disconnect callback.
+connection.removeListener(listener)
+connection.close()
+```
+
+Likewise:
+
+```kotlin
+// Acquire the lock.
+lock.lock()
+```
+
+adds nothing, while:
+
+```kotlin
+// Keep the lock held while publishing the metadata so readers
+// cannot observe the new value with stale metadata.
+lock.lock()
+```
+
+records an invariant that might otherwise be lost during refactoring.
+
+If a comment exists only because the code is difficult to read, prefer improving the code when practical.
+
+Prefer:
+
+```kotlin
+val hasExpired = now >= expirationTime
+
+if (hasExpired) {
+    removeEntry()
+}
+```
+
+over:
+
+```kotlin
+// Check whether the current time is past the expiration time.
+val result = now >= end
+
+// Remove the entry if it has expired.
+if (result) {
+    removeEntry()
+}
+```
+
+Comments should explain necessary complexity, not preserve avoidable complexity.
+
+In short:
+
+> Code should communicate what it reasonably can. Comments and documentation should provide the context that code cannot
+> communicate clearly on its own.
 ## Mixin Rules
 
 ### Do not directly implement interfaces
