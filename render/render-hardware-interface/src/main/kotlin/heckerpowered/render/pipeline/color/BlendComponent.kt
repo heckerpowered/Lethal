@@ -5,9 +5,6 @@
 
 package heckerpowered.render.pipeline.color
 
-import heckerpowered.render.BlendOperation
-import heckerpowered.render.pipeline.BlendState
-
 /**
  * Describes one factor-based equation used to combine a fragment output with the existing value of
  * a color target.
