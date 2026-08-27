@@ -18,6 +18,9 @@ When relevant, explain:
 - typical use cases and why this API would be chosen over nearby alternatives;
 - surprising edge cases, invalid combinations, lifetime or ownership rules, and interactions with other state;
 - concrete examples, diagrams, tables, or formulas when they make behavior easier to understand.
+- caller-visible behavior that the API's types and structure do not already make clear or enforce, such as state changes
+  and their scope, ordering constraints, failure behavior, resource ownership and lifetime, thread-safety or
+  synchronization requirements, and significant performance costs.
 
 Do not begin with an exhaustive execution specification when a plain-language explanation would establish the concept
 more effectively. Introduce precise formulas and processing rules after the reader has a useful mental model.
