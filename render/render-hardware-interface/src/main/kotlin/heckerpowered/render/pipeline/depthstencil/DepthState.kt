@@ -58,4 +58,18 @@ data class DepthState(
      * may still require sorting or another transparency technique.
      */
     val writeEnabled: Boolean = true,
-)
+) {
+    companion object {
+        /**
+         * Conventional depth state for opaque geometry where smaller depth values represent nearer
+         * surfaces.
+         *
+         * Incoming depth must be less than the stored value, and passing fragments replace the stored
+         * depth. The attachment is normally cleared to its largest depth value, typically `1.0`.
+         *
+         * This state is not appropriate for reverse-depth projection, which normally uses a
+         * greater-style comparison and clears depth to `0.0`.
+         */
+        val Default = DepthState()
+    }
+}
