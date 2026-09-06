@@ -5,8 +5,6 @@
 
 package heckerpowered.render.texture
 
-import heckerpowered.render.TextureFormat
-
 /**
  * A view exposing a selected subresource range of a [GpuTexture].
  *
