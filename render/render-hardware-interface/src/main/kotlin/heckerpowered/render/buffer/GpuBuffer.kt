@@ -5,32 +5,37 @@
 
 package heckerpowered.render.buffer
 
-import heckerpowered.render.BufferUsage
 import heckerpowered.render.GpuResource
+import heckerpowered.render.memory.Size
 
 /**
- * A fixed-size region of byte storage accessible to graphics operations.
+ * Stores bytes that graphics and compute operations can read or write.
  *
- * A buffer has no intrinsic element type. Vertex input, index interpretation, and shader data
- * layouts are supplied by the operations that use it, so the same storage may serve several
- * roles when its usage permits them.
+ * A buffer does not assign an element type or data layout to its contents. Vertex input may
+ * interpret a range as positions and texture coordinates, while a shader binding may interpret
+ * another range as a block of parameters. The corresponding bindings and shader declarations
+ * determine those interpretations.
  *
- * The capacity and permitted uses remain unchanged throughout the buffer's lifetime; its contents
- * may change. Data transfer and binding are performed through the graphics command API rather
- * than through this interface.
+ * A single allocation can serve several roles when its usage permits them. For example, a
+ * compute shader can write vertex data into a buffer that a later draw reads through vertex
+ * input.
  *
- * GPU access does not imply CPU addressability or a particular physical memory location. Closing
- * the buffer ends the usable lifetime of every slice that references it.
+ * The allocation's capacity and permitted uses remain fixed, while its contents may change.
+ * [GpuBufferView] selects a range within that allocation.
  */
 interface GpuBuffer : GpuResource {
-    /** Allocated capacity in bytes, not the amount of initialized or currently used data. */
-    val sizeBytes: Long
+    /**
+     * Allocated capacity in bytes, rather than the amount of data currently used by the
+     * application.
+     */
+    val sizeBytes: Size
 
     /**
-     * Operations permitted for this allocation.
+     * Operations for which this allocation may be used.
      *
-     * This set is a stable snapshot. It does not describe the current binding, a memory-placement
-     * preference, or permission to access the storage directly from the CPU.
+     * Multiple roles can be combined; this set does not describe the buffer's current binding
+     * or establish ordering between operations that access it. Its contents remain unchanged
+     * throughout the allocation's lifetime.
      */
     val usage: Set<BufferUsage>
 }
