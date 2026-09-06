@@ -80,7 +80,6 @@ interface GpuTexture : GpuResource {
      * Cube textures are commonly represented by groups of six array layers, although their
      * interpretation also depends on the texture or view dimension.
      */
-    @Suppress("GrazieInspection")
     val arrayLayerCount: Int
 }
 
