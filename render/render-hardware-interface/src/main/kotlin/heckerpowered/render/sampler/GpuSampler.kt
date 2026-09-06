@@ -8,17 +8,17 @@ package heckerpowered.render.sampler
 import heckerpowered.render.GpuResource
 
 /**
- * A reusable sampling configuration established by a graphics device.
+ * A reusable texture-sampling configuration established by a graphics device.
  *
- * A texture view selects which texels and mip levels are accessible; a sampler determines how
- * sampling filters those texels and handles texture coordinates. It contains no image storage
- * and does not own the textures used with it.
+ * A texture view selects the image data available to a shader. A sampler controls how sampling
+ * chooses and combines texels from that data, including filtering, mip selection, and
+ * coordinate addressing.
  *
- * The configuration is immutable after creation. One sampler may be reused with multiple
- * compatible texture views, and a texture view may be used with different samplers.
+ * Keeping these rules separate allows the same texture view to be sampled differently without
+ * duplicating its image data. For example, one draw can preserve sharp texel boundaries with
+ * nearest filtering while another uses linear filtering for smoother transitions.
  *
- * The backend may represent this resource with a native sampler object or with managed sampling
- * state. Successful creation does not establish compatibility with every texture format, view,
- * or simultaneous binding combination; those requirements are checked when the sampler is used.
+ * The configuration remains unchanged after creation and can be reused with multiple compatible
+ * texture views. [SamplerDescription] describes the rules used to create it.
  */
 interface GpuSampler : GpuResource
