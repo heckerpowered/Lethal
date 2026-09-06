@@ -5,9 +5,9 @@
 
 package heckerpowered.render
 
-import heckerpowered.render.pipeline.DepthStencilState
 import heckerpowered.render.pipeline.PipelineLayout
 import heckerpowered.render.pipeline.color.ColorTargetState
+import heckerpowered.render.pipeline.depthstencil.DepthStencilState
 import heckerpowered.render.pipeline.multisample.MultisampleState
 import heckerpowered.render.pipeline.primitive.PrimitiveState
 import heckerpowered.render.pipeline.rasterization.RasterizationState
