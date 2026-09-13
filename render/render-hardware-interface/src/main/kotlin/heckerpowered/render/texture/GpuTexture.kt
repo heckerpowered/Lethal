@@ -8,10 +8,13 @@ package heckerpowered.render.texture
 import heckerpowered.render.GpuResource
 
 /**
- * GPU-resident texture storage containing one or more mip levels and array layers.
+ * Texture storage containing one or more mip levels and array layers.
  *
- * A texture represents the complete allocated storage. Rendering and shader access use
+ * A texture represents the complete image storage. Rendering and shader access use
  * [GpuTextureView]s that select a subresource range from this texture.
+ *
+ * [storage] determines whether image data can be kept for later use or is temporary working
+ * data for rendering. Selecting a view does not change the storage mode of its subresources.
  *
  * This abstraction intentionally uses the cross-backend term "texture" rather than the
  * Vulkan-specific term "image". Depending on the backend, it may be implemented by a Vulkan
@@ -21,6 +24,14 @@ import heckerpowered.render.GpuResource
  * uses, such as sampling, rendering, storage access, and copying, are determined by its usage.
  */
 interface GpuTexture : GpuResource {
+    /**
+     * Storage mode of the complete texture.
+     *
+     * The mode is fixed when this texture is created or imported. Selecting a view or discarding
+     * image contents does not change it.
+     */
+    val storage: TextureStorage
+
     /**
      * Width in texels of mip level zero.
      *
