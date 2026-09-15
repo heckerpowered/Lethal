@@ -22,10 +22,9 @@ package heckerpowered.render.pipeline.multisample
  * or motion between frames. Those problems may require texture filtering, shader-specific
  * techniques, or temporal anti-aliasing.
  *
- * Increasing [sampleCount] also increases the storage and bandwidth required by multisampled color,
- * depth, and stencil attachments. A multisampled attachment is commonly resolved into a
- * single-sampled image before presentation or later sampling, but that resolve operation belongs to
- * the render pass rather than to this state.
+ * Using more samples normally requires attachments with more sample storage and can increase
+ * memory traffic. A multisampled attachment may be resolved into a single-sampled image for later
+ * use. The resolve operation and its destination are specified separately from this state.
  *
  * Multisampling does not by itself require one fragment-shader invocation for every sample. Explicit
  * per-sample shading is a separate capability.
@@ -37,8 +36,18 @@ data class MultisampleState(
      * Higher counts can describe partial coverage more precisely, improving the appearance of
      * geometry edges at the cost of additional attachment storage and bandwidth.
      *
+     * This sets the number of rasterization samples, not how many samples to fetch
+     * from an input texture or how many times the fragment shader must run. Binding a pipeline
+     * does not change the sample count of an existing texture.
+     *
+     * In the ordinary attachment-rendering model, each color and depth-stencil attachment
+     * directly used by the draw must have this sample count. Shader texture inputs and resolve
+     * destinations are not subject to that equality. A mismatch does not request an implicit
+     * resolve or authorize writing only a subset of the attachment's samples.
+     *
      * Support depends on both the graphics device and the formats of the attachments used with the
-     * pipeline.
+     * pipeline. Mixed-sample rendering requires a separately defined capability and configuration;
+     * this state alone does not enable it.
      */
     val sampleCount: SampleCount = SampleCount.One,
 
