@@ -11,6 +11,15 @@ package heckerpowered.render.texture
  * A texture view does not contain independent image storage. It references [texture] and
  * restricts access to consecutive mip levels and array layers of that texture.
  *
+ * The selected subresources use [texture]'s [storage mode][GpuTexture.storage]. A view of a
+ * [TextureStorage.Memoryless] texture shares its content restrictions; creating another
+ * view cannot preserve those contents beyond their native rendering scope.
+ *
+ * The view retains [texture]'s [sample count][GpuTexture.sampleCount] and cannot expand its
+ * [permitted uses][GpuTexture.usage]. Selecting a view neither resolves multisampled contents
+ * nor grants sampling or attachment access that the texture does not permit. The selected
+ * format and subresources must also support the operation performed through the view.
+ *
  * Rendering and shader access normally operate on texture views rather than complete textures.
  * Different views may expose different subresource ranges of the same underlying texture without
  * copying its contents.
