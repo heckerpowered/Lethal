@@ -5,6 +5,8 @@
 
 package heckerpowered.render.texture
 
+import heckerpowered.render.pipeline.depthstencil.DepthStencilState
+
 /**
  * Identifies the exact formatted representation of a texture texel.
  *
