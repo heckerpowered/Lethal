@@ -6,10 +6,192 @@
 package heckerpowered.render.pass
 
 import heckerpowered.render.color.Color
+import heckerpowered.render.pipeline.multisample.SampleCount
+import heckerpowered.render.target.RenderAttachment
+import heckerpowered.render.target.validateMetadata
+import heckerpowered.render.texture.TextureAspect
+import java.util.*
 
-data class RenderPassDescription(
+/**
+ * Chooses the images that a group of draws contributes to and how their contents are handled
+ * before and after drawing.
+ *
+ * A scene can be built from separate draws for terrain, characters, and other objects. A render
+ * pass lets these draws share the same color, depth, and stencil attachments. Pipelines and
+ * resource bindings may change between draws without changing the attachments or repeating
+ * their load operations.
+ *
+ * Each attachment use chooses how drawing begins: continue existing contents, clear to a known
+ * value, or discard values that will be replaced. It also chooses whether the result must remain
+ * available afterward. For example, a scene and an overlay can use the same color image:
+ *
+ * ```
+ * scene pass
+ *   color -> clear background -> draw terrain and objects -> store
+ *   depth -> clear far depth  -> test and update depth    -> discard
+ *
+ * overlay pass
+ *   color -> load scene color -> draw interface           -> store
+ * ```
+ *
+ * The overlay adds to the scene rather than clearing it again. Depth is only working data in
+ * this example; a later operation that reads the scene depth would require storing it instead.
+ * Load and store choices belong to each use, not permanently to the underlying image.
+ *
+ * [renderArea] and [layerCount] select the pixels and layers affected by the pass. The commands
+ * that draw geometry, bind pipelines, and supply shader resources are recorded separately
+ * through [RenderPass]; this description provides their attachment setup, not the commands or
+ * new image storage.
+ *
+ * The pass boundary is logical. A backend may group it with other operations during native
+ * execution, but must preserve the specified reads, writes, and content-validity guarantees.
+ *
+ * @throws IllegalArgumentException if the attachment metadata, render area, layer count, sample
+ * counts, or depth clear value fail the checks described by [validateAttachments].
+ */
+class RenderPassDescription(
     val label: String,
-    val colorAttachments: List<RenderPassAttachment<Color>> = emptyList(),
+
+    /**
+     * Region affected in each participating attachment layer.
+     *
+     * Use a smaller rectangle to update part of a larger image, such as one cell in a texture
+     * atlas. Every bound attachment must cover this rectangle, but their complete dimensions
+     * need not match. The area does not choose the viewport's coordinate transform.
+     */
+    val renderArea: RenderArea,
+    colorAttachments: List<RenderPassAttachment<Color>?> = emptyList(),
+
+    /**
+     * Supplies depth values for deciding which surfaces are visible.
+     *
+     * This position's load and store operations affect only [TextureAspect.Depth], even when
+     * the attachment also exposes stencil. Binding it does not enable depth testing: the
+     * pipeline controls the comparisons and depth writes used by each draw.
+     */
     val depthAttachment: RenderPassAttachment<Float>? = null,
+
+    /**
+     * Supplies integer stencil marks for masking or classifying drawing regions.
+     *
+     * This position's load and store operations affect only [TextureAspect.Stencil]. It can
+     * reference the same combined attachment as [depthAttachment] while choosing different
+     * operations, such as keeping depth and clearing stencil for a new selection mask.
+     * The pipeline and stencil reference determine how draws test and update the marks.
+     */
     val stencilAttachment: RenderPassAttachment<UByte>? = null,
-)
+
+    /**
+     * Number of layers used from the start of each attachment's exposed layer range.
+     *
+     * For example, if an attachment exposes texture layers 4 through 7, a count of 2 uses texture
+     * layers 4 and 5. The pass does not select layers from the start of the complete texture.
+     *
+     * The default uses one layer. A larger count makes more layers available to supported layered
+     * rendering; it does not repeat each draw for every layer or enable multiview by itself.
+     */
+    val layerCount: Int = 1,
+) {
+    /**
+     * Images that receive the fragment shader's color outputs, together with their load and
+     * store operations for this pass.
+     *
+     * List indices correspond to fragment-output locations. A shader can write scene color to
+     * location 0 and a second result, such as a normal image, to location 1. A null entry leaves
+     * its location unbound without renumbering later entries: `[first, null, third]` binds
+     * locations 0 and 2.
+     *
+     * Each bound attachment must expose [TextureAspect.Color]. The list is an unmodifiable copy
+     * of the supplied selection, so changing the caller's list does not reconfigure this pass.
+     */
+    val colorAttachments: List<RenderPassAttachment<Color>?> =
+        Collections.unmodifiableList(colorAttachments.toList())
+
+    /**
+     * Common sample count required by the direct attachments, or null when none are bound.
+     *
+     * All bound color, depth, and stencil attachments must have the same sample count in this
+     * model. Draws must use a matching rasterization count; [validateSampleCount] checks this
+     * part of pipeline compatibility. Shader input textures and separate resolve destinations
+     * do not participate in this count.
+     *
+     * A null result does not select single-sampled rendering. An attachmentless pass uses the
+     * draw's rasterization configuration, subject to the device's attachmentless-rendering limits.
+     */
+    val attachmentSampleCount: SampleCount?
+        get() = colorAttachments.firstNotNullOfOrNull { it?.attachment?.sampleCount }
+            ?: depthAttachment?.attachment?.sampleCount
+            ?: stencilAttachment?.attachment?.sampleCount
+
+    init {
+        validateAttachments()
+    }
+
+    /**
+     * Checks aspect membership, image metadata, render bounds, layer count, and sample agreement.
+     *
+     * Backends can repeat these public metadata checks before recording. Identity and overlap of
+     * native images, imported-resource availability, format support, and content scope still
+     * require device knowledge and must not be inferred from Kotlin object equality.
+     *
+     * @throws IllegalArgumentException if the description contradicts the attachment metadata.
+     */
+    fun validateAttachments() {
+        require(layerCount > 0) { "Render pass layer count must be positive" }
+        colorAttachments.forEachIndexed { index, binding ->
+            binding?.let { requireAspect(it.attachment, TextureAspect.Color, "color attachment $index") }
+        }
+        depthAttachment?.let { requireAspect(it.attachment, TextureAspect.Depth, "depth attachment") }
+        stencilAttachment?.let { requireAspect(it.attachment, TextureAspect.Stencil, "stencil attachment") }
+
+        var samples: SampleCount? = null
+        forEachAttachment { position, attachment ->
+            attachment.validateMetadata()
+            renderArea.validateFor(attachment.width, attachment.height)
+            require(layerCount <= attachment.arrayLayerCount) {
+                "$label: $position exposes ${attachment.arrayLayerCount} layers, but the pass requires $layerCount"
+            }
+            val expected = samples
+            require(expected == null || attachment.sampleCount == expected) {
+                "$label: $position has ${attachment.sampleCount.value} samples; other direct attachments have ${expected?.value}"
+            }
+            samples = attachment.sampleCount
+        }
+
+        val depthLoad = depthAttachment?.operation?.load
+        if (depthLoad is AttachmentLoadOperation.Clear) {
+            require(depthLoad.value in 0.0F..1.0F) {
+                "$label: depth clear value must be finite and between zero and one"
+            }
+        }
+    }
+
+    /**
+     * Checks a draw's rasterization sample count against the direct attachments.
+     *
+     * This does not compare shader input textures or resolve destinations. With no attachments
+     * there is no image count to match; the device must still validate attachmentless rendering.
+     * Other pipeline compatibility requirements are checked by the draw implementation.
+     *
+     * @throws IllegalArgumentException if a direct attachment's sample count differs from [sampleCount].
+     */
+    fun validateSampleCount(sampleCount: SampleCount) {
+        forEachAttachment { position, attachment ->
+            require(attachment.sampleCount == sampleCount) {
+                "$label: $position has ${attachment.sampleCount.value} samples, but the pipeline requires ${sampleCount.value}"
+            }
+        }
+    }
+
+    private fun requireAspect(attachment: RenderAttachment, aspect: TextureAspect, position: String) {
+        require(aspect in attachment.aspects) { "$label: $position does not expose $aspect" }
+    }
+
+    private inline fun forEachAttachment(action: (String, RenderAttachment) -> Unit) {
+        colorAttachments.forEachIndexed { index, binding ->
+            binding?.let { action("color attachment $index", it.attachment) }
+        }
+        depthAttachment?.let { action("depth attachment", it.attachment) }
+        stencilAttachment?.let { action("stencil attachment", it.attachment) }
+    }
+}
