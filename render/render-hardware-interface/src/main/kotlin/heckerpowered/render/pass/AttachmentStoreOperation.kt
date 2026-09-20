@@ -5,57 +5,47 @@
 
 package heckerpowered.render.pass
 
-import heckerpowered.render.RenderPassDescription
-import heckerpowered.render.RenderTarget
-
 /**
- * A [RenderPassDescription] assigns a store operation to each color attachment supplied by its
- * [RenderTarget], and separate store operations to the depth and stencil aspects of that target's
- * depth/stencil attachment.
+ * Determines whether an attachment use's contents remain needed after a logical render pass.
  *
- * When the render pass ends, [Store] keeps the resulting contents available to later work, while
- * [Discard] indicates that those contents are no longer needed and may become undefined. The store
- * operation does not affect attachment access during the render pass itself.
+ * A scene image consumed later must be preserved. Depth or stencil data used only to produce
+ * that image may instead be discarded. Each pass position chooses for its own aspect, within
+ * the pass's render area and participating layers; it does not discard the other aspect of a
+ * combined depth-stencil image.
  *
- * [AttachmentLoadOperation] separately determines the contents available when the render pass
- * begins.
+ * These are content guarantees, not requests for particular native store instructions. Logical
+ * passes and image operations may be grouped into one native rendering scope, provided their
+ * reads, writes, and content-validity rules are preserved.
  */
 enum class AttachmentStoreOperation {
     /**
-     * Preserves the attachment contents after the render pass ends.
+     * Keeps the result available to later operations until it is replaced, discarded, or leaves
+     * the source's permitted content scope.
      *
-     * Use this when a later render pass or operation needs the generated color, depth, or stencil
-     * values.
+     * Use this when later drawing, sampling, or resolve needs the image. For example, a logical
+     * pass can Store its multisampled color for a following resolve, then explicitly discard the
+     * source after resolve. A backend can keep the samples locally until that consumer finishes;
+     * Store does not require an intermediate write to backing memory.
      *
-     * Storing does not initialize values that were already undefined and never overwritten during
-     * the pass. It only preserves the final contents that the pass actually established.
+     * This does not make previously undefined, unwritten values valid, establish synchronization,
+     * or make memoryless contents survive a native scope in which they cannot be retained.
      */
     Store,
 
     /**
-     * Indicates that the implementation does not need to preserve this attachment aspect after the
-     * render pass.
+     * Gives up this use's contents when the logical pass ends.
      *
-     * Typical reasons for choosing [Discard] include:
+     * Choose this when the result is no longer needed, for example temporary depth data after
+     * visibility testing. Rendering still takes place; only the requirement to preserve the
+     * resulting values is removed.
      *
-     * - The attachment is only an intermediate result, and preserving it may require unnecessary
-     *   storage or memory traffic.
-     * - Its contents will be cleared or completely overwritten before any later operation could
-     *   observe them.
-     * - It uses transient or memoryless storage whose contents are not intended to survive the render
-     *   pass.
-     * - Its result has already been consumed or transferred into the persistent output that matters.
-     *   For example, a deferred renderer may consume a transient G-buffer while producing the lit
-     *   color, and an MSAA resolve transfers the useful image into the resolve attachment.
-     * - Preserving it would impose a stronger post-pass contract than the rendering algorithm
-     *   requires.
+     * The affected values are undefined afterward and must be established again before a read
+     * depends on them. In particular, a later logical resolve cannot read a source discarded
+     * here, even if a backend could otherwise fuse the operations.
      *
-     * Choosing [Discard] does not skip rendering or attachment access within the render pass. It only
-     * removes the requirement to preserve defined contents afterward.
-     *
-     * After the render pass, the aspect's contents are undefined and must not be read until a later
-     * operation defines them again. [Discard] does not clear the attachment or erase its underlying
-     * storage.
+     * This neither clears nor destroys the image. Values outside the selected pass region and
+     * aspect are not discarded by this choice, although backend synchronization can cover a
+     * larger range than the logical content effect.
      */
     Discard,
 }
