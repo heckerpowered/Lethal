@@ -5,8 +5,7 @@
 
 package heckerpowered.render.pass
 
-import heckerpowered.render.RenderPassDescription
-import heckerpowered.render.RenderTarget
+import heckerpowered.render.target.RenderTarget
 
 /**
  * Groups the attachment load and store operations configured by a [RenderPassDescription].
