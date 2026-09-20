@@ -9,6 +9,16 @@ import heckerpowered.bridge.adapter.item.ItemBlueprint
 import java.util.*
 
 object CreativeModeTabRegistry {
+    private val Registry = CreativeModeTabBlueprintRegistry()
+
+    fun register(blueprint: CreativeModeTabBlueprint): CreativeModeTabBlueprint = Registry.register(blueprint)
+
+    fun all(): List<CreativeModeTabBlueprint> = Registry.all()
+
+    fun findAll(item: ItemBlueprint): List<CreativeModeTabBlueprint> = Registry.findAll(item)
+}
+
+internal class CreativeModeTabBlueprintRegistry {
     private val blueprintsByIdentifier = LinkedHashMap<String, CreativeModeTabBlueprint>()
     private val tabsByItem = IdentityHashMap<ItemBlueprint, MutableList<CreativeModeTabBlueprint>>()
 
@@ -30,11 +40,5 @@ object CreativeModeTabRegistry {
 
     fun findAll(item: ItemBlueprint): List<CreativeModeTabBlueprint> {
         return tabsByItem[item]?.toList() ?: emptyList()
-    }
-
-    // TODO: clear doesn't seems make sense. If it's for testing, use @VisibleForTesting
-    internal fun clear() {
-        blueprintsByIdentifier.clear()
-        tabsByItem.clear()
     }
 }
