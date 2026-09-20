@@ -7,7 +7,11 @@ package heckerpowered.render
 
 import heckerpowered.render.buffer.BufferDescription
 import heckerpowered.render.buffer.GpuBuffer
+import heckerpowered.render.command.CommandEncoder
 import heckerpowered.render.memory.MemoryStack
+import heckerpowered.render.pipeline.PipelineLayout
+import heckerpowered.render.pipeline.PipelineLayoutCreationException
+import heckerpowered.render.pipeline.PipelineLayoutDescription
 import heckerpowered.render.pipeline.RenderPipeline
 import heckerpowered.render.sampler.GpuSampler
 import heckerpowered.render.sampler.SamplerDescription
@@ -63,6 +67,35 @@ interface GraphicsDevice {
      * established separately during render-pipeline creation.
      */
     fun createShaderStages(description: ShaderStagesDescription): ShaderStages
+
+    /**
+     * Establishes the shader-resource interface described by [description].
+     *
+     * For example, scene and material set layouts can be combined with small per-draw push
+     * constants, then reused by several render pipelines. Set and binding numbers, descriptor
+     * array counts, stage visibility, resource requirements, and push-constant byte ranges keep
+     * their declared meanings on every backend.
+     *
+     * The device checks the complete interface, including per-stage and aggregate resource
+     * limits, texture-binding forms, storage access, and push-constant capacity. Unsupported
+     * requirements are rejected rather than dropping bindings, reducing arrays, or changing
+     * their shader-visible addresses. All declared slots participate, even before a shader is
+     * supplied; later shader compilation may eliminate accesses without changing this contract.
+     *
+     * Descriptor-set layouts are ordinary immutable descriptions. Any native set-layout objects
+     * or binding maps required here are managed as backend state of the established layout, not
+     * returned as extra public resources. No actual descriptor set or bound image is created.
+     *
+     * This checks interface support, not a particular shader program. Pipeline creation checks
+     * shader declarations against this interface, and resource binding checks actual resources.
+     * Push-constant ranges reserve an interface; their values are supplied by later commands.
+     *
+     * @throws UnsupportedOperationException if the interface cannot be represented or exceeds
+     * this device's limits.
+     * @throws IllegalStateException if the device cannot currently create resources.
+     * @throws PipelineLayoutCreationException if establishing supported backend state fails.
+     */
+    fun createPipelineLayout(description: PipelineLayoutDescription): PipelineLayout
 
     /**
      * Establishes the texture storage requested by [description].
@@ -138,7 +171,6 @@ interface GraphicsDevice {
 
     fun createRenderPipeline(description: RenderPipelineDescription): RenderPipeline
     fun createBuffer(description: BufferDescription): GpuBuffer
-    fun createRenderTarget(description: RenderTargetDescription): OwnedTextureRenderTarget
     fun createSampler(description: SamplerDescription): GpuSampler
 
     /**
