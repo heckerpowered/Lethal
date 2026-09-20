@@ -5,54 +5,47 @@
 
 package heckerpowered.render.pass
 
-import heckerpowered.render.RenderPassDescription
-import heckerpowered.render.RenderTarget
-
 /**
- * A [RenderPassDescription] assigns a load operation to each color attachment supplied by its
- * [RenderTarget], and separate load operations to the depth and stencil aspects of that target's
- * depth/stencil attachment.
+ * Chooses the contents an attachment use starts with before drawing in a logical render pass.
  *
- * Each operation determines the corresponding contents when the render pass begins, before draw
- * commands are executed. [Load] preserves values produced earlier, [Clear] replaces them with a
- * specified value, and [Discard] leaves them undefined.
+ * Loading continues an earlier image, clearing supplies known starting values, and discarding
+ * avoids preserving values the pass will replace. The choice applies to the aspect selected by
+ * the pass position, inside the render area and participating layers.
  *
- * [AttachmentStoreOperation] controls whether contents produced during the render pass remain
- * available after it ends.
+ * The depth and stencil positions choose independently. A combined attachment can retain its
+ * depth image while clearing its stencil marks. [AttachmentStoreOperation] separately controls
+ * which results remain available after the pass.
  */
 sealed interface AttachmentLoadOperation<out T> {
     /**
-     * Preserves the aspect's existing contents as the initial contents of the render pass.
+     * Uses the existing values as the initial contents.
      *
-     * Use this when rendering depends on values produced earlier, such as blending with existing color,
-     * preserving pixels not covered by new drawing, or continuing depth or stencil testing.
-     *
-     * The existing contents must already be defined. Loading a newly created aspect or one previously
-     * discarded does not initialize it.
+     * Use this for overlays that blend with earlier color, drawing that preserves uncovered
+     * pixels, or depth and stencil tests that must continue from previous results. Loading does
+     * not initialize storage: every old value the new work depends on must already be defined.
      */
     data object Load : AttachmentLoadOperation<Nothing>
 
     /**
-     * Indicates that the render pass does not care about the aspect's previous contents.
+     * Gives up the previous values so they need not be preserved for this pass.
      *
-     * Use this when every value that can affect the result will be established by the current pass,
-     * such as an opaque full-target draw that independently replaces its color output. This may allow
-     * the implementation to avoid preserving earlier contents.
-     *
-     * The initial contents are undefined and are chosen freely by the implementation. They must not be
-     * read before being replaced with defined values; blending, depth testing, and stencil testing that
-     * depend on existing attachment values count as reads.
+     * This is useful when drawing establishes every value that can affect its result, such as
+     * replacing a color region without destination-dependent blending. It does not clear to zero.
+     * The initial values are undefined and must be replaced before they affect blending, depth
+     * tests, stencil tests, or any other read.
      */
     data object Discard : AttachmentLoadOperation<Nothing>
 
     /**
-     * Initializes the attachment aspect to [value] when the render pass begins.
+     * Replaces the selected aspect's values in the pass region with [value] before drawing.
      *
-     * Use this when rendering requires a known initial value, such as a background color, the far depth
-     * value, or an empty stencil mask.
+     * Typical values are a background color, the far depth value for the chosen depth convention,
+     * or zero for an empty stencil mask. Depth clear values must be finite and in `[0, 1]`;
+     * choosing conventional or reverse depth determines which end is useful, not the valid range.
      *
-     * The clear occurs before draw commands and is not restricted by pipeline tests or write masks.
-     * Clearing the depth or stencil aspect of a combined attachment does not modify the other aspect.
+     * Clear covers the render area in every participating layer and every stored sample. It is
+     * independent of draw-time tests, scissor, and write masks, and does not clear an unselected
+     * aspect. Color values follow the selected attachment format's clear conversion semantics.
      */
     data class Clear<T>(val value: T) : AttachmentLoadOperation<T>
 }
