@@ -5,22 +5,17 @@
 
 package heckerpowered.render.pass
 
-import heckerpowered.render.target.RenderTarget
-
 /**
- * Groups the attachment load and store operations configured by a [RenderPassDescription].
+ * Chooses the initial contents and preservation of one attachment use in a logical render pass.
  *
- * A render pass description assigns one instance to each color attachment supplied by its
- * [RenderTarget], and separate instances to the depth and stencil aspects of that target's
- * depth/stencil attachment. [load] determines the contents available when the render pass begins,
- * while [store] determines whether contents produced during the pass remain available after it
- * ends.
+ * A scene pass might clear color and preserve its result; an overlay then loads that color
+ * before adding to it. These choices describe the use, not permanent settings of the image.
  *
- * These choices apply to that render pass. Another render pass using the same render target may
- * assign different operations.
+ * The containing pass position determines the aspect, and its render area and layer count
+ * determine the affected range. Depth and stencil can therefore have different operations even
+ * when supplied by the same combined attachment.
  *
- * `T` is the clear-value type accepted by [load]. It has no runtime significance when [load] is
- * [AttachmentLoadOperation.Load] or [AttachmentLoadOperation.Discard].
+ * `T` is the value accepted by [AttachmentLoadOperation.Clear]. Load and Discard need no value.
  */
 data class AttachmentOperations<out T>(
     val load: AttachmentLoadOperation<T>,
@@ -28,11 +23,10 @@ data class AttachmentOperations<out T>(
 ) {
     companion object {
         /**
-         * Loads the attachment's existing contents when the render pass begins and preserves its
-         * resulting contents after the pass ends.
+         * Continues from existing contents and preserves the result for later operations.
          *
-         * Use this for an attachment that follows the render pass's conventional preservation behavior.
-         * Its existing contents must already be defined before the pass begins.
+         * This is convenient for overlays and incremental drawing. It does not initialize a newly
+         * created or discarded image; use an explicit Clear when known initial values are needed.
          */
         val Default: AttachmentOperations<Nothing> = AttachmentOperations(
             load = AttachmentLoadOperation.Load,
