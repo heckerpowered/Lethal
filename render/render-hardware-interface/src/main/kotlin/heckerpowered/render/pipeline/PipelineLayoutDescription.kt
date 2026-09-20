@@ -5,64 +5,81 @@
 
 package heckerpowered.render.pipeline
 
-import heckerpowered.render.DescriptorSetLayout
-import heckerpowered.render.PushConstantLayout
+import heckerpowered.render.binding.DescriptorSetLayout
+import java.util.*
 
 /**
- * Immutable description used to create a [PipelineLayout].
+ * Describes the resource interface used to create a [PipelineLayout].
  *
- * The description defines the complete shader-visible resource interface consisting of numbered
- * descriptor sets and, optionally, push constants.
+ * Shaders can access resources such as camera buffers and material textures, and can also read
+ * small values supplied directly for each draw. [descriptorSets] declares the resource
+ * slots; [pushConstants] declares the directly supplied parameter ranges. Together they define
+ * the interface against which shader declarations and application-provided inputs are checked.
  *
- * For example:
- *
- * ```
- * PipelineLayoutDescription(
- *     descriptorSets = listOf(
- *         sceneLayout,     // set 0
- *         materialLayout,  // set 1
- *     ),
- *     pushConstants = drawConstants,
- *     label = "World",
- * )
- * ```
- *
- * In this example, bindings declared by `sceneLayout` are addressed through set 0, bindings
- * declared by `materialLayout` through set 1, and `drawConstants` describes data supplied directly
- * through push-constant commands.
+ * This is a device-independent request. Creating the layout establishes device support;
+ * combining it with shader stages establishes shader compatibility. The description does not
+ * supply actual resources, parameter values, or shader code.
  */
-data class PipelineLayoutDescription(
-    /**
-     * Descriptor-set layouts available to shaders, ordered by set index.
-     *
-     * The element at index `n` defines descriptor set `n`. Set indices identify groups of
-     * resources, while bindings declared by each [DescriptorSetLayout] identify individual
-     * resource slots within that set.
-     *
-     * For example, `(set = 1, binding = 3)` refers to binding 3 of `descriptorSets[1]`.
-     *
-     * An empty list means that the layout exposes no descriptor sets.
-     */
-    val descriptorSets: List<DescriptorSetLayout> = emptyList(),
+class PipelineLayoutDescription(
+    descriptorSets: List<DescriptorSetLayout> = emptyList(),
+    pushConstants: PushConstantLayout? = null,
 
     /**
-     * Layout of the push-constant data accessible to shaders.
-     *
-     * Push constants provide a small block of values that can be updated directly while encoding
-     * commands without allocating or binding a buffer or descriptor set. The layout determines
-     * the byte ranges and shader-stage visibility of that data.
-     *
-     * Typical values include object indices, draw flags, small offsets, or other frequently
-     * changing per-draw data.
-     *
-     * `null` means that the layout exposes no push constants.
-     */
-    val pushConstants: PushConstantLayout? = null,
-
-    /**
-     * Human-readable name used for diagnostics and debugging.
-     *
-     * The label does not affect resource compatibility or runtime behavior.
+     * Diagnostic name for the layout. It does not affect resource addressing or structural equality.
      */
     val label: String,
-)
+) {
+    /**
+     * Resource-group layouts in shader set-number order.
+     *
+     * For example, a renderer can put camera resources in set 0 and material resources in set 1:
+     *
+     * ```
+     * descriptorSets[0] -> scene layout
+     *     binding 0    -> camera uniform buffer
+     *
+     * descriptorSets[1] -> material layout
+     *     binding 0    -> sampled texture
+     *     binding 1    -> sampler
+     * ```
+     *
+     * A shader address `(set = 1, binding = 0)` selects the material texture slot. The list index
+     * chooses the set; the explicit binding number in that set's layout chooses the slot.
+     * Changing a material supplies different resources to the same slots instead of changing
+     * this interface. These entries describe slot requirements, not the resources currently bound.
+     *
+     * Use [DescriptorSetLayout.Empty] to leave a set position empty without renumbering later
+     * sets. Reusing the same layout at two list positions declares two distinct set addresses.
+     * An empty list exposes no descriptor sets. The list is copied and cannot be modified.
+     */
+    val descriptorSets: List<DescriptorSetLayout> = Collections.unmodifiableList(descriptorSets.toList())
+
+    /**
+     * Layout of the small parameter block supplied directly by push-constant commands.
+     *
+     * Use it for values such as a per-object transform, color, object index, or draw flags that
+     * can change between draws without replacing a descriptor set. Each range declares which
+     * bytes particular shader stages may read; the shader block defines the members at those
+     * byte offsets, and recorded commands supply their values.
+     *
+     * This parameter block is separate from the numbered descriptor sets. It has byte offsets
+     * rather than `(set, binding)` addresses, and assigning this property does not write values.
+     * See [PushConstantRange] for a matching shader block and [PushConstantLayout] for the
+     * relationship between declarations and updates.
+     *
+     * `null` exposes no push constants. An empty layout is normalized to `null` so both ways of
+     * requesting no push constants have the same representation.
+     */
+    val pushConstants: PushConstantLayout? = pushConstants?.takeIf { it.ranges.isNotEmpty() }
+
+    /**
+     * Compares ordered set layouts and exact push-constant declarations, ignoring diagnostic labels.
+     *
+     * This compares resource-interface descriptions, not the complete compatibility of pipelines
+     * that may use them.
+     */
+    override fun equals(other: Any?): Boolean = other is PipelineLayoutDescription &&
+            descriptorSets == other.descriptorSets && pushConstants == other.pushConstants
+
+    override fun hashCode(): Int = 31 * descriptorSets.hashCode() + pushConstants.hashCode()
+}
