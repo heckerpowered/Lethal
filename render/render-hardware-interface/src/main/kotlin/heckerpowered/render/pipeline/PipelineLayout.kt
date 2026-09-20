@@ -6,48 +6,25 @@
 package heckerpowered.render.pipeline
 
 import heckerpowered.render.GpuResource
+import heckerpowered.render.binding.DescriptorSetLayout
 
 /**
- * Defines the shader-visible resource interface of compatible pipelines.
+ * A shader-resource interface established by a graphics device for use by compatible pipelines.
  *
- * A pipeline layout describes how resources supplied by the application are addressed by shaders.
- * It consists of an ordered sequence of [DescriptorSetLayout]s together with an optional
- * [PushConstantLayout].
+ * The layout gives shader resource addresses a stable meaning: a scene set can contain camera
+ * buffers, a material set can contain textures and samplers, and push constants can supply a
+ * small object index for each draw. Different actual resources can satisfy that same interface.
  *
- * Descriptor sets group bindable resources such as buffers, textures, and samplers into numbered
- * sets. The position of a [DescriptorSetLayout] in [PipelineLayoutDescription.descriptorSets]
- * determines its set index, while each descriptor-set layout defines the bindings available
- * within that set.
+ * [PipelineLayoutDescription.descriptorSets] assigns set numbers by list position. Each
+ * [DescriptorSetLayout] assigns explicit binding numbers within its set. Push-constant offsets
+ * instead refer to the byte ranges in [PushConstantLayout], outside the descriptor-set namespace.
  *
- * For example, a pipeline layout might expose:
+ * Creating this resource establishes support for the declared interface, not compatibility with
+ * every shader. Pipeline creation must match the shader's resource types, counts, stages, and
+ * data requirements to the layout. Actual resource bindings are checked separately when used.
  *
- * ```
- * set 0
- *   binding 0 -> camera uniform buffer
- *   binding 1 -> lighting uniform buffer
- *
- * set 1
- *   binding 0 -> material texture
- *   binding 1 -> material sampler
- *
- * push constants
- *   object index
- *   draw flags
- * ```
- *
- * A shader referring to `(set = 1, binding = 0)` therefore accesses the resource described by
- * binding 0 of the second descriptor-set layout.
- *
- * Push constants describe a small region of application-provided data that can be updated directly
- * while encoding commands without binding it through a descriptor set. They are useful for small,
- * frequently changing values associated with a draw or dispatch.
- *
- * The pipeline layout contains no shader code and does not describe fixed-function pipeline state.
- * Instead, it defines the resource-binding contract against which shaders and bound resources must
- * be compatible.
- *
- * The native representation is backend-specific. Vulkan implementations may map this resource to
- * a native pipeline layout, while other backends may retain or translate the same logical resource
- * interface without requiring a corresponding native object.
+ * A layout contains no shader program, fixed-function drawing state, or currently bound resource
+ * values. It may be reused by multiple pipelines. The backend can represent it with a native
+ * layout object or with binding maps and other managed state; these do not change shader addresses.
  */
 interface PipelineLayout : GpuResource
