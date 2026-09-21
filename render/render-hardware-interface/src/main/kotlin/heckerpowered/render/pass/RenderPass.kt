@@ -6,8 +6,8 @@
 package heckerpowered.render.pass
 
 import heckerpowered.render.BuiltInPrimitives
-import heckerpowered.render.DescriptorSet
 import heckerpowered.render.RenderPipelineDescription
+import heckerpowered.render.binding.DescriptorSet
 import heckerpowered.render.buffer.GpuBuffer
 import heckerpowered.render.memory.*
 import heckerpowered.render.pipeline.RenderPipeline
