@@ -5,7 +5,8 @@
 
 package heckerpowered.render.pipeline.vertex
 
-import heckerpowered.render.GpuBuffer
+import heckerpowered.render.buffer.GpuBuffer
+import heckerpowered.render.buffer.GpuBufferView
 
 /**
  * Describes how vertex buffers provide input attributes to the vertex shader.
@@ -52,6 +53,74 @@ data class VertexState(
             .let { uniqueAttributes ->
                 require(uniqueAttributes.size == buffers.flatMap(VertexBufferLayout::attributes).size) { "Vertex attribute locations must be unique across every buffer binding" }
             }
+    }
+
+    /**
+     * Checks the vertex-input selections and byte ranges of a non-indexed draw.
+     *
+     * Every layout containing attributes requires a binding at its list position. Vertex-rate
+     * bindings select `[firstVertex, firstVertex + vertexCount)`; instance-rate bindings select
+     * `[firstInstance, firstInstance + instanceCount)`. Slots with no attributes need no buffer,
+     * and extra bindings are not consumed by this vertex state.
+     *
+     * If either count is zero, bindings and argument validity are still checked, but no element
+     * range is read. An empty [buffers] list supports buffer-free procedural geometry.
+     *
+     * This checks only vertex input, not the pipeline, attachments, descriptors, or push constants.
+     *
+     * @throws IllegalArgumentException if arguments, usages, or fetched byte ranges are invalid.
+     * @throws IllegalStateException if a required vertex-buffer slot is unbound.
+     */
+    fun validateDrawInputs(boundBuffers: Map<Int, GpuBufferView>, vertexCount: Int, firstVertex: Int = 0, instanceCount: Int = 1, firstInstance: Int = 0) {
+        require(vertexCount >= 0) { "Vertex count must not be negative" }
+        require(firstVertex >= 0) { "First vertex must not be negative" }
+        validateInstanceArguments(instanceCount, firstInstance)
+        val hasWork = vertexCount > 0 && instanceCount > 0
+
+        buffers.forEachIndexed { slot, layout ->
+            if (layout.attributes.isEmpty()) return@forEachIndexed
+            val view = checkNotNull(boundBuffers[slot]) { "Vertex-buffer slot $slot is unbound" }
+            when (layout.stepMode) {
+                VertexStepMode.Vertex -> layout.validateAccess(view, firstVertex.toLong(), if (hasWork) vertexCount else 0, "Vertex-buffer slot $slot")
+                VertexStepMode.Instance -> layout.validateAccess(view, firstInstance.toLong(), if (hasWork) instanceCount else 0, "Instance-buffer slot $slot")
+            }
+        }
+    }
+
+    /**
+     * Checks required vertex bindings and the instance-data range of an indexed draw.
+     *
+     * Index-buffer bounds are checked separately by `IndexFormat.validateDrawRange`. Index values
+     * determine which vertex-rate elements are fetched, so this method cannot prove those byte
+     * ranges from metadata. It deliberately does not treat `indexCount` as a vertex bound, reject
+     * a negative base-vertex offset by itself, or read back the index buffer to guess its contents.
+     * The actual non-restart indices plus the base offset must select valid vertex elements.
+     *
+     * Instance-rate access does not depend on index values, and is checked for the requested
+     * instances when both counts are positive. A stream containing only restart markers may
+     * consume fewer attributes; that does not relax the declared instance-data range requirement.
+     *
+     * @throws IllegalArgumentException if arguments, usages, or the instance-data range are invalid.
+     * @throws IllegalStateException if a required vertex-buffer slot is unbound.
+     */
+    fun validateIndexedDrawInputs(boundBuffers: Map<Int, GpuBufferView>, indexCount: Int, instanceCount: Int = 1, firstInstance: Int = 0) {
+        require(indexCount >= 0) { "Index count must not be negative" }
+        validateInstanceArguments(instanceCount, firstInstance)
+        val hasWork = indexCount > 0 && instanceCount > 0
+
+        buffers.forEachIndexed { slot, layout ->
+            if (layout.attributes.isEmpty()) return@forEachIndexed
+            val view = checkNotNull(boundBuffers[slot]) { "Vertex-buffer slot $slot is unbound" }
+            when (layout.stepMode) {
+                VertexStepMode.Vertex -> layout.validateAccess(view, 0L, 0, "Vertex-buffer slot $slot")
+                VertexStepMode.Instance -> layout.validateAccess(view, firstInstance.toLong(), if (hasWork) instanceCount else 0, "Instance-buffer slot $slot")
+            }
+        }
+    }
+
+    private fun validateInstanceArguments(instanceCount: Int, firstInstance: Int) {
+        require(instanceCount >= 0) { "Instance count must not be negative" }
+        require(firstInstance >= 0) { "First instance must not be negative" }
     }
 
     companion object {
