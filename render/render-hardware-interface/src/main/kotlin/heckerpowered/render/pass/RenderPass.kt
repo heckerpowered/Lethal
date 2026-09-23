@@ -27,7 +27,13 @@ import heckerpowered.render.shader.ShaderStage
  * and resource bindings can change between draws, allowing several objects with different
  * materials to contribute to the same attachments without beginning a new pass.
  *
+ * Each pass starts with a viewport matching its render area and no extra scissor. [withViewport]
+ * and [withScissor] temporarily change those states and restore the enclosing values when their
+ * callbacks exit. They do not create nested render passes or repeat attachment load operations.
+ * Neither state is inherited by a later pass, even when the backend reuses a native encoder.
+ *
  * This interface is supplied to the pass-recording callback and is valid only during that callback.
+ * Implementations must reject commands through a retained reference after that callback ends.
  */
 interface RenderPass {
     val memoryStack: MemoryStack
@@ -47,7 +53,7 @@ interface RenderPass {
      *
      * The pass starts without a selected pipeline. Switching pipelines retains logical descriptor
      * selections, vertex-buffer selections, and the index binding. It does not rewrite
-     * push-constant values or reset the stencil reference. Each
+     * push-constant values or reset the stencil reference, viewport, or active scissor. Each
      * draw checks whether its retained inputs are valid for the newly selected configuration;
      * the backend re-establishes native bindings when required.
      *
@@ -55,6 +61,60 @@ interface RenderPass {
      * the pass's attachments and current inputs must be checked before a consuming draw.
      */
     fun bindPipeline(pipeline: RenderPipeline)
+
+    /**
+     * Records [commands] using a temporary coordinate mapping, then restores the previous viewport.
+     *
+     * Use this to draw a scene preview into a panel without changing the mapping used by later
+     * interface draws. The initial mapping comes from the pass's render area, as described by
+     * [Viewport.from]. Nested viewport scopes replace the mapping temporarily; their rectangles
+     * are not intersected.
+     *
+     * [commands] is called once, synchronously, using this same pass. Normal completion, a local
+     * return, or an exception restores the enclosing viewport. An exception is propagated, not
+     * treated as a successful recording or a rollback of commands already recorded.
+     *
+     * Only the viewport is restored. The current scissors remain in effect, and changes to other
+     * drawing state in the callback persist according to their own contracts. Pipeline switches
+     * do not reset the scoped viewport. Recorded draws retain the mapping selected at their
+     * recording position rather than reading mutable state after this callback ends.
+     *
+     * The backend validates its coordinate, extent, and depth-mapping support before executing
+     * an affected draw. It must not clamp a request to a different mapping to make it fit.
+     *
+     * @throws UnsupportedOperationException if the requested mapping cannot be represented.
+     * @throws IllegalStateException if this pass is inactive or used from the wrong recording thread.
+     */
+    fun <R> withViewport(viewport: Viewport, commands: RenderPass.() -> R): R
+
+    /**
+     * Records [commands] with an additional rectangular clip, then restores the enclosing clip.
+     *
+     * For example, scope a scrolling panel's draws here and draw the next panel after the block.
+     * No `disableScissor`, null assignment, or matching pop is needed. The pass itself supplies
+     * the initial clip from its render area.
+     *
+     * The effective clip is the intersection of [rectangle], the enclosing clip, and the render
+     * area. Nested blocks can narrow coverage, never enlarge a parent's clip. Coordinates remain
+     * absolute framebuffer coordinates, not offsets within the parent rectangle. Use sibling
+     * scopes when two groups need independent clips.
+     *
+     * [commands] runs once and synchronously even when the intersection is empty. The previous
+     * clip is restored on normal completion, local return, and exception; exceptions propagate.
+     * Returning to the outermost scope restores the render-area clip, not unrestricted drawing.
+     *
+     * This affects rasterized attachment coverage, not the pass's load/clear/store range, viewport
+     * mapping, or arbitrary shader resource writes. Only the clip is restored; pipeline, descriptor,
+     * and other state changes inside the callback keep their usual behavior. Pipeline switches
+     * cannot remove an enclosing clip. Already recorded draws retain their earlier selections.
+     *
+     * Scope exit neither waits for the GPU nor undoes drawing. Backend state must also be isolated
+     * at pass or host handoff boundaries; updating this pass's logical clip alone is not sufficient
+     * to restore a shared native graphics context.
+     *
+     * @throws IllegalStateException if this pass is inactive or used from the wrong recording thread.
+     */
+    fun <R> withScissor(rectangle: ScissorRectangle, commands: RenderPass.() -> R): R
 
     /**
      * Selects a byte range that supplies vertex or instance attributes through [slot].
@@ -84,7 +144,9 @@ interface RenderPass {
      * measured from the complete buffer and is independent of the draw's element indices.
      */
     fun bindVertexBuffer(slot: Int, buffer: GpuBuffer, offsetBytes: Size = 0) {
-        require(offsetBytes >= 0 && offsetBytes <= buffer.sizeBytes) { "Vertex binding offset is outside the buffer" }
+        require(offsetBytes >= 0 && offsetBytes <= buffer.sizeBytes) {
+            "Vertex binding offset is outside the buffer"
+        }
         bindVertexBuffer(slot, GpuBufferView(buffer, offsetBytes, buffer.sizeBytes - offsetBytes))
     }
 
@@ -180,6 +242,10 @@ interface RenderPass {
      * resource accesses, and the push-constant values read by its selected entry points.
      * [VertexState.validateDrawInputs] provides the metadata-based vertex-input checks.
      *
+     * The viewport maps geometry and the effective scissor limits rasterized attachment coverage.
+     * The draw captures their values at this recording position, including inside scoped overrides.
+     * An empty scissor does not bypass validation or imply that every shader side effect is absent.
+     *
      * The draw retains selections and parameter values from this recording position. Later
      * binds affect later draws; buffer and image contents still follow recorded writes and
      * synchronization. If either count is zero, no primitives or attribute reads are produced,
@@ -195,7 +261,12 @@ interface RenderPass {
      * @see [OpenGL instanced draw parameters](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_base_instance.txt)
      * @see [D3D12 DrawInstanced](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-drawinstanced)
      */
-    fun draw(vertexCount: Int, firstVertex: Int = 0, instanceCount: Int = 1, firstInstance: Int = 0)
+    fun draw(
+        vertexCount: Int,
+        firstVertex: Int = 0,
+        instanceCount: Int = 1,
+        firstInstance: Int = 0,
+    )
 
     /**
      * Draws vertices selected by the bound index range, optionally for several instances.
@@ -237,7 +308,13 @@ interface RenderPass {
      * @see [OpenGL base vertex and restart](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_draw_elements_base_vertex.txt)
      * @see [D3D12 DrawIndexedInstanced](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-drawindexedinstanced)
      */
-    fun drawIndexed(indexCount: Int, firstIndex: Int = 0, baseVertex: Int = 0, instanceCount: Int = 1, firstInstance: Int = 0)
+    fun drawIndexed(
+        indexCount: Int,
+        firstIndex: Int = 0,
+        baseVertex: Int = 0,
+        instanceCount: Int = 1,
+        firstInstance: Int = 0,
+    )
 
     /**
      * Sets the stencil reference value used by subsequent draws in this render pass.
@@ -263,5 +340,94 @@ inline fun RenderPass.pushConstants(
     memoryStack.alloc(bytes(sizeBytes)) { address ->
         write(address)
         pushConstants(stages, address, sizeBytes, destinationOffsetBytes)
+    }
+}
+
+/**
+ * Maintains the viewport and effective scissor while a backend records one logical [RenderPass].
+ *
+ * A backend can compose this state rather than implementing its own nested save/restore stack.
+ * [record] creates fresh defaults from [RenderArea] and ends access when the pass-recording
+ * callback exits. Scope restoration only changes logical values and cannot fail through a native
+ * graphics call while another exception is propagating.
+ *
+ * At each draw the backend must read [viewport] and [scissor] and capture those immutable values
+ * in the draw record, or apply them immediately before native execution. Keeping a reference to
+ * this mutable state in a deferred draw would incorrectly use a later or restored selection.
+ *
+ * This is an implementation component, not a complete pass encoder. The backend must call
+ * [checkActive] at its other command entry points, validate device limits, and isolate native
+ * state when entering a pass or handing control back to a host renderer.
+ */
+class RenderPassRegions private constructor(renderArea: RenderArea) {
+    private val recordingThread = Thread.currentThread()
+    private var active = true
+    private var selectedViewport = Viewport.from(renderArea)
+    private var selectedScissor = ScissorRectangle.from(renderArea)
+
+    val viewport: Viewport
+        get() {
+            checkActive()
+            return selectedViewport
+        }
+
+    val scissor: ScissorRectangle
+        get() {
+            checkActive()
+            return selectedScissor
+        }
+
+    /**
+     * Rejects access outside the recording that supplied this state.
+     *
+     * Backends also call this before commands that do not read a region, such as a pipeline bind,
+     * so retaining a pass reference does not bypass the callback's lifetime.
+     */
+    fun checkActive() {
+        check(Thread.currentThread() === recordingThread) {
+            "Render pass must be used on its recording thread"
+        }
+        check(active) { "Render pass recording has ended" }
+    }
+
+    /** Implements the restoration rule of [RenderPass.withViewport] without native calls. */
+    fun <R> withViewport(viewport: Viewport, commands: () -> R): R {
+        checkActive()
+        val previous = selectedViewport
+        selectedViewport = viewport
+        return try {
+            commands()
+        } finally {
+            selectedViewport = previous
+        }
+    }
+
+    /** Implements the intersection and restoration rules of [RenderPass.withScissor]. */
+    fun <R> withScissor(rectangle: ScissorRectangle, commands: () -> R): R {
+        checkActive()
+        val previous = selectedScissor
+        selectedScissor = previous.intersect(rectangle)
+        return try {
+            commands()
+        } finally {
+            selectedScissor = previous
+        }
+    }
+
+    companion object {
+        /**
+         * Supplies fresh region state for exactly one synchronous recording callback.
+         *
+         * Both successful and exceptional exit end state access. This ends CPU recording access,
+         * not the lifetime of captured draw parameters or the GPU work that will consume them.
+         */
+        fun <R> record(renderArea: RenderArea, commands: (RenderPassRegions) -> R): R {
+            val regions = RenderPassRegions(renderArea)
+            return try {
+                commands(regions)
+            } finally {
+                regions.active = false
+            }
+        }
     }
 }
