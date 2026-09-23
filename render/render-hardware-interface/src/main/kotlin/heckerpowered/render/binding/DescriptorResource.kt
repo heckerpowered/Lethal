@@ -76,7 +76,7 @@ internal fun validateDescriptorResource(type: DescriptorType, resource: Descript
         is DescriptorType.CombinedTextureSampler -> validateCombinedTextureSampler(type, resource, context)
         is DescriptorType.StorageTexture -> validateStorageTexture(type, resource, context)
         is DescriptorType.InputAttachment -> validateInputAttachment(type, resource, context)
-        is DescriptorType.UniformTexelBuffer -> validateUniformTexelBuffer(resource, context)
+        is DescriptorType.UniformTexelBuffer -> validateUniformTexelBuffer(type, resource, context)
         is DescriptorType.StorageTexelBuffer -> validateStorageTexelBuffer(type, resource, context)
     }
 }
@@ -97,12 +97,14 @@ private fun validateSampler(resource: DescriptorResource, context: String) {
 
 private fun validateSampledTexture(type: DescriptorType.SampledTexture, resource: DescriptorResource, context: String) {
     require(resource is DescriptorResource.Texture) { "$context requires a texture view" }
-    validateTexture(resource.view, TextureUsage.Sampled, type.dimension, type.multisampled, context)
+    val aspect = validateTexture(resource.view, TextureUsage.Sampled, type.dimension, type.multisampled, context)
+    validateSampleType(type.sampleType, resource.view.format, aspect, context)
 }
 
 private fun validateCombinedTextureSampler(type: DescriptorType.CombinedTextureSampler, resource: DescriptorResource, context: String) {
     require(resource is DescriptorResource.CombinedTextureSampler) { "$context requires a texture view and sampler together" }
-    validateTexture(resource.view, TextureUsage.Sampled, type.dimension, false, context)
+    val aspect = validateTexture(resource.view, TextureUsage.Sampled, type.dimension, false, context)
+    validateSampleType(type.sampleType, resource.view.format, aspect, context)
 }
 
 private fun validateStorageTexture(type: DescriptorType.StorageTexture, resource: DescriptorResource, context: String) {
@@ -113,13 +115,15 @@ private fun validateStorageTexture(type: DescriptorType.StorageTexture, resource
 
 private fun validateInputAttachment(type: DescriptorType.InputAttachment, resource: DescriptorResource, context: String) {
     require(resource is DescriptorResource.Texture) { "$context requires a texture view" }
-    validateTexture(resource.view, TextureUsage.InputAttachment, null, type.multisampled, context)
+    val aspect = validateTexture(resource.view, TextureUsage.InputAttachment, null, type.multisampled, context)
+    validateSampleType(type.sampleType, resource.view.format, aspect, context)
 }
 
-private fun validateUniformTexelBuffer(resource: DescriptorResource, context: String) {
+private fun validateUniformTexelBuffer(type: DescriptorType.UniformTexelBuffer, resource: DescriptorResource, context: String) {
     require(resource is DescriptorResource.TexelBuffer) { "$context requires a formatted buffer range" }
     validateBuffer(resource.view, BufferUsage.UniformTexel, 0, context)
     require(resource.format.isColor) { "$context requires a color texel format" }
+    validateSampleType(type.sampleType, resource.format, TextureAspect.Color, context)
 }
 
 private fun validateStorageTexelBuffer(type: DescriptorType.StorageTexelBuffer, resource: DescriptorResource, context: String) {
@@ -135,7 +139,7 @@ private fun validateBuffer(view: GpuBufferView, usage: BufferUsage, minimumSizeB
     require(view.sizeBytes >= minimumSizeBytes) { "$context requires at least $minimumSizeBytes bytes, but received ${view.sizeBytes}" }
 }
 
-private fun validateTexture(view: GpuTextureView, usage: TextureUsage, dimension: TextureViewDimension?, multisampled: Boolean, context: String) {
+private fun validateTexture(view: GpuTextureView, usage: TextureUsage, dimension: TextureViewDimension?, multisampled: Boolean, context: String): TextureAspect {
     require(usage in view.texture.usage) { "$context requires TextureUsage.$usage" }
     require(dimension == null || view.dimension == dimension) { "$context requires a $dimension view, but received ${view.dimension}" }
     require((view.texture.sampleCount != SampleCount.One) == multisampled) { "$context requires ${if (multisampled) "multisampled" else "single-sampled"} image access" }
@@ -148,4 +152,10 @@ private fun validateTexture(view: GpuTextureView, usage: TextureUsage, dimension
         TextureAspect.Stencil -> view.format.hasStencil
     }
     require(aspectExists) { "$context selects an aspect absent from ${view.format}" }
+    return aspect
+}
+
+private fun validateSampleType(expected: TextureSampleType, format: TextureFormat, aspect: TextureAspect, context: String) {
+    val actual = TextureSampleType.from(format, aspect)
+    require(actual == expected) { "$context requires $expected values, but $format with aspect $aspect exposes $actual" }
 }
