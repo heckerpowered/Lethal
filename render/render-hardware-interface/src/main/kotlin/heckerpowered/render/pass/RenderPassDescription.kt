@@ -57,7 +57,12 @@ class RenderPassDescription(
      *
      * Use a smaller rectangle to update part of a larger image, such as one cell in a texture
      * atlas. Every bound attachment must cover this rectangle, but their complete dimensions
-     * need not match. The area does not choose the viewport's coordinate transform.
+     * need not match. The pass begins with a [Viewport] covering this rectangle and with this
+     * rectangle as its effective drawing clip. These defaults are established anew for each pass.
+     *
+     * [RenderPass.withViewport] changes the mapping for selected draws; [RenderPass.withScissor]
+     * adds temporary drawing clips. Neither changes this region or the attachment load/clear/store
+     * operations. For example, clipping a scrolling list does not clip the pass's background clear.
      */
     val renderArea: RenderArea,
     colorAttachments: List<RenderPassAttachment<Color>?> = emptyList(),
@@ -148,21 +153,16 @@ class RenderPassDescription(
         forEachAttachment { position, attachment ->
             attachment.validateMetadata()
             renderArea.validateFor(attachment.width, attachment.height)
-            require(layerCount <= attachment.arrayLayerCount) {
-                "$label: $position exposes ${attachment.arrayLayerCount} layers, but the pass requires $layerCount"
-            }
+            require(layerCount <= attachment.arrayLayerCount) { "$label: $position exposes ${attachment.arrayLayerCount} layers, but the pass requires $layerCount" }
+            
             val expected = samples
-            require(expected == null || attachment.sampleCount == expected) {
-                "$label: $position has ${attachment.sampleCount.value} samples; other direct attachments have ${expected?.value}"
-            }
+            require(expected == null || attachment.sampleCount == expected) { "$label: $position has ${attachment.sampleCount.value} samples; other direct attachments have ${expected?.value}" }
             samples = attachment.sampleCount
         }
 
         val depthLoad = depthAttachment?.operation?.load
         if (depthLoad is AttachmentLoadOperation.Clear) {
-            require(depthLoad.value in 0.0F..1.0F) {
-                "$label: depth clear value must be finite and between zero and one"
-            }
+            require(depthLoad.value in 0.0F..1.0F) { "$label: depth clear value must be finite and between zero and one" }
         }
     }
 
@@ -177,9 +177,7 @@ class RenderPassDescription(
      */
     fun validateSampleCount(sampleCount: SampleCount) {
         forEachAttachment { position, attachment ->
-            require(attachment.sampleCount == sampleCount) {
-                "$label: $position has ${attachment.sampleCount.value} samples, but the pipeline requires ${sampleCount.value}"
-            }
+            require(attachment.sampleCount == sampleCount) { "$label: $position has ${attachment.sampleCount.value} samples, but the pipeline requires ${sampleCount.value}" }
         }
     }
 
