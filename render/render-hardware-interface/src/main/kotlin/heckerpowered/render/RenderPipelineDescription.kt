@@ -71,6 +71,16 @@ import heckerpowered.render.shader.ShaderStages
 data class RenderPipelineDescription(
     val label: String,
     val shaders: ShaderStages,
+    /**
+     * Resource interface against which the selected shader stages are checked.
+     *
+     * The layout supplies descriptor-slot and push-constant declarations, not the resources
+     * or parameter values for a draw. Those values are provided through pass commands.
+     *
+     * `null` exposes no descriptor sets or push constants. It is useful for shaders that need
+     * neither, and is not a request to infer an interface or skip resource validation. A shader
+     * that uses these resources requires an explicit compatible layout.
+     */
     val layout: PipelineLayout? = null,
     val vertex: VertexState = VertexState.Empty,
     val primitive: PrimitiveState = PrimitiveState(),
