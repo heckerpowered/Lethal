@@ -197,6 +197,7 @@ interface RenderPass {
      * @throws IllegalStateException if recording or a referenced resource is no longer valid.
      */
     fun bindDescriptorSet(set: Int, descriptors: DescriptorSet)
+    
     /**
      * Supplies small parameter values for subsequent draws, such as an object's transform or color.
      *
