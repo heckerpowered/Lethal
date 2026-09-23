@@ -169,6 +169,30 @@ interface GraphicsDevice {
      */
     fun createTextureView(texture: GpuTexture, description: TextureViewDescription): GpuTextureView
 
+    /**
+     * Establishes a reusable drawing configuration from shader stages, their resource interface,
+     * and fixed-function state.
+     *
+     * Shader resources must fit the declared layout: set and binding addresses, descriptor
+     * kinds and array requirements, stage visibility, image interfaces, permitted storage
+     * access, and push-constant byte ranges must agree. A missing layout exposes no descriptors
+     * or push constants; it does not request inference from the shader or disable these checks.
+     *
+     * The backend retains validated interface information for the selected shader entry points,
+     * including which sets and parameter bytes are used. This lets draws require the actual
+     * inputs rather than every slot reserved by a more general layout. Buffer member offsets,
+     * strides, and shader-required ranges still come from the shader interface; a descriptor's
+     * minimum byte size is not a substitute for that information.
+     *
+     * Creation also checks device support for the complete drawing configuration. Actual
+     * resources and pass attachments are selected later and checked before their use. No
+     * descriptor resources or parameter values are supplied by creating the pipeline.
+     *
+     * @throws IllegalArgumentException if shader interfaces and the declared layout disagree,
+     * referenced resources belong to another device, or the configuration is inconsistent.
+     * @throws UnsupportedOperationException if the device cannot implement the requested configuration.
+     * @throws IllegalStateException if the device or a referenced resource is not currently usable.
+     */
     fun createRenderPipeline(description: RenderPipelineDescription): RenderPipeline
     fun createBuffer(description: BufferDescription): GpuBuffer
     fun createSampler(description: SamplerDescription): GpuSampler
@@ -181,6 +205,8 @@ interface GraphicsDevice {
     /**
      * Resolves a description through this device's pipeline cache.
      *
+     * A cached result must satisfy the same interface and configuration contract as
+     * [createRenderPipeline]; caching is not an alternative path that skips validation.
      * The returned pipeline is borrowed from the device and must not be closed by the caller.
      */
     fun resolveRenderPipeline(description: RenderPipelineDescription): RenderPipeline
