@@ -30,6 +30,15 @@ data class PrimitiveState(
      * ```
      *
      * can represent two independent triangle strips in one indexed draw.
+     *
+     * The marker is [IndexFormat.restartIndex] for the format selected by the index binding.
+     * It is compared before adding the draw's `baseVertex`, so relocating a mesh does not
+     * relocate its strip breaks. A marker counts toward `indexCount`, but does not select a
+     * vertex. Restart has no effect on non-indexed draws and begins afresh for each instance.
+     *
+     * When disabled, the maximum stored value is an ordinary index. A backend that cannot
+     * preserve this behavior for a requested topology must report the unsupported combination
+     * rather than silently treating that vertex as a break.
      */
     val primitiveRestartEnabled: Boolean = false,
 ) {
