@@ -28,6 +28,10 @@ enum class VertexStepMode {
      * Attributes in the [VertexBufferLayout] then extract the position, texture coordinates, or
      * other values from the selected element.
      *
+     * Non-indexed draws begin at `firstVertex`. Indexed draws use each non-restart index plus
+     * `baseVertex`. Both select elements relative to the bound buffer view, rather than from
+     * the beginning of its complete buffer.
+     *
      * Typical uses include positions, normals, texture coordinates, vertex colors, and other data
      * that may differ between vertices of the same geometry.
      */
@@ -59,6 +63,15 @@ enum class VertexStepMode {
      *
      * The geometry therefore needs to be stored only once, while this binding supplies the values
      * that differ between rendered instances.
+     *
+     * `firstInstance` selects the first element for either kind of draw. With `firstInstance = 5`
+     * and three instances, the selected elements are 5, 6, and 7. `firstVertex`, indices, and
+     * `baseVertex` do not offset this stream. There is one element per instance; this mode does
+     * not expose an arbitrary instance divisor.
+     *
+     * These element numbers describe attribute fetch, not a universal definition of shader
+     * built-ins. For example, OpenGL's `gl_InstanceID` remains local to the draw even when a
+     * base instance selects a later part of an instance buffer.
      *
      * Typical uses include object transforms, colors, material indices, object identifiers, and
      * other values shared by all vertices of one instance.
