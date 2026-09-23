@@ -14,8 +14,13 @@ package heckerpowered.render.pass
  *
  * Coordinates are integer pixel edges in the RHI's upper-left-origin framebuffer coordinates.
  * The region is `[x, x + width)` by `[y, y + height)`. It bounds attachment clear, load, store,
- * and drawing effects; it does not itself choose the viewport's clip-to-framebuffer transform.
- * Backends must keep drawing inside it, for example by intersecting it with the draw scissor.
+ * and rasterized attachment effects. The pass initially derives its [Viewport] from this rectangle;
+ * [RenderPass.withViewport] can change that mapping without changing the render area.
+ *
+ * [ScissorRectangle] supplies a temporary, usually smaller clip for particular draws. It does not
+ * shrink the pass's load, clear, or store region. Backends keep drawing inside the render area by
+ * intersecting it with every enclosing scissor. Leaving a scissor block restores its parent clip;
+ * leaving the outermost one restores this area, rather than disabling the pass boundary.
  *
  * This bounds logical image effects, not the footprint of native memory transactions. Disjoint
  * rectangles do not by themselves establish that concurrent accesses to one image are safe.
@@ -32,7 +37,9 @@ data class RenderArea(
     init {
         require(x >= 0 && y >= 0) { "Render area origin must not be negative" }
         require(width > 0 && height > 0) { "Render area dimensions must be positive" }
-        require(width <= Int.MAX_VALUE - x && height <= Int.MAX_VALUE - y) { "Render area end coordinates exceed the supported integer range" }
+        require(width <= Int.MAX_VALUE - x && height <= Int.MAX_VALUE - y) {
+            "Render area end coordinates exceed the supported integer range"
+        }
     }
 
     /**
@@ -43,6 +50,8 @@ data class RenderArea(
     fun validateFor(width: Int, height: Int) {
         require(width > 0 && height > 0) { "Attachment dimensions must be positive" }
         require(x <= width && y <= height) { "Render area origin is outside the attachment" }
-        require(this.width <= width - x && this.height <= height - y) { "Render area exceeds the attachment dimensions" }
+        require(this.width <= width - x && this.height <= height - y) {
+            "Render area exceeds the attachment dimensions"
+        }
     }
 }
