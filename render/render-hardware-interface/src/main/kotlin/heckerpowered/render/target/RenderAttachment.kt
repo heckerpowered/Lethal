@@ -28,6 +28,11 @@ import heckerpowered.render.texture.*
  * Host-provided outputs can also supply attachments without exposing a texture-view interface.
  * Neither kind implicitly selects a resolve destination or a final output image.
  *
+ * Image operations can address this selection without requiring a texture-view cast. The device
+ * uses the same underlying resource record, preserving usage and import restrictions. Attachment
+ * access alone does not grant resolve access: texture-derived attachments require the original
+ * texture's resolve usage, and opaque host images require the corresponding admitted operation.
+ *
  * Metadata describes this particular image selection and remains unchanged while it is valid.
  * If a host replaces its output storage, the old attachment is invalidated rather than silently
  * retargeted to an unrelated image. Device implementations retain the underlying storage and
