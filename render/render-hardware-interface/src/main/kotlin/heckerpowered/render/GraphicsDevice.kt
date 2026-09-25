@@ -198,48 +198,46 @@ interface GraphicsDevice {
     fun createSampler(description: SamplerDescription): GpuSampler
 
     /**
-     * Records and schedules one ordered sequence of uploads, rendering, and image operations.
+     * Issues an ordered sequence of uploads, drawing, and image operations through a scoped encoder.
      *
-     * For example, upload a material texture in one call and sample it in a later call on this
-     * device's default execution stream. Conflicting accesses in those accepted sequences keep
-     * their order, including through resource aliases. The backend establishes the execution and
-     * memory dependencies; the application does not pair this scope with end, submit, or close.
-     * Other devices, explicit streams, and host-native accesses need their own synchronization.
+     * For example, a material upload in one call can be read by drawing in a later call on this
+     * device's default execution stream. The backend establishes execution and memory dependencies
+     * between conflicting accesses, including through aliases. Other devices, explicit streams,
+     * and host-native accesses need their own synchronization contract.
      *
-     * [commands] runs exactly once and synchronously on this device's recording thread. Encoders
-     * and passes obtained by it reject recording after their callbacks exit. Nested encode calls
-     * on the same device are rejected. Uploads and push constants preserve temporary host input
-     * during their calls; ordinary copies do not snapshot GPU contents while recording.
+     * [commands] runs exactly once, synchronously on this device's recording thread. The supplied
+     * encoder and its passes reject access after their callbacks exit. Nested encode calls on the
+     * same device are rejected. The application does not pair this scope with end, submit, or close.
      *
-     * Only normal callback completion permits this sequence to execute. An escaping callback
-     * exception discards this unsubmitted sequence, not previously accepted work or application
-     * side effects performed directly by the callback. Pipeline-cache creation is not rolled back.
-     * This guarantee requires deferred execution, not replaying the application callback later.
+     * Commands may reach the native API during the callback. A Vulkan backend can record directly
+     * into a native command buffer; a context-based backend may already issue work for execution.
+     * No backend-independent command list, replay step, or whole-sequence preparation is required.
+     * Uploads and push constants still consume or save their host inputs during the individual
+     * calls; direct encoding must not leave a dependency on an expired temporary address.
      *
-     * Normal return means the complete sequence has been validated, accepted, and arranged to
-     * progress without another application encode call. It does not mean GPU completion, CPU
-     * readback availability, or presentation. A logical recording need not correspond to exactly
-     * one native command buffer, pass, or queue submission.
+     * Normal return means the sequence was accepted and arranged to progress without another
+     * encode call. It does not mean GPU completion, CPU readback availability, or presentation.
+     * Resource and device validation may fail during a command or when finalizing this scope.
+     * A successful return cannot guarantee that asynchronous execution will succeed later.
      *
-     * Preparation failure occurs before execution of this sequence. Once native submission is
-     * attempted, failure cannot generally promise unchanged resource contents. The device must
-     * retain potentially in-use storage and prevent unsafe further work until its execution state
-     * is known. Asynchronous execution failures are reported when observed by device maintenance
-     * or completion operations; a successful return cannot promise future GPU success.
+     * This scope is not a transaction. Exceptional exit ends encoder access but does not undo
+     * commands already issued, application side effects, or resource creation. An implementation
+     * may discard an entirely unsubmitted native recording, but callers must not depend on this
+     * across backends. A failure escaping a render-pass callback invalidates this recording;
+     * catching it inside [commands] does not make continued encoding or successful finalization
+     * valid. An argument rejected before a command changes recording state need not invalidate it.
      *
-     * Backend upload, descriptor, and command storage remains alive through its last GPU access.
-     * Callback exit is not a completion signal or a transfer of application resource ownership.
-     * Imported-resource access restrictions and resource validity requirements remain in force.
+     * The backend retains potentially in-use upload, descriptor, and command storage until actual
+     * completion or a backend-specific teardown guarantee makes release safe. Callback exit is
+     * not that guarantee. Recording failure is not by itself device loss; the device interprets
+     * native failures and prevents unsafe reuse without treating every exception as permanent loss.
+     * Shared host graphics state must be restored according to the interoperation contract.
      *
-     * Implementations can compose [heckerpowered.render.command.GraphicsRecording] for the
-     * recording and retirement boundary. Native lowering, dependencies, completion detection,
-     * and restoration of shared host graphics state still belong to the backend.
+     * @throws IllegalStateException if called on the wrong device thread, another recording is
+     * active, or the device or current recording cannot safely accept work.
      *
-     * @throws IllegalStateException if used from the wrong device thread, another recording is
-     * active, or the device's execution stream is unavailable.
-     *
-     * @see <a href="https://docs.vulkan.org/spec/latest/chapters/cmdbuffers.html">Vulkan recording and submission</a>
-     * @see <a href="https://registry.khronos.org/OpenGL/extensions/ARB/ARB_sync.txt">OpenGL completion synchronization</a>
+     * @see <a href="https://docs.vulkan.org/spec/latest/chapters/cmdbuffers.html">Vulkan native recording</a>
+     * @see <a href="https://registry.khronos.org/OpenGL/extensions/ARB/ARB_sync.txt">OpenGL execution completion</a>
      */
     fun encode(label: String, commands: CommandEncoder.() -> Unit)
 
