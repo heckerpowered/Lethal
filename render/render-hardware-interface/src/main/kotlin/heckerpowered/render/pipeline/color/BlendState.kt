@@ -5,7 +5,7 @@
 
 package heckerpowered.render.pipeline.color
 
-import heckerpowered.render.texture.TextureFormat
+import heckerpowered.render.resource.texture.TextureFormat
 
 /**
  * Describes enabled factor-based blending for one color target.
