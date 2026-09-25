@@ -202,8 +202,15 @@ interface GraphicsDevice {
      *
      * For example, a material upload in one call can be read by drawing in a later call on this
      * device's default execution stream. The backend establishes execution and memory dependencies
-     * between conflicting accesses, including through aliases. Other devices, explicit streams,
-     * and host-native accesses need their own synchronization contract.
+     * between transfer/image operations and whole render-pass scopes, including through aliases.
+     * A pass supplies its potential accesses up front through RenderPassDescription and
+     * [heckerpowered.render.pass.RenderPassResources], so preparation need not inspect future draws.
+     * Preparing a potential write does not initialize contents or prove that a shader wrote them.
+     *
+     * This boundary guarantee does not automatically order arbitrary shader storage accesses
+     * between draws inside a pass. They need an explicitly supported dependency mechanism or
+     * separate passes; fixed-function attachment operations keep their specified semantics.
+     * Other devices, explicit streams, and host-native accesses need their own synchronization.
      *
      * [commands] runs exactly once, synchronously on this device's recording thread. The supplied
      * encoder and its passes reject access after their callbacks exit. Nested encode calls on the
