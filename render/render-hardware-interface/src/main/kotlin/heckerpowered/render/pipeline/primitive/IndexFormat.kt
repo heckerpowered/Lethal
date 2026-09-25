@@ -5,9 +5,9 @@
 
 package heckerpowered.render.pipeline.primitive
 
-import heckerpowered.render.buffer.BufferUsage
-import heckerpowered.render.buffer.GpuBufferView
 import heckerpowered.render.memory.Size
+import heckerpowered.render.resource.buffer.BufferUsage
+import heckerpowered.render.resource.buffer.GpuBufferView
 
 /**
  * Determines how an index-buffer range stores vertex indices for indexed drawing.
