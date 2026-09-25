@@ -422,13 +422,18 @@ private fun validateTransferUsage(region: ImageRegion, usage: TextureUsage) {
 }
 
 private fun validateKnownCopyOverlap(source: ImageRegion, destination: ImageRegion) {
+    validateKnownImageDisjoint(source, destination, "Texture copy source and destination select overlapping contents")
+}
+
+/** Rejects proven overlap; passing still requires the backend to resolve opaque and physical aliases. */
+internal fun validateKnownImageDisjoint(source: ImageRegion, destination: ImageRegion, message: String) {
     if (!sameKnownImage(source, destination)) return
     if (knownMip(source) != knownMip(destination)) return
     val overlap = intervalsOverlap(knownLayer(source), source.arrayLayerCount, knownLayer(destination), destination.arrayLayerCount) &&
             intervalsOverlap(source.x, source.width, destination.x, destination.width) &&
             intervalsOverlap(source.y, source.height, destination.y, destination.height) &&
             intervalsOverlap(source.z, source.depth, destination.z, destination.depth)
-    require(!overlap) { "Texture copy source and destination select overlapping contents" }
+    require(!overlap) { message }
 }
 
 private fun sameKnownImage(source: ImageRegion, destination: ImageRegion): Boolean {
