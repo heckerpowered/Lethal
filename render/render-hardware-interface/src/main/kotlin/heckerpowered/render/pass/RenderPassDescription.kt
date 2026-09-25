@@ -6,6 +6,7 @@
 package heckerpowered.render.pass
 
 import heckerpowered.render.color.Color
+import heckerpowered.render.command.validateKnownImageDisjoint
 import heckerpowered.render.pipeline.multisample.SampleCount
 import heckerpowered.render.target.RenderAttachment
 import heckerpowered.render.target.validateMetadata
@@ -43,11 +44,16 @@ import java.util.*
  * through [RenderPass]; this description provides their attachment setup, not the commands or
  * new image storage.
  *
- * The pass boundary is logical. A backend may group it with other operations during native
- * execution, but must preserve the specified reads, writes, and content-validity guarantees.
+ * [colorResolves] optionally names single-sample destinations produced from selected color
+ * attachments at the end of drawing, before the source contents are stored or discarded.
+ * Declaring these relations up front permits direct native recording without inspecting future
+ * commands. They do not change which attachments receive fragment outputs.
+ *
+ * The pass boundary is logical, but no automatic grouping with later commands is promised.
+ * A backend may group native work only when the requested content and access rules are preserved.
  *
  * @throws IllegalArgumentException if the attachment metadata, render area, layer count, sample
- * counts, or depth clear value fail the checks described by [validateAttachments].
+ * counts, depth clear value, or declared color resolves fail [validateAttachments].
  */
 class RenderPassDescription(
     val label: String,
@@ -96,6 +102,7 @@ class RenderPassDescription(
      * rendering; it does not repeat each draw for every layer or enable multiview by itself.
      */
     val layerCount: Int = 1,
+    colorResolves: List<ColorAttachmentResolve> = emptyList(),
 ) {
     /**
      * Images that receive the fragment shader's color outputs, together with their load and
@@ -111,6 +118,25 @@ class RenderPassDescription(
      */
     val colorAttachments: List<RenderPassAttachment<Color>?> =
         Collections.unmodifiableList(colorAttachments.toList())
+
+    /**
+     * Explicit color-source-to-destination relations completed as this pass ends.
+     *
+     * An empty list performs no resolve. Each entry names an existing color slot and a separate
+     * destination; it neither changes the slot's attachment nor selects a final output implicitly.
+     * At most one destination is declared for each slot. More destinations or later snapshots can
+     * use standalone resolve when the source is retained and its storage supports those accesses.
+     *
+     * Resolves consume the final samples before source Discard takes effect. Store is needed only
+     * when the original samples are also needed after this pass; it does not control whether the
+     * resolve result is written. Destinations do not contribute to [attachmentSampleCount].
+     *
+     * The list is an unmodifiable snapshot. Backends validate native aliasing and prohibit accesses
+     * to resolve destinations during the pass. A resolve-only texture need not acquire the RHI
+     * ColorAttachment usage, even if a native implementation uses attachment machinery internally.
+     */
+    val colorResolves: List<ColorAttachmentResolve> =
+        Collections.unmodifiableList(colorResolves.toList())
 
     /**
      * Common sample count required by the direct attachments, or null when none are bound.
@@ -133,7 +159,7 @@ class RenderPassDescription(
     }
 
     /**
-     * Checks aspect membership, image metadata, render bounds, layer count, and sample agreement.
+     * Checks aspects, image metadata, render bounds, layers, sample agreement, and color resolves.
      *
      * Backends can repeat these public metadata checks before recording. Identity and overlap of
      * native images, imported-resource availability, format support, and content scope still
@@ -164,6 +190,7 @@ class RenderPassDescription(
         if (depthLoad is AttachmentLoadOperation.Clear) {
             require(depthLoad.value in 0.0F..1.0F) { "$label: depth clear value must be finite and between zero and one" }
         }
+        validateColorResolves()
     }
 
     /**
@@ -178,6 +205,24 @@ class RenderPassDescription(
     fun validateSampleCount(sampleCount: SampleCount) {
         forEachAttachment { position, attachment ->
             require(attachment.sampleCount == sampleCount) { "$label: $position has ${attachment.sampleCount.value} samples, but the pipeline requires ${sampleCount.value}" }
+        }
+    }
+
+    private fun validateColorResolves() {
+        if (colorResolves.isEmpty()) return
+        val sources = HashSet<Int>()
+        colorResolves.forEach { resolve ->
+            require(sources.add(resolve.colorAttachment)) { "$label: color attachment ${resolve.colorAttachment} has more than one pass-local resolve" }
+            resolve.validateFor(this)
+        }
+        colorResolves.forEachIndexed { index, first ->
+            for (otherIndex in index + 1 until colorResolves.size) {
+                validateKnownImageDisjoint(
+                    first.destination,
+                    colorResolves[otherIndex].destination,
+                    "$label: pass-local resolve destinations select overlapping contents",
+                )
+            }
         }
     }
 
