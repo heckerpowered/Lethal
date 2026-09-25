@@ -27,6 +27,16 @@ import heckerpowered.render.shader.ShaderStage
  * and resource bindings can change between draws, allowing several objects with different
  * materials to contribute to the same attachments without beginning a new pass.
  *
+ * [RenderPassResources] declares this invocation's additional shader and geometry accesses before
+ * native rendering begins. Bindings must be covered by that declaration even if later draws do
+ * not use them. Binding does not expand the declaration or perform a late image-layout transition.
+ * Changing pipelines retains bindings but does not grant additional resource access.
+ *
+ * The declaration permits boundary synchronization; it is not a dependency between arbitrary
+ * storage accesses in successive draws. Producer/consumer storage uses require an explicitly
+ * supported mechanism or separate passes. This does not change blending, depth/stencil ordering,
+ * or other guarantees of fixed-function attachment operations.
+ *
  * Each pass starts with a viewport matching its render area and no extra scissor. [withViewport]
  * and [withScissor] temporarily change those states and restore the enclosing values when their
  * callbacks exit. They do not create nested render passes or repeat attachment load operations.
@@ -133,6 +143,8 @@ interface RenderPass {
      * The range must be non-empty and permit `BufferUsage.Vertex`. The selected attributes must
      * fit inside the range when consumed; having more storage outside the view does not help.
      * Device alignment, resource validity, and native size limits are checked by the backend.
+     * The backend calls [RenderPassResources.validateVertexBuffer] with this pass's declaration
+     * before changing the binding. Index or storage declarations do not authorize vertex fetches.
      *
      * @throws IllegalArgumentException if the slot, range, usage, or alignment is invalid.
      * @throws UnsupportedOperationException if the binding cannot be represented by the device.
@@ -147,9 +159,7 @@ interface RenderPass {
      * measured from the complete buffer and is independent of the draw's element indices.
      */
     fun bindVertexBuffer(slot: Int, buffer: GpuBuffer, offsetBytes: Size = 0) {
-        require(offsetBytes >= 0 && offsetBytes <= buffer.sizeBytes) {
-            "Vertex binding offset is outside the buffer"
-        }
+        require(offsetBytes >= 0 && offsetBytes <= buffer.sizeBytes) { "Vertex binding offset is outside the buffer" }
         bindVertexBuffer(slot, GpuBufferView(buffer, offsetBytes, buffer.sizeBytes - offsetBytes))
     }
 
@@ -164,6 +174,8 @@ interface RenderPass {
      * changes later indexed draws without changing already recorded selections or copying data.
      * The range must satisfy [IndexFormat.validateBinding]; native format support and resource
      * validity are additional checks. Binding does not scan index values.
+     * The backend also calls [RenderPassResources.validateIndexBuffer] before changing the binding;
+     * a vertex-input declaration for the same bytes does not authorize index fetches.
      *
      * @throws IllegalArgumentException if index usage, alignment, or range size is invalid.
      * @throws UnsupportedOperationException if this format or binding cannot be represented.
@@ -179,6 +191,10 @@ interface RenderPass {
      * changing the pass attachments. Draws already recorded keep their earlier selections.
      *
      * [set] indexes the pipeline layout's descriptor-set list, not a binding within a set.
+     * Before changing native state, the backend calls [RenderPassResources.validateDescriptorSet]
+     * against the declaration supplied at pass entrance. This checks every exposed content access,
+     * not only the current shader's used bindings. It is independent of pipeline-layout matching
+     * and cannot replace checks on actual resources, samplers, or retained import scopes.
      * Before a draw uses this selection, [descriptors]' layout must equal the declaration at that
      * position and its resources must satisfy the shader's requirements. Separate but structurally
      * equal layout descriptions are accepted; reference identity is not required.
@@ -312,13 +328,7 @@ interface RenderPass {
      * @see [OpenGL base vertex and restart](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_draw_elements_base_vertex.txt)
      * @see [D3D12 DrawIndexedInstanced](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-drawindexedinstanced)
      */
-    fun drawIndexed(
-        indexCount: Int,
-        firstIndex: Int = 0,
-        baseVertex: Int = 0,
-        instanceCount: Int = 1,
-        firstInstance: Int = 0,
-    )
+    fun drawIndexed(indexCount: Int, firstIndex: Int = 0, baseVertex: Int = 0, instanceCount: Int = 1, firstInstance: Int = 0)
 
     /**
      * Sets the stencil reference value used by subsequent draws in this render pass.
