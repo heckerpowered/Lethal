@@ -5,7 +5,7 @@
 
 package heckerpowered.render
 
-import heckerpowered.render.buffer.GpuBuffer
+import heckerpowered.render.resource.buffer.GpuBuffer
 
 /**
  * Non-owning access to immutable geometry shared by a graphics device.

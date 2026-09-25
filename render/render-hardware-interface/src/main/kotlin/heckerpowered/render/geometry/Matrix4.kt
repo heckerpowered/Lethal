@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render
+package heckerpowered.render.geometry
 
 import heckerpowered.render.memory.MemoryFrame
 import heckerpowered.render.memory.NativeAddress
