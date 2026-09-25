@@ -118,9 +118,7 @@ class RenderPassResources(
         description.colorResolves.forEach { resolve ->
             shaderAccesses.forEach { access ->
                 val view = access.textureView
-                require(view == null || !overlapsKnownTexture(view, resolve.destination)) {
-                    "Shader resource overlaps the resolve destination of color attachment ${resolve.colorAttachment}"
-                }
+                require(view == null || !overlapsKnownTexture(view, resolve.destination)) { "Shader resource overlaps the resolve destination of color attachment ${resolve.colorAttachment}" }
             }
         }
     }
@@ -189,10 +187,7 @@ class RenderPassResources(
         } else {
             coversTexture(checkNotNull(requested.textureView), candidates.mapNotNull { it.textureView })
         }
-        require(covered) {
-            "Binding ${requested.declaration.binding} ${requested.role} ${if (write) "write" else "read"} " +
-                    "in $stage extends beyond this pass's declared resource coverage"
-        }
+        require(covered) { "Binding ${requested.declaration.binding} ${requested.role} ${if (write) "write" else "read"} in $stage extends beyond this pass's declared resource coverage" }
     }
 
     companion object {
@@ -293,9 +288,9 @@ private fun coversBuffer(requested: GpuBufferView, declared: List<GpuBufferView>
 
 private fun coversInterval(requested: Interval, declared: List<Interval>): Boolean {
     var coveredUntil = requested.start
-    for (interval in declared.sortedBy { it.start }) {
-        if (interval.start > coveredUntil) return false
-        coveredUntil = maxOf(coveredUntil, interval.end)
+    for ((start, end) in declared.sortedBy { it.start }) {
+        if (start > coveredUntil) return false
+        coveredUntil = maxOf(coveredUntil, end)
         if (coveredUntil >= requested.end) return true
     }
     return coveredUntil >= requested.end
