@@ -23,9 +23,10 @@ enum class AttachmentStoreOperation {
      * the source's permitted content scope.
      *
      * Use this when later drawing, sampling, or resolve needs the image. For example, a logical
-     * pass can Store its multisampled color for a following resolve, then explicitly discard the
-     * source after resolve. A backend can keep the samples locally until that consumer finishes;
-     * Store does not require an intermediate write to backing memory.
+     * pass can Store its multisampled color for a following standalone resolve, then explicitly
+     * discard the source. This requires storage that remains available at that later operation;
+     * automatic pass fusion is not promised. With [RenderPassDescription.colorResolves], Store is
+     * needed only when the unresolved samples are also required after the pass.
      *
      * This does not make previously undefined, unwritten values valid, establish synchronization,
      * or make memoryless contents survive a native scope in which they cannot be retained.
@@ -41,7 +42,9 @@ enum class AttachmentStoreOperation {
      *
      * The affected values are undefined afterward and must be established again before a read
      * depends on them. In particular, a later logical resolve cannot read a source discarded
-     * here, even if a backend could otherwise fuse the operations.
+     * here, even if a backend could otherwise fuse the operations. In contrast, a resolve declared
+     * in [RenderPassDescription.colorResolves] consumes the final samples inside this pass, before
+     * this discard takes effect. Its destination result is preserved independently.
      *
      * This neither clears nor destroys the image. Values outside the selected pass region and
      * aspect are not discarded by this choice, although backend synchronization can cover a
