@@ -5,7 +5,7 @@
 
 package heckerpowered.render.pipeline.vertex
 
-import heckerpowered.render.buffer.GpuBuffer
+import heckerpowered.render.resource.buffer.GpuBuffer
 
 /**
  * Describes one value fetched from a vertex-buffer element and supplied to the vertex shader.

@@ -5,8 +5,8 @@
 
 package heckerpowered.render.pipeline.vertex
 
-import heckerpowered.render.buffer.GpuBuffer
-import heckerpowered.render.buffer.GpuBufferView
+import heckerpowered.render.resource.buffer.GpuBuffer
+import heckerpowered.render.resource.buffer.GpuBufferView
 
 /**
  * Describes how vertex buffers provide input attributes to the vertex shader.

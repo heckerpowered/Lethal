@@ -5,8 +5,8 @@
 
 package heckerpowered.render.pipeline.vertex
 
-import heckerpowered.render.buffer.BufferUsage
-import heckerpowered.render.buffer.GpuBufferView
+import heckerpowered.render.resource.buffer.BufferUsage
+import heckerpowered.render.resource.buffer.GpuBufferView
 
 /**
  * Describes one vertex-buffer binding within a [VertexState].

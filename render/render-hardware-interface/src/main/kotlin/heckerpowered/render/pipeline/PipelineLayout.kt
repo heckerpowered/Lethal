@@ -6,7 +6,7 @@
 package heckerpowered.render.pipeline
 
 import heckerpowered.render.GpuResource
-import heckerpowered.render.binding.DescriptorSetLayout
+import heckerpowered.render.shader.binding.DescriptorSetLayout
 
 /**
  * A shader-resource interface established by a graphics device for use by compatible pipelines.

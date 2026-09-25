@@ -5,9 +5,9 @@
 
 package heckerpowered.render.pipeline
 
-import heckerpowered.render.binding.DescriptorSet
-import heckerpowered.render.binding.DescriptorSetLayout
 import heckerpowered.render.shader.ShaderStage
+import heckerpowered.render.shader.binding.DescriptorSet
+import heckerpowered.render.shader.binding.DescriptorSetLayout
 import java.util.*
 
 /**
