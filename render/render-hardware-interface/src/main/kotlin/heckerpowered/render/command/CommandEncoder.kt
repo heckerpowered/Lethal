@@ -13,6 +13,7 @@ import heckerpowered.render.memory.NativeAddress
 import heckerpowered.render.memory.Size
 import heckerpowered.render.pass.RenderPass
 import heckerpowered.render.pass.RenderPassDescription
+import heckerpowered.render.pass.RenderPassResources
 import heckerpowered.render.target.RenderAttachment
 import heckerpowered.render.texture.TextureAspect
 
@@ -282,6 +283,23 @@ interface CommandEncoder {
      * Attachment setup is known before drawing begins. In particular,
      * [RenderPassDescription.colorResolves] supplies any pass-local resolve destinations up front,
      * so a direct backend can establish native rendering without looking ahead through draws.
+     * [resources] declares all additional shader and geometry accesses before that boundary.
+     * It does not assign bindings or require every declared resource to be used.
+     *
+     * Before entering native rendering, the backend checks resources.validateFor(description),
+     * resolves resource identities and imported access scopes, and checks the combined access
+     * requirements of resources, attachments, and resolves. It establishes dependencies on prior
+     * operations and prepares native layouts. Actual bindings must remain within the declared
+     * ranges, roles, stages, and permissions; undeclared accesses are rejected, not discovered
+     * by recording or replaying this callback. Even an unused declaration participates in scope
+     * compatibility. Reusing a declaration does not reuse an earlier preparation result.
+     *
+     * This boundary preparation does not insert dependencies between arbitrary storage accesses
+     * in separate draws within the pass. Such producer/consumer uses need an explicitly supported
+     * dependency mechanism or separate passes. Listing ReadWrite alone supplies no ordering, and
+     * declaring an input attachment does not establish its attachment mapping. Native access
+     * compatibility and feedback capabilities must be checked separately, without splitting the
+     * pass implicitly or weakening memoryless/load/store behavior.
      *
      * On successful execution, declared pass-local resolves consume the final samples before the
      * source attachments' store/discard boundary. They do not replace the directly drawn images.
@@ -302,7 +320,22 @@ interface CommandEncoder {
      * @throws IllegalStateException if a resource or recording scope is invalid, or another pass
      * is active on this encoder.
      */
-    fun renderPass(description: RenderPassDescription, commands: RenderPass.() -> Unit)
+    fun renderPass(
+        description: RenderPassDescription,
+        resources: RenderPassResources,
+        commands: RenderPass.() -> Unit,
+    )
+
+    /**
+     * Begins a pass with no additional shader or geometry resource accesses.
+     *
+     * Attachments and resolves still come from [description]. This form works for a clear-only
+     * pass or procedural geometry with no buffer/image inputs; it does not infer resources from
+     * later bindings. Use the resource-bearing overload when drawing consumes such inputs.
+     */
+    fun renderPass(description: RenderPassDescription, commands: RenderPass.() -> Unit) {
+        renderPass(description, RenderPassResources.Empty, commands)
+    }
 
     /**
      * Resolves each source pixel's color samples into one destination pixel for later
