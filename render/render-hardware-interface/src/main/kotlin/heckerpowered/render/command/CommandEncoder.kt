@@ -19,8 +19,19 @@ import heckerpowered.render.texture.TextureAspect
 /**
  * Encodes commands into the active graphics recording.
  *
- * A command encoder is valid only for the scoped recording that supplies it. The graphics device owns that recording's
- * completion and cleanup; callers neither close the encoder nor retain frame-scoped values created through it.
+ * The encoder is valid only during the synchronous device callback that supplies it, on that
+ * device's recording thread. Ending the callback ends recording access, not GPU execution.
+ * The device validates and schedules the completed sequence; application code does not close
+ * this encoder or separately submit it.
+ *
+ * No command in this sequence executes before the outer recording callback completes normally.
+ * An escaping exception abandons the unsubmitted sequence. Commands store their inputs, not
+ * callbacks to rerun later: temporary upload addresses expire before native execution may begin.
+ * GPU resource contents still follow execution order rather than being captured by recording.
+ * Public metadata errors can be checked while recording; device-specific validation may finish
+ * when the complete sequence is prepared. A successful command call is not a device-support or
+ * execution-success guarantee. Preparation errors are reported by the enclosing encode call.
+ * See [heckerpowered.render.GraphicsDevice.encode] for cross-recording order and failure behavior.
  */
 interface CommandEncoder {
     val memoryStack: MemoryStack
@@ -280,6 +291,11 @@ interface CommandEncoder {
      *
      * Deferring native emission must preserve inputs supplied while recording, including data
      * provided through temporary host storage.
+     * A failed pass callback contributes no partial pass. If its exception is caught by the
+     * outer recording callback, later recording can continue without that pass. Successful
+     * commands preceding it outside the pass are retained. A failed inner scissor or viewport
+     * scope is different: it restores that state without rolling back earlier commands in a
+     * pass whose callback ultimately completes normally.
      *
      * @throws IllegalArgumentException if the description or resources are incompatible.
      * @throws UnsupportedOperationException if the device cannot execute the requested combination.
