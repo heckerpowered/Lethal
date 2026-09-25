@@ -5,13 +5,13 @@
 
 package heckerpowered.render.command
 
-import heckerpowered.render.buffer.BufferUsage
-import heckerpowered.render.buffer.GpuBufferView
 import heckerpowered.render.memory.NativeAddress
 import heckerpowered.render.pipeline.multisample.SampleCount
-import heckerpowered.render.target.RenderAttachment
-import heckerpowered.render.target.validateMetadata
-import heckerpowered.render.texture.*
+import heckerpowered.render.resource.buffer.BufferUsage
+import heckerpowered.render.resource.buffer.GpuBufferView
+import heckerpowered.render.resource.target.RenderAttachment
+import heckerpowered.render.resource.target.validateMetadata
+import heckerpowered.render.resource.texture.*
 
 /**
  * Selects existing image contents for an upload, copy, resolve, or discard.

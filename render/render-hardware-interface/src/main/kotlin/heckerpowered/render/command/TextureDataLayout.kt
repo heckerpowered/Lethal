@@ -7,8 +7,8 @@ package heckerpowered.render.command
 
 import heckerpowered.render.memory.Size
 import heckerpowered.render.pipeline.multisample.SampleCount
-import heckerpowered.render.texture.TextureAspect
-import heckerpowered.render.texture.TextureFormat
+import heckerpowered.render.resource.texture.TextureAspect
+import heckerpowered.render.resource.texture.TextureFormat
 
 /**
  * Describes how rows of texture data are arranged in host memory or a GPU buffer.

@@ -5,17 +5,17 @@
 
 package heckerpowered.render.command
 
-import heckerpowered.render.buffer.GpuBuffer
-import heckerpowered.render.buffer.GpuBufferView
+import heckerpowered.render.command.pass.RenderPass
+import heckerpowered.render.command.pass.RenderPassDescription
+import heckerpowered.render.command.pass.RenderPassResources
 import heckerpowered.render.memory.MemoryFrame
 import heckerpowered.render.memory.MemoryStack
 import heckerpowered.render.memory.NativeAddress
 import heckerpowered.render.memory.Size
-import heckerpowered.render.pass.RenderPass
-import heckerpowered.render.pass.RenderPassDescription
-import heckerpowered.render.pass.RenderPassResources
-import heckerpowered.render.target.RenderAttachment
-import heckerpowered.render.texture.TextureAspect
+import heckerpowered.render.resource.buffer.GpuBuffer
+import heckerpowered.render.resource.buffer.GpuBufferView
+import heckerpowered.render.resource.target.RenderAttachment
+import heckerpowered.render.resource.texture.TextureAspect
 
 /**
  * Issues graphics commands during one [heckerpowered.render.GraphicsDevice.encode] callback.
