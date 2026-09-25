@@ -121,6 +121,151 @@ interface CommandEncoder {
     fun copyBuffer(source: GpuBufferView, destination: GpuBufferView)
 
     /**
+     * Uploads host texel data into the selected image region.
+     *
+     * For example, upload one decoded sprite into a cell of an atlas without replacing the
+     * surrounding sprites. [destination] selects its mip, aspect, layers, and texel box;
+     * [sourceLayout] describes rows at [sourceAddress], starting with that box's first texel.
+     * Image offsets do not skip bytes in the source. The region does not inherit render area,
+     * viewport, or scissor state. All unselected destination contents retain their validity.
+     *
+     * Before returning normally, the implementation has consumed or independently saved every
+     * occupied source row. The caller can then modify or release the host storage. It must not
+     * retain only an address into a temporary memory frame, even if GPU emission is deferred.
+     * Only texel words are read: row/slice gaps and nonexistent trailing padding are not inputs.
+     * The caller must provide readable storage for those words during the call and prevent
+     * concurrent writes. A nonzero address does not establish that host memory is accessible.
+     *
+     * Data uses the selected format/aspect's encoding defined by [TextureDataLayout], including
+     * stored sRGB bytes and separate depth/stencil planes. No scaling, decoding, mip generation,
+     * or sample reconstruction occurs. The image must be single-sampled and permit
+     * TransferDestination; Sampled and ColorAttachment are not prerequisites. An attachment
+     * operand retains its original permissions and import restrictions rather than granting access.
+     *
+     * CPU pitches need not satisfy a particular native staging alignment: the backend may
+     * repack its private upload storage, without changing which source words are consumed.
+     * Native format/operation support still matters. Requests that cannot preserve these
+     * semantics are rejected rather than silently expanded or converted.
+     *
+     * Record outside a logical render-pass callback. As with [writeBuffer], conflicting accesses
+     * through this encoder are ordered with execution and memory dependencies: earlier reads
+     * precede this overwrite and later reads observe it unless intervening work changes the data.
+     * Other recordings, queues, and host access need their own synchronization contract.
+     * Returning does not wait for GPU completion. Backend staging survives all GPU reads of it.
+     *
+     * [ImageRegion.validateUpload] provides public metadata checks. The implementation also checks
+     * device identity, native support, physical aliases, import scopes, and storage lifetime.
+     * Memoryless storage is never silently replaced by backed storage to make a transfer succeed.
+     *
+     * @throws IllegalArgumentException if the address is zero, an endpoint belongs to another
+     * device, a required permission is missing, or the region/sample/layout requirements fail.
+     * @throws UnsupportedOperationException if the backend cannot execute the requested transfer.
+     * @throws IllegalStateException if recording, resource, or access scope is invalid, or a
+     * logical render pass is active.
+     * @see <a href="https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdCopyBufferToImage.html">Vulkan staging-to-image copy</a>
+     * @see <a href="https://registry.khronos.org/OpenGL/extensions/ARB/ARB_pixel_buffer_object.txt">OpenGL pixel transfer sources</a>
+     */
+    fun writeTexture(destination: ImageRegion, sourceAddress: NativeAddress, sourceLayout: TextureDataLayout = TextureDataLayout.TightlyPacked)
+
+    /**
+     * Copies linearly arranged texels from a GPU buffer into an image region.
+     *
+     * Use this when the source already resides in a staging or shader-produced buffer. Unlike
+     * [writeTexture], source texels are read when this command executes, not captured during
+     * the Kotlin call. There is no implicit CPU readback. The source view's byte zero locates
+     * the first texel; its capacity must contain the complete [sourceLayout] footprint.
+     * Extra capacity, row gaps, and slice gaps are not read. Source texel words must be defined.
+     *
+     * The source needs TransferSource and the destination TransferDestination. The image is
+     * single-sampled. Encoding, selection, command ordering, and recording scope follow
+     * [writeTexture]; only the source and its read time differ. Actual source and destination
+     * storage must not overlap, even if represented by different resource kinds.
+     *
+     * Explicit GPU buffer pitches and offsets must be executable on this backend. Unlike a
+     * CPU upload, repacking may require extra GPU work; it must not modify the source, widen the
+     * accessed words, or read back to the CPU. Reject when no semantics-preserving path exists.
+     * [ImageRegion.validateCopyFromBuffer] checks public usages, capacity, layout, and sample count,
+     * not device support, physical aliasing, content validity, or access scopes.
+     *
+     * @throws IllegalArgumentException if resources belong to another device, required usages
+     * are missing, metadata requirements fail, or the actual source/destination storage overlaps.
+     * @throws UnsupportedOperationException if the backend cannot execute this transfer.
+     * @throws IllegalStateException if recording, resources, source contents, or access scopes are
+     * invalid, or a logical render pass is active.
+     * @see <a href="https://docs.vulkan.org/refpages/latest/refpages/source/VkBufferImageCopy.html">Vulkan buffer/image addressing parameters</a>
+     */
+    fun copyBufferToTexture(source: GpuBufferView, destination: ImageRegion, sourceLayout: TextureDataLayout = TextureDataLayout.TightlyPacked)
+
+    /**
+     * Copies selected image texels into rows of a GPU buffer.
+     *
+     * This produces linear data for a later GPU operation or CPU readback. It does not map the
+     * buffer, wait for the GPU, or make CPU access immediately safe. Completion and host
+     * visibility must be established through the separate readback/access mechanism.
+     *
+     * The first output texel is at the destination view's byte zero. Only occupied rows in
+     * [destinationLayout] are written; gaps and extra capacity retain both contents and validity.
+     * Unused bits inside a 24-bit depth word follow [TextureDataLayout], not the gap rule.
+     * Required capacity ends at the last texel, without trailing row or slice padding.
+     *
+     * The source needs TransferSource and the destination TransferDestination. The image must
+     * be single-sampled; explicitly resolve MSAA color before this command when one value per
+     * pixel is desired. Depth input must represent finite values in [0, 1]. The selected source
+     * remains unchanged and every texel read must be defined. Actual storage must not overlap.
+     *
+     * Format/aspect encoding, scope, and ordering follow [writeTexture]. Explicit buffer pitches
+     * have the execution requirements described by [copyBufferToTexture]. In particular, a
+     * padded private readback followed by a buffer copy must copy occupied rows, not overwrite
+     * the caller's gaps. [ImageRegion.validateCopyToBuffer] supplies public metadata checks;
+     * the backend additionally checks native support, device identity, aliases, and access scopes.
+     *
+     * @throws IllegalArgumentException if resources belong to another device, usages are missing,
+     * metadata requirements fail, or actual source/destination storage overlaps.
+     * @throws UnsupportedOperationException if the backend cannot execute this transfer.
+     * @throws IllegalStateException if recording, resources, source contents, or access scopes are
+     * invalid, or a logical render pass is active.
+     * @see <a href="https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdCopyImageToBuffer.html">Vulkan image-to-buffer copy</a>
+     * @see <a href="https://learn.microsoft.com/en-us/windows/win32/direct3d12/readback-data-using-heaps">Direct3D 12 readback completion</a>
+     */
+    fun copyTextureToBuffer(source: ImageRegion, destination: GpuBufferView, destinationLayout: TextureDataLayout = TextureDataLayout.TightlyPacked)
+
+    /**
+     * Copies image contents to a matching region, preserving their formatted representation.
+     *
+     * For example, move a sprite between two atlas cells or copy a rendered result for a later
+     * stage. Both regions have the same format, selected aspect, extents, layer count, and sample
+     * count. Origins and mip levels can differ. Pair x/y/z positions and array layers in selection
+     * order; this does not reinterpret volume slices as array layers or generate other mip levels.
+     *
+     * This is not a blit or resolve: there is no filtering, scaling, color-space conversion, or
+     * reduction of samples. Equal multisample counts copy the original samples when supported.
+     * A 4-sample to 1-sample request instead needs [resolve]. Linear buffers are not involved,
+     * so their row strides and one-sample representation do not constrain this operation.
+     *
+     * The source needs TransferSource, the destination TransferDestination. The selected source
+     * stays unchanged; unselected destination texels, layers, mips, and aspects are preserved.
+     * All source texels must be defined; copied depth values must be finite and in [0, 1].
+     * Actual source and destination contents must not overlap. Nonoverlapping cells of one image
+     * are representable, but copying onto itself is rejected rather than given memmove semantics.
+     *
+     * Source data is read at this command's execution position, without a host snapshot or wait.
+     * Recording scope, conflict ordering, and import/storage-lifetime checks follow [writeTexture].
+     * [ImageRegion.validateCopyTo] checks public metadata and known overlap. A backend must still
+     * resolve physical aliases and native restrictions; identical formats do not guarantee that
+     * every partial depth, multisample, or cross-dimensional native copy is supported.
+     *
+     * @throws IllegalArgumentException if resources belong to another device, usages are missing,
+     * the regions do not match for copying, or their actual source/destination contents overlap.
+     * @throws UnsupportedOperationException if the backend cannot execute this copy.
+     * @throws IllegalStateException if recording, resources, source contents, or access scopes are
+     * invalid, or a logical render pass is active.
+     * @see <a href="https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdCopyImage.html">Vulkan image copy</a>
+     * @see <a href="https://registry.khronos.org/OpenGL/extensions/ARB/ARB_copy_image.txt">OpenGL raw image copy</a>
+     * @see <a href="https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-copytextureregion">Direct3D 12 texture copy</a>
+     */
+    fun copyTexture(source: ImageRegion, destination: ImageRegion)
+
+    /**
      * Records drawing into the attachments selected by [description].
      *
      * [commands] runs once, using a [RenderPass] that is valid only during this callback.
@@ -294,5 +439,38 @@ inline fun CommandEncoder.writeBuffer(destination: GpuBufferView, alignment: Int
         destination.validateUpload(address)
         write(address)
         writeBuffer(destination, address)
+    }
+}
+
+/**
+ * Fills a temporary linear image and uploads its occupied rows after [write] returns normally.
+ *
+ * Use this for small generated images or atlas updates. The memory is not a mapping of the
+ * texture and contains none of its old texels. Initialize every selected texel word in the
+ * encoding defined by [TextureDataLayout]; padding between rows or slices need not be written.
+ * [TextureDataLayout.footprintFor] gives row offsets for a writer using explicit strides.
+ *
+ * The enclosing span must fit an Int and the remaining [MemoryStack] capacity. [alignment]
+ * is a positive power-of-two alignment for the temporary host address, not a GPU pitch or
+ * binding alignment. Large uploads can use the address-based overload with other host storage.
+ *
+ * After allocation and metadata checks, the writer executes once on the recording thread.
+ * If it throws or returns nonlocally, this helper issues no upload. Commands explicitly recorded
+ * by the writer are not rolled back. The frame is restored on every exit, including upload failure;
+ * neither the frame nor its address may escape the synchronous callback. On normal return the
+ * address-based upload consumes the selected words before the frame ends. No unmap/reset is needed.
+ *
+ * @throws IllegalArgumentException if the span does not fit an Int, alignment is invalid, or
+ * public destination/layout requirements fail.
+ * @throws IllegalStateException if the temporary allocation cannot fit in the memory stack.
+ */
+inline fun CommandEncoder.writeTexture(destination: ImageRegion, sourceLayout: TextureDataLayout = TextureDataLayout.TightlyPacked, alignment: Int = 1, write: MemoryFrame.(address: NativeAddress) -> Unit) {
+    val footprint = sourceLayout.footprintFor(destination)
+    require(footprint.requiredSizeBytes <= Int.MAX_VALUE.toLong()) { "Scoped texture upload exceeds Int.MAX_VALUE; use the address-based overload" }
+    memoryStack.frame {
+        val address = reserve(footprint.requiredSizeBytes.toInt(), alignment)
+        destination.validateUpload(address, sourceLayout)
+        write(address)
+        writeTexture(destination, address, sourceLayout)
     }
 }
