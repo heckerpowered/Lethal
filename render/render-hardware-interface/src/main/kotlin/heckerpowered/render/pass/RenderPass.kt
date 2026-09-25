@@ -34,6 +34,9 @@ import heckerpowered.render.shader.ShaderStage
  *
  * This interface is supplied to the pass-recording callback and is valid only during that callback.
  * Implementations must reject commands through a retained reference after that callback ends.
+ * Calls may encode directly into native commands. No intermediate replay representation is
+ * required. A failure escaping the pass callback invalidates the enclosing recording rather than
+ * deleting a partial pass and continuing. See [heckerpowered.render.GraphicsDevice.encode].
  */
 interface RenderPass {
     val memoryStack: MemoryStack
@@ -345,24 +348,27 @@ inline fun RenderPass.pushConstants(
 }
 
 /**
- * Maintains the viewport and effective scissor while a backend records one logical [RenderPass].
+ * Keeps the current viewport and effective scissor while a backend encodes one [RenderPass].
  *
- * A backend can compose this state rather than implementing its own nested save/restore stack.
- * [record] creates fresh defaults from [RenderArea] and ends access when the pass-recording
- * callback exits. Scope restoration only changes logical values and cannot fail through a native
- * graphics call while another exception is propagating.
+ * Only these two selections are stored here. An enclosing selection is a local variable in the
+ * corresponding scope call, just as a memory-stack frame saves its previous allocation position.
+ * There is no separate nesting stack, pass lifecycle, submission queue, or failure state.
  *
- * At each draw the backend must read [viewport] and [scissor] and capture those immutable values
- * in the draw record, or apply them immediately before native execution. Keeping a reference to
- * this mutable state in a deferred draw would incorrectly use a later or restored selection.
+ * [validateAccess] consults the backend's existing pass/recording identity and thread checks.
+ * It must reject use after that pass ends, while it is not the current pass, or after its recording
+ * becomes invalid. The callback is required: moving lifetime checks out of this component does not
+ * remove their necessity or make Kotlin receivers non-escaping. Do not create a second lifetime
+ * flag just for this object. A retained reference must not become valid again in a later pass.
  *
- * This is an implementation component, not a complete pass encoder. The backend must call
- * [checkActive] at its other command entry points, validate device limits, and isolate native
- * state when entering a pass or handing control back to a host renderer.
+ * A direct backend applies [viewport] and [scissor] before each affected draw. A deferred adapter
+ * instead captures their immutable values. Restoring a Kotlin scope changes these values only;
+ * it does not issue a fallible native restore call while an exception is propagating. The backend
+ * still validates device limits and isolates native state when returning control to a host.
  */
-class RenderPassRegions private constructor(renderArea: RenderArea) {
-    private val recordingThread = Thread.currentThread()
-    private var active = true
+class RenderPassRegions(
+    renderArea: RenderArea,
+    private val validateAccess: () -> Unit,
+) {
     private var selectedViewport = Viewport.from(renderArea)
     private var selectedScissor = ScissorRectangle.from(renderArea)
 
@@ -378,20 +384,9 @@ class RenderPassRegions private constructor(renderArea: RenderArea) {
             return selectedScissor
         }
 
-    /**
-     * Rejects access outside the recording that supplied this state.
-     *
-     * Backends also call this before commands that do not read a region, such as a pipeline bind,
-     * so retaining a pass reference does not bypass the callback's lifetime.
-     */
-    fun checkActive() {
-        check(Thread.currentThread() === recordingThread) {
-            "Render pass must be used on its recording thread"
-        }
-        check(active) { "Render pass recording has ended" }
-    }
+    /** Uses the enclosing backend's access check rather than maintaining another lifetime. */
+    fun checkActive() = validateAccess()
 
-    /** Implements the restoration rule of [RenderPass.withViewport] without native calls. */
     fun <R> withViewport(viewport: Viewport, commands: () -> R): R {
         checkActive()
         val previous = selectedViewport
@@ -403,7 +398,6 @@ class RenderPassRegions private constructor(renderArea: RenderArea) {
         }
     }
 
-    /** Implements the intersection and restoration rules of [RenderPass.withScissor]. */
     fun <R> withScissor(rectangle: ScissorRectangle, commands: () -> R): R {
         checkActive()
         val previous = selectedScissor
@@ -412,23 +406,6 @@ class RenderPassRegions private constructor(renderArea: RenderArea) {
             commands()
         } finally {
             selectedScissor = previous
-        }
-    }
-
-    companion object {
-        /**
-         * Supplies fresh region state for exactly one synchronous recording callback.
-         *
-         * Both successful and exceptional exit end state access. This ends CPU recording access,
-         * not the lifetime of captured draw parameters or the GPU work that will consume them.
-         */
-        fun <R> record(renderArea: RenderArea, commands: (RenderPassRegions) -> R): R {
-            val regions = RenderPassRegions(renderArea)
-            return try {
-                commands(regions)
-            } finally {
-                regions.active = false
-            }
         }
     }
 }
