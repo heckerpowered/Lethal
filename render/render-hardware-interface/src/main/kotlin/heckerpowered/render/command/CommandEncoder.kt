@@ -17,21 +17,20 @@ import heckerpowered.render.target.RenderAttachment
 import heckerpowered.render.texture.TextureAspect
 
 /**
- * Encodes commands into the active graphics recording.
+ * Issues graphics commands during one [heckerpowered.render.GraphicsDevice.encode] callback.
  *
- * The encoder is valid only during the synchronous device callback that supplies it, on that
- * device's recording thread. Ending the callback ends recording access, not GPU execution.
- * The device validates and schedules the completed sequence; application code does not close
- * this encoder or separately submit it.
+ * The device owns the recording boundary; callers do not close or separately submit this encoder.
+ * It is usable only on the recording thread and only while its callback is active. Scope exit
+ * ends CPU encoding access, not the GPU work's lifetime.
  *
- * No command in this sequence executes before the outer recording callback completes normally.
- * An escaping exception abandons the unsubmitted sequence. Commands store their inputs, not
- * callbacks to rerun later: temporary upload addresses expire before native execution may begin.
- * GPU resource contents still follow execution order rather than being captured by recording.
- * Public metadata errors can be checked while recording; device-specific validation may finish
- * when the complete sequence is prepared. A successful command call is not a device-support or
- * execution-success guarantee. Preparation errors are reported by the enclosing encode call.
- * See [heckerpowered.render.GraphicsDevice.encode] for cross-recording order and failure behavior.
+ * Implementations may encode directly into their native API. Commands are not required to become
+ * a second, backend-independent command list, and callback failure does not imply rollback.
+ * Uploads and push constants must still consume or save temporary host input before returning;
+ * copies read GPU contents at their execution position instead of snapshotting them on the CPU.
+ *
+ * Validation belongs to the command and device boundaries that have the required information.
+ * Unsupported sequences are rejected, not made valid by silently dropping dependencies or content
+ * guarantees. See [heckerpowered.render.GraphicsDevice.encode] for order and failure behavior.
  */
 interface CommandEncoder {
     val memoryStack: MemoryStack
@@ -277,30 +276,31 @@ interface CommandEncoder {
     fun copyTexture(source: ImageRegion, destination: ImageRegion)
 
     /**
-     * Records drawing into the attachments selected by [description].
+     * Draws into the attachments selected by [description] within one scoped render pass.
      *
-     * [commands] runs once, using a [RenderPass] that is valid only during this callback.
-     * Each attachment position selects the aspect affected by its load and store operations.
-     * The device validates the attachment combination before accepting the pass for native
-     * execution; each draw must also be compatible with its pipeline and bindings.
+     * [commands] runs once, synchronously, with a [RenderPass] valid only during that callback.
+     * Attachment setup is known before drawing begins. In particular,
+     * [RenderPassDescription.colorResolves] supplies any pass-local resolve destinations up front,
+     * so a direct backend can establish native rendering without looking ahead through draws.
      *
-     * Ending the callback ends the logical pass, not necessarily a native rendering scope.
-     * The backend may jointly record and emit the pass and a subsequent resolve when this
-     * preserves their recorded behavior. Contents needed by later operations must still be logically preserved;
-     * combining native operations does not restore contents discarded at the logical pass boundary.
+     * On successful execution, declared pass-local resolves consume the final samples before the
+     * source attachments' store/discard boundary. They do not replace the directly drawn images.
+     * A later standalone [resolve] instead needs source contents preserved beyond this pass.
+     * No implicit resolve, pass merging, or retention of memoryless data across calls is promised.
+     * A backend may combine native work only when all requested content and access rules survive.
      *
-     * Deferring native emission must preserve inputs supplied while recording, including data
-     * provided through temporary host storage.
-     * A failed pass callback contributes no partial pass. If its exception is caught by the
-     * outer recording callback, later recording can continue without that pass. Successful
-     * commands preceding it outside the pass are retained. A failed inner scissor or viewport
-     * scope is different: it restores that state without rolling back earlier commands in a
-     * pass whose callback ultimately completes normally.
+     * A callback exception ends pass access and invalidates the enclosing recording. Already
+     * issued commands are not removed as a partial rollback. Even when caught by outer application
+     * code, the failed pass must prevent further commands and successful encode finalization.
+     * An exception from a viewport/scissor block that is caught inside this pass restores that
+     * block's local state without undoing issued commands. A native or recording error can still
+     * invalidate the recording; catching it does not establish recovery.
      *
-     * @throws IllegalArgumentException if the description or resources are incompatible.
-     * @throws UnsupportedOperationException if the device cannot execute the requested combination.
-     * @throws IllegalStateException if a resource, content scope, or recording scope is invalid,
-     * or another render pass is active on this encoder.
+     * @throws IllegalArgumentException if the description, resolves, or resources are incompatible.
+     * @throws UnsupportedOperationException if the backend cannot execute the requested scope,
+     * including its resolve, storage, or dependency requirements.
+     * @throws IllegalStateException if a resource or recording scope is invalid, or another pass
+     * is active on this encoder.
      */
     fun renderPass(description: RenderPassDescription, commands: RenderPass.() -> Unit)
 
@@ -331,12 +331,12 @@ interface CommandEncoder {
      * cannot bypass the underlying storage's permissions. For opaque host attachments, the device
      * verifies resolve access against the import contract.
      *
-     * This independent logical operation does not require a separate native render pass. A backend
-     * may record and combine it with its producer when the regions and accesses permit that path.
-     * Memoryless input must be consumed within a supported native lifetime. An unsupported sequence
-     * is rejected, not changed to backed storage or repaired by reading logically discarded data.
-     * The backend needs resolve information before issuing any native command that requires it;
-     * postponing end-rendering alone cannot repair an already-issued begin configuration.
+     * This command does not promise fusion with a preceding pass. A direct backend may already
+     * have ended that native scope. When samples must be consumed inside their producing scope,
+     * declare [RenderPassDescription.colorResolves] before entering the pass instead. A later
+     * command cannot restore expired memoryless contents or revise an already encoded native
+     * begin-rendering configuration. Unsupported lifetimes are rejected, not silently backed.
+     * An optional planning layer may arrange equivalent native work without changing this contract.
      *
      * This uses the implementation's standard color resolve, not a caller-defined filter. Sample
      * weighting and rounding are implementation-dependent; combining sRGB samples in linear color
