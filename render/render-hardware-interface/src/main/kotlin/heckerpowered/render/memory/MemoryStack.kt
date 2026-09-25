@@ -165,6 +165,7 @@ private object DirectBufferAddresses {
 }
 
 private class UnsafeDirectBufferAddress {
+    // TODO: sun.misc.Unsafe is not available in Java 9+, so this will need to be replaced with a different approach for newer Java versions.
     private val unsafeClass = Class.forName("sun.misc.Unsafe")
     private val unsafe = unsafeClass.getDeclaredField("theUnsafe").apply { isAccessible = true }.get(null)
     private val addressOffset = unsafeClass.getMethod("objectFieldOffset", java.lang.reflect.Field::class.java).invoke(unsafe, Buffer::class.java.getDeclaredField("address")) as Long
