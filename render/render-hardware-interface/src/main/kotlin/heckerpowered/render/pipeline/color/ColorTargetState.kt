@@ -6,7 +6,7 @@
 package heckerpowered.render.pipeline.color
 
 import heckerpowered.render.RenderPipelineDescription
-import heckerpowered.render.texture.TextureFormat
+import heckerpowered.render.resource.texture.TextureFormat
 
 /**
  * Describes one indexed color output expected by a render pipeline.
