@@ -5,13 +5,16 @@
 
 package heckerpowered.render.command
 
+import heckerpowered.render.buffer.BufferUsage
+import heckerpowered.render.buffer.GpuBufferView
+import heckerpowered.render.memory.NativeAddress
 import heckerpowered.render.pipeline.multisample.SampleCount
 import heckerpowered.render.target.RenderAttachment
 import heckerpowered.render.target.validateMetadata
 import heckerpowered.render.texture.*
 
 /**
- * Selects existing image contents for an operation such as resolve or discard.
+ * Selects existing image contents for an upload, copy, resolve, or discard.
  *
  * Rendering may update one cell of an atlas, while the next operation resolves that cell into
  * another image. The operation needs its own coordinates; it must not inherit the preceding
@@ -214,6 +217,85 @@ sealed class ImageRegion private constructor(
         validateResolveUsage(this, TextureUsage.ResolveSource)
         validateResolveUsage(destination, TextureUsage.ResolveDestination)
     }
+
+    /**
+     * Checks a host upload's destination role, linear layout, and nonzero source address.
+     *
+     * The returned footprint describes the occupied source rows, not a contiguous block that
+     * may be copied including padding. This does not read memory or prove address validity.
+     * For opaque attachments, the device must obtain permissions from its resource record.
+     * Device identity, native support, imported scopes, and content lifetime remain backend checks.
+     *
+     * @throws IllegalArgumentException if transfer metadata is invalid or the address is zero.
+     */
+    fun validateUpload(sourceAddress: NativeAddress, sourceLayout: TextureDataLayout = TextureDataLayout.TightlyPacked): TextureDataLayout.Footprint {
+        val footprint = validateLinearTransfer(TextureUsage.TransferDestination, sourceLayout)
+        require(sourceAddress.rawValue != 0L) { "A nonempty texture upload requires a nonzero source address" }
+        return footprint
+    }
+
+    /**
+     * Checks the source buffer selection against the rows needed to populate this image region.
+     *
+     * Source capacity may exceed the footprint, but bytes outside occupied rows are not input.
+     * Both transfer roles are checked where exposed. The device must additionally check native
+     * offsets/pitches and whether the buffer and image alias overlapping physical storage.
+     *
+     * @throws IllegalArgumentException if usage, sample count, layout, or source capacity is invalid.
+     */
+    fun validateCopyFromBuffer(source: GpuBufferView, sourceLayout: TextureDataLayout = TextureDataLayout.TightlyPacked): TextureDataLayout.Footprint {
+        require(BufferUsage.TransferSource in source.buffer.usage) { "Texture upload requires BufferUsage.TransferSource" }
+        val footprint = validateLinearTransfer(TextureUsage.TransferDestination, sourceLayout)
+        footprint.validateCapacity(source.sizeBytes)
+        return footprint
+    }
+
+    /**
+     * Checks a linear buffer destination for this region's texel data, excluding gaps and tail padding.
+     *
+     * Only occupied destination rows are replaced. Native resource, pitch, aliasing, and scope
+     * checks remain necessary, and successful validation does not make the buffer CPU-readable.
+     *
+     * @throws IllegalArgumentException if usage, sample count, layout, or destination capacity is invalid.
+     */
+    fun validateCopyToBuffer(destination: GpuBufferView, destinationLayout: TextureDataLayout = TextureDataLayout.TightlyPacked): TextureDataLayout.Footprint {
+        require(BufferUsage.TransferDestination in destination.buffer.usage) { "Texture readback requires BufferUsage.TransferDestination" }
+        val footprint = validateLinearTransfer(TextureUsage.TransferSource, destinationLayout)
+        footprint.validateCapacity(destination.sizeBytes)
+        return footprint
+    }
+
+    /**
+     * Checks whether this region can describe a direct texel copy to [destination].
+     *
+     * Equal extents and layer counts pair corresponding texels, z planes, and array layers.
+     * Equal formats/aspects preserve their representation; equal sample counts preserve each
+     * sample instead of resolving it. Different mip levels, image sizes, and starting positions
+     * are allowed. No automatic conversion between the z axis and the array-layer axis occurs.
+     *
+     * Known overlap is rejected, including a texture referenced directly on one side and through
+     * a view on the other. Different wrappers can still alias. Passing these checks does not prove
+     * physical disjointness, device support, source validity, or an opaque attachment's permission.
+     * Backends must also satisfy native depth-value restrictions without scanning GPU data here.
+     *
+     * @throws IllegalArgumentException if usages, formats, aspects, extents, layer/sample counts,
+     * or overlap observable through the same resource contradict a direct copy.
+     */
+    fun validateCopyTo(destination: ImageRegion) {
+        require(aspect == destination.aspect) { "Texture copy aspects must match" }
+        require(format == destination.format) { "Texture copy formats must match: $format and ${destination.format}" }
+        require(width == destination.width && height == destination.height && depth == destination.depth) { "Texture copy extents must match; copying does not resize or remap layers" }
+        require(arrayLayerCount == destination.arrayLayerCount) { "Texture copy layer counts must match" }
+        require(sampleCount == destination.sampleCount) { "Texture copy sample counts must match; use resolve to reduce samples" }
+        validateTransferUsage(this, TextureUsage.TransferSource)
+        validateTransferUsage(destination, TextureUsage.TransferDestination)
+        validateKnownCopyOverlap(this, destination)
+    }
+
+    private fun validateLinearTransfer(usage: TextureUsage, layout: TextureDataLayout): TextureDataLayout.Footprint {
+        validateTransferUsage(this, usage)
+        return layout.footprintFor(this)
+    }
 }
 
 /**
@@ -329,3 +411,49 @@ private fun validateResolveUsage(region: ImageRegion, usage: TextureUsage) {
     }
     require(usage in texture.usage) { "Resolve requires TextureUsage.$usage" }
 }
+
+private fun validateTransferUsage(region: ImageRegion, usage: TextureUsage) {
+    val texture = when (region) {
+        is ImageRegion.Texture -> region.texture
+        is ImageRegion.View -> region.view.texture
+        is ImageRegion.Attachment -> return // Import metadata supplies permissions; attachment identity grants none.
+    }
+    require(usage in texture.usage) { "Texture transfer requires TextureUsage.$usage" }
+}
+
+private fun validateKnownCopyOverlap(source: ImageRegion, destination: ImageRegion) {
+    if (!sameKnownImage(source, destination)) return
+    if (knownMip(source) != knownMip(destination)) return
+    val overlap = intervalsOverlap(knownLayer(source), source.arrayLayerCount, knownLayer(destination), destination.arrayLayerCount) &&
+            intervalsOverlap(source.x, source.width, destination.x, destination.width) &&
+            intervalsOverlap(source.y, source.height, destination.y, destination.height) &&
+            intervalsOverlap(source.z, source.depth, destination.z, destination.depth)
+    require(!overlap) { "Texture copy source and destination select overlapping contents" }
+}
+
+private fun sameKnownImage(source: ImageRegion, destination: ImageRegion): Boolean {
+    if (source is ImageRegion.Attachment || destination is ImageRegion.Attachment) {
+        return source is ImageRegion.Attachment && destination is ImageRegion.Attachment && source.attachment === destination.attachment
+    }
+    return knownTexture(source) === knownTexture(destination)
+}
+
+private fun knownTexture(region: ImageRegion) = when (region) {
+    is ImageRegion.Texture -> region.texture
+    is ImageRegion.View -> region.view.texture
+    is ImageRegion.Attachment -> null
+}
+
+private fun knownMip(region: ImageRegion): Int = when (region) {
+    is ImageRegion.Texture -> region.mipLevel
+    is ImageRegion.View -> region.textureMipLevel
+    is ImageRegion.Attachment -> 0
+}
+
+private fun knownLayer(region: ImageRegion): Int = when (region) {
+    is ImageRegion.View -> region.textureBaseArrayLayer
+    is ImageRegion.Texture, is ImageRegion.Attachment -> region.baseArrayLayer
+}
+
+private fun intervalsOverlap(first: Int, firstCount: Int, second: Int, secondCount: Int): Boolean =
+    first.toLong() < second.toLong() + secondCount && second.toLong() < first.toLong() + firstCount
