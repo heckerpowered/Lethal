@@ -5,7 +5,7 @@
 
 package heckerpowered.render.presentation
 
-import heckerpowered.render.target.RenderTarget
+import heckerpowered.render.resource.target.RenderTarget
 
 /**
  * Gives rendering code access to the output selected by a window or host for presentation.

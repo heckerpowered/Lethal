@@ -5,23 +5,26 @@
 
 package heckerpowered.render
 
-import heckerpowered.render.buffer.BufferDescription
-import heckerpowered.render.buffer.GpuBuffer
 import heckerpowered.render.command.CommandEncoder
 import heckerpowered.render.memory.MemoryStack
 import heckerpowered.render.pipeline.PipelineLayout
 import heckerpowered.render.pipeline.PipelineLayoutCreationException
 import heckerpowered.render.pipeline.PipelineLayoutDescription
 import heckerpowered.render.pipeline.RenderPipeline
-import heckerpowered.render.sampler.GpuSampler
-import heckerpowered.render.sampler.SamplerDescription
+import heckerpowered.render.resource.buffer.BufferDescription
+import heckerpowered.render.resource.buffer.GpuBuffer
+import heckerpowered.render.resource.sampler.GpuSampler
+import heckerpowered.render.resource.sampler.SamplerDescription
+import heckerpowered.render.resource.target.RenderAttachment
+import heckerpowered.render.resource.target.validateAttachmentView
+import heckerpowered.render.resource.texture.GpuTexture
+import heckerpowered.render.resource.texture.GpuTextureView
+import heckerpowered.render.resource.texture.TextureDescription
+import heckerpowered.render.resource.texture.TextureViewDescription
 import heckerpowered.render.shader.ShaderModule
 import heckerpowered.render.shader.ShaderModuleDescription
 import heckerpowered.render.shader.ShaderStages
 import heckerpowered.render.shader.ShaderStagesDescription
-import heckerpowered.render.target.RenderAttachment
-import heckerpowered.render.target.validateAttachmentView
-import heckerpowered.render.texture.*
 
 /**
  * Owns backend resources and encodes graphics commands.
@@ -104,14 +107,14 @@ interface GraphicsDevice {
      * can be created for drawing and later post-processing. The description supplies the shape,
      * format, sample count, storage mode, and permitted operations for that allocation.
      *
-     * Successful creation establishes those requested properties on the returned [GpuTexture].
+     * Successful creation establishes those requested properties on the returned [heckerpowered.render.resource.texture.GpuTexture].
      * The complete combination must be supported; individually supported properties do not
      * guarantee that they can be used together. An implementation must not silently substitute
      * a different format, reduce dimensions or sample counts, drop usage roles, or replace the
      * requested storage mode. Native implementation flags do not grant additional RHI usages.
      *
-     * If [TextureDescription.cubeCompatible] is `true`, cube compatibility must be established
-     * and [GpuTexture.cubeCompatible] must report `true`. Otherwise creation fails. A `false`
+     * If [heckerpowered.render.resource.texture.TextureDescription.cubeCompatible] is `true`, cube compatibility must be established
+     * and [heckerpowered.render.resource.texture.GpuTexture.cubeCompatible] must report `true`. Otherwise creation fails. A `false`
      * request leaves this capability optional; the returned property reports the compatibility
      * actually established and exposed by this device. It does not grant additional usage roles.
      * Specific view requests are still validated separately when those views are created.
@@ -128,7 +131,7 @@ interface GraphicsDevice {
      * @throws UnsupportedOperationException if this device cannot support the requested
      * combination of shape, format, sample count, storage, usage, and cube compatibility.
      * @throws IllegalStateException if the device cannot currently create resources.
-     * @throws TextureCreationException if backend allocation or texture establishment fails.
+     * @throws heckerpowered.render.resource.texture.TextureCreationException if backend allocation or texture establishment fails.
      */
     fun createTexture(description: TextureDescription): GpuTexture
 
@@ -143,7 +146,7 @@ interface GraphicsDevice {
      * extends past the source is rejected, not clamped. The view keeps the source format, sample
      * count, and storage mode, and cannot enable a usage absent from the source texture.
      *
-     * [TextureViewDescription.validateFor] supplies the common metadata checks. This operation
+     * [heckerpowered.render.resource.texture.TextureViewDescription.validateFor] supplies the common metadata checks. This operation
      * additionally checks that the device recognizes the source, that it remains valid, and that
      * the requested view representation is supported. It does not require initialized contents
      * or Sampled usage merely to establish a view; individual uses require their corresponding
@@ -165,7 +168,7 @@ interface GraphicsDevice {
      * representation, including any required array or cube-array capability.
      * @throws IllegalStateException if the source is invalid or the device or an import access
      * restriction prevents creating the view now.
-     * @throws TextureViewCreationException if backend view establishment fails.
+     * @throws heckerpowered.render.resource.texture.TextureViewCreationException if backend view establishment fails.
      */
     fun createTextureView(texture: GpuTexture, description: TextureViewDescription): GpuTextureView
 
@@ -204,7 +207,7 @@ interface GraphicsDevice {
      * device's default execution stream. The backend establishes execution and memory dependencies
      * between transfer/image operations and whole render-pass scopes, including through aliases.
      * A pass supplies its potential accesses up front through RenderPassDescription and
-     * [heckerpowered.render.pass.RenderPassResources], so preparation need not inspect future draws.
+     * [heckerpowered.render.command.pass.RenderPassResources], so preparation need not inspect future draws.
      * Preparing a potential write does not initialize contents or prove that a shader wrote them.
      *
      * This boundary guarantee does not automatically order arbitrary shader storage accesses
@@ -300,7 +303,7 @@ interface GraphicsDevice {
      * be represented as an attachment by this device.
      * @throws IllegalStateException if the source is invalid or an import restriction prevents
      * establishing this representation now.
-     * @throws TextureViewCreationException if backend attachment-view establishment fails.
+     * @throws heckerpowered.render.resource.texture.TextureViewCreationException if backend attachment-view establishment fails.
      */
     fun createAttachmentView(view: GpuTextureView): RenderAttachment
 }

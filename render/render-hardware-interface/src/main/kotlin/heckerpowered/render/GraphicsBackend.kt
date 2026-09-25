@@ -6,7 +6,7 @@
 package heckerpowered.render
 
 import heckerpowered.render.command.CommandEncoder
-import heckerpowered.render.target.RenderTarget
+import heckerpowered.render.resource.target.RenderTarget
 
 interface GraphicsBackend {
     /**
