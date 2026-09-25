@@ -198,7 +198,48 @@ interface GraphicsDevice {
     fun createSampler(description: SamplerDescription): GpuSampler
 
     /**
-     * Encodes one command sequence while this device owns the encoder's complete lifetime.
+     * Records and schedules one ordered sequence of uploads, rendering, and image operations.
+     *
+     * For example, upload a material texture in one call and sample it in a later call on this
+     * device's default execution stream. Conflicting accesses in those accepted sequences keep
+     * their order, including through resource aliases. The backend establishes the execution and
+     * memory dependencies; the application does not pair this scope with end, submit, or close.
+     * Other devices, explicit streams, and host-native accesses need their own synchronization.
+     *
+     * [commands] runs exactly once and synchronously on this device's recording thread. Encoders
+     * and passes obtained by it reject recording after their callbacks exit. Nested encode calls
+     * on the same device are rejected. Uploads and push constants preserve temporary host input
+     * during their calls; ordinary copies do not snapshot GPU contents while recording.
+     *
+     * Only normal callback completion permits this sequence to execute. An escaping callback
+     * exception discards this unsubmitted sequence, not previously accepted work or application
+     * side effects performed directly by the callback. Pipeline-cache creation is not rolled back.
+     * This guarantee requires deferred execution, not replaying the application callback later.
+     *
+     * Normal return means the complete sequence has been validated, accepted, and arranged to
+     * progress without another application encode call. It does not mean GPU completion, CPU
+     * readback availability, or presentation. A logical recording need not correspond to exactly
+     * one native command buffer, pass, or queue submission.
+     *
+     * Preparation failure occurs before execution of this sequence. Once native submission is
+     * attempted, failure cannot generally promise unchanged resource contents. The device must
+     * retain potentially in-use storage and prevent unsafe further work until its execution state
+     * is known. Asynchronous execution failures are reported when observed by device maintenance
+     * or completion operations; a successful return cannot promise future GPU success.
+     *
+     * Backend upload, descriptor, and command storage remains alive through its last GPU access.
+     * Callback exit is not a completion signal or a transfer of application resource ownership.
+     * Imported-resource access restrictions and resource validity requirements remain in force.
+     *
+     * Implementations can compose [heckerpowered.render.command.GraphicsRecording] for the
+     * recording and retirement boundary. Native lowering, dependencies, completion detection,
+     * and restoration of shared host graphics state still belong to the backend.
+     *
+     * @throws IllegalStateException if used from the wrong device thread, another recording is
+     * active, or the device's execution stream is unavailable.
+     *
+     * @see <a href="https://docs.vulkan.org/spec/latest/chapters/cmdbuffers.html">Vulkan recording and submission</a>
+     * @see <a href="https://registry.khronos.org/OpenGL/extensions/ARB/ARB_sync.txt">OpenGL completion synchronization</a>
      */
     fun encode(label: String, commands: CommandEncoder.() -> Unit)
 
