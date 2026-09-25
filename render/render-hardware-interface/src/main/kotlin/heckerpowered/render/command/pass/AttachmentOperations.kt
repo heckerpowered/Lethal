@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
 /**
  * Chooses the initial contents and preservation of one attachment use in a logical render pass.

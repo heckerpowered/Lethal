@@ -3,11 +3,11 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
 import heckerpowered.render.command.ImageRegion
 import heckerpowered.render.command.validateKnownImageDisjoint
-import heckerpowered.render.texture.TextureStorage
+import heckerpowered.render.resource.texture.TextureStorage
 
 /**
  * Arranges for a drawn color attachment to produce a separate single-sample image as its pass ends.

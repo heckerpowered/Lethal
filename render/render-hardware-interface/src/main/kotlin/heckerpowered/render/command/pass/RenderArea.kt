@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
 /**
  * Selects the rectangular region of each attachment that a render pass operates on.

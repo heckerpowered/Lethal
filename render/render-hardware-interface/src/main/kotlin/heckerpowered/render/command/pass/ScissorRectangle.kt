@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
 /**
  * Restricts rasterized drawing to a rectangular part of the framebuffer without moving geometry.

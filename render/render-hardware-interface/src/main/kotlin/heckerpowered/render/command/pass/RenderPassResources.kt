@@ -3,16 +3,16 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
-import heckerpowered.render.binding.*
-import heckerpowered.render.buffer.BufferUsage
-import heckerpowered.render.buffer.GpuBufferView
 import heckerpowered.render.command.ImageRegion
 import heckerpowered.render.memory.Size
+import heckerpowered.render.resource.buffer.BufferUsage
+import heckerpowered.render.resource.buffer.GpuBufferView
+import heckerpowered.render.resource.texture.GpuTextureView
+import heckerpowered.render.resource.texture.TextureViewDescription
 import heckerpowered.render.shader.ShaderStage
-import heckerpowered.render.texture.GpuTextureView
-import heckerpowered.render.texture.TextureViewDescription
+import heckerpowered.render.shader.binding.*
 import java.util.*
 
 /**

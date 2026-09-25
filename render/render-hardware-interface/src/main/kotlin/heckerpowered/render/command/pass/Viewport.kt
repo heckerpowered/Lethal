@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
 /**
  * Maps normalized geometry coordinates into a rectangle of framebuffer coordinates.

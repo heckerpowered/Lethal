@@ -3,9 +3,9 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
-import heckerpowered.render.target.RenderAttachment
+import heckerpowered.render.resource.target.RenderAttachment
 
 /**
  * Associates an attachment with the load and store operations for one position in a render pass.

@@ -3,14 +3,14 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
 import heckerpowered.render.color.Color
 import heckerpowered.render.command.validateKnownImageDisjoint
 import heckerpowered.render.pipeline.multisample.SampleCount
-import heckerpowered.render.target.RenderAttachment
-import heckerpowered.render.target.validateMetadata
-import heckerpowered.render.texture.TextureAspect
+import heckerpowered.render.resource.target.RenderAttachment
+import heckerpowered.render.resource.target.validateMetadata
+import heckerpowered.render.resource.texture.TextureAspect
 import java.util.*
 
 /**

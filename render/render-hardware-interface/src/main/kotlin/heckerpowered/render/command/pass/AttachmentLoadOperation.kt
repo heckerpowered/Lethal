@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
 /**
  * Chooses the contents an attachment use starts with before drawing in a logical render pass.

@@ -3,13 +3,10 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.render.pass
+package heckerpowered.render.command.pass
 
 import heckerpowered.render.BuiltInPrimitives
 import heckerpowered.render.RenderPipelineDescription
-import heckerpowered.render.binding.DescriptorSet
-import heckerpowered.render.buffer.GpuBuffer
-import heckerpowered.render.buffer.GpuBufferView
 import heckerpowered.render.memory.*
 import heckerpowered.render.pipeline.PipelineLayoutDescription
 import heckerpowered.render.pipeline.PushConstantLayout
@@ -18,7 +15,10 @@ import heckerpowered.render.pipeline.depthstencil.StencilOperation
 import heckerpowered.render.pipeline.primitive.IndexFormat
 import heckerpowered.render.pipeline.vertex.VertexState
 import heckerpowered.render.pipeline.vertex.VertexStepMode
+import heckerpowered.render.resource.buffer.GpuBuffer
+import heckerpowered.render.resource.buffer.GpuBufferView
 import heckerpowered.render.shader.ShaderStage
+import heckerpowered.render.shader.binding.DescriptorSet
 
 /**
  * Records draws and the state they use within one logical render pass.
