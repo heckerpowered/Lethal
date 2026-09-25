@@ -6,7 +6,7 @@
 package heckerpowered.render.pipeline.depthstencil
 
 import heckerpowered.render.RenderPipelineDescription
-import heckerpowered.render.texture.TextureFormat
+import heckerpowered.render.resource.texture.TextureFormat
 
 
 /**
