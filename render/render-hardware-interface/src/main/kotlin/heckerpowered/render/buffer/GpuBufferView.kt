@@ -5,6 +5,7 @@
 
 package heckerpowered.render.buffer
 
+import heckerpowered.render.memory.NativeAddress
 import heckerpowered.render.memory.Size
 
 /**
@@ -32,6 +33,53 @@ data class GpuBufferView(
 ) {
     init {
         requireContainedRange(buffer.sizeBytes, offsetBytes, sizeBytes)
+    }
+
+    /**
+     * Checks the public preconditions for uploading host bytes into this selection.
+     *
+     * Upload access requires TransferDestination even when a later draw uses the same buffer
+     * as uniform or vertex input. An empty selection reads nothing, so its source address may
+     * be zero. This does not establish that a nonzero host address is readable; the caller of
+     * the upload still has to supply at least [sizeBytes] valid bytes.
+     *
+     * Device identity, resource validity, recording scope, and execution support are checked
+     * by the command implementation. This method does not read memory or record a command.
+     *
+     * @throws IllegalArgumentException if the usage is absent or a nonempty upload has a zero
+     * source address.
+     */
+    fun validateUpload(sourceAddress: NativeAddress) {
+        require(BufferUsage.TransferDestination in buffer.usage) { "Buffer upload destination requires TransferDestination usage" }
+        require(sizeBytes == 0L || sourceAddress.rawValue != 0L) { "A nonempty buffer upload requires a nonzero source address" }
+    }
+
+    /**
+     * Checks whether these byte selections can describe a buffer-to-buffer copy.
+     *
+     * Both lengths must match so the operation copies exactly what the caller selected, rather
+     * than silently taking the shorter range. Adjacent ranges of the same buffer are disjoint;
+     * a nonempty range copied onto itself is not. Empty selections access no bytes.
+     *
+     * Overlap can be established here when both views reference the same buffer. Different
+     * wrappers are not proof of different allocations: the backend must also compare their
+     * actual storage ranges. This check neither reads source contents nor establishes device
+     * ownership, resource validity, support, or synchronization.
+     *
+     * @throws IllegalArgumentException if a required transfer usage is missing, the lengths
+     * differ, or nonempty ranges of the same buffer overlap.
+     */
+    fun validateCopyTo(destination: GpuBufferView) {
+        require(BufferUsage.TransferSource in buffer.usage) { "Buffer copy source requires TransferSource usage" }
+        require(BufferUsage.TransferDestination in destination.buffer.usage) { "Buffer copy destination requires TransferDestination usage" }
+        require(sizeBytes == destination.sizeBytes) { "Buffer copy ranges must have equal sizes: source=$sizeBytes, destination=${destination.sizeBytes}" }
+        if (sizeBytes == 0L || buffer !== destination.buffer) return
+
+        val distance = if (offsetBytes <= destination.offsetBytes)
+            destination.offsetBytes - offsetBytes else
+            offsetBytes - destination.offsetBytes
+
+        require(distance >= sizeBytes) { "Buffer copy source and destination ranges overlap" }
     }
 
     /**
@@ -64,7 +112,5 @@ private fun requireContainedRange(capacityBytes: Size, offsetBytes: Size, sizeBy
     require(offsetBytes <= capacityBytes) { "Buffer view offset exceeds its containing range" }
 
     // Subtraction avoids overflowing an invalid end offset while checking the range.
-    require(sizeBytes <= capacityBytes - offsetBytes) {
-        "Buffer view extends beyond its containing range"
-    }
+    require(sizeBytes <= capacityBytes - offsetBytes) { "Buffer view extends beyond its containing range" }
 }
