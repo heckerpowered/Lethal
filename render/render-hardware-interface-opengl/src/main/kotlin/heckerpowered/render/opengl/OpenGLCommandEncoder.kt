@@ -40,11 +40,7 @@ internal class OpenGLCommandEncoder(val device: OpenGLGraphicsDevice) : CommandE
         check(currentPass == null) { "An operation requiring no active render pass was called inside one" }
     }
 
-    override fun renderPass(
-        description: RenderPassDescription,
-        resources: RenderPassResources,
-        commands: RenderPass.() -> Unit,
-    ) = context(device, device.functions) {
+    override fun renderPass(description: RenderPassDescription, resources: RenderPassResources, commands: RenderPass.() -> Unit) = context(device, device.functions) {
         checkOutsidePass()
         resources.validateFor(description)
         validateResources(resources)
@@ -57,7 +53,7 @@ internal class OpenGLCommandEncoder(val device: OpenGLGraphicsDevice) : CommandE
         withinPass(pass) {
             withColorFramebuffer(attachment) {
                 when (val load = colorAttachment.operation.load) {
-                    is AttachmentLoadOperation.Clear -> clearColorAttachment(attachment, description.renderArea, load.value)
+                    is AttachmentLoadOperation.Clear -> clearBoundColorAttachment(attachment, description.renderArea, load.value)
                     AttachmentLoadOperation.Load, AttachmentLoadOperation.Discard -> Unit
                 }
                 commands(pass)
