@@ -5,6 +5,7 @@
 
 package heckerpowered.render.opengl.function
 
+import heckerpowered.render.opengl.BufferName
 import heckerpowered.render.opengl.TextureName
 import heckerpowered.render.opengl.TextureUnit
 import java.nio.ByteBuffer
@@ -17,6 +18,14 @@ import java.nio.ByteBuffer
  * adapters may normalize `ARB_multitexture` when core OpenGL 1.3 is absent.
  */
 interface OpenGLTextureFunctions {
+    val supportsNonPowerOfTwoTextures: Boolean
+    val supportsPixelBuffers: Boolean
+
+    /** These two operations require [supportsPixelBuffers]; absence is not a zero binding. */
+    fun getBoundPixelUnpackBuffer(): BufferName
+    fun bindPixelUnpackBuffer(buffer: BufferName)
+
+    fun getTextureLevelParameter(level: Int, parameter: Int): Int
     fun createTexture(): TextureName
     fun getActiveTextureUnit(): TextureUnit
     fun activeTexture(unit: TextureUnit)
