@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("heckerpowered.convention.kotlin-jvm")
+    alias(libs.plugins.ksp)
 }
 
 repositories {
@@ -15,7 +16,7 @@ repositories {
 
 dependencies {
     implementation(project(":render:render-hardware-interface"))
-    testImplementation(kotlin("test"))
+    add("ksp", project(":render:render-hardware-interface-codegen"))
 }
 
 java {

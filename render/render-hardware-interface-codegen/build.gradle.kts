@@ -13,6 +13,4 @@ repositories {
 
 dependencies {
     implementation(libs.kspSymbolProcessingAPI)
-
-    testImplementation(kotlin("test"))
 }

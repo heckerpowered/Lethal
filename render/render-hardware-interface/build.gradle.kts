@@ -26,9 +26,6 @@ dependencies {
     compileOnly(libs.bundles.lwjgl3)
 
     add("ksp", project(":render:render-hardware-interface-codegen"))
-    add("kspTest", project(":render:render-hardware-interface-codegen"))
-
-    testImplementation(kotlin("test"))
 }
 
 java {
@@ -55,6 +52,6 @@ tasks.named("compileKotlin") {
     dependsOn(generateMemoryStackAllocations)
 }
 
-tasks.matching { it.name == "kspKotlin" || it.name == "kspTestKotlin" }.configureEach {
+tasks.matching { it.name == "kspKotlin" }.configureEach {
     dependsOn(generateMemoryStackAllocations)
 }
