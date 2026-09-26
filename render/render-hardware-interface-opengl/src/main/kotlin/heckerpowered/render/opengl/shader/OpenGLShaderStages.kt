@@ -7,6 +7,7 @@ package heckerpowered.render.opengl.shader
 
 import heckerpowered.render.opengl.OpenGLGraphicsDevice
 import heckerpowered.render.opengl.ProgramName
+import heckerpowered.render.opengl.function.deleteProgram
 import heckerpowered.render.shader.ShaderStages
 import heckerpowered.render.terminateOnFailure
 
@@ -18,19 +19,21 @@ internal class OpenGLShaderStages(
 ) : ShaderStages {
     private val modules = modules.toList()
 
-    fun requireProgram(requester: OpenGLGraphicsDevice): ProgramName {
+    context(requester: OpenGLGraphicsDevice)
+    fun requireProgram(): ProgramName {
         require(requester === owner) { "Shader stages '$label' belong to another graphics device" }
         owner.checkAccess()
         check(program != ProgramName.None) { "Shader stages '$label' are closed" }
         // The public stage-combination contract borrows modules for its complete lifetime.
-        modules.forEach { it.requireShader(owner) }
+        modules.forEach { it.requireShader() }
         return program
     }
 
     override fun close() = terminateOnFailure {
-        if (program != ProgramName.None) {
+        if (program == ProgramName.None) return@terminateOnFailure
+        context(owner.functions) {
             owner.checkAccess()
-            owner.functions.deleteProgram(program)
+            deleteProgram(program)
             program = ProgramName.None
         }
     }
