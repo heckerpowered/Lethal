@@ -152,7 +152,6 @@ private val Identifier = Regex("[A-Za-z_][A-Za-z0-9_]*")
 internal fun requireIdentifier(name: String) {
     require(Identifier.matches(name)) { "Generated declarations require ordinary identifier characters: $name" }
 }
-
 private fun requirePowerOfTwo(value: Int) {
     require(value > 0 && value and (value - 1) == 0) { "Alignment must be a positive power of two" }
 }

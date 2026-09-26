@@ -33,7 +33,7 @@ internal class NativeStructProcessor(
                 }
                 val name = declaration.qualifiedName?.asString()
                 if (name != null && (!visited.add(name) || name in emitted)) continue
-                if (!declaration.validate(COMPILED_CODE, enableNewFeatures = false)) {
+                if (!declaration.validate(enableNewFeatures = true)) {
                     deferred += declaration
                     continue
                 }
@@ -97,7 +97,7 @@ private fun readSchema(
 ): StructSchema {
     val qualifiedName = requireNotNull(declaration.qualifiedName).asString()
     require(qualifiedName !in ancestors) { "Cyclic native structure: ${(ancestors.toList() + qualifiedName).joinToString(" -> ")}" }
-    if (!declaration.validate(COMPILED_CODE, enableNewFeatures = false)) throw UnresolvedSchema()
+    if (!declaration.validate(enableNewFeatures = true)) throw UnresolvedSchema()
     dependencies += requireNotNull(declaration.containingFile) { "Nested NativeStruct schemas must be declared in this compilation's sources" }
     validateDeclaration(declaration)
     val annotations = declaration.annotations.filter { it.qualifiedName() in SchemaAnnotations }.toList()
@@ -183,17 +183,14 @@ private fun readField(
             require(kind != StructKind.Native) { "$name: shader vector markers are not host scalar fields" }
             StructField(name, ElementKind.Float, 2)
         }
-
         "heckerpowered.render.Float3" -> {
             require(kind != StructKind.Native) { "$name: shader vector markers are not host scalar fields" }
             StructField(name, ElementKind.Float, 3)
         }
-
         "heckerpowered.render.Float4" -> {
             require(kind != StructKind.Native) { "$name: shader vector markers are not host scalar fields" }
             StructField(name, ElementKind.Float, 4)
         }
-
         else -> {
             val nested = type.declaration as? KSClassDeclaration
             val isNativeStructure = nested?.annotations?.any { it.qualifiedName() == "heckerpowered.render.memory.NativeStruct" } == true

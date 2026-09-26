@@ -27,13 +27,11 @@ internal fun renderStruct(schema: StructSchema, layout: StructLayout): String = 
             appendLine("import java.nio.FloatBuffer")
             appendLine("import java.nio.IntBuffer")
         }
-
         StructKind.Uniform -> {
             appendLine("import heckerpowered.render.command.CommandEncoder")
             appendLine("import heckerpowered.render.resource.buffer.BufferUsage")
             appendLine("import heckerpowered.render.resource.buffer.GpuBufferView")
         }
-
         StructKind.PushConstant -> {
             appendLine("import heckerpowered.render.command.pass.RenderPass")
             appendLine("import heckerpowered.render.pipeline.PushConstantLayout")
@@ -70,7 +68,6 @@ private fun StringBuilder.renderLayout(schema: StructSchema, layout: StructLayou
             appendLine("${schema.visibility} val ${schema.name}Layout: MemoryLayout = ${schema.layoutName}.memory")
             appendLine()
         }
-
         StructKind.PushConstant -> {
             appendLine("${schema.visibility} val ${schema.name}Range = PushConstantRange(")
             appendLine("    stages = setOf(${schema.stages.joinToString { "ShaderStage.${quoted(it)}" }}),")
@@ -96,7 +93,6 @@ private fun StringBuilder.renderView(schema: StructSchema, layout: StructLayout)
                 appendLine("    val ${quoted(field.name)}: $nestedType")
                 appendLine("        get() = $nestedType($offset)")
             }
-
             field.isScalar -> {
                 appendLine("    context(memoryFrame: MemoryFrame)")
                 appendLine("    var ${quoted(field.name)}: ${field.element.name}")
@@ -107,7 +103,6 @@ private fun StringBuilder.renderView(schema: StructSchema, layout: StructLayout)
                 }
                 appendLine("        set(value) = memoryFrame.store${field.element.name}($offset, value)")
             }
-
             schema.kind == StructKind.Native -> {
                 val bufferType = when (field.element) {
                     ElementKind.Float -> "FloatBuffer"
@@ -120,7 +115,6 @@ private fun StringBuilder.renderView(schema: StructSchema, layout: StructLayout)
                 appendLine("    val ${quoted(field.name)}: $bufferType")
                 appendLine("        get() = memoryFrame.asByteBuffer($offset, ${field.byteSize})$cast")
             }
-
             field.count in 2..4 -> {
                 val components = listOf("x", "y", "z", "w").take(field.count)
                 appendLine("    context(memoryFrame: MemoryFrame)")
@@ -134,7 +128,6 @@ private fun StringBuilder.renderView(schema: StructSchema, layout: StructLayout)
                 }
                 appendLine("    }")
             }
-
             else -> {
                 appendLine("    /** Writes sixteen column-major components; no transpose or shader-side conversion is performed. */")
                 appendLine("    context(memoryFrame: MemoryFrame)")
