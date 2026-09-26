@@ -27,6 +27,12 @@ interface OpenGLFunctions :
     OpenGLStateFunctions {
 
     /**
+     * Rejects calls from a different thread or without the context used to obtain this table.
+     * Backends check at public operation boundaries, before issuing native commands.
+     */
+    fun checkCurrentContext()
+
+    /**
      * Framebuffer and renderbuffer operations, or `null` when the device reports
      * render-target creation as unsupported and renders only to output targets
      * managed by the host.
