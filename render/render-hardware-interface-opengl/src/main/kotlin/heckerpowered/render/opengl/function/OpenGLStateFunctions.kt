@@ -6,6 +6,7 @@
 package heckerpowered.render.opengl.function
 
 import heckerpowered.render.opengl.BlendEquation
+import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
 /**
@@ -16,6 +17,30 @@ import java.nio.IntBuffer
  * and blend equations. Adapters may normalize the corresponding EXT operations.
  */
 interface OpenGLStateFunctions {
+    /** Whether the context exposes the rasterizer-discard enable state. */
+    val supportsRasterizerDiscard: Boolean
+
+    fun getError(): Int
+    fun flush()
+    fun getFloats(parameter: Int, destination: FloatBuffer)
+
+    /**
+     * Addresses one scissor without changing the other viewport-array entries. Contexts without
+     * viewport arrays accept index zero and use their single scissor. A global glScissor call on
+     * an array-capable context is not an equivalent implementation: it overwrites every box.
+     */
+    fun scissor(index: Int, x: Int, y: Int, width: Int, height: Int)
+    fun getScissorBox(index: Int, destination: IntBuffer)
+    fun isScissorEnabled(index: Int): Boolean
+    fun setScissorEnabled(index: Int, enabled: Boolean)
+
+    /**
+     * Changes one draw buffer's mask when independent masks exist. Otherwise only index zero
+     * is accepted and addresses the shared mask. Unlike the unindexed overload, this does not
+     * overwrite unrelated independent masks on newer contexts.
+     */
+    fun colorMask(index: Int, red: Boolean, green: Boolean, blue: Boolean, alpha: Boolean)
+
     fun getInteger(parameter: Int): Int
     fun getIntegers(parameter: Int, destination: IntBuffer)
     fun isEnabled(capability: Int): Boolean
