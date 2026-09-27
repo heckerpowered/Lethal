@@ -39,7 +39,8 @@ import java.util.*
  * this example; a later operation that reads the scene depth would require storing it instead.
  * Load and store choices belong to each use, not permanently to the underlying image.
  *
- * [renderArea] and [layerCount] select the pixels and layers affected by the pass. The commands
+ * [renderArea] and [layerCount] select the pixels and layers affected by the pass. The area defaults
+ * to the common extent of the direct attachments; attachmentless passes must specify it. The commands
  * that draw geometry, bind pipelines, and supply shader resources are recorded separately
  * through [RenderPass]; this description provides their attachment setup, not the commands or
  * new image storage.
@@ -52,58 +53,25 @@ import java.util.*
  * The pass boundary is logical, but no automatic grouping with later commands is promised.
  * A backend may group native work only when the requested content and access rules are preserved.
  *
+ * @property depthAttachment Supplies depth values for deciding which surfaces are visible.
+ *
+ * This position's load and store operations affect only [TextureAspect.Depth], even when
+ * the attachment also exposes stencil. Binding it does not enable depth testing: the
+ * pipeline controls the comparisons and depth writes used by each draw.
+ *
+ * @property stencilAttachment Supplies integer stencil marks for masking or classifying drawing regions.
+ *
+ * This position's operations affect only [TextureAspect.Stencil]. It can reference the same
+ * combined attachment as [depthAttachment] while choosing independent load/store operations.
+ *
+ * @property layerCount Number of layers used from the start of each attachment's exposed range. For example,
+ * a count of two on a selection of layers four through seven uses layers four and five.
+ * More layers do not repeat each draw or enable multiview automatically.
+ *
  * @throws IllegalArgumentException if the attachment metadata, render area, layer count, sample
  * counts, depth clear value, or declared color resolves fail [validateAttachments].
  */
-class RenderPassDescription(
-    val label: String,
-
-    /**
-     * Region affected in each participating attachment layer.
-     *
-     * Use a smaller rectangle to update part of a larger image, such as one cell in a texture
-     * atlas. Every bound attachment must cover this rectangle, but their complete dimensions
-     * need not match. The pass begins with a [Viewport] covering this rectangle and with this
-     * rectangle as its effective drawing clip. These defaults are established anew for each pass.
-     *
-     * [RenderPass.withViewport] changes the mapping for selected draws; [RenderPass.withScissor]
-     * adds temporary drawing clips. Neither changes this region or the attachment load/clear/store
-     * operations. For example, clipping a scrolling list does not clip the pass's background clear.
-     */
-    val renderArea: RenderArea,
-    colorAttachments: List<RenderPassAttachment<Color>?> = emptyList(),
-
-    /**
-     * Supplies depth values for deciding which surfaces are visible.
-     *
-     * This position's load and store operations affect only [TextureAspect.Depth], even when
-     * the attachment also exposes stencil. Binding it does not enable depth testing: the
-     * pipeline controls the comparisons and depth writes used by each draw.
-     */
-    val depthAttachment: RenderPassAttachment<Float>? = null,
-
-    /**
-     * Supplies integer stencil marks for masking or classifying drawing regions.
-     *
-     * This position's load and store operations affect only [TextureAspect.Stencil]. It can
-     * reference the same combined attachment as [depthAttachment] while choosing different
-     * operations, such as keeping depth and clearing stencil for a new selection mask.
-     * The pipeline and stencil reference determine how draws test and update the marks.
-     */
-    val stencilAttachment: RenderPassAttachment<UByte>? = null,
-
-    /**
-     * Number of layers used from the start of each attachment's exposed layer range.
-     *
-     * For example, if an attachment exposes texture layers 4 through 7, a count of 2 uses texture
-     * layers 4 and 5. The pass does not select layers from the start of the complete texture.
-     *
-     * The default uses one layer. A larger count makes more layers available to supported layered
-     * rendering; it does not repeat each draw for every layer or enable multiview by itself.
-     */
-    val layerCount: Int = 1,
-    colorResolves: List<ColorAttachmentResolve> = emptyList(),
-) {
+class RenderPassDescription(val label: String, renderArea: RenderArea? = null, colorAttachments: List<RenderPassAttachment<Color>?> = emptyList(), val depthAttachment: RenderPassAttachment<Float>? = null, val stencilAttachment: RenderPassAttachment<UByte>? = null, val layerCount: Int = 1, colorResolves: List<ColorAttachmentResolve> = emptyList()) {
     /**
      * Images that receive the fragment shader's color outputs, together with their load and
      * store operations for this pass.
@@ -137,6 +105,26 @@ class RenderPassDescription(
      */
     val colorResolves: List<ColorAttachmentResolve> =
         Collections.unmodifiableList(colorResolves.toList())
+
+    /**
+     * Concrete region affected in every participating attachment layer.
+     *
+     * Omitting the constructor argument, or passing null, selects the largest upper-left-origin
+     * rectangle covered by all direct color, depth, and stencil attachments: the minimum width
+     * and minimum height. Equally sized attachments therefore use their whole extent. Different
+     * sizes use only their common extent, not the extent of an arbitrarily selected attachment.
+     * Resolve destinations do not determine this default. An attachmentless pass must supply an
+     * explicit region because no image defines its dimensions.
+     *
+     * The default is resolved once during construction; backends always receive a non-null area.
+     * An explicit area must fit every attachment and is never silently clipped. Use it for an
+     * atlas cell or a split-screen region. The pass starts with a [Viewport] matching this area
+     * and this area as its effective clip.
+     *
+     * [RenderPass.withViewport] changes selected draws' mapping, and [RenderPass.withScissor]
+     * adds temporary clips. Neither changes attachment load, clear, or store operations.
+     */
+    val renderArea: RenderArea = renderArea ?: commonAttachmentArea()
 
     /**
      * Common sample count required by the direct attachments, or null when none are bound.
@@ -180,7 +168,7 @@ class RenderPassDescription(
             attachment.validateMetadata()
             renderArea.validateFor(attachment.width, attachment.height)
             require(layerCount <= attachment.arrayLayerCount) { "$label: $position exposes ${attachment.arrayLayerCount} layers, but the pass requires $layerCount" }
-            
+
             val expected = samples
             require(expected == null || attachment.sampleCount == expected) { "$label: $position has ${attachment.sampleCount.value} samples; other direct attachments have ${expected?.value}" }
             samples = attachment.sampleCount
@@ -206,6 +194,19 @@ class RenderPassDescription(
         forEachAttachment { position, attachment ->
             require(attachment.sampleCount == sampleCount) { "$label: $position has ${attachment.sampleCount.value} samples, but the pipeline requires ${sampleCount.value}" }
         }
+    }
+
+    private fun commonAttachmentArea(): RenderArea {
+        val first = colorAttachments.firstNotNullOfOrNull { it?.attachment } ?: depthAttachment?.attachment ?: stencilAttachment?.attachment
+        requireNotNull(first) { "$label: an attachmentless pass requires an explicit render area" }
+
+        var width = first.width
+        var height = first.height
+        forEachAttachment { _, attachment ->
+            width = minOf(width, attachment.width)
+            height = minOf(height, attachment.height)
+        }
+        return RenderArea(0, 0, width, height)
     }
 
     private fun validateColorResolves() {
