@@ -11,7 +11,7 @@ import heckerpowered.bridge.network.Payload
 import heckerpowered.bridge.network.StreamCodecs
 import heckerpowered.bridge.network.codec.StreamCodec
 import heckerpowered.lethal.Constants
-import heckerpowered.lethal.gameplay.client.render.ZeusShotEffect
+import heckerpowered.lethal.gameplay.client.render.zeus.ZeusElectricLineEffect
 
 class ZeusShotPayload(val isMainHand: Boolean) : ClientboundPayload<ZeusShotPayload> {
     companion object {
@@ -26,6 +26,6 @@ class ZeusShotPayload(val isMainHand: Boolean) : ClientboundPayload<ZeusShotPayl
         get() = Type
 
     fun handle(context: Context) {
-        ZeusShotEffect.play(context.player, isMainHand)
+        ZeusElectricLineEffect.play(context.player, isMainHand)
     }
 }
