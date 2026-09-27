@@ -15,6 +15,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":render:render-hardware-interface"))
     implementation(project(":render:render-hardware-interface-opengl"))
     compileOnly(libs.lwjgl2)
 
