@@ -5,11 +5,12 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.bridge.requireAccess
-import heckerpowered.bridge.requireHost
 import heckerpowered.bridge.resources.Identifier
+import heckerpowered.bridge.resources.IdentifierProvider
 import net.minecraft.resources.ResourceLocation
 
-fun Identifier.asHost() = requireHost<ResourceLocation>(this)
+@Suppress("CAST_NEVER_SUCCEEDS")
+fun Identifier.asHost(): ResourceLocation = this as? ResourceLocation ?: ResourceLocation.fromNamespaceAndPath(namespace, path)
 
-fun ResourceLocation.asView() = requireAccess<Identifier>(this)
+@Suppress("CAST_NEVER_SUCCEEDS")
+fun ResourceLocation.asView() = this as? Identifier ?: IdentifierProvider.Freestanding.identifier(namespace, path)
