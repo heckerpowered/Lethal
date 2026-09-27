@@ -5,8 +5,10 @@
 
 package heckerpowered.render.opengl.lwjgl2
 
+import heckerpowered.render.memory.NativeAddress
 import heckerpowered.render.opengl.*
 import heckerpowered.render.opengl.function.*
+import org.lwjgl.PointerBuffer
 import org.lwjgl.opengl.*
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
@@ -25,6 +27,102 @@ internal class Lwjgl2OpenGLFunctions(
     override val samplers: OpenGLSamplerFunctions?,
     override val shaderColorClamping: OpenGLShaderColorClampingFunctions?,
 ) : OpenGLFunctions {
+    private val context = GLContext.getCapabilities()
+    private val thread = Thread.currentThread()
+    private val nativeBufferSubData = when (bufferEntryPoints) {
+        Lwjgl2BufferEntryPoints.Core -> Lwjgl2BufferSubData.create(context, GL15::class.java, "glBufferSubData")
+        Lwjgl2BufferEntryPoints.ARB -> Lwjgl2BufferSubData.create(context, ARBBufferObject::class.java, "glBufferSubDataARB")
+    }
+    override val maximumBufferSizeBytes: Long = if (PointerBuffer.getPointerSize() == 8) Long.MAX_VALUE else Int.MAX_VALUE.toLong()
+    private val viewportArrays = context.OpenGL41 || context.GL_ARB_viewport_array
+
+    init {
+        check(!viewportArrays || context.OpenGL30 || context.GL_EXT_draw_buffers2) { "Viewport-array scissor state requires core or EXT indexed state entry points" }
+    }
+
+    override val spirVShaders: OpenGLSpirVShaderFunctions? = null
+
+    override val supportsRasterizerDiscard: Boolean = context.OpenGL30 || context.GL_EXT_transform_feedback || context.GL_NV_transform_feedback
+    override val supportsNonPowerOfTwoTextures: Boolean = context.OpenGL20 || context.GL_ARB_texture_non_power_of_two
+    override val supportsPixelBuffers: Boolean = context.OpenGL21 || context.GL_ARB_pixel_buffer_object || context.GL_EXT_pixel_buffer_object
+
+    override fun checkCurrentContext() {
+        check(Thread.currentThread() === thread) { "OpenGL access from a different thread" }
+        check(GLContext.getCapabilities() === context) { "The original OpenGL context is not current" }
+    }
+
+    override fun getError(): Int = GL11.glGetError()
+    override fun flush() = GL11.glFlush()
+    override fun getFloats(parameter: Int, destination: FloatBuffer) = GL11.glGetFloat(parameter, destination)
+
+    override fun getBoundPixelUnpackBuffer(): BufferName {
+        check(supportsPixelBuffers) { "Pixel buffer objects are unavailable" }
+        return BufferName(GL11.glGetInteger(ARBPixelBufferObject.GL_PIXEL_UNPACK_BUFFER_BINDING_ARB))
+    }
+
+    override fun bindPixelUnpackBuffer(buffer: BufferName) {
+        check(supportsPixelBuffers) { "Pixel buffer objects are unavailable" }
+        bufferEntryPoints.bindBuffer(ARBPixelBufferObject.GL_PIXEL_UNPACK_BUFFER_ARB, buffer.value)
+    }
+
+    override fun getTextureLevelParameter(level: Int, parameter: Int): Int =
+        GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, level, parameter)
+
+    override fun scissor(index: Int, x: Int, y: Int, width: Int, height: Int) {
+        when {
+            context.OpenGL41 -> GL41.glScissorIndexed(index, x, y, width, height)
+            context.GL_ARB_viewport_array -> ARBViewportArray.glScissorIndexed(index, x, y, width, height)
+            else -> {
+                require(index == 0) { "Only scissor zero is available" }
+                GL11.glScissor(x, y, width, height)
+            }
+        }
+    }
+
+    override fun getScissorBox(index: Int, destination: IntBuffer) {
+        if (viewportArrays) {
+            if (context.OpenGL30) GL30.glGetInteger(GL11.GL_SCISSOR_BOX, index, destination)
+            else EXTDrawBuffers2.glGetIntegerIndexedEXT(GL11.GL_SCISSOR_BOX, index, destination)
+        } else {
+            require(index == 0) { "Only scissor zero is available" }
+            getIntegers(GL11.GL_SCISSOR_BOX, destination)
+        }
+    }
+
+    override fun isScissorEnabled(index: Int): Boolean {
+        if (viewportArrays) {
+            return if (context.OpenGL30) GL30.glIsEnabledi(GL11.GL_SCISSOR_TEST, index)
+            else EXTDrawBuffers2.glIsEnabledIndexedEXT(GL11.GL_SCISSOR_TEST, index)
+        }
+        require(index == 0) { "Only scissor zero is available" }
+        return GL11.glIsEnabled(GL11.GL_SCISSOR_TEST)
+    }
+
+    override fun setScissorEnabled(index: Int, enabled: Boolean) {
+        if (viewportArrays) {
+            if (context.OpenGL30) {
+                if (enabled) GL30.glEnablei(GL11.GL_SCISSOR_TEST, index) else GL30.glDisablei(GL11.GL_SCISSOR_TEST, index)
+            } else {
+                if (enabled) EXTDrawBuffers2.glEnableIndexedEXT(GL11.GL_SCISSOR_TEST, index)
+                else EXTDrawBuffers2.glDisableIndexedEXT(GL11.GL_SCISSOR_TEST, index)
+            }
+        } else {
+            require(index == 0) { "Only scissor zero is available" }
+            if (enabled) GL11.glEnable(GL11.GL_SCISSOR_TEST) else GL11.glDisable(GL11.GL_SCISSOR_TEST)
+        }
+    }
+
+    override fun colorMask(index: Int, red: Boolean, green: Boolean, blue: Boolean, alpha: Boolean) {
+        when {
+            context.OpenGL30 -> GL30.glColorMaski(index, red, green, blue, alpha)
+            context.GL_EXT_draw_buffers2 -> EXTDrawBuffers2.glColorMaskIndexedEXT(index, red, green, blue, alpha)
+            else -> {
+                require(index == 0) { "Only the shared color mask is available" }
+                GL11.glColorMask(red, green, blue, alpha)
+            }
+        }
+    }
+
     override fun createShader(type: ShaderType): ShaderName {
         val name = when (shaderEntryPoints) {
             Lwjgl2ShaderEntryPoints.Core -> GL20.glCreateShader(type.toOpenGL())
@@ -173,6 +271,13 @@ internal class Lwjgl2OpenGLFunctions(
         bufferEntryPoints.bufferSubData(target.toOpenGL(), offsetBytes, data)
     }
 
+    override fun bufferSubData(target: BufferTarget, offsetBytes: Long, sizeBytes: Long, sourceAddress: NativeAddress) {
+        validateNativeUpload(offsetBytes, sizeBytes, sourceAddress, maximumBufferSizeBytes)
+        if (sizeBytes == 0L) return
+        checkCurrentContext()
+        nativeBufferSubData.upload(target.toOpenGL(), offsetBytes, sizeBytes, sourceAddress.rawValue)
+    }
+
     override fun deleteBuffer(buffer: BufferName) {
         bufferEntryPoints.deleteBuffer(buffer.value)
     }
@@ -296,4 +401,17 @@ internal fun Lwjgl2BufferEntryPoints.bufferSubData(target: Int, offsetBytes: Lon
 internal fun Lwjgl2BufferEntryPoints.deleteBuffer(buffer: Int) = when (this) {
     Lwjgl2BufferEntryPoints.Core -> GL15.glDeleteBuffers(buffer)
     Lwjgl2BufferEntryPoints.ARB -> ARBBufferObject.glDeleteBuffersARB(buffer)
+}
+
+private fun validateNativeUpload(offsetBytes: Long, sizeBytes: Long, sourceAddress: NativeAddress, nativeSizeLimit: Long) {
+    require(offsetBytes in 0..nativeSizeLimit) { "Buffer upload offset is outside the native GLintptr range" }
+    require(sizeBytes in 0..nativeSizeLimit - offsetBytes) { "Buffer upload range is outside the native GLsizeiptr range" }
+    if (sizeBytes == 0L) return
+
+    require(sourceAddress.rawValue != 0L) { "A nonempty buffer upload requires a nonzero source address" }
+    val firstByte = sourceAddress.rawValue.toULong()
+    val lastByte = firstByte + (sizeBytes - 1).toULong()
+    val wrapsAddressSpace = lastByte < firstByte
+    val exceeds32BitAddressSpace = nativeSizeLimit == Int.MAX_VALUE.toLong() && lastByte > UInt.MAX_VALUE.toULong()
+    require(!wrapsAddressSpace && !exceeds32BitAddressSpace) { "Buffer upload source range cannot be represented by a native pointer" }
 }
