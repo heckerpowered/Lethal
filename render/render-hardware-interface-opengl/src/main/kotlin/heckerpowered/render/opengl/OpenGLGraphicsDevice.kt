@@ -28,13 +28,14 @@ import heckerpowered.render.shader.ShaderStages
 import heckerpowered.render.shader.ShaderStagesDescription
 
 /**
- * Creates offscreen color images and executes attachment-only passes in an existing OpenGL context.
+ * Creates buffer and shader resources and executes uploads and attachment-only passes in an existing OpenGL context.
  *
  * This first implementation supports backed, single-sampled RGBA8 images with one two-dimensional
  * mip and one layer. Views and attachments refer to that same image. A pass can load, clear, or
- * discard it, but drawing, transfers, depth/stencil, resolves, shader resources, and imported host
- * targets are not implemented here yet. Their entry points reject the request instead of doing
- * nothing. This is an integration milestone, not a complete drawing backend.
+ * discard it. Buffer creation and host uploads are also implemented, as are shader compilation
+ * and linking. Drawing, GPU copies, image transfers, depth/stencil, resolves, resource binding,
+ * and imported host targets are not implemented here yet. Those entry points reject requests
+ * instead of silently ignoring them. This is not yet a complete drawing backend.
  *
  * [functions] comes from the host's LWJGL adapter. The host keeps that context current on its
  * original thread and owns its lifetime. No window, context, command replay list, or swap operation
@@ -95,6 +96,14 @@ class OpenGLGraphicsDevice(
         return OpenGLRenderAttachment(source)
     }
 
+    internal fun requireBuffer(buffer: GpuBuffer): OpenGLBuffer {
+        require(buffer is OpenGLBuffer) { "Buffer was not created by this OpenGL backend" }
+        val belongsToDevice = buffer.device === this
+        require(belongsToDevice) { "Buffer was not created by this graphics device" }
+        buffer.checkOpen()
+        return buffer
+    }
+
     internal fun requireTexture(texture: GpuTexture): OpenGLTexture {
         require(texture is OpenGLTexture) { "Texture was not created by this OpenGL backend" }
         val belongsToDevice = texture.device === this
@@ -144,7 +153,7 @@ class OpenGLGraphicsDevice(
     override fun createShaderStages(description: ShaderStagesDescription): ShaderStages = context(this) { OpenGLShaderCompiler.link(description) }
     override fun createPipelineLayout(description: PipelineLayoutDescription): PipelineLayout = TODO("Implement OpenGL pipeline layouts")
     override fun createRenderPipeline(description: RenderPipelineDescription): RenderPipeline = TODO("Implement OpenGL render pipelines")
-    override fun createBuffer(description: BufferDescription): GpuBuffer = TODO("Implement OpenGL buffers")
+    override fun createBuffer(description: BufferDescription): GpuBuffer = context(this) { OpenGLBuffer.create(description) }
     override fun createSampler(description: SamplerDescription): GpuSampler = TODO("Implement OpenGL samplers")
     override fun resolveRenderPipeline(description: RenderPipelineDescription): RenderPipeline = createRenderPipeline(description)
     override fun resolveSampler(description: SamplerDescription): GpuSampler = createSampler(description)
