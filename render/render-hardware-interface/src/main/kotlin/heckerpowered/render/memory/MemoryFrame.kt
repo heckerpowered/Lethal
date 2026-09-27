@@ -95,9 +95,9 @@ value class MemoryFrame @PublishedApi internal constructor(@PublishedApi interna
     fun asByteBuffer(address: NativeAddress, byteCount: Int): ByteBuffer {
         require(byteCount >= 0) { "Buffer view size must be non-negative" }
         val start = offset(address, byteCount)
-        check(start.toLong() + byteCount <= pointer.rawValue - memoryStack.baseAddress.rawValue) {
-            "Buffer view extends beyond this stack's reserved memory"
-        }
+        val reservedBytes = pointer.rawValue - memoryStack.baseAddress.rawValue
+        val fitsReservedMemory = start.toLong() + byteCount <= reservedBytes
+        check(fitsReservedMemory) { "Buffer view extends beyond this stack's reserved memory" }
         return bufferAt(start, byteCount)
     }
 
@@ -177,9 +177,8 @@ value class MemoryFrame @PublishedApi internal constructor(@PublishedApi interna
 
     private fun reservationAddress(byteCount: Int, alignment: Int): NativeAddress {
         require(byteCount >= 0) { "Memory reservation size must be non-negative" }
-        require(alignment > 0 && alignment and (alignment - 1) == 0) {
-            "Memory reservation alignment must be a positive power of two"
-        }
+        val alignmentIsPowerOfTwo = alignment > 0 && alignment and (alignment - 1) == 0
+        require(alignmentIsPowerOfTwo) { "Memory reservation alignment must be a positive power of two" }
         return alignUp(pointer, alignment)
     }
 
@@ -192,7 +191,9 @@ value class MemoryFrame @PublishedApi internal constructor(@PublishedApi interna
 
     private fun offset(address: NativeAddress, byteCount: Int): Int {
         val offset = address.rawValue - memoryStack.baseAddress.rawValue
-        check(offset >= 0L && offset <= Int.MAX_VALUE && byteCount >= 0 && offset + byteCount <= memory.capacity()) { "Memory access is outside this stack" }
+        val offsetFitsBuffer = offset >= 0L && offset <= Int.MAX_VALUE
+        val rangeFitsStorage = byteCount >= 0 && offset + byteCount <= memory.capacity()
+        check(offsetFitsBuffer && rangeFitsStorage) { "Memory access is outside this stack" }
         return offset.toInt()
     }
 }
