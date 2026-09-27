@@ -73,3 +73,14 @@ interface OpenGLFunctions :
      */
     val spirVShaders: OpenGLSpirVShaderFunctions?
 }
+
+context(functions: OpenGLFunctions)
+fun checkCurrentContext() = functions.checkCurrentContext()
+
+context(functions: OpenGLFunctions)
+val framebuffers: OpenGLFramebufferFunctions?
+    get() = functions.framebuffers
+
+context(functions: OpenGLFunctions)
+val spirVShaders: OpenGLSpirVShaderFunctions?
+    get() = functions.spirVShaders
