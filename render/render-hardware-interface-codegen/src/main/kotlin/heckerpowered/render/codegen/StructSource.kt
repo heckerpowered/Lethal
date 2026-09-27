@@ -118,7 +118,7 @@ private fun StringBuilder.renderView(schema: StructSchema, layout: StructLayout)
             field.count in 2..4 -> {
                 val components = listOf("x", "y", "z", "w").take(field.count)
                 appendLine("    context(memoryFrame: MemoryFrame)")
-                appendLine("    fun ${field.setterName}(${components.joinToString { "$it: ${field.element.name}" }}) {")
+                appendLine("    fun ${quoted(field.name)}(${components.joinToString { "$it: ${field.element.name}" }}) {")
                 if (field.element == ElementKind.Float) {
                     appendLine("        memoryFrame.storeFloat${field.count}($offset, ${components.joinToString()})")
                 } else {
@@ -127,6 +127,13 @@ private fun StringBuilder.renderView(schema: StructSchema, layout: StructLayout)
                     }
                 }
                 appendLine("    }")
+                // Keep the interim setX spelling without making the original field-name DSL depend on it.
+                val aliasConflictsWithField = schema.fields.any { it.name == field.setterName && !it.isScalar }
+                if (!aliasConflictsWithField) {
+                    appendLine()
+                    appendLine("    context(_: MemoryFrame)")
+                    appendLine("    fun ${field.setterName}(${components.joinToString { "$it: ${field.element.name}" }}) = ${quoted(field.name)}(${components.joinToString()})")
+                }
             }
             else -> {
                 appendLine("    context(memoryFrame: MemoryFrame)")
