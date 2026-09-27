@@ -14,7 +14,7 @@ import heckerpowered.bridge.network.StreamBuffer
 import heckerpowered.bridge.network.StreamCodecs
 import heckerpowered.bridge.network.codec.StreamCodec
 import heckerpowered.lethal.Constants
-import heckerpowered.lethal.gameplay.client.render.ZeusChainEffect
+import heckerpowered.lethal.gameplay.client.render.zeus.ZeusElectricLineEffect
 
 data class ZeusChainSegment(
     val startPosition: VectorView,
@@ -69,7 +69,7 @@ class ZeusChainPayload(chainSegments: List<ZeusChainSegment>) : ClientboundPaylo
         get() = Type
 
     fun handle(context: Context) {
-        ZeusChainEffect.play(chainSegments)
+        ZeusElectricLineEffect.play(chainSegments)
     }
 }
 
