@@ -35,7 +35,7 @@ class LethalMod {
     fun preInitialize(event: FMLPreInitializationEvent) {
         proxy.preInitialize(event)
         Services.callEntrypoints<Entrypoint>()
-        ForgeCreativeModeTabs.initialize()
+        ForgeCreativeModeTabs.onInitialize()
     }
 
     @EventHandler
