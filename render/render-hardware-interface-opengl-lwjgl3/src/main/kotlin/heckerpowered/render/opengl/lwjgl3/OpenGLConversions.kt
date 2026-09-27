@@ -6,10 +6,7 @@
 package heckerpowered.render.opengl.lwjgl3
 
 import heckerpowered.render.opengl.*
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL15
-import org.lwjgl.opengl.GL20
-import org.lwjgl.opengl.GL30
+import org.lwjgl.opengl.*
 
 internal fun ShaderType.toOpenGL(): Int = when (this) {
     ShaderType.Vertex -> GL20.GL_VERTEX_SHADER
@@ -38,6 +35,15 @@ internal fun PrimitiveMode.toOpenGL(): Int = when (this) {
 }
 
 internal fun ColorClampMode.toOpenGL(): Int = when (this) {
-    ColorClampMode.Unclamped -> GL11.GL_FALSE
+    ColorClampMode.Always -> GL11.GL_TRUE
+    ColorClampMode.Never -> GL11.GL_FALSE
     ColorClampMode.FixedOnly -> GL30.GL_FIXED_ONLY
+}
+
+internal fun BlendEquation.toOpenGL(): Int = when (this) {
+    BlendEquation.Add -> GL14.GL_FUNC_ADD
+    BlendEquation.Subtract -> GL14.GL_FUNC_SUBTRACT
+    BlendEquation.ReverseSubtract -> GL14.GL_FUNC_REVERSE_SUBTRACT
+    BlendEquation.Min -> GL14.GL_MIN
+    BlendEquation.Max -> GL14.GL_MAX
 }
