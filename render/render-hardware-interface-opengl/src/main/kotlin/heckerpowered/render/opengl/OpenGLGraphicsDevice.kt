@@ -11,6 +11,7 @@ import heckerpowered.render.RenderPipelineDescription
 import heckerpowered.render.command.CommandEncoder
 import heckerpowered.render.memory.MemoryStack
 import heckerpowered.render.opengl.function.*
+import heckerpowered.render.opengl.shader.OpenGLShaderCompiler
 import heckerpowered.render.pipeline.PipelineLayout
 import heckerpowered.render.pipeline.PipelineLayoutDescription
 import heckerpowered.render.pipeline.RenderPipeline
@@ -139,8 +140,8 @@ class OpenGLGraphicsDevice(
     }
 
     override val primitives: BuiltInPrimitives get() = TODO("Implement OpenGL built-in geometry")
-    override fun createShaderModule(description: ShaderModuleDescription): ShaderModule = TODO("Implement OpenGL shader module creation")
-    override fun createShaderStages(description: ShaderStagesDescription): ShaderStages = TODO("Implement OpenGL shader stage linking")
+    override fun createShaderModule(description: ShaderModuleDescription): ShaderModule = context(this) { OpenGLShaderCompiler.compile(description) }
+    override fun createShaderStages(description: ShaderStagesDescription): ShaderStages = context(this) { OpenGLShaderCompiler.link(description) }
     override fun createPipelineLayout(description: PipelineLayoutDescription): PipelineLayout = TODO("Implement OpenGL pipeline layouts")
     override fun createRenderPipeline(description: RenderPipelineDescription): RenderPipeline = TODO("Implement OpenGL render pipelines")
     override fun createBuffer(description: BufferDescription): GpuBuffer = TODO("Implement OpenGL buffers")
