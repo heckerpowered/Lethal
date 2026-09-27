@@ -6,16 +6,14 @@
 package heckerpowered.bridge.platform
 
 import heckerpowered.bridge.network.PayloadTransport
-import heckerpowered.bridge.platform.services.ClientPlatform
-import heckerpowered.bridge.platform.services.Entrypoint
-import heckerpowered.bridge.platform.services.ModPlatform
-import heckerpowered.bridge.platform.services.PlatformLogger
+import heckerpowered.bridge.platform.services.*
 import java.util.*
 
 object Services {
     val Logger by lazy { load<PlatformLogger>() }
     val Platform by lazy { load<ModPlatform>() }
     val ClientPlatform by lazy { load<ClientPlatform>() }
+    val EntityPlatform by lazy { load<EntityPlatform>() }
     val PayloadTransport by lazy { load<PayloadTransport>() }
 
     fun <T : Any> load(type: Class<T>): T {
@@ -36,7 +34,7 @@ object Services {
         val entrypointCount = entrypoints.size
 
         Logger.info("Found $entrypointCount entrypoint(s).")
-        for ((index, entrypoint) in entrypoints.withIndex()) {
+        for ([index, entrypoint] in entrypoints.withIndex()) {
             Logger.info("Calling entrypoint (${index + 1}/$entrypointCount): ${entrypoint.javaClass.name}")
             entrypoint.onEntrypoint()
         }
