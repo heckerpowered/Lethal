@@ -73,3 +73,20 @@ fun getTextureParameter(parameter: Int): Int = function.getTextureParameter(para
 
 context(function: OpenGLTextureFunctions)
 fun deleteTexture(texture: TextureName) = function.deleteTexture(texture)
+
+context(function: OpenGLTextureFunctions)
+val supportsNonPowerOfTwoTextures: Boolean
+    get() = function.supportsNonPowerOfTwoTextures
+
+context(function: OpenGLTextureFunctions)
+val supportsPixelBuffers: Boolean
+    get() = function.supportsPixelBuffers
+
+context(function: OpenGLTextureFunctions)
+fun getBoundPixelUnpackBuffer(): BufferName = function.getBoundPixelUnpackBuffer()
+
+context(function: OpenGLTextureFunctions)
+fun bindPixelUnpackBuffer(buffer: BufferName) = function.bindPixelUnpackBuffer(buffer)
+
+context(function: OpenGLTextureFunctions)
+fun getTextureLevelParameter(level: Int, parameter: Int): Int = function.getTextureLevelParameter(level, parameter)
