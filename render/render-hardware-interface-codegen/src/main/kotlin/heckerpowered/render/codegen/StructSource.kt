@@ -129,6 +129,11 @@ private fun StringBuilder.renderView(schema: StructSchema, layout: StructLayout)
                 appendLine("    }")
             }
             else -> {
+                appendLine("    context(memoryFrame: MemoryFrame)")
+                appendLine("    var ${quoted(field.name)}: heckerpowered.render.geometry.Matrix4")
+                appendLine("        get() = error(\"Shader data writer properties are write-only\")")
+                appendLine("        set(value) = value.writeColumnMajor(memoryFrame, $offset)")
+                appendLine()
                 appendLine("    /** Writes sixteen column-major components; no transpose or shader-side conversion is performed. */")
                 appendLine("    context(memoryFrame: MemoryFrame)")
                 appendLine("    fun ${field.setterName}(values: FloatArray) {")
