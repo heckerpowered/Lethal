@@ -113,3 +113,31 @@ fun clearDepth(depth: Double) = function.clearDepth(depth)
 
 context(function: OpenGLStateFunctions)
 fun clear(mask: Int) = function.clear(mask)
+
+context(function: OpenGLStateFunctions)
+val supportsRasterizerDiscard: Boolean
+    get() = function.supportsRasterizerDiscard
+
+context(function: OpenGLStateFunctions)
+fun getError(): Int = function.getError()
+
+context(function: OpenGLStateFunctions)
+fun flush() = function.flush()
+
+context(function: OpenGLStateFunctions)
+fun getFloats(parameter: Int, destination: FloatBuffer) = function.getFloats(parameter, destination)
+
+context(function: OpenGLStateFunctions)
+fun scissor(index: Int, x: Int, y: Int, width: Int, height: Int) = function.scissor(index, x, y, width, height)
+
+context(function: OpenGLStateFunctions)
+fun getScissorBox(index: Int, destination: IntBuffer) = function.getScissorBox(index, destination)
+
+context(function: OpenGLStateFunctions)
+fun isScissorEnabled(index: Int): Boolean = function.isScissorEnabled(index)
+
+context(function: OpenGLStateFunctions)
+fun setScissorEnabled(index: Int, enabled: Boolean) = function.setScissorEnabled(index, enabled)
+
+context(function: OpenGLStateFunctions)
+fun colorMask(index: Int, red: Boolean, green: Boolean, blue: Boolean, alpha: Boolean) = function.colorMask(index, red, green, blue, alpha)
