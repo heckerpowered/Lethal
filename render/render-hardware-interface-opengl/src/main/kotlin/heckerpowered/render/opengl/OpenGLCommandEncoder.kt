@@ -110,7 +110,10 @@ internal class OpenGLCommandEncoder(val device: OpenGLGraphicsDevice) : CommandE
         // physical storage. In particular, never broaden a subrectangle to the whole mip.
     }
 
-    override fun writeBuffer(destination: GpuBufferView, sourceAddress: NativeAddress): Unit = TODO("Implement OpenGL buffer upload")
+    override fun writeBuffer(destination: GpuBufferView, sourceAddress: NativeAddress) {
+        checkOutsidePass()
+        context(device) { uploadBuffer(destination, sourceAddress) }
+    }
     override fun copyBuffer(source: GpuBufferView, destination: GpuBufferView): Unit = TODO("Implement OpenGL buffer copy")
     override fun writeTexture(destination: ImageRegion, sourceAddress: NativeAddress, sourceLayout: TextureDataLayout): Unit = TODO("Implement OpenGL texture upload")
     override fun copyBufferToTexture(source: GpuBufferView, destination: ImageRegion, sourceLayout: TextureDataLayout): Unit = TODO("Implement OpenGL buffer-to-texture copy")
