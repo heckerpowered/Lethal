@@ -121,7 +121,7 @@ open class HostedItem(val blueprint: ItemBlueprint) : Item(), ItemAccess by blue
     override fun addInformation(stack: ItemStack, world: World?, tooltip: MutableList<String>, flag: ITooltipFlag) {
         val itemTooltip = blueprint as? ItemTooltip ?: return
         tooltip += itemTooltip.getTooltipLines(stack.asView())
-            .map(TooltipLine::asHost)
+            .map(TooltipLinePresentation::asHost)
     }
 
     override fun hasEffect(stack: ItemStack): Boolean {
