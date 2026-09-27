@@ -19,6 +19,13 @@ import java.lang.reflect.Method;
  * Access to these non-public LWJGL 2 members is isolated here and fails during adapter creation
  * when the runtime binding ABI is different or reflection access is denied. No native library
  * is replaced or added. The adapter checks the original current context before invocation.
+ *
+ * <p>This small bridge deliberately stays in Java so javac determines the exact primitive,
+ * void-returning {@code invokeExact} call site. In a Kotlin 1.9/JDK 21 check, the same
+ * Kotlin statement emitted {@code (IJJJ)V} with {@code -jvm-target 1.8}, but
+ * {@code (Object[])Object} with {@code -Xjdk-release=8}. This is a conservative
+ * toolchain-compatibility choice, not a Kotlin/JNI limitation; a Kotlin port should verify
+ * {@code (IJJJ)V} with the project's actual compiler and JDK configuration.</p>
  */
 final class Lwjgl2BufferSubData {
     private final MethodHandle upload;
@@ -40,9 +47,8 @@ final class Lwjgl2BufferSubData {
         return new Lwjgl2BufferSubData(contextCall);
     }
 
-    // Java fixes the invokeExact descriptor to (int, long, long, long)void. A failure propagates
-    // unchanged; this bridge does not catch Throwable or reinterpret a failure as success.
     void upload(int target, long offsetBytes, long sizeBytes, long sourceAddress) throws Throwable {
+        // Keep this call as a statement: invokeExact must expect JVM void, not Object.
         upload.invokeExact(target, offsetBytes, sizeBytes, sourceAddress);
     }
 }
