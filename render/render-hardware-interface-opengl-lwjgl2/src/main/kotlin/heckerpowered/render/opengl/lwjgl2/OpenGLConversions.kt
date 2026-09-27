@@ -38,6 +38,7 @@ internal fun PrimitiveMode.toOpenGL(): Int = when (this) {
 }
 
 internal fun ColorClampMode.toOpenGL(): Int = when (this) {
-    ColorClampMode.Unclamped -> GL11.GL_FALSE
+    ColorClampMode.Always -> GL11.GL_TRUE
+    ColorClampMode.Never -> GL11.GL_FALSE
     ColorClampMode.FixedOnly -> GL30.GL_FIXED_ONLY
 }
