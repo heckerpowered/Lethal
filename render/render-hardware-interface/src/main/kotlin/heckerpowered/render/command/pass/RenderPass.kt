@@ -345,6 +345,27 @@ interface RenderPass {
     fun setStencilReference(reference: UByte)
 }
 
+/**
+ * Draws the device's shared unit quad with the currently selected pipeline and shader resources.
+ *
+ * Binds [BuiltInPrimitives.unitQuad] to [slot], then draws its four vertices. The pipeline must
+ * use triangle-strip topology and read tightly packed Float32x2 vertex data from that slot.
+ * The slot is a vertex-buffer slot, not a shader attribute location. Other vertex slots are
+ * unchanged, and this binding remains selected for subsequent draws, as with [RenderPass.bindVertexBuffer].
+ *
+ * Include the quad buffer in [RenderPassResources.vertexBuffers] before entering the pass.
+ * This convenience operation uses the ordinary binding and draw validation; it does not grant
+ * undeclared access or discover resources by recording the callback twice.
+ *
+ * The coordinates cover `[0, 1] x [-1, 1]`. A full-screen vertex shader can map x to `2*x - 1`
+ * and preserve y; actual coverage still depends on the current viewport, scissor, and pipeline.
+ * No pipeline, descriptors, depth/blend settings, or viewport are changed by this operation.
+ */
+fun RenderPass.drawUnitQuad(slot: Int = 0) {
+    bindVertexBuffer(slot, primitives.unitQuad)
+    draw(vertexCount = 4)
+}
+
 inline fun RenderPass.pushConstants(
     stages: Set<ShaderStage>,
     sizeBytes: Int,
