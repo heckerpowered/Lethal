@@ -8,7 +8,7 @@ package heckerpowered.bridge.adapter.client.render.context
 import heckerpowered.bridge.math.VectorView
 import heckerpowered.render.GraphicsDevice
 import heckerpowered.render.command.CommandEncoder
-import heckerpowered.render.command.pass.RenderArea
+import heckerpowered.render.command.pass.RenderPassDescription
 import heckerpowered.render.geometry.Matrix4
 import heckerpowered.render.pipeline.depthstencil.CompareFunction
 import heckerpowered.render.resource.target.RenderTarget
@@ -32,21 +32,20 @@ interface RenderContext {
     val mainRenderTarget: RenderTarget
 
     /**
-     * Destination selected for this stage. Ordinary stages use [mainRenderTarget]; offscreen
-     * stages can override this without changing each renderer's drawing arguments. This is a
-     * fixed attachment selection for the stage, not an instruction to query the currently bound
-     * native framebuffer. Individual post-processing passes may still choose other targets.
+     * Baseline for complete passes created during this stage, not an already active pass.
+     *
+     * This is the single source of the stage's default attachment selection, region, layer count,
+     * and attachment operations. Keep the description stable for the stage. A renderer can use
+     * it directly, derive only its differences, or supply an unrelated description to the encoder.
+     *
+     * Choose operations intended for these consumers, rather than copying the most recently
+     * executed pass. Derivation preserves Clear, Discard and resolves; it does not turn them into
+     * a continuation policy. Load requires prior contents that are still defined and preserved.
+     *
+     * The description and its borrowed attachments must remain valid for their stage uses. It is
+     * not retained by long-lived renderers, and the stage projection must match the selected area.
      */
-    val renderTarget: RenderTarget
-        get() = mainRenderTarget
-
-    /**
-     * Optional stage region, such as a split-screen view. Null lets each pass infer its complete
-     * common attachment extent. A stage projection must match this region or the inferred extent.
-     * This selects pass effects and its initial viewport; per-draw clipping remains a scissor.
-     */
-    val renderArea: RenderArea?
-        get() = null
+    val passDefaults: RenderPassDescription
 }
 
 /** World-stage state shared by world renderers; object positions and animation phases remain draw inputs. */
@@ -78,6 +77,6 @@ interface UiRenderContext : RenderContext {
 
 /**
  * Post-processing environment. Inputs and intermediate targets belong to each effect or pass;
- * [renderTarget] is only the stage's default destination, not a shared collection of effect data.
+ * [passDefaults] is only a baseline for the stage, not a shared collection of effect inputs.
  */
 interface PostProcessContext : RenderContext
