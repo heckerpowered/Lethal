@@ -50,6 +50,9 @@ import java.util.*
  * Declaring these relations up front permits direct native recording without inspecting future
  * commands. They do not change which attachments receive fragment outputs.
  *
+ * [derive] creates another description by replacing only the supplied choices. It does not
+ * begin a pass or create a parent-child execution relationship.
+ *
  * The pass boundary is logical, but no automatic grouping with later commands is promised.
  * A backend may group native work only when the requested content and access rules are preserved.
  *
@@ -106,6 +109,9 @@ class RenderPassDescription(val label: String, renderArea: RenderArea? = null, c
     val colorResolves: List<ColorAttachmentResolve> =
         Collections.unmodifiableList(colorResolves.toList())
 
+    // Preserve the choice to infer an area; copying its resolved size would pin derived passes to old attachments.
+    private val requestedRenderArea: RenderArea? = renderArea
+
     /**
      * Concrete region affected in every participating attachment layer.
      *
@@ -124,7 +130,7 @@ class RenderPassDescription(val label: String, renderArea: RenderArea? = null, c
      * [RenderPass.withViewport] changes selected draws' mapping, and [RenderPass.withScissor]
      * adds temporary clips. Neither changes attachment load, clear, or store operations.
      */
-    val renderArea: RenderArea = renderArea ?: commonAttachmentArea()
+    val renderArea: RenderArea = requestedRenderArea ?: commonAttachmentArea()
 
     /**
      * Common sample count required by the direct attachments, or null when none are bound.
@@ -144,6 +150,29 @@ class RenderPassDescription(val label: String, renderArea: RenderArea? = null, c
 
     init {
         validateAttachments()
+    }
+
+    /**
+     * Creates an independent description using this description's choices for omitted arguments.
+     *
+     * For example, `base.derive(label = "Overlay", depthAttachment = null)` keeps the other
+     * settings and removes depth. Lists replace the complete selection, retaining their supplied
+     * slot indices; an empty list removes all entries. They are snapshotted by the constructor.
+     *
+     * An omitted area inherits the original choice, not just its resolved dimensions. An automatic
+     * area is therefore recalculated for the final attachments. An explicit area remains unchanged;
+     * passing null selects automatic sizing again. An attachmentless result needs an explicit area.
+     *
+     * Attachment operations and resolves are inherited unchanged. In particular, a Clear remains
+     * a Clear: choose a suitable base or override its operations before continuing existing contents.
+     * Related choices are never silently repaired; the final combination uses normal validation.
+     *
+     * No parent reference or live override chain is retained. Images are shared references, not
+     * copied storage, and must still be available when the resulting pass is executed. This method
+     * neither preserves discarded contents nor changes command ordering or resource access scopes.
+     */
+    fun derive(label: String = this.label, renderArea: RenderArea? = requestedRenderArea, colorAttachments: List<RenderPassAttachment<Color>?> = this.colorAttachments, depthAttachment: RenderPassAttachment<Float>? = this.depthAttachment, stencilAttachment: RenderPassAttachment<UByte>? = this.stencilAttachment, layerCount: Int = this.layerCount, colorResolves: List<ColorAttachmentResolve> = this.colorResolves): RenderPassDescription {
+        return RenderPassDescription(label, renderArea, colorAttachments, depthAttachment, stencilAttachment, layerCount, colorResolves)
     }
 
     /**
