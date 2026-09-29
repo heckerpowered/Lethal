@@ -28,7 +28,7 @@ internal fun assertVector(expected: VectorView, actual: VectorView, absoluteTole
     assertVector(expected.x, expected.y, expected.z, actual, absoluteTolerance)
 }
 
-internal fun assertMatrix(expected: Matrix4View, actual: Matrix4View, absoluteTolerance: Double = 1.0E-12) {
+internal fun assertMatrix(expected: MatrixView, actual: MatrixView, absoluteTolerance: Double = 1.0E-12) {
     for (row in 0..3) {
         for (column in 0..3) {
             assertEquals(expected[row, column], actual[row, column], absoluteTolerance, "[$row, $column]")

@@ -13,7 +13,7 @@ import kotlin.math.abs
  * `(first * second)` applies second, then first, matching QuaternionView and TransformView.
  * This interface does not prescribe the backing storage order.
  */
-interface Matrix4View : Interpolatable<Matrix4View>, Iterable<Double> {
+interface MatrixView : Interpolatable<MatrixView>, Iterable<Double> {
     val m00: Double
     val m01: Double
     val m02: Double
@@ -62,7 +62,7 @@ interface Matrix4View : Interpolatable<Matrix4View>, Iterable<Double> {
     fun isZero(): Boolean = all { it == 0.0 }
 
     /** Epsilon must be finite and nonnegative. */
-    fun isNearlyEqual(other: Matrix4View, epsilon: Double = 1.0E-6): Boolean {
+    fun isNearlyEqual(other: MatrixView, epsilon: Double = 1.0E-6): Boolean {
         require(epsilon.isFinite() && epsilon >= 0.0)
         return zip(other).all { [left, right] -> abs(left - right) <= epsilon }
     }
@@ -108,7 +108,7 @@ interface Matrix4View : Interpolatable<Matrix4View>, Iterable<Double> {
         get() = Geometry.vector(m03, m13, m23)
 
     /** Linear interpolation of coefficients; does not preserve rigid rotations. Alpha is not clamped. */
-    override fun interpolate(target: Matrix4View, alpha: Double): Matrix4View = combineComponents(target) { start, end ->
+    override fun interpolate(target: MatrixView, alpha: Double): MatrixView = combineComponents(target) { start, end ->
         start + (end - start) * alpha
     }
 
@@ -121,26 +121,26 @@ interface Matrix4View : Interpolatable<Matrix4View>, Iterable<Double> {
         override fun nextDouble(): Double {
             if (!hasNext()) throw NoSuchElementException()
             val current = index++
-            return this@Matrix4View[current / 4, current % 4]
+            return this@MatrixView[current / 4, current % 4]
         }
     }
 }
 
-operator fun Matrix4View.plus(other: Matrix4View): Matrix4View = combineComponents(other) { left, right -> left + right }
-operator fun Matrix4View.minus(other: Matrix4View): Matrix4View = combineComponents(other) { left, right -> left - right }
-operator fun Matrix4View.unaryMinus(): Matrix4View = mapComponents { -it }
-operator fun Matrix4View.times(scale: Double): Matrix4View = mapComponents { it * scale }
-operator fun Matrix4View.div(scale: Double): Matrix4View = mapComponents { it / scale }
-operator fun Double.times(matrix: Matrix4View): Matrix4View = matrix * this
+operator fun MatrixView.plus(other: MatrixView): MatrixView = combineComponents(other) { left, right -> left + right }
+operator fun MatrixView.minus(other: MatrixView): MatrixView = combineComponents(other) { left, right -> left - right }
+operator fun MatrixView.unaryMinus(): MatrixView = mapComponents { -it }
+operator fun MatrixView.times(scale: Double): MatrixView = mapComponents { it * scale }
+operator fun MatrixView.div(scale: Double): MatrixView = mapComponents { it / scale }
+operator fun Double.times(matrix: MatrixView): MatrixView = matrix * this
 
 /** Composes transformations, applying [other] first. */
-operator fun Matrix4View.times(other: Matrix4View): Matrix4View = Matrices4.generate { row, column ->
+operator fun MatrixView.times(other: MatrixView): MatrixView = Matrices4.generate { row, column ->
     (0..3).sumOf { index -> this[row, index] * other[index, column] }
 }
 
-fun Matrix4View.transposed(): Matrix4View = Matrices4.generate { row, column -> this[column, row] }
+fun MatrixView.transposed(): MatrixView = Matrices4.generate { row, column -> this[column, row] }
 
-fun Matrix4View.withComponent(row: Int, column: Int, value: Double): Matrix4View {
+fun MatrixView.withComponent(row: Int, column: Int, value: Double): MatrixView {
     require(row in 0..3 && column in 0..3) { "Matrix coordinates must be between zero and three" }
     return Matrices4.generate { currentRow, currentColumn ->
         if (currentRow == row && currentColumn == column) value else this[currentRow, currentColumn]
@@ -148,7 +148,7 @@ fun Matrix4View.withComponent(row: Int, column: Int, value: Double): Matrix4View
 }
 
 /** Returns an independent row-major copy. */
-fun Matrix4View.toRowMajorArray(): DoubleArray = doubleArrayOf(
+fun MatrixView.toRowMajorArray(): DoubleArray = doubleArrayOf(
     m00, m01, m02, m03,
     m10, m11, m12, m13,
     m20, m21, m22, m23,
@@ -156,7 +156,7 @@ fun Matrix4View.toRowMajorArray(): DoubleArray = doubleArrayOf(
 )
 
 /** Returns an independent column-major copy, suitable for conversion to graphics API storage. */
-fun Matrix4View.toColumnMajorArray(): DoubleArray = doubleArrayOf(
+fun MatrixView.toColumnMajorArray(): DoubleArray = doubleArrayOf(
     m00, m10, m20, m30,
     m01, m11, m21, m31,
     m02, m12, m22, m32,
@@ -170,7 +170,7 @@ fun Matrix4View.toColumnMajorArray(): DoubleArray = doubleArrayOf(
  * Components are sampled once before elimination. This is not a condition-number test.
  * Tolerance must be finite and nonnegative.
  */
-fun Matrix4View.inverseOrNull(tolerance: Double = 0.0): Matrix4View? {
+fun MatrixView.inverseOrNull(tolerance: Double = 0.0): MatrixView? {
     require(tolerance.isFinite() && tolerance >= 0.0)
 
     val augmented = AugmentedMatrix4(this)
@@ -188,24 +188,24 @@ fun Matrix4View.inverseOrNull(tolerance: Double = 0.0): Matrix4View? {
 }
 
 /** Throws IllegalArgumentException if [inverseOrNull] cannot produce a finite inverse. */
-fun Matrix4View.inverse(tolerance: Double = 0.0): Matrix4View =
+fun MatrixView.inverse(tolerance: Double = 0.0): MatrixView =
     requireNotNull(inverseOrNull(tolerance)) { "Matrix has no finite inverse at the requested pivot tolerance" }
 
-fun Matrix4View.safeInverse(tolerance: Double = 0.0, resultIfSingular: Matrix4View = Matrices4.Identity): Matrix4View =
+fun MatrixView.safeInverse(tolerance: Double = 0.0, resultIfSingular: MatrixView = Matrices4.Identity): MatrixView =
     inverseOrNull(tolerance) ?: resultIfSingular
 
 /**
  * Transforms (x, y, z, 1), returning XYZ without perspective division.
  * For projective matrices, use [projectPosition] to divide by the resulting W.
  */
-fun Matrix4View.transformPosition(position: VectorView): VectorView = Geometry.vector(
+fun MatrixView.transformPosition(position: VectorView): VectorView = Geometry.vector(
     m00 * position.x + m01 * position.y + m02 * position.z + m03,
     m10 * position.x + m11 * position.y + m12 * position.z + m13,
     m20 * position.x + m21 * position.y + m22 * position.z + m23
 )
 
 /** Applies the linear 3 x 3 part, ignoring translation and the homogeneous output W. */
-fun Matrix4View.transformVector(vector: VectorView): VectorView = Geometry.vector(
+fun MatrixView.transformVector(vector: VectorView): VectorView = Geometry.vector(
     m00 * vector.x + m01 * vector.y + m02 * vector.z,
     m10 * vector.x + m11 * vector.y + m12 * vector.z,
     m20 * vector.x + m21 * vector.y + m22 * vector.z
@@ -215,7 +215,7 @@ fun Matrix4View.transformVector(vector: VectorView): VectorView = Geometry.vecto
  * Reverses an invertible affine position transform. Rejects projective matrices with IllegalArgumentException;
  * use `inverse().projectPosition(position)` for inverse projection. Validation and inversion use the same snapshot.
  */
-fun Matrix4View.inverseTransformPosition(position: VectorView): VectorView {
+fun MatrixView.inverseTransformPosition(position: VectorView): VectorView {
     val snapshot = Matrices4.copyOf(this)
     require(snapshot.isAffine()) { "Inverse position transformation requires an affine matrix" }
     return snapshot.inverse().transformPosition(position)
@@ -225,7 +225,7 @@ fun Matrix4View.inverseTransformPosition(position: VectorView): VectorView {
  * Reverses an invertible affine vector transform, including scale and shear.
  * Rejects projective matrices with IllegalArgumentException. Validation and inversion use the same snapshot.
  */
-fun Matrix4View.inverseTransformVector(vector: VectorView): VectorView {
+fun MatrixView.inverseTransformVector(vector: VectorView): VectorView {
     val snapshot = Matrices4.copyOf(this)
     require(snapshot.isAffine()) { "Inverse vector transformation requires an affine matrix" }
     return snapshot.inverse().transformVector(vector)
@@ -236,14 +236,14 @@ fun Matrix4View.inverseTransformVector(vector: VectorView): VectorView {
  * perpendicularity under nonuniform scale and shear. Requires an invertible affine
  * matrix. The result is not normalized. Validation and inversion use the same snapshot.
  */
-fun Matrix4View.transformNormal(normal: VectorView): VectorView {
+fun MatrixView.transformNormal(normal: VectorView): VectorView {
     val snapshot = Matrices4.copyOf(this)
     require(snapshot.isAffine()) { "Surface normal transformation requires an affine matrix" }
     return snapshot.inverse().transposed().transformVector(normal)
 }
 
 /** Perspective-divides the transformed position. Zero W produces IEEE infinity or NaN. */
-fun Matrix4View.projectPosition(position: VectorView): VectorView {
+fun MatrixView.projectPosition(position: VectorView): VectorView {
     val x = position.x
     val y = position.y
     val z = position.z
@@ -256,25 +256,25 @@ fun Matrix4View.projectPosition(position: VectorView): VectorView {
 }
 
 /** Returns null if projection cannot produce finite coordinates; does not test visibility. */
-fun Matrix4View.projectPositionOrNull(position: VectorView): VectorView? =
+fun MatrixView.projectPositionOrNull(position: VectorView): VectorView? =
     projectPosition(position).takeIf { it.isFinite() }
 
 /** Local axis of the linear 3 x 3 part, including scale and shear. Index is 0 = X, 1 = Y, 2 = Z. */
-fun Matrix4View.axis(index: Int): VectorView = when (index) {
+fun MatrixView.axis(index: Int): VectorView = when (index) {
     0 -> axisX
     1 -> axisY
     2 -> axisZ
     else -> throw IllegalArgumentException("Axis index must be between zero and two")
 }
 
-fun Matrix4View.unitAxis(index: Int): VectorView = axis(index).normalized()
+fun MatrixView.unitAxis(index: Int): VectorView = axis(index).normalized()
 
 /**
  * Normalizes the linear columns; does not remove shear or reflections.
  * Columns with zero squared length or squared length below [tolerance] become zero.
  * Tolerance must be finite and nonnegative.
  */
-fun Matrix4View.withNormalizedAxes(tolerance: Double = 1.0E-8): Matrix4View {
+fun MatrixView.withNormalizedAxes(tolerance: Double = 1.0E-8): MatrixView {
     require(tolerance.isFinite() && tolerance >= 0.0)
 
     val normalizedX = normalizedAxis(axisX, tolerance)
@@ -289,29 +289,29 @@ fun Matrix4View.withNormalizedAxes(tolerance: Double = 1.0E-8): Matrix4View {
     )
 }
 
-fun Matrix4View.withTranslation(translation: VectorView): Matrix4View = Matrices4.of(
+fun MatrixView.withTranslation(translation: VectorView): MatrixView = Matrices4.of(
     m00, m01, m02, translation.x,
     m10, m11, m12, translation.y,
     m20, m21, m22, translation.z,
     m30, m31, m32, m33
 )
 
-fun Matrix4View.withoutTranslation(): Matrix4View = withTranslation(Vectors.Zero)
+fun MatrixView.withoutTranslation(): MatrixView = withTranslation(Vectors.Zero)
 
 /** Adds a world-space translation after this transformation, including for projective matrices. */
-fun Matrix4View.translatedWorld(translation: VectorView): Matrix4View = Matrices4.fromTranslation(translation) * this
+fun MatrixView.translatedWorld(translation: VectorView): MatrixView = Matrices4.fromTranslation(translation) * this
 
 /** Applies local scale before this transformation. */
-fun Matrix4View.scaledLocal(scale: VectorView): Matrix4View = this * Matrices4.fromScale(scale)
+fun MatrixView.scaledLocal(scale: VectorView): MatrixView = this * Matrices4.fromScale(scale)
 
 /** Returns the linear columns, retaining scale and shear. */
-fun Matrix4View.toBasis(): Basis3dView = Basis3d(axisX, axisY, axisZ)
+fun MatrixView.toBasis(): Basis3dView = Basis3d(axisX, axisY, axisZ)
 
 /** Requires a right-handed orthonormal linear part. Translation is ignored. */
-fun Matrix4View.toQuaternion(): QuaternionView = Quaternions.fromBasis(toBasis())
+fun MatrixView.toQuaternion(): QuaternionView = Quaternions.fromBasis(toBasis())
 
 /** Rejects a projective last row instead of discarding it. */
-fun Matrix4View.toAffine(): AffineTransformView {
+fun MatrixView.toAffine(): AffineTransformView {
     val snapshot = Matrices4.copyOf(this)
     require(snapshot.isAffine()) { "A projective matrix cannot be represented as an affine transform" }
 
@@ -323,16 +323,16 @@ fun Matrix4View.toAffine(): AffineTransformView {
     )
 }
 
-fun AffineTransformView.toMatrix4(): Matrix4View = Matrices4.fromAffine(this)
-fun TransformView.toMatrix4(): Matrix4View = toAffine().toMatrix4()
-fun QuaternionView.toMatrix4(): Matrix4View = Matrices4.fromRotation(this)
+fun AffineTransformView.toMatrix4(): MatrixView = Matrices4.fromAffine(this)
+fun TransformView.toMatrix4(): MatrixView = toAffine().toMatrix4()
+fun QuaternionView.toMatrix4(): MatrixView = Matrices4.fromRotation(this)
 
 object Matrices4 {
-    val Zero: Matrix4View = generate { _, _ -> 0.0 }
-    val Identity: Matrix4View = generate { row, column -> if (row == column) 1.0 else 0.0 }
+    val Zero: MatrixView = generate { _, _ -> 0.0 }
+    val Identity: MatrixView = generate { row, column -> if (row == column) 1.0 else 0.0 }
 
     /** Evaluates each coordinate once in row-major order and stores the resulting values. */
-    fun generate(element: (row: Int, column: Int) -> Double): Matrix4View = of(
+    fun generate(element: (row: Int, column: Int) -> Double): MatrixView = of(
         element(0, 0), element(0, 1), element(0, 2), element(0, 3),
         element(1, 0), element(1, 1), element(1, 2), element(1, 3),
         element(2, 0), element(2, 1), element(2, 2), element(2, 3),
@@ -344,7 +344,7 @@ object Matrices4 {
         m10: Double, m11: Double, m12: Double, m13: Double,
         m20: Double, m21: Double, m22: Double, m23: Double,
         m30: Double, m31: Double, m32: Double, m33: Double,
-    ): Matrix4View = Geometry.matrix4(
+    ): MatrixView = Geometry.matrix(
         m00, m01, m02, m03,
         m10, m11, m12, m13,
         m20, m21, m22, m23,
@@ -355,7 +355,7 @@ object Matrices4 {
      * Takes an independent snapshot, reading each source component once in row-major order.
      * Sampling is sequential, not atomic with respect to changes to the source view.
      */
-    fun copyOf(matrix: Matrix4View): Matrix4View = of(
+    fun copyOf(matrix: MatrixView): MatrixView = of(
         matrix.m00, matrix.m01, matrix.m02, matrix.m03,
         matrix.m10, matrix.m11, matrix.m12, matrix.m13,
         matrix.m20, matrix.m21, matrix.m22, matrix.m23,
@@ -363,20 +363,20 @@ object Matrices4 {
     )
 
     /** Copies sixteen values in row-major order. */
-    fun fromRowMajor(values: DoubleArray): Matrix4View {
+    fun fromRowMajor(values: DoubleArray): MatrixView {
         require(values.size == 16) { "A 4 x 4 matrix requires sixteen values" }
         return generate { row, column -> values[row * 4 + column] }
     }
 
     /** Copies sixteen values in column-major order. */
-    fun fromColumnMajor(values: DoubleArray): Matrix4View {
+    fun fromColumnMajor(values: DoubleArray): MatrixView {
         require(values.size == 16) { "A 4 x 4 matrix requires sixteen values" }
         return generate { row, column -> values[column * 4 + row] }
     }
 
-    fun fromTranslation(translation: VectorView): Matrix4View = Identity.withTranslation(translation)
+    fun fromTranslation(translation: VectorView): MatrixView = Identity.withTranslation(translation)
 
-    fun fromScale(scale: VectorView): Matrix4View = of(
+    fun fromScale(scale: VectorView): MatrixView = of(
         scale.x, 0.0, 0.0, 0.0,
         0.0, scale.y, 0.0, 0.0,
         0.0, 0.0, scale.z, 0.0,
@@ -384,30 +384,30 @@ object Matrices4 {
     )
 
     /** Rotation must be a unit quaternion. */
-    fun fromRotation(rotation: QuaternionView): Matrix4View = fromBasis(rotation.toBasis())
+    fun fromRotation(rotation: QuaternionView): MatrixView = fromBasis(rotation.toBasis())
 
     /** Basis vectors become the linear columns; scale and shear are retained. */
-    fun fromBasis(basis: Basis3dView, translation: VectorView = Vectors.Zero): Matrix4View = of(
+    fun fromBasis(basis: Basis3dView, translation: VectorView = Vectors.Zero): MatrixView = of(
         basis.right.x, basis.up.x, basis.forward.x, translation.x,
         basis.right.y, basis.up.y, basis.forward.y, translation.y,
         basis.right.z, basis.up.z, basis.forward.z, translation.z,
         0.0, 0.0, 0.0, 1.0
     )
 
-    fun fromAffine(transform: AffineTransformView): Matrix4View = of(
+    fun fromAffine(transform: AffineTransformView): MatrixView = of(
         transform.axisX.x, transform.axisY.x, transform.axisZ.x, transform.translation.x,
         transform.axisX.y, transform.axisY.y, transform.axisZ.y, transform.translation.y,
         transform.axisX.z, transform.axisY.z, transform.axisZ.z, transform.translation.z,
         0.0, 0.0, 0.0, 1.0
     )
 
-    fun fromTransform(transform: TransformView): Matrix4View = transform.toMatrix4()
+    fun fromTransform(transform: TransformView): MatrixView = transform.toMatrix4()
 
     /** Builds a matrix applying scale, then unit-quaternion rotation, then translation. */
-    fun fromTRS(translation: VectorView, rotation: QuaternionView, scale: VectorView): Matrix4View =
+    fun fromTRS(translation: VectorView, rotation: QuaternionView, scale: VectorView): MatrixView =
         fromRotation(rotation).scaledLocal(scale).withTranslation(translation)
 
-    fun lerp(a: Matrix4View, b: Matrix4View, t: Double): Matrix4View = a.interpolate(b, t)
+    fun lerp(a: MatrixView, b: MatrixView, t: Double): MatrixView = a.interpolate(b, t)
 }
 
 private fun normalizedAxis(axis: VectorView, tolerance: Double): VectorView {
@@ -415,18 +415,18 @@ private fun normalizedAxis(axis: VectorView, tolerance: Double): VectorView {
     return axis.safeNormal(tolerance)
 }
 
-private fun Matrix4View.mapComponents(transform: (Double) -> Double): Matrix4View =
+private fun MatrixView.mapComponents(transform: (Double) -> Double): MatrixView =
     Matrices4.generate { row, column -> transform(this[row, column]) }
 
-private fun Matrix4View.combineComponents(other: Matrix4View, transform: (Double, Double) -> Double): Matrix4View =
+private fun MatrixView.combineComponents(other: MatrixView, transform: (Double, Double) -> Double): MatrixView =
     Matrices4.generate { row, column -> transform(this[row, column], other[row, column]) }
 
-private fun Matrix4View.computeLinearDeterminant(): Double =
+private fun MatrixView.computeLinearDeterminant(): Double =
     m00 * (m11 * m22 - m12 * m21) -
             m01 * (m10 * m22 - m12 * m20) +
             m02 * (m10 * m21 - m11 * m20)
 
-private fun Matrix4View.cofactor(row: Int, column: Int): Double {
+private fun MatrixView.cofactor(row: Int, column: Int): Double {
     val minorRows = (0..3).filter { it != row }
     val minorColumns = (0..3).filter { it != column }
 
@@ -444,7 +444,7 @@ private fun Matrix4View.cofactor(row: Int, column: Int): Double {
  * Owns the working copy `[matrix | identity]`. Row operations reduce the left half
  * to identity and leave the inverse in the right half, without rereading the source view.
  */
-private class AugmentedMatrix4(matrix: Matrix4View) {
+private class AugmentedMatrix4(matrix: MatrixView) {
     private val rows = Array(4) { row -> createRow(matrix, row) }
 
     fun isFinite(): Boolean = rows.all { row -> row.all { it.isFinite() } }
@@ -479,7 +479,7 @@ private class AugmentedMatrix4(matrix: Matrix4View) {
         }
     }
 
-    fun rightHalfOrNull(): Matrix4View? {
+    fun rightHalfOrNull(): MatrixView? {
         if (!isFinite()) return null
 
         return Matrices4.generate { row, column -> rows[row][column + 4] }
@@ -495,7 +495,7 @@ private class AugmentedMatrix4(matrix: Matrix4View) {
         }
     }
 
-    private fun createRow(matrix: Matrix4View, row: Int): DoubleArray {
+    private fun createRow(matrix: MatrixView, row: Int): DoubleArray {
         val values = DoubleArray(8)
         for (column in 0..3) {
             values[column] = matrix[row, column]

@@ -8,7 +8,7 @@ package heckerpowered.math
 import kotlin.math.sqrt
 import kotlin.test.*
 
-class Matrix4ViewTest {
+class MatrixViewTest {
     private val affine = Matrices4.of(
         2.0, 1.0, 0.0, 4.0,
         0.0, 3.0, 0.0, -3.0,

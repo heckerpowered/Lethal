@@ -72,7 +72,7 @@ class MatrixSnapshotTest {
         assertContentEquals(DoubleArray(16) { it.toDouble() }, matrix.toRowMajorArray())
     }
 
-    private class SingleSampleMatrix(private val sample: Matrix4View) : Matrix4View {
+    private class SingleSampleMatrix(private val sample: MatrixView) : MatrixView {
         private val reads = IntArray(16)
 
         override val m00: Double get() = read(0, 0)
