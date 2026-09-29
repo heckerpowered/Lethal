@@ -5,8 +5,8 @@
 
 package heckerpowered.bridge.math
 
-import heckerpowered.fundation.math.Geometry
-import heckerpowered.fundation.math.VectorView
+import heckerpowered.foundation.math.Geometry
+import heckerpowered.foundation.math.VectorView
 
 object MinecraftDirections {
     /**

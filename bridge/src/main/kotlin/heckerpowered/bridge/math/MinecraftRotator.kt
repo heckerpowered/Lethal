@@ -5,9 +5,9 @@
 
 package heckerpowered.bridge.math
 
-import heckerpowered.fundation.math.Geometry
-import heckerpowered.fundation.math.RotatorView
-import heckerpowered.fundation.math.VectorView
+import heckerpowered.foundation.math.Geometry
+import heckerpowered.foundation.math.RotatorView
+import heckerpowered.foundation.math.VectorView
 import kotlin.math.cos
 import kotlin.math.sin
 
