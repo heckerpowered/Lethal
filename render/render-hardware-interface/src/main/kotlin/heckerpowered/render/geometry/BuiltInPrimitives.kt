@@ -6,6 +6,7 @@
 package heckerpowered.render.geometry
 
 import heckerpowered.render.resource.buffer.GpuBuffer
+import heckerpowered.render.shader.ShaderLibrary
 
 /**
  * Non-owning access to immutable geometry shared by a graphics device.
@@ -14,7 +15,7 @@ import heckerpowered.render.resource.buffer.GpuBuffer
  * Device and pass accessors expose the same buffer objects while that device remains valid, so
  * a range declared before a pass also covers the shared geometry selected within it.
  */
-interface BuiltInPrimitives {
+interface BuiltInPrimitives : ShaderLibrary {
     /**
      * Four tightly packed Float32x2 vertices covering `[0, 1] x [-1, 1]` as a triangle strip.
      * Each vertex contains x followed by y, with an eight-byte stride and no padding.
