@@ -45,3 +45,19 @@ interface TransformView : Interpolatable<TransformView> {
             scale = scale.interpolate(target.scale, alpha),
         )
 }
+
+object Transforms {
+    val Identity: TransformView = Geometry.transform(Vectors.Zero, Quaternions.Identity, Vectors.One)
+
+    fun of(translation: VectorView = Vectors.Zero, rotation: QuaternionView = Quaternions.Identity, scale: VectorView = Vectors.One): TransformView =
+        Geometry.transform(translation, rotation, scale)
+
+    fun fromTranslation(translation: VectorView): TransformView =
+        of(translation = translation)
+
+    fun fromRotation(rotation: QuaternionView): TransformView =
+        of(rotation = rotation)
+
+    fun fromScale(scale: VectorView): TransformView =
+        of(scale = scale)
+}
