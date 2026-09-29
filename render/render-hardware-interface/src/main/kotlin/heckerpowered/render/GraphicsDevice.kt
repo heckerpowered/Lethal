@@ -6,6 +6,7 @@
 package heckerpowered.render
 
 import heckerpowered.render.command.CommandEncoder
+import heckerpowered.render.geometry.BuiltInPrimitives
 import heckerpowered.render.memory.MemoryStack
 import heckerpowered.render.pipeline.PipelineLayout
 import heckerpowered.render.pipeline.PipelineLayoutCreationException
@@ -21,10 +22,7 @@ import heckerpowered.render.resource.texture.GpuTexture
 import heckerpowered.render.resource.texture.GpuTextureView
 import heckerpowered.render.resource.texture.TextureDescription
 import heckerpowered.render.resource.texture.TextureViewDescription
-import heckerpowered.render.shader.ShaderModule
-import heckerpowered.render.shader.ShaderModuleDescription
-import heckerpowered.render.shader.ShaderStages
-import heckerpowered.render.shader.ShaderStagesDescription
+import heckerpowered.render.shader.*
 
 /**
  * Owns backend resources and encodes graphics commands.
@@ -34,6 +32,8 @@ import heckerpowered.render.shader.ShaderStagesDescription
  * implementation may compile it to SPIR-V with shaderc.
  */
 interface GraphicsDevice {
+    /** Standard drawing programs owned by this device; callers must not close their stages. */
+    val shaders: ShaderLibrary
     val memoryStack: MemoryStack
     val primitives: BuiltInPrimitives
 
