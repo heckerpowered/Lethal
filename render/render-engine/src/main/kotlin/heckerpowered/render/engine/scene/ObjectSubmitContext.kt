@@ -5,7 +5,7 @@
 
 package heckerpowered.render.engine.scene
 
-import heckerpowered.render.geometry.Matrix4
+import heckerpowered.math.AffineTransformView
 
 /**
  * Spatial state captured for an object submitted to the renderer.
@@ -15,5 +15,5 @@ import heckerpowered.render.geometry.Matrix4
  * view rather than to the object.
  */
 class ObjectSubmitContext(
-    val localToWorld: Matrix4,
+    val localToWorld: AffineTransformView,
 )
