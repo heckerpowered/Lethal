@@ -5,8 +5,8 @@
 
 package heckerpowered.render.command.pass
 
-import heckerpowered.render.BuiltInPrimitives
 import heckerpowered.render.RenderPipelineDescription
+import heckerpowered.render.geometry.BuiltInPrimitives
 import heckerpowered.render.memory.*
 import heckerpowered.render.pipeline.PipelineLayoutDescription
 import heckerpowered.render.pipeline.PushConstantLayout
