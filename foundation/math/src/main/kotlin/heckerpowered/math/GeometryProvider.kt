@@ -23,6 +23,7 @@ interface GeometryProvider {
     fun box(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double): BoxView = Freestanding.box(minX, minY, minZ, maxX, maxY, maxZ)
     fun rotator(pitch: Double, yaw: Double, roll: Double = 0.0): RotatorView = Freestanding.rotator(pitch, yaw, roll)
     fun ray(origin: VectorView, direction: VectorView): RayView = Freestanding.ray(origin, direction)
+    fun quaternion(x: Double, y: Double, z: Double, w: Double): QuaternionView = Freestanding.quaternion(x, y, z, w)
 }
 
 object FreestandingGeometryProvider : GeometryProvider {
@@ -30,6 +31,7 @@ object FreestandingGeometryProvider : GeometryProvider {
     override fun box(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double): BoxView = FreestandingBox(minX, minY, minZ, maxX, maxY, maxZ)
     override fun rotator(pitch: Double, yaw: Double, roll: Double): RotatorView = FreestandingRotator(pitch, yaw, roll)
     override fun ray(origin: VectorView, direction: VectorView): RayView = FreestandingRay(origin, direction)
+    override fun quaternion(x: Double, y: Double, z: Double, w: Double): QuaternionView = FreestandingQuaternion(x, y, z, w)
 }
 
 object Geometry {
@@ -79,3 +81,10 @@ private data class FreestandingRay(
     override val origin: VectorView,
     override val direction: VectorView,
 ) : RayView
+
+private data class FreestandingQuaternion(
+    override val x: Double,
+    override val y: Double,
+    override val z: Double,
+    override val w: Double,
+) : QuaternionView
