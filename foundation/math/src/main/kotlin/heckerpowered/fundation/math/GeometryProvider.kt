@@ -3,17 +3,17 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.bridge.math
+package heckerpowered.fundation.math
 
-import heckerpowered.bridge.FreestandingRepresentation
-import heckerpowered.bridge.platform.Services
-import heckerpowered.bridge.platform.loadOrNull
+import java.util.*
 
 interface GeometryProvider {
     companion object {
         val Freestanding: GeometryProvider = FreestandingGeometryProvider
         val Hosting: GeometryProvider?
-            get() = Services.loadOrNull<GeometryProvider>()
+            get() = ServiceLoader
+                .load(GeometryProvider::class.java, GeometryProvider::class.java.classLoader)
+                .firstOrNull()
         val Auto
             get() = Hosting ?: Freestanding
     }
@@ -51,7 +51,7 @@ private data class FreestandingVector(
     override val x: Double,
     override val y: Double,
     override val z: Double,
-) : VectorView, FreestandingRepresentation
+) : VectorView
 
 private data class FreestandingBox(
     override val minX: Double,
@@ -61,7 +61,7 @@ private data class FreestandingBox(
     override val maxX: Double,
     override val maxY: Double,
     override val maxZ: Double,
-) : BoxView, FreestandingRepresentation {
+) : BoxView {
     override val min: VectorView
         get() = FreestandingGeometryProvider.vector(minX, minY, minZ)
 
@@ -73,9 +73,9 @@ private data class FreestandingRotator(
     override val pitch: Double,
     override val yaw: Double,
     override val roll: Double = 0.0,
-) : RotatorView, FreestandingRepresentation
+) : RotatorView
 
 private data class FreestandingRay(
     override val origin: VectorView,
     override val direction: VectorView,
-) : RayView, FreestandingRepresentation
+) : RayView

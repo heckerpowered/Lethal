@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.bridge.math
+package heckerpowered.fundation.math
 
 import kotlin.math.sqrt
 
