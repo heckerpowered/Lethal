@@ -17,6 +17,7 @@ dependencies {
     testImplementation(kotlin("test"))
 
     implementation(project(":render:render-hardware-interface"))
+    implementation(project(":foundation:math"))
 }
 
 java {
