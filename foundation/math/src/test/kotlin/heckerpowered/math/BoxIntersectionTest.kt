@@ -3,14 +3,9 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.bridge.math
+package heckerpowered.math
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class BoxIntersectionTest {
     private val box = Geometry.box(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)

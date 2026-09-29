@@ -3,18 +3,11 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.bridge.math
+package heckerpowered.math
 
 import kotlin.math.PI
 import kotlin.math.sqrt
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNull
-import kotlin.test.assertSame
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class VectorViewTest {
     @Test
@@ -228,17 +221,6 @@ class VectorViewTest {
     }
 
     @Test
-    fun vectorAndRotatorConversionsRoundTripMinecraftViewDirections() {
-        val rotator = Geometry.rotator(20.0, -35.0)
-
-        val roundTrip = rotator.toViewVector().toRotator()
-
-        assertEquals(expected = rotator.pitch, actual = roundTrip.pitch, absoluteTolerance = 1.0E-12)
-        assertEquals(expected = rotator.yaw, actual = roundTrip.yaw, absoluteTolerance = 1.0E-12)
-        assertEquals(expected = 0.0, actual = roundTrip.roll)
-    }
-
-    @Test
     fun vectorCollectionsExposeCanonicalDirectionsAndOperations() {
         assertVector(0.0, 0.0, 0.0, Vectors.Zero)
         assertVector(1.0, 1.0, 1.0, Vectors.One)
@@ -259,14 +241,7 @@ class VectorViewTest {
     }
 
     @Test
-    fun minecraftDirectionsAndPointBoxesUseMinecraftCoordinates() {
-        assertVector(0.0, 1.0, 0.0, MinecraftDirections.Up)
-        assertVector(0.0, -1.0, 0.0, MinecraftDirections.Down)
-        assertVector(0.0, 0.0, 1.0, MinecraftDirections.Forward)
-        assertVector(0.0, 0.0, -1.0, MinecraftDirections.Backward)
-        assertVector(-1.0, 0.0, 0.0, MinecraftDirections.Right)
-        assertVector(1.0, 0.0, 0.0, MinecraftDirections.Left)
-
+    fun pointBoxHasTheSameMinimumAndMaximum() {
         val point = Geometry.vector(1.0, 2.0, 3.0)
         assertBox(1.0, 2.0, 3.0, 1.0, 2.0, 3.0, point.asPointBox())
     }

@@ -3,12 +3,10 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.bridge.math
+package heckerpowered.math
 
-import heckerpowered.bridge.FreestandingRepresentation
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
@@ -20,10 +18,6 @@ class GeometryProviderTest {
         val rotator = FreestandingGeometryProvider.rotator(10.0, 20.0, 30.0)
         val ray = FreestandingGeometryProvider.ray(vector, Vectors.UnitZ)
 
-        assertIs<FreestandingRepresentation>(vector)
-        assertIs<FreestandingRepresentation>(box)
-        assertIs<FreestandingRepresentation>(rotator)
-        assertIs<FreestandingRepresentation>(ray)
         assertVector(1.0, 2.0, 3.0, vector)
         assertBox(-1.0, -2.0, -3.0, 4.0, 5.0, 6.0, box)
         assertEquals(expected = 10.0, actual = rotator.pitch)
@@ -43,12 +37,11 @@ class GeometryProviderTest {
         val rotator = provider.rotator(10.0, 20.0)
         val ray = provider.ray(minimum, maximum)
 
-        assertIs<FreestandingRepresentation>(minimum)
-        assertIs<FreestandingRepresentation>(box)
-        assertIs<FreestandingRepresentation>(rotator)
-        assertIs<FreestandingRepresentation>(ray)
         assertBox(-1.0, -2.0, -3.0, 4.0, 5.0, 6.0, box)
         assertEquals(expected = 0.0, actual = rotator.roll)
+        assertVector(-1.0, -2.0, -3.0, minimum)
+        assertSame(minimum, ray.origin)
+        assertSame(maximum, ray.direction)
     }
 
     @Test
@@ -71,4 +64,30 @@ class GeometryProviderTest {
         assertSame(expected = GeometryProvider.Freestanding, actual = GeometryProvider.Auto)
         assertSame(expected = GeometryProvider.Auto, actual = Geometry.Provider)
     }
+
+    @Test
+    fun providersConstructNewGeometryTypesWithoutAHost() {
+        for (provider in listOf(FreestandingGeometryProvider, object : GeometryProvider {})) {
+            val rotation = provider.quaternion(0.0, 0.0, 0.0, 1.0)
+            val translation = provider.vector(2.0, 3.0, 4.0)
+            val scale = provider.vector(5.0, 6.0, 7.0)
+            val transform = provider.transform(translation, rotation, scale)
+            val affine = provider.affineTransform(Vectors.UnitX, Vectors.UnitY, Vectors.UnitZ, translation)
+            val matrix = provider.matrix4(
+                1.0, 2.0, 3.0, 4.0,
+                5.0, 6.0, 7.0, 8.0,
+                9.0, 10.0, 11.0, 12.0,
+                13.0, 14.0, 15.0, 16.0
+            )
+            assertEquals(listOf(0.0, 0.0, 0.0, 1.0), (0..3).map { rotation[it] })
+            assertSame(rotation, transform.rotation)
+            assertSame(translation, transform.translation)
+            assertSame(scale, transform.scale)
+            assertVector(7.0, 9.0, 11.0, transform.transformPosition(Vectors.One))
+            assertSame(translation, affine.translation)
+            assertVector(3.0, 4.0, 5.0, affine.transformPosition(Vectors.One))
+            assertEquals((1..16).map { it.toDouble() }, matrix.toList())
+        }
+    }
+
 }
