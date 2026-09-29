@@ -109,6 +109,7 @@ operator fun VectorView.plus(other: VectorView): VectorView = Geometry.vector(x 
 operator fun VectorView.minus(other: VectorView): VectorView = Geometry.vector(x - other.x, y - other.y, z - other.z)
 operator fun VectorView.unaryMinus(): VectorView = Geometry.vector(-x, -y, -z)
 operator fun VectorView.times(scale: Double): VectorView = Geometry.vector(x * scale, y * scale, z * scale)
+operator fun VectorView.times(vector: VectorView): VectorView = Geometry.vector(x * vector.x, y * vector.y, z * vector.z)
 operator fun Double.times(vector: VectorView): VectorView = vector * this
 operator fun VectorView.div(scale: Double): VectorView = Geometry.vector(x / scale, y / scale, z / scale)
 
