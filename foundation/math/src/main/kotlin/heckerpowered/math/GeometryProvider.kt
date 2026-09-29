@@ -47,6 +47,8 @@ object Geometry {
     fun rotator(pitch: Double, yaw: Double, roll: Double = 0.0) = Provider.rotator(pitch, yaw, roll)
 
     fun ray(origin: VectorView, direction: VectorView) = Provider.ray(origin, direction)
+
+    fun quaternion(x: Double, y: Double, z: Double, w: Double) = Provider.quaternion(x, y, z, w)
 }
 
 private data class FreestandingVector(
