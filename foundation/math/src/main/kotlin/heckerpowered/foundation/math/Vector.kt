@@ -422,15 +422,6 @@ fun VectorView.horizontalHeadingRadians(): Double {
     return atan2(z, x)
 }
 
-fun VectorView.toRotator(): RotatorView {
-    val horizontalLength = sqrt(x * x + z * z)
-    return Geometry.rotator(
-        Math.toDegrees(atan2(-y, horizontalLength)),
-        Math.toDegrees(-atan2(x, z)),
-        0.0
-    )
-}
-
 fun VectorView.createPerpendicularBasis(): Basis3dView {
     val forward = normalized()
     val temporaryRight = if (abs(forward.z) > abs(forward.x) && abs(forward.z) > abs(forward.y)) Vectors.UnitX else Vectors.UnitZ
