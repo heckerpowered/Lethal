@@ -25,6 +25,7 @@ interface GeometryProvider {
     fun ray(origin: VectorView, direction: VectorView): RayView = Freestanding.ray(origin, direction)
     fun quaternion(x: Double, y: Double, z: Double, w: Double): QuaternionView = Freestanding.quaternion(x, y, z, w)
     fun transform(translation: VectorView, rotation: QuaternionView, scale: VectorView): TransformView = Freestanding.transform(translation, rotation, scale)
+    fun affineTransform(axisX: VectorView, axisY: VectorView, axisZ: VectorView, translation: VectorView): AffineTransformView = Freestanding.affineTransform(axisX, axisY, axisZ, translation)
 }
 
 object FreestandingGeometryProvider : GeometryProvider {
@@ -34,6 +35,7 @@ object FreestandingGeometryProvider : GeometryProvider {
     override fun ray(origin: VectorView, direction: VectorView): RayView = FreestandingRay(origin, direction)
     override fun quaternion(x: Double, y: Double, z: Double, w: Double): QuaternionView = FreestandingQuaternion(x, y, z, w)
     override fun transform(translation: VectorView, rotation: QuaternionView, scale: VectorView): TransformView = FreestandingTransform(translation, rotation, scale)
+    override fun affineTransform(axisX: VectorView, axisY: VectorView, axisZ: VectorView, translation: VectorView): AffineTransformView = FreestandingAffineTransform(axisX, axisY, axisZ, translation)
 }
 
 object Geometry {
@@ -47,6 +49,7 @@ object Geometry {
     fun ray(origin: VectorView, direction: VectorView) = Provider.ray(origin, direction)
     fun quaternion(x: Double, y: Double, z: Double, w: Double) = Provider.quaternion(x, y, z, w)
     fun transform(translation: VectorView, rotation: QuaternionView, scale: VectorView) = Provider.transform(translation, rotation, scale)
+    fun affineTransform(axisX: VectorView, axisY: VectorView, axisZ: VectorView, translation: VectorView) = Provider.affineTransform(axisX, axisY, axisZ, translation)
 }
 
 private data class FreestandingVector(
@@ -94,3 +97,10 @@ private data class FreestandingTransform(
     override val rotation: QuaternionView,
     override val scale: VectorView,
 ) : TransformView
+
+private data class FreestandingAffineTransform(
+    override val axisX: VectorView,
+    override val axisY: VectorView,
+    override val axisZ: VectorView,
+    override val translation: VectorView,
+) : AffineTransformView
