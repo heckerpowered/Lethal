@@ -76,6 +76,16 @@ class PerspectiveProjection(
             0.0, 0.0, 1.0, 0.0,
         )
     }
+
+    companion object {
+        fun degrees(verticalFieldOfViewDegrees: Double, aspectRatio: Double, nearPlane: Double, farPlane: Double): PerspectiveProjection =
+            PerspectiveProjection(
+                verticalFieldOfViewRadians = Math.toRadians(verticalFieldOfViewDegrees),
+                aspectRatio = aspectRatio,
+                nearPlane = nearPlane,
+                farPlane = farPlane,
+            )
+    }
 }
 
 /**
