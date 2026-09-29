@@ -12,7 +12,7 @@ import heckerpowered.bridge.adapter.item.stack.ItemStackAccess;
 import heckerpowered.bridge.adapter.world.WorldAccess;
 import heckerpowered.bridge.math.BlockDirection;
 import heckerpowered.bridge.math.BlockPositionView;
-import heckerpowered.bridge.math.VectorView;
+import heckerpowered.math.VectorView;
 import heckerpowered.bridge.resources.Identifier;
 import heckerpowered.lethal.mixin.impl.ItemAccessImpl;
 import heckerpowered.lethal.platform.interop.ItemInterop;

@@ -44,6 +44,7 @@ dependencies {
 
     attach(project(":common"))
     attach(project(":bridge"))
+    attach(project(":foundation:math"))
     attach(project(":render:render-hardware-interface"))
     attach("org.spongepowered:mixin:$mixinVersion") {
         exclude(group = "com.google.guava", module = "guava")

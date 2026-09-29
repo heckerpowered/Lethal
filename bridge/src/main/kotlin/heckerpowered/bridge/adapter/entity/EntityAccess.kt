@@ -8,7 +8,9 @@ package heckerpowered.bridge.adapter.entity
 import heckerpowered.bridge.adapter.BridgeAccess
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
 import heckerpowered.bridge.adapter.world.WorldAccess
-import heckerpowered.bridge.math.*
+import heckerpowered.bridge.math.MinecraftDirections
+import heckerpowered.bridge.math.toViewVector
+import heckerpowered.math.*
 import java.util.*
 
 interface EntityAccess : BridgeAccess, UniquelyIdentifiable {

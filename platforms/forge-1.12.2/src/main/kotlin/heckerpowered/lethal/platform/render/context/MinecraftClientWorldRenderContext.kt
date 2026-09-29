@@ -6,7 +6,7 @@
 package heckerpowered.lethal.platform.render.context
 
 import heckerpowered.bridge.adapter.client.render.context.WorldRenderContext
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.VectorView
 import heckerpowered.render.GraphicsDevice
 import heckerpowered.render.geometry.Matrix4
 import heckerpowered.render.resource.target.RenderTarget

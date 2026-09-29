@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.bridge.math.BoxView;
+import heckerpowered.math.BoxView;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;

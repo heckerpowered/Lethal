@@ -5,7 +5,10 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.bridge.math.*
+import heckerpowered.bridge.math.BlockDirection
+import heckerpowered.bridge.math.BlockPositions
+import heckerpowered.bridge.math.BlockPositionView
+import heckerpowered.math.*
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.math.AxisAlignedBB
 import net.minecraft.util.math.BlockPos

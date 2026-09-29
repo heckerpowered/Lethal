@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.platform.services
 
-import heckerpowered.bridge.math.BoxView
-import heckerpowered.bridge.math.GeometryProvider
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.BoxView
+import heckerpowered.math.GeometryProvider
+import heckerpowered.math.VectorView
 import heckerpowered.lethal.platform.interop.asView
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3

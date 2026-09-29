@@ -13,7 +13,7 @@ import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageSourceSpec
 import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageType
 import heckerpowered.bridge.adapter.entity.damagesource.VirtualDamageProvider
 import heckerpowered.bridge.adapter.entity.damagesource.VirtualDamageSourceSpec
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.VectorView
 import heckerpowered.lethal.gameplay.common.entity.damagesource.attributedDamageSource
 import heckerpowered.lethal.platform.interop.asHost
 import heckerpowered.lethal.platform.interop.asView

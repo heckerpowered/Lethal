@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.bridge.math.BoxView;
-import heckerpowered.bridge.math.Geometry;
-import heckerpowered.bridge.math.VectorView;
+import heckerpowered.math.BoxView;
+import heckerpowered.math.Geometry;
+import heckerpowered.math.VectorView;
 import net.minecraft.util.math.AxisAlignedBB;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.*;

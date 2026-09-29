@@ -9,9 +9,9 @@ import heckerpowered.bridge.adapter.entity.EntityAccess
 import heckerpowered.bridge.adapter.entity.LivingEntityAccess
 import heckerpowered.bridge.adapter.entity.PlayerAccess
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
-import heckerpowered.bridge.math.VectorView
-import heckerpowered.bridge.math.asPointBox
-import heckerpowered.bridge.math.expandedBy
+import heckerpowered.math.VectorView
+import heckerpowered.math.asPointBox
+import heckerpowered.math.expandedBy
 import heckerpowered.lethal.gameplay.common.item.firearm.EntityDamageResult
 import heckerpowered.lethal.gameplay.common.network.ZeusChainSegment
 import java.util.*

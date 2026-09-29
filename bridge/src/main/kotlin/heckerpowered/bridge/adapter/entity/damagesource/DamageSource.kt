@@ -8,7 +8,7 @@ package heckerpowered.bridge.adapter.entity.damagesource
 import heckerpowered.bridge.QuantumRepresentation
 import heckerpowered.bridge.VirtualRepresentation
 import heckerpowered.bridge.adapter.entity.EntityAccess
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.VectorView
 import heckerpowered.bridge.platform.Services
 import heckerpowered.bridge.platform.loadOrNull
 import heckerpowered.bridge.resources.Identifier

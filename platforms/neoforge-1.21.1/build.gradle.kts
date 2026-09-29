@@ -93,6 +93,7 @@ dependencies {
 
     attach(project(":common"))
     attach(project(":bridge"))
+    attach(project(":foundation:math"))
     attach(project(":render:render-hardware-interface"))
     // kotlin(...) uses the same version as the applied Kotlin Gradle plugin.
     attach(kotlin("stdlib"))
@@ -100,6 +101,7 @@ dependencies {
     // ModDevGradle requires non-mod libraries on this classpath for 1.21.8 and earlier runs.
     add("additionalRuntimeClasspath", project(":common"))
     add("additionalRuntimeClasspath", project(":bridge"))
+    add("additionalRuntimeClasspath", project(":foundation:math"))
     add("additionalRuntimeClasspath", project(":render:render-hardware-interface"))
     add("additionalRuntimeClasspath", kotlin("stdlib"))
 }

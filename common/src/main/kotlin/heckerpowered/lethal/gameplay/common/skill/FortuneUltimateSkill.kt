@@ -9,7 +9,7 @@ import heckerpowered.bridge.adapter.entity.PlayerAccess
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 import heckerpowered.bridge.adapter.item.stack.PersistentDataAccess
 import heckerpowered.bridge.adapter.world.raycast.BlockRaycastShape
-import heckerpowered.bridge.math.Geometry
+import heckerpowered.math.Geometry
 import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.common.item.firearm.EntityDamageResult
 import heckerpowered.lethal.gameplay.common.item.firearm.EntityHitEffect

@@ -9,7 +9,7 @@ import heckerpowered.bridge.adapter.world.raycast.BlockHitResult
 import heckerpowered.bridge.adapter.world.raycast.BlockRaycastShape
 import heckerpowered.bridge.math.BlockDirection
 import heckerpowered.bridge.math.BlockPositions
-import heckerpowered.bridge.math.Geometry
+import heckerpowered.math.Geometry
 import heckerpowered.lethal.platform.interop.asHost
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks

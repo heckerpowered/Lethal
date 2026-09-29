@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.mixin.impl
 
-import heckerpowered.bridge.math.Geometry
-import heckerpowered.bridge.math.RayIntersectionContext
-import heckerpowered.bridge.math.intersectTime
+import heckerpowered.math.Geometry
+import heckerpowered.math.RayIntersectionContext
+import heckerpowered.math.intersectTime
 import net.minecraft.entity.item.EntityXPOrb
 import net.minecraft.init.Bootstrap
 import net.minecraft.profiler.Profiler

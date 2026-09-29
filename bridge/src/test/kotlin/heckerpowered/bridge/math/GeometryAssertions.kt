@@ -5,6 +5,8 @@
 
 package heckerpowered.bridge.math
 
+import heckerpowered.math.BoxView
+import heckerpowered.math.VectorView
 import kotlin.test.assertEquals
 
 internal fun assertVector(expectedX: Double, expectedY: Double, expectedZ: Double, actual: VectorView, absoluteTolerance: Double = 0.0) {

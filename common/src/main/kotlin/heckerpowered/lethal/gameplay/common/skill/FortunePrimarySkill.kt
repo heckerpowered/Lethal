@@ -14,7 +14,7 @@ import heckerpowered.bridge.adapter.entity.PlayerAccess
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 import heckerpowered.bridge.adapter.item.stack.ItemStackInterop
 import heckerpowered.bridge.adapter.world.raycast.BlockHitResult
-import heckerpowered.bridge.math.expandedBy
+import heckerpowered.math.expandedBy
 import heckerpowered.bridge.resources.Identifier
 import heckerpowered.lethal.Constants
 

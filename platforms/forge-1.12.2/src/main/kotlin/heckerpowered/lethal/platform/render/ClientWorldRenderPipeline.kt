@@ -7,7 +7,7 @@ package heckerpowered.lethal.platform.render
 
 import heckerpowered.bridge.adapter.client.render.ClientWorldPostProcessRule
 import heckerpowered.bridge.adapter.client.render.ClientWorldRenderRule
-import heckerpowered.bridge.math.Geometry
+import heckerpowered.math.Geometry
 import heckerpowered.bridge.rule.RuleRegistry
 import heckerpowered.bridge.rule.forEach
 import heckerpowered.lethal.Constants

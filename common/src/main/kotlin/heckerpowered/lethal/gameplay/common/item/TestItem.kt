@@ -13,7 +13,7 @@ import heckerpowered.bridge.adapter.world.raycast.AlgorithmResolution
 import heckerpowered.bridge.adapter.world.raycast.AlgorithmResolutionState
 import heckerpowered.bridge.adapter.world.raycast.RaycastExecutionPolicy
 import heckerpowered.bridge.adapter.world.raycast.raycastEntityHits
-import heckerpowered.bridge.math.Geometry
+import heckerpowered.math.Geometry
 import heckerpowered.bridge.resources.Identifier
 import heckerpowered.lethal.Constants
 

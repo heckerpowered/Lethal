@@ -10,7 +10,7 @@ import heckerpowered.bridge.adapter.asView
 import heckerpowered.bridge.adapter.entity.LivingEntityAccess
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSources
 import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageType
-import heckerpowered.bridge.math.BoxView
+import heckerpowered.math.BoxView
 
 class HeadshotExecutionEffect private constructor(private val minimumHeightFraction: (BoxView) -> Double) : EntityHitEffect {
     companion object {

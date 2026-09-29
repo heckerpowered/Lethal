@@ -8,7 +8,7 @@ package heckerpowered.lethal.gameplay.common.entity.damagesource
 import heckerpowered.bridge.adapter.entity.damagesource.DamageFeature
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView
 import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageSourceSpec
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.VectorView
 import heckerpowered.lethal.platform.interop.asHost
 import heckerpowered.lethal.platform.interop.asView
 import net.minecraft.entity.Entity

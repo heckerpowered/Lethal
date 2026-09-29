@@ -8,7 +8,7 @@ package heckerpowered.lethal.platform.adapter.item
 import com.google.common.collect.HashMultimap
 import com.google.common.collect.Multimap
 import heckerpowered.bridge.adapter.item.*
-import heckerpowered.bridge.math.Geometry
+import heckerpowered.math.Geometry
 import heckerpowered.lethal.platform.adapter.item.creativetab.ForgeCreativeModeTabs
 import heckerpowered.lethal.platform.interop.asHost
 import heckerpowered.lethal.platform.interop.asView

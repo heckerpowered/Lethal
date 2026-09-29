@@ -16,7 +16,7 @@ import heckerpowered.bridge.adapter.sound.SoundCategory
 import heckerpowered.bridge.adapter.sound.SoundEventSpec
 import heckerpowered.bridge.adapter.sound.SoundPlayback
 import heckerpowered.bridge.adapter.world.WorldAccess
-import heckerpowered.bridge.math.*
+import heckerpowered.math.*
 import heckerpowered.bridge.resources.Identifier
 import heckerpowered.lethal.gameplay.common.entity.isStarJudgement
 import java.util.*

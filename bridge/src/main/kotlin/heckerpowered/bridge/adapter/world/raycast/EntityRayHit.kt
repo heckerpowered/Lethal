@@ -6,8 +6,8 @@
 package heckerpowered.bridge.adapter.world.raycast
 
 import heckerpowered.bridge.adapter.entity.EntityAccess
-import heckerpowered.bridge.math.BoxIntersection
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.BoxIntersection
+import heckerpowered.math.VectorView
 
 data class EntityRayHit(
     val entity: EntityAccess,

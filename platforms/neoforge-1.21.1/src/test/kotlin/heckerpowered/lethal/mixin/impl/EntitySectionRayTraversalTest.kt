@@ -5,9 +5,9 @@
 
 package heckerpowered.lethal.mixin.impl
 
-import heckerpowered.bridge.math.GeometryProvider
-import heckerpowered.bridge.math.RayIntersectionContext
-import heckerpowered.bridge.math.intersectTime
+import heckerpowered.math.GeometryProvider
+import heckerpowered.math.RayIntersectionContext
+import heckerpowered.math.intersectTime
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals

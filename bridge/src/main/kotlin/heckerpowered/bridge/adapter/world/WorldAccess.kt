@@ -13,9 +13,9 @@ import heckerpowered.bridge.adapter.world.raycast.BlockHitResult
 import heckerpowered.bridge.adapter.world.raycast.BlockRaycastShape
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucketSource
 import heckerpowered.bridge.math.BlockPositionView
-import heckerpowered.bridge.math.BoxView
-import heckerpowered.bridge.math.RayView
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.BoxView
+import heckerpowered.math.RayView
+import heckerpowered.math.VectorView
 
 /**
  * Host-neutral world access.

@@ -8,8 +8,8 @@ package heckerpowered.lethal.platform.interop
 import heckerpowered.bridge.requireAccess
 import heckerpowered.bridge.math.BlockDirection
 import heckerpowered.bridge.math.BlockPositionView
-import heckerpowered.bridge.math.BoxView
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.BoxView
+import heckerpowered.math.VectorView
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.world.phys.AABB

@@ -5,8 +5,8 @@
 
 package heckerpowered.lethal.mixin.impl
 
-import heckerpowered.bridge.math.RayIntersectionContext
-import heckerpowered.bridge.math.intersectTime
+import heckerpowered.math.RayIntersectionContext
+import heckerpowered.math.intersectTime
 import java.util.PriorityQueue
 import kotlin.math.floor
 import kotlin.math.max

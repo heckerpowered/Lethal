@@ -10,7 +10,7 @@ import heckerpowered.bridge.adapter.entity.EntityAccess;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageFeature;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView;
 import heckerpowered.bridge.adapter.entity.damagesource.VanillaDamageType;
-import heckerpowered.bridge.math.VectorView;
+import heckerpowered.math.VectorView;
 import heckerpowered.bridge.resources.Identifier;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;

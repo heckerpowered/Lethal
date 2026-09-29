@@ -9,10 +9,10 @@ import heckerpowered.bridge.adapter.entity.EntityAccess
 import heckerpowered.bridge.adapter.entity.EntityPartAccess
 import heckerpowered.bridge.adapter.entity.MultipartEntityAccess
 import heckerpowered.bridge.adapter.world.WorldAccess
-import heckerpowered.bridge.math.Geometry
-import heckerpowered.bridge.math.RayIntersectionContext
-import heckerpowered.bridge.math.RayView
-import heckerpowered.bridge.math.intersect
+import heckerpowered.math.Geometry
+import heckerpowered.math.RayIntersectionContext
+import heckerpowered.math.RayView
+import heckerpowered.math.intersect
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min

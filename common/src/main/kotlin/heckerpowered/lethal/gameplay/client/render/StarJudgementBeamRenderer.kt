@@ -5,7 +5,7 @@
 
 package heckerpowered.lethal.gameplay.client.render
 
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.VectorView
 import heckerpowered.lethal.Constants
 import heckerpowered.render.*
 import heckerpowered.render.VertexAttributeFormat.Float2

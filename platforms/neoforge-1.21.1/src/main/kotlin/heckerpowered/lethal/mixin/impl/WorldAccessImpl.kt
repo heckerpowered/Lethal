@@ -11,7 +11,8 @@ import heckerpowered.bridge.adapter.sound.SoundPlayback
 import heckerpowered.bridge.adapter.world.raycast.BlockHitResult
 import heckerpowered.bridge.adapter.world.raycast.BlockRaycastShape
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket
-import heckerpowered.bridge.math.*
+import heckerpowered.bridge.math.BlockPositionView
+import heckerpowered.math.*
 import heckerpowered.lethal.platform.interop.asHost
 import heckerpowered.lethal.platform.interop.asView
 import net.minecraft.core.BlockPos

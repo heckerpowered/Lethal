@@ -8,7 +8,7 @@ package heckerpowered.bridge.adapter.world.raycast
 import heckerpowered.bridge.adapter.block.BlockStateAccess
 import heckerpowered.bridge.math.BlockDirection
 import heckerpowered.bridge.math.BlockPositionView
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.VectorView
 
 /**
  * A block shape intersected by a ray.

@@ -8,7 +8,7 @@ package heckerpowered.lethal.mixin.target;
 import heckerpowered.bridge.adapter.entity.EntityAccess;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageFeature;
 import heckerpowered.bridge.adapter.entity.damagesource.DamageSourceView;
-import heckerpowered.bridge.math.VectorView;
+import heckerpowered.math.VectorView;
 import heckerpowered.bridge.resources.Identifier;
 import heckerpowered.lethal.platform.interop.GeometryInterop;
 import heckerpowered.lethal.platform.interop.ObjectInterop;

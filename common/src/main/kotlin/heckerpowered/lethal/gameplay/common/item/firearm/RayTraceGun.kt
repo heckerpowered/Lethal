@@ -11,8 +11,8 @@ import heckerpowered.bridge.adapter.world.WorldAccess
 import heckerpowered.bridge.adapter.world.raycast.BlockHitResult
 import heckerpowered.bridge.adapter.world.raycast.EntityRayHit
 import heckerpowered.bridge.adapter.world.raycast.raycastEntityHits
-import heckerpowered.bridge.math.Geometry
-import heckerpowered.bridge.math.RayView
+import heckerpowered.math.Geometry
+import heckerpowered.math.RayView
 
 abstract class RayTraceGun : Firearm() {
     protected abstract fun getRayTraceDistanceBlocks(player: PlayerAccess, weaponStack: ItemStackAccess): Double

@@ -5,7 +5,7 @@
 
 package heckerpowered.bridge.adapter.client.render.context
 
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.VectorView
 import heckerpowered.render.GraphicsDevice
 import heckerpowered.render.command.CommandEncoder
 import heckerpowered.render.command.pass.RenderPassDescription

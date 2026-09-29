@@ -8,8 +8,8 @@ package heckerpowered.lethal.gameplay.common.item.firearm
 import heckerpowered.bridge.adapter.entity.DeferredExperienceDropAccess
 import heckerpowered.bridge.adapter.entity.DroppedItemAccess
 import heckerpowered.bridge.adapter.entity.ExperienceOrbAccess
-import heckerpowered.bridge.math.asPointBox
-import heckerpowered.bridge.math.expandedBy
+import heckerpowered.math.asPointBox
+import heckerpowered.math.expandedBy
 
 object CaptureEntityHitEffect : EntityHitEffect {
     private const val CAPTURE_RADIUS_BLOCKS = 6.0

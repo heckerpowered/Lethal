@@ -5,8 +5,8 @@
 
 package heckerpowered.lethal.gameplay.common.network
 
-import heckerpowered.bridge.math.Geometry
-import heckerpowered.bridge.math.VectorView
+import heckerpowered.math.Geometry
+import heckerpowered.math.VectorView
 import heckerpowered.bridge.network.ClientPlayNetworking.Context
 import heckerpowered.bridge.network.ClientboundPayload
 import heckerpowered.bridge.network.Payload
