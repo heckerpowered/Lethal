@@ -24,6 +24,7 @@ interface GeometryProvider {
     fun rotator(pitch: Double, yaw: Double, roll: Double = 0.0): RotatorView = Freestanding.rotator(pitch, yaw, roll)
     fun ray(origin: VectorView, direction: VectorView): RayView = Freestanding.ray(origin, direction)
     fun quaternion(x: Double, y: Double, z: Double, w: Double): QuaternionView = Freestanding.quaternion(x, y, z, w)
+    fun transform(translation: VectorView, rotation: QuaternionView, scale: VectorView): TransformView = Freestanding.transform(translation, rotation, scale)
 }
 
 object FreestandingGeometryProvider : GeometryProvider {
@@ -32,6 +33,7 @@ object FreestandingGeometryProvider : GeometryProvider {
     override fun rotator(pitch: Double, yaw: Double, roll: Double): RotatorView = FreestandingRotator(pitch, yaw, roll)
     override fun ray(origin: VectorView, direction: VectorView): RayView = FreestandingRay(origin, direction)
     override fun quaternion(x: Double, y: Double, z: Double, w: Double): QuaternionView = FreestandingQuaternion(x, y, z, w)
+    override fun transform(translation: VectorView, rotation: QuaternionView, scale: VectorView): TransformView = FreestandingTransform(translation, rotation, scale)
 }
 
 object Geometry {
@@ -39,16 +41,12 @@ object Geometry {
 
     @JvmStatic
     fun vector(x: Double, y: Double, z: Double) = Provider.vector(x, y, z)
-
     fun box(min: VectorView, max: VectorView) = Provider.box(min, max)
-
     fun box(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double) = Provider.box(minX, minY, minZ, maxX, maxY, maxZ)
-
     fun rotator(pitch: Double, yaw: Double, roll: Double = 0.0) = Provider.rotator(pitch, yaw, roll)
-
     fun ray(origin: VectorView, direction: VectorView) = Provider.ray(origin, direction)
-
     fun quaternion(x: Double, y: Double, z: Double, w: Double) = Provider.quaternion(x, y, z, w)
+    fun transform(translation: VectorView, rotation: QuaternionView, scale: VectorView) = Provider.transform(translation, rotation, scale)
 }
 
 private data class FreestandingVector(
@@ -90,3 +88,9 @@ private data class FreestandingQuaternion(
     override val z: Double,
     override val w: Double,
 ) : QuaternionView
+
+private data class FreestandingTransform(
+    override val translation: VectorView,
+    override val rotation: QuaternionView,
+    override val scale: VectorView,
+) : TransformView
