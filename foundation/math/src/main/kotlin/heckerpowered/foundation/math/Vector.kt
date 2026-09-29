@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.fundation.math
+package heckerpowered.foundation.math
 
 import kotlin.math.*
 
