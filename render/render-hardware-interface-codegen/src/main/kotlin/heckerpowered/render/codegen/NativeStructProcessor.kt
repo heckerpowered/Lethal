@@ -78,9 +78,8 @@ private class UnresolvedSchema : RuntimeException()
 
 private val SchemaAnnotations = mapOf(
     "heckerpowered.render.memory.NativeStruct" to StructKind.Native,
-    // These declarations still use the root package in the restored production baseline.
-    "heckerpowered.render.GpuBufferData" to StructKind.Uniform,
-    "heckerpowered.render.PushConstantBlock" to StructKind.PushConstant,
+    "heckerpowered.render.shader.data.GpuBufferData" to StructKind.Uniform,
+    "heckerpowered.render.shader.data.PushConstantBlock" to StructKind.PushConstant,
 )
 private const val NativeAddressName = "heckerpowered.render.memory.NativeAddress"
 private const val FloatElementsName = "heckerpowered.render.memory.FloatElements"
