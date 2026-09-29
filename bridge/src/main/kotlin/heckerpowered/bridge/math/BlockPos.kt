@@ -5,7 +5,6 @@
 
 package heckerpowered.bridge.math
 
-import heckerpowered.bridge.FreestandingRepresentation
 import heckerpowered.bridge.platform.Services
 import heckerpowered.bridge.platform.loadOrNull
 import kotlin.math.abs
@@ -108,7 +107,7 @@ private data class FreestandingBlockPosition(
     override val x: Int,
     override val y: Int,
     override val z: Int,
-) : BlockPositionView, FreestandingRepresentation
+) : BlockPositionView
 
 object BlockPositions {
     var Provider: BlockPositionProvider = BlockPositionProvider.Auto
