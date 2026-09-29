@@ -46,6 +46,49 @@ interface TransformView : Interpolatable<TransformView> {
         )
 }
 
+/**
+ * Composes this transform with [other] exactly.
+ *
+ * `(first.compose(second))` applies [other] first, then this transform.
+ *
+ * The result is affine because composing TRS transforms may introduce shear.
+ */
+fun TransformView.compose(other: TransformView): AffineTransformView =
+    toAffine() * other.toAffine()
+
+/**
+ * Attempts to compose this transform with [other] while preserving an exact
+ * TRS representation.
+ *
+ * `(first.tryCompose(second))` applies [other] first, then this transform.
+ *
+ * Returns `null` when the composition may introduce shear that cannot be
+ * represented exactly by [TransformView].
+ *
+ * This check is intentionally conservative: some compositions that are
+ * mathematically representable as TRS may still return `null`.
+ */
+fun TransformView.tryCompose(other: TransformView): TransformView? {
+    val scaleCommutesWithOtherRotation = scale.allComponentsEqual(0.0) || other.rotation.isIdentity(0.0)
+    if (!scaleCommutesWithOtherRotation) return null
+
+    return Geometry.transform(
+        translation = transformPosition(other.translation),
+        rotation = rotation * other.rotation,
+        scale = scale * other.scale,
+    )
+}
+
+/**
+ * Composes two TRS transforms exactly.
+ *
+ * `(first * second)` applies second, then first.
+ *
+ * The result is affine because arbitrary TRS composition may introduce shear.
+ */
+operator fun TransformView.times(other: TransformView): AffineTransformView =
+    compose(other)
+
 object Transforms {
     val Identity: TransformView = Geometry.transform(Vectors.Zero, Quaternions.Identity, Vectors.One)
 
