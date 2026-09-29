@@ -33,7 +33,7 @@ class DescriptorSetLayout(
         Collections.unmodifiableList(bindings.sortedBy { it.binding })
 
     init {
-        require(this.bindings.zipWithNext().none { (left, right) -> left.binding == right.binding }) { "Descriptor binding numbers must be unique within a set" }
+        require(this.bindings.zipWithNext().none { [left, right] -> left.binding == right.binding }) { "Descriptor binding numbers must be unique within a set" }
     }
 
     /** Looks up an explicit binding number. An omitted number is an absent slot, not a null resource. */
