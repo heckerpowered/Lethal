@@ -17,7 +17,9 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
 
+    implementation(project(":foundation:math"))
     implementation(project(":render:render-hardware-interface"))
+    
     add("ksp", project(":render:render-hardware-interface-codegen"))
 }
 
