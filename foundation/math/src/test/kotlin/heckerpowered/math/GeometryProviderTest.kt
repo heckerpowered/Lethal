@@ -73,7 +73,7 @@ class GeometryProviderTest {
             val scale = provider.vector(5.0, 6.0, 7.0)
             val transform = provider.transform(translation, rotation, scale)
             val affine = provider.affineTransform(Vectors.UnitX, Vectors.UnitY, Vectors.UnitZ, translation)
-            val matrix = provider.matrix4(
+            val matrix = provider.matrix(
                 1.0, 2.0, 3.0, 4.0,
                 5.0, 6.0, 7.0, 8.0,
                 9.0, 10.0, 11.0, 12.0,
