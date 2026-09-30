@@ -117,62 +117,63 @@ operator fun VectorView.div(scale: Double): VectorView = Geometry.vector(x / sca
  * Calculates the normalized version of vector without checking for zero length
  *
  * @return a normalized version of vector
- * @see safeNormal
+ * @see normalizedOr
  */
-fun VectorView.unsafeNormal(): VectorView {
+fun VectorView.normalizedUnsafe(): VectorView {
     val scale = 1.0 / sqrt(x * x + y * y + z * z)
     return Geometry.vector(x * scale, y * scale, z * scale)
 }
 
 /**
- * Gets a normalized copy of the vector, checking it is safe to do so based on the length.
- * Returns zero vector by default if vector length is too small to safely normalize
- *
- * @param tolerance minimum squared vector length
- * @param resultIfZero return value if unsafe
- * @return a normalized copy if safe, `resultIfZero` otherwise
+ * Returns a unit vector, or null for non-finite input, length or output, or squared length
+ * at or below [tolerance]. Tolerance must be finite and nonnegative.
+ * Each source component is sampled once.
  */
-fun VectorView.safeNormal(tolerance: Double = 1.0e-8, resultIfZero: VectorView = Vectors.Zero): VectorView {
-    val squareSum = x * x + y * y + z * z
+fun VectorView.normalizedOrNull(tolerance: Double = 1.0E-8): VectorView? {
+    require(tolerance.isFinite() && tolerance >= 0.0)
+    val vector = Geometry.vector(x, y, z)
+    if (!vector.isFinite()) return null
 
-    if (squareSum == 1.0) return this
-    else if (squareSum < tolerance) return resultIfZero
+    // Compare lengths to avoid overflow or underflow when squaring the vector length.
+    val length = hypot(hypot(vector.x, vector.y), vector.z)
+    val minimumLength = sqrt(tolerance)
 
-    val scale = 1.0 / sqrt(squareSum)
-    return Geometry.vector(x * scale, y * scale, z * scale)
+    if (!length.isFinite() || length <= minimumLength) {
+        return null
+    }
+
+    return (vector / length).takeIf { it.isFinite() }
 }
 
-fun VectorView.normalized(): VectorView {
-    return safeNormal()
-}
+/** Uses [fallback] for any normalization failure, including non-finite input or output. */
+fun VectorView.normalizedOr(fallback: VectorView, tolerance: Double = 1.0E-8): VectorView =
+    normalizedOrNull(tolerance) ?: fallback
 
-fun VectorView.unsafeNormal2D(): VectorView {
+/** Returns a unit vector, or throws [IllegalArgumentException] under the failure conditions of [normalizedOrNull]. */
+fun VectorView.normalized(tolerance: Double = 1.0E-8): VectorView =
+    requireNotNull(normalizedOrNull(tolerance)) { "Cannot normalize a degenerate or non-finite vector" }
+
+fun VectorView.normalized2DUnsafe(): VectorView {
     val scale = 1.0 / sqrt(x * x + z * z)
     return Geometry.vector(x * scale, 0.0, z * scale)
 }
 
 /**
- * Gets a normalized copy of the 2D components of the vector, checking it is safe to do so. Y is set to zero.
- * Returns zero vector by default if vector length is too small to normalize
- *
- * @param tolerance minimum squared vector length.
- * @param resultIfZero return value if unsafe
- * @return a normalized copy if safe, `resultIfZero` otherwise
+ * Normalizes the XZ projection, setting Y to zero. Y is neither sampled nor validated.
+ * Failure and tolerance follow [normalizedOrNull], using the squared XZ length.
  */
-fun VectorView.safeNormal2D(tolerance: Double = 1.0e-8, resultIfZero: VectorView = Vectors.Zero): VectorView {
-    val squareSum = x * x + z * z
-
-    // Not sure if it is safe to add tolerance in there. Might introduce too many errors
-    if (squareSum == 1.0) return if (y == 0.0) this else Geometry.vector(x, 0.0, z)
-    else if (squareSum <= tolerance) return resultIfZero
-
-    val scale = 1.0 / sqrt(squareSum)
-    return Geometry.vector(x * scale, 0.0, z * scale)
+fun VectorView.normalized2DOrNull(tolerance: Double = 1.0E-8): VectorView? {
+    require(tolerance.isFinite() && tolerance >= 0.0)
+    return Geometry.vector(x, 0.0, z).normalizedOrNull(tolerance)
 }
 
-fun VectorView.normalized2D(): VectorView {
-    return safeNormal2D()
-}
+/** Uses [fallback] unchanged when [normalized2DOrNull] fails. */
+fun VectorView.normalized2DOr(fallback: VectorView, tolerance: Double = 1.0E-8): VectorView =
+    normalized2DOrNull(tolerance) ?: fallback
+
+/** Returns a unit XZ vector, or throws [IllegalArgumentException] when [normalized2DOrNull] fails. */
+fun VectorView.normalized2D(tolerance: Double = 1.0E-8): VectorView =
+    requireNotNull(normalized2DOrNull(tolerance)) { "Cannot normalize a degenerate or non-finite XZ vector" }
 
 fun VectorView.reciprocal(): VectorView {
     return Geometry.vector(1.0 / x, 1.0 / y, 1.0 / z)
