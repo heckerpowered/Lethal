@@ -281,12 +281,7 @@ interface RenderPass {
      * @see [OpenGL instanced draw parameters](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_base_instance.txt)
      * @see [D3D12 DrawInstanced](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-drawinstanced)
      */
-    fun draw(
-        vertexCount: Int,
-        firstVertex: Int = 0,
-        instanceCount: Int = 1,
-        firstInstance: Int = 0,
-    )
+    fun draw(vertexCount: Int, firstVertex: Int = 0, instanceCount: Int = 1, firstInstance: Int = 0)
 
     /**
      * Draws vertices selected by the bound index range, optionally for several instances.
