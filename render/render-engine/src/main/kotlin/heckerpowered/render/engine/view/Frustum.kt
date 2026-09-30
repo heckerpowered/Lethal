@@ -52,41 +52,41 @@ class Frustum private constructor(
             val matrix = Matrices.copyOf(worldToClip)
 
             return Frustum(
-                left = Planes.normalized(
+                left = halfSpacePlane(
                     matrix.m30 + matrix.m00,
                     matrix.m31 + matrix.m01,
                     matrix.m32 + matrix.m02,
                     matrix.m33 + matrix.m03,
                 ),
-                right = Planes.normalized(
+                right = halfSpacePlane(
                     matrix.m30 - matrix.m00,
                     matrix.m31 - matrix.m01,
                     matrix.m32 - matrix.m02,
                     matrix.m33 - matrix.m03,
                 ),
 
-                // NDC Y increases downward in the RHI convention.
-                top = Planes.normalized(
+                // NDC y = -1 is the upper edge of the framebuffer.
+                top = halfSpacePlane(
                     matrix.m30 + matrix.m10,
                     matrix.m31 + matrix.m11,
                     matrix.m32 + matrix.m12,
                     matrix.m33 + matrix.m13,
                 ),
-                bottom = Planes.normalized(
+                bottom = halfSpacePlane(
                     matrix.m30 - matrix.m10,
                     matrix.m31 - matrix.m11,
                     matrix.m32 - matrix.m12,
                     matrix.m33 - matrix.m13,
                 ),
 
-                // Depth is 0..w, not -w..w.
-                near = Planes.normalized(
+                // The RHI depth interval is 0 <= z <= w.
+                near = halfSpacePlane(
                     matrix.m20,
                     matrix.m21,
                     matrix.m22,
                     matrix.m23,
                 ),
-                far = Planes.normalized(
+                far = halfSpacePlane(
                     matrix.m30 - matrix.m20,
                     matrix.m31 - matrix.m21,
                     matrix.m32 - matrix.m22,
@@ -96,6 +96,10 @@ class Frustum private constructor(
         }
     }
 }
+
+/** Inward boundary of `x * point.x + y * point.y + z * point.z + constant >= 0`. */
+private fun halfSpacePlane(x: Double, y: Double, z: Double, constant: Double): PlaneView =
+    Planes.normalized(x, y, z, -constant)
 
 private fun isCompletelyOutside(box: BoxView, plane: PlaneView): Boolean {
     val normal = plane.normal
@@ -108,6 +112,6 @@ private fun isCompletelyOutside(box: BoxView, plane: PlaneView): Boolean {
 
     return normal.x * x +
             normal.y * y +
-            normal.z * z +
+            normal.z * z -
             plane.w < 0.0
 }
