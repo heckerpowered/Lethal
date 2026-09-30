@@ -11,9 +11,9 @@ internal class CollectingRenderElementCollector : RenderElementCollector {
 
     context(context: ObjectSubmitContext)
     override fun submit(element: RenderElement) {
-        // Submission may outlive the producer's current mutable render state.
-        // Snapshot the object context here so later visibility, sorting, and pass
-        // processing observe the transform exactly as it was when submitted.
+        // Producers may reuse mutable transform views while emitting multiple elements.
+        // A submission must preserve the object state at this exact submit point rather
+        // than observing later mutations during visibility or pass processing.
         submissions += RenderSubmission(element, context.snapshot())
     }
 }
