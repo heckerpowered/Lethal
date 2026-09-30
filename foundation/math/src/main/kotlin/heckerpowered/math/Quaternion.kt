@@ -80,21 +80,36 @@ fun QuaternionView.withZ(z: Double): QuaternionView = Geometry.quaternion(x, y, 
 fun QuaternionView.withW(w: Double): QuaternionView = Geometry.quaternion(x, y, z, w)
 
 /** Normalizes without checking for zero length or non-finite components. */
-fun QuaternionView.unsafeNormal(): QuaternionView = this / length
+fun QuaternionView.normalizedUnsafe(): QuaternionView = this / length
 
 /**
- * Returns a unit quaternion, or [resultIfZero] when the squared length is zero or
- * below [tolerance]. Non-finite input is not repaired. Tolerance must be finite and nonnegative.
+ * Returns a unit quaternion, or null for non-finite input, length or output, or squared length
+ * at or below [tolerance]. Tolerance must be finite and nonnegative.
+ * Each source component is sampled once.
  */
-fun QuaternionView.safeNormal(tolerance: Double = 1.0E-8, resultIfZero: QuaternionView = Quaternions.Identity): QuaternionView {
+fun QuaternionView.normalizedOrNull(tolerance: Double = 1.0E-8): QuaternionView? {
     require(tolerance.isFinite() && tolerance >= 0.0)
-    val squareSum = lengthSquared
-    if (squareSum == 1.0) return this
-    if (squareSum == 0.0 || squareSum < tolerance) return resultIfZero
-    return this / sqrt(squareSum)
+    val quaternion = Geometry.quaternion(x, y, z, w)
+    if (!quaternion.isFinite()) return null
+
+    // Compare lengths to avoid overflow or underflow when squaring the quaternion length.
+    val length = hypot(hypot(quaternion.x, quaternion.y), hypot(quaternion.z, quaternion.w))
+    val minimumLength = sqrt(tolerance)
+
+    if (!length.isFinite() || length <= minimumLength) {
+        return null
+    }
+
+    return (quaternion / length).takeIf { it.isFinite() }
 }
 
-fun QuaternionView.normalized(): QuaternionView = safeNormal()
+/** Uses [fallback] for any normalization failure, including non-finite input or output. */
+fun QuaternionView.normalizedOr(fallback: QuaternionView, tolerance: Double = 1.0E-8): QuaternionView =
+    normalizedOrNull(tolerance) ?: fallback
+
+/** Returns a unit quaternion, or throws [IllegalArgumentException] under the failure conditions of [normalizedOrNull]. */
+fun QuaternionView.normalized(tolerance: Double = 1.0E-8): QuaternionView =
+    requireNotNull(normalizedOrNull(tolerance)) { "Cannot normalize a degenerate or non-finite quaternion" }
 
 /** For a unit quaternion, conjugation reverses the rotation. */
 fun QuaternionView.conjugate(): QuaternionView = Geometry.quaternion(-x, -y, -z, w)
@@ -213,22 +228,21 @@ object Quaternions {
 
     /**
      * Shortest rotation between nonzero directions, which need not be normalized.
-     * Returns identity if either squared length is below 1e-8. Opposite directions
+     * Returns identity if either direction cannot be normalized with the default tolerance. Opposite directions
      * use a perpendicular axis; that axis is not unique.
      */
     fun fromTo(from: VectorView, to: VectorView): QuaternionView {
-        val start = from.normalized()
-        val end = to.normalized()
-        if (start.isZero() || end.isZero()) return Identity
+        val start = from.normalizedOrNull() ?: return Identity
+        val end = to.normalizedOrNull() ?: return Identity
         val cosine = start.dot(end).coerceIn(-1.0, 1.0)
         val cross = start.cross(end)
         // atan2 retains the small deviation from PI when 1 + dot rounds to zero.
         if (cross.lengthSquared > 0.0) {
-            return fromAxisAngleRadians(cross.unsafeNormal(), atan2(cross.length, cosine))
+            return fromAxisAngleRadians(cross.normalizedUnsafe(), atan2(cross.length, cosine))
         }
         if (cosine >= 0.0) return Identity
         val reference = if (abs(start.x) < abs(start.z)) Vectors.UnitX else Vectors.UnitZ
-        return fromAxisAngleRadians(start.cross(reference).unsafeNormal(), PI)
+        return fromAxisAngleRadians(start.cross(reference).normalizedUnsafe(), PI)
     }
 
     /**

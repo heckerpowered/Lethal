@@ -61,17 +61,17 @@ class QuaternionViewTest {
     fun normalizationHandlesZeroAndExplicitSquaredLengthThresholds() {
         val quaternion = Quaternions.of(0.0, 3.0, 0.0, 4.0)
         val expected = Quaternions.of(0.0, 0.6, 0.0, 0.8)
-        assertQuaternion(expected, quaternion.unsafeNormal())
+        assertQuaternion(expected, quaternion.normalizedUnsafe())
         assertQuaternion(expected, quaternion.normalized())
-        assertSame(Quaternions.Identity, Quaternions.Identity.safeNormal())
-        assertSame(Quaternions.Identity, Quaternions.Zero.normalized())
-        assertSame(Quaternions.Identity, Quaternions.Zero.safeNormal(tolerance = 0.0))
+        assertQuaternion(Quaternions.Identity, Quaternions.Identity.normalizedOr(Quaternions.Zero))
+        assertFailsWith<IllegalArgumentException> { Quaternions.Zero.normalized() }
+        assertSame(Quaternions.Identity, Quaternions.Zero.normalizedOr(Quaternions.Identity, tolerance = 0.0))
         val small = quaternion * 1e-6
-        assertSame(quaternion, small.safeNormal(resultIfZero = quaternion))
-        assertQuaternion(expected, small.safeNormal(tolerance = 1e-12))
-        assertTrue(Quaternions.Zero.unsafeNormal().containsNan())
-        assertFailsWith<IllegalArgumentException> { quaternion.safeNormal(tolerance = -1.0) }
-        assertFailsWith<IllegalArgumentException> { quaternion.safeNormal(tolerance = Double.NaN) }
+        assertSame(quaternion, small.normalizedOr(fallback = quaternion))
+        assertQuaternion(expected, small.normalizedOr(Quaternions.Identity, tolerance = 1e-12))
+        assertTrue(Quaternions.Zero.normalizedUnsafe().containsNan())
+        assertFailsWith<IllegalArgumentException> { quaternion.normalizedOr(Quaternions.Identity, tolerance = -1.0) }
+        assertFailsWith<IllegalArgumentException> { quaternion.normalizedOr(Quaternions.Identity, tolerance = Double.NaN) }
     }
 
     @Test
