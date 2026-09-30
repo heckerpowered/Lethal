@@ -130,7 +130,7 @@ class PlaneViewTest {
             assertFailsWith<IllegalArgumentException> { plane.isNormalized(invalid) }
             assertFailsWith<IllegalArgumentException> { plane.isNearlyEqual(plane, invalid) }
             assertFailsWith<IllegalArgumentException> { plane.isSamePlane(plane, invalid) }
-            assertFailsWith<IllegalArgumentException> { plane.transformedByOrNull(Matrices4.Identity, invalid) }
+            assertFailsWith<IllegalArgumentException> { plane.transformedByOrNull(Matrices.Identity, invalid) }
             assertFailsWith<IllegalArgumentException> { Planes.fromPointsOrNull(Vectors.Zero, Vectors.UnitX, Vectors.UnitY, invalid) }
         }
     }
@@ -154,7 +154,7 @@ class PlaneViewTest {
 
     @Test
     fun affineTransformationUsesInverseTransposeIncludingOffsetAndReflection() {
-        val matrix = Matrices4.of(
+        val matrix = Matrices.of(
             -2.0, 1.0, 0.0, 5.0,
             0.0, 3.0, 0.0, 7.0,
             0.0, 0.0, 4.0, 9.0,
@@ -174,14 +174,14 @@ class PlaneViewTest {
     @Test
     fun transformationRejectsSingularInvalidAndProjectiveInput() {
         val plane = Planes.fromNormal(Vectors.UnitX, 1.0)
-        val singular = Matrices4.fromScale(Vectors.of(0.0, 1.0, 1.0))
-        val projective = Matrices4.Identity.withComponent(3, 0, 1.0)
+        val singular = Matrices.fromScale(Vectors.of(0.0, 1.0, 1.0))
+        val projective = Matrices.Identity.withComponent(3, 0, 1.0)
 
         assertNull(plane.transformedByOrNull(singular))
-        assertNull(Planes.Zero.transformedByOrNull(Matrices4.Identity))
+        assertNull(Planes.Zero.transformedByOrNull(Matrices.Identity))
         assertFailsWith<IllegalArgumentException> { plane.transformedBy(singular) }
         assertFailsWith<IllegalArgumentException> { plane.transformedByOrNull(projective) }
-        assertNull(plane.transformedByOrNull(Matrices4.Identity.withComponent(0, 0, Double.NaN)))
+        assertNull(plane.transformedByOrNull(Matrices.Identity.withComponent(0, 0, Double.NaN)))
     }
 
     @Test
@@ -208,7 +208,7 @@ class PlaneViewTest {
             { assertVector(0.0, 3.0, 0.0, it.projectPosition(Vectors.Zero)) },
             { assertVector(0.0, 6.0, 0.0, it.mirrorPosition(Vectors.Zero)) },
             { assertPlane(0.0, 2.0, 0.0, 8.0, it.translated(Vectors.UnitY)) },
-            { assertPlane(0.0, 2.0, 0.0, 6.0, it.transformedBy(Matrices4.Identity)) },
+            { assertPlane(0.0, 2.0, 0.0, 6.0, it.transformedBy(Matrices.Identity)) },
         )
         for (operation in operations) {
             val plane = SampleOncePlane()
@@ -221,7 +221,7 @@ class PlaneViewTest {
     fun transformationValidatesAndInvertsTheSameMatrixSnapshot() {
         var translationReads = 0
         var affineReads = 0
-        val matrix = object : MatrixView by Matrices4.Identity {
+        val matrix = object : MatrixView by Matrices.Identity {
             override val m13: Double get() = if (++translationReads == 1) 4.0 else Double.NaN
             override val m33: Double get() = if (++affineReads == 1) 1.0 else Double.NaN
         }
