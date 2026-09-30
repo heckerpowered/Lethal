@@ -80,20 +80,20 @@ class VectorViewTest {
         val vectorWithVerticalComponent = Geometry.vector(3.0, 7.0, 4.0)
         val fallback = Geometry.vector(9.0, 8.0, 7.0)
 
-        assertVector(0.6, 0.8, 0.0, vector.unsafeNormal(), 1.0E-12)
+        assertVector(0.6, 0.8, 0.0, vector.normalizedUnsafe(), 1.0E-12)
         assertVector(0.6, 0.8, 0.0, vector.normalized(), 1.0E-12)
-        assertVector(0.6, 0.0, 0.8, vectorWithVerticalComponent.unsafeNormal2D(), 1.0E-12)
+        assertVector(0.6, 0.0, 0.8, vectorWithVerticalComponent.normalized2DUnsafe(), 1.0E-12)
         assertVector(0.6, 0.0, 0.8, vectorWithVerticalComponent.normalized2D(), 1.0E-12)
-        assertSame(expected = fallback, actual = Vectors.Zero.safeNormal(resultIfZero = fallback))
-        assertSame(expected = fallback, actual = Vectors.Zero.safeNormal2D(resultIfZero = fallback))
-        assertVector(1.0, 0.0, 0.0, Vectors.UnitX.safeNormal())
-        assertVector(1.0, 0.0, 0.0, Vectors.UnitX.safeNormal2D())
+        assertSame(expected = fallback, actual = Vectors.Zero.normalizedOr(fallback = fallback))
+        assertSame(expected = fallback, actual = Vectors.Zero.normalized2DOr(fallback = fallback))
+        assertVector(1.0, 0.0, 0.0, Vectors.UnitX.normalizedOr(Vectors.Zero))
+        assertVector(1.0, 0.0, 0.0, Vectors.UnitX.normalized2DOr(Vectors.Zero))
 
         val small = Geometry.vector(1.0E-5, 4.0, 0.0)
-        assertSame(expected = fallback, actual = small.withY(0.0).safeNormal(tolerance = 1.0E-8, resultIfZero = fallback))
-        assertVector(1.0, 0.0, 0.0, small.withY(0.0).safeNormal(tolerance = 1.0E-12, resultIfZero = fallback), 1.0E-12)
-        assertSame(expected = fallback, actual = small.safeNormal2D(tolerance = 1.0E-8, resultIfZero = fallback))
-        assertVector(1.0, 0.0, 0.0, small.safeNormal2D(tolerance = 1.0E-12, resultIfZero = fallback), 1.0E-12)
+        assertSame(expected = fallback, actual = small.withY(0.0).normalizedOr(tolerance = 1.0E-8, fallback = fallback))
+        assertVector(1.0, 0.0, 0.0, small.withY(0.0).normalizedOr(tolerance = 1.0E-12, fallback = fallback), 1.0E-12)
+        assertSame(expected = fallback, actual = small.normalized2DOr(tolerance = 1.0E-8, fallback = fallback))
+        assertVector(1.0, 0.0, 0.0, small.normalized2DOr(tolerance = 1.0E-12, fallback = fallback), 1.0E-12)
     }
 
     @Test
