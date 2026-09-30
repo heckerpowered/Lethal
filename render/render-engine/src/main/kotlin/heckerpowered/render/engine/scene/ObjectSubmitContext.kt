@@ -5,10 +5,7 @@
 
 package heckerpowered.render.engine.scene
 
-import heckerpowered.math.AffineTransformView
-import heckerpowered.math.TransformView
-import heckerpowered.math.times
-import heckerpowered.math.toAffine
+import heckerpowered.math.*
 
 /**
  * Spatial state captured for an object submitted to the renderer.
@@ -26,3 +23,6 @@ fun ObjectSubmitContext.transformed(localToParent: AffineTransformView): ObjectS
 
 fun ObjectSubmitContext.transformed(localToParent: TransformView): ObjectSubmitContext =
     transformed(localToParent.toAffine())
+
+fun ObjectSubmitContext.snapshot(): ObjectSubmitContext =
+    ObjectSubmitContext(localToWorld = AffineTransforms.copyOf(localToWorld))
