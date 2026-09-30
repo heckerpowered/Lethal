@@ -11,7 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class MatrixSnapshotTest {
-    private val sample = Matrices4.of(
+    private val sample = Matrices.of(
         2.0, 1.0, 0.0, 4.0,
         0.0, 3.0, 0.0, -3.0,
         0.0, 0.0, -4.0, 2.0,
@@ -21,7 +21,7 @@ class MatrixSnapshotTest {
     @Test
     fun copyReadsEachSourceComponentOnceAndOwnsTheSample() {
         val view = SingleSampleMatrix(sample)
-        val copy = Matrices4.copyOf(view)
+        val copy = Matrices.copyOf(view)
         assertMatrix(sample, copy)
         assertMatrix(sample, copy)
         view.assertReadOnce()
@@ -64,7 +64,7 @@ class MatrixSnapshotTest {
     @Test
     fun generatorEvaluatesEachCoordinateOnceInRowMajorOrder() {
         val coordinates = mutableListOf<Pair<Int, Int>>()
-        val matrix = Matrices4.generate { row, column ->
+        val matrix = Matrices.generate { row, column ->
             coordinates.add(row to column)
             (row * 4 + column).toDouble()
         }
