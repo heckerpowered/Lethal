@@ -24,6 +24,7 @@ class View(
     /**
      * Maps world-space homogeneous coordinates directly into clip space.
      */
-    val worldToClip: MatrixView =
-        projection.matrix * worldToView.toMatrix4()
+    val worldToClip: MatrixView = projection.matrix * worldToView.toMatrix4()
+
+    val frustum: Frustum = Frustum.fromWorldToClip(worldToClip)
 }
