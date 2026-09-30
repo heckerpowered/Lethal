@@ -5,7 +5,6 @@
 
 package heckerpowered.render.engine.view
 
-import heckerpowered.math.AffineTransformView
 import heckerpowered.math.MatrixView
 import heckerpowered.math.times
 import heckerpowered.math.toMatrix4
@@ -13,13 +12,15 @@ import heckerpowered.math.toMatrix4
 /**
  * A prepared view of the scene.
  *
- * [worldToView] maps world-space positions into the view's coordinate system.
+ * [frame] defines the validated view coordinate system; [worldToView] maps world positions into it.
  * [projection] then maps view space into the renderer's clip space.
  */
 class View(
-    val worldToView: AffineTransformView,
+    val frame: ViewFrame,
     val projection: Projection,
 ) {
+    val worldToView = frame.worldToView
+
     /**
      * Maps world-space homogeneous coordinates directly into clip space.
      */
