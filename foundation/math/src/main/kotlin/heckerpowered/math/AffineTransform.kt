@@ -65,10 +65,10 @@ interface AffineTransformView : Interpolatable<AffineTransformView> {
      */
     override fun interpolate(target: AffineTransformView, alpha: Double): AffineTransformView =
         Geometry.affineTransform(
-            axisX = axisX.interpolate(target.axisX, alpha),
-            axisY = axisY.interpolate(target.axisY, alpha),
-            axisZ = axisZ.interpolate(target.axisZ, alpha),
-            translation = translation.interpolate(target.translation, alpha),
+            axisX.interpolate(target.axisX, alpha),
+            axisY.interpolate(target.axisY, alpha),
+            axisZ.interpolate(target.axisZ, alpha),
+            translation.interpolate(target.translation, alpha)
         )
 }
 
@@ -79,10 +79,10 @@ interface AffineTransformView : Interpolatable<AffineTransformView> {
  */
 operator fun AffineTransformView.times(other: AffineTransformView): AffineTransformView =
     Geometry.affineTransform(
-        axisX = transformVector(other.axisX),
-        axisY = transformVector(other.axisY),
-        axisZ = transformVector(other.axisZ),
-        translation = transformPosition(other.translation),
+        transformVector(other.axisX),
+        transformVector(other.axisY),
+        transformVector(other.axisZ),
+        transformPosition(other.translation)
     )
 
 /**
@@ -92,10 +92,18 @@ operator fun AffineTransformView.times(other: AffineTransformView): AffineTransf
  */
 fun TransformView.toAffine(): AffineTransformView =
     Geometry.affineTransform(
-        axisX = rotation.axisX() * scale.x,
-        axisY = rotation.axisY() * scale.y,
-        axisZ = rotation.axisZ() * scale.z,
-        translation = translation,
+        rotation.axisX() * scale.x,
+        rotation.axisY() * scale.y,
+        rotation.axisZ() * scale.z,
+        translation
+    )
+
+fun AffineTransforms.copyOf(transform: AffineTransformView): AffineTransformView =
+    Geometry.affineTransform(
+        Vectors.of(transform.axisX.x, transform.axisX.y, transform.axisX.z),
+        Vectors.of(transform.axisY.x, transform.axisY.y, transform.axisY.z),
+        Vectors.of(transform.axisZ.x, transform.axisZ.y, transform.axisZ.z),
+        Vectors.of(transform.translation.x, transform.translation.y, transform.translation.z),
     )
 
 object AffineTransforms {
@@ -107,12 +115,7 @@ object AffineTransforms {
     )
 
     fun of(axisX: VectorView = Vectors.UnitX, axisY: VectorView = Vectors.UnitY, axisZ: VectorView = Vectors.UnitZ, translation: VectorView = Vectors.Zero): AffineTransformView =
-        Geometry.affineTransform(
-            axisX = axisX,
-            axisY = axisY,
-            axisZ = axisZ,
-            translation = translation,
-        )
+        Geometry.affineTransform(axisX, axisY, axisZ, translation)
 
     fun fromTranslation(translation: VectorView): AffineTransformView =
         of(translation = translation)
