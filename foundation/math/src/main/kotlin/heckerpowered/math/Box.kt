@@ -5,6 +5,8 @@
 
 package heckerpowered.math
 
+import kotlin.math.abs
+
 interface BoxView {
     val minX: Double
     val minY: Double
@@ -370,4 +372,52 @@ private inline fun intersectAxis(origin: Double, directionIsNearlyZero: Boolean,
     }
 
     return nextEnterTime <= nextExitTime
+}
+
+fun BoxView.transformedBy(transform: AffineTransformView): BoxView {
+    // Snapshot the box before deriving center and extent so a live BoxView
+    // cannot produce internally inconsistent values.
+    val minX = minX
+    val minY = minY
+    val minZ = minZ
+    val maxX = maxX
+    val maxY = maxY
+    val maxZ = maxZ
+
+    val center = Geometry.vector(
+        (minX + maxX) * 0.5,
+        (minY + maxY) * 0.5,
+        (minZ + maxZ) * 0.5,
+    )
+
+    val extentX = (maxX - minX) * 0.5
+    val extentY = (maxY - minY) * 0.5
+    val extentZ = (maxZ - minZ) * 0.5
+
+    val transform = AffineTransforms.copyOf(transform)
+    val transformedCenter = transform.transformPosition(center)
+
+    // For an affine transform A, the AABB extent is |A| * localExtent.
+    // This remains exact for the AABB of the transformed box under rotation,
+    // non-uniform scale, reflection, and shear.
+    val transformedExtentX = abs(transform.axisX.x) * extentX +
+            abs(transform.axisY.x) * extentY +
+            abs(transform.axisZ.x) * extentZ
+
+    val transformedExtentY = abs(transform.axisX.y) * extentX +
+            abs(transform.axisY.y) * extentY +
+            abs(transform.axisZ.y) * extentZ
+
+    val transformedExtentZ = abs(transform.axisX.z) * extentX +
+            abs(transform.axisY.z) * extentY +
+            abs(transform.axisZ.z) * extentZ
+
+    return Geometry.box(
+        transformedCenter.x - transformedExtentX,
+        transformedCenter.y - transformedExtentY,
+        transformedCenter.z - transformedExtentZ,
+        transformedCenter.x + transformedExtentX,
+        transformedCenter.y + transformedExtentY,
+        transformedCenter.z + transformedExtentZ,
+    )
 }
