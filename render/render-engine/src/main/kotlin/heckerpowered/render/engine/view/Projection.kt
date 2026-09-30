@@ -5,7 +5,7 @@
 
 package heckerpowered.render.engine.view
 
-import heckerpowered.math.Matrices4
+import heckerpowered.math.Matrices
 import heckerpowered.math.MatrixView
 import kotlin.math.PI
 import kotlin.math.tan
@@ -69,7 +69,7 @@ class PerspectiveProjection(
         val depthScale = farPlane * inverseDepthRange
         val depthTranslation = -farPlane * nearPlane * inverseDepthRange
 
-        matrix = Matrices4.of(
+        matrix = Matrices.of(
             horizontalScale, 0.0, 0.0, 0.0,
             0.0, -verticalScale, 0.0, 0.0,
             0.0, 0.0, depthScale, depthTranslation,
@@ -100,18 +100,10 @@ class OrthographicProjection(
     override val farPlane: Double,
 ) : Projection {
     init {
-        require(width.isFinite() && width > 0.0) {
-            "Orthographic width must be finite and positive"
-        }
-        require(height.isFinite() && height > 0.0) {
-            "Orthographic height must be finite and positive"
-        }
-        require(nearPlane.isFinite()) {
-            "Orthographic near plane must be finite"
-        }
-        require(farPlane.isFinite() && farPlane > nearPlane) {
-            "Orthographic far plane must be finite and greater than the near plane"
-        }
+        require(width.isFinite() && width > 0.0) { "Orthographic width must be finite and positive" }
+        require(height.isFinite() && height > 0.0) { "Orthographic height must be finite and positive" }
+        require(nearPlane.isFinite()) { "Orthographic near plane must be finite" }
+        require(farPlane.isFinite() && farPlane > nearPlane) { "Orthographic far plane must be finite and greater than the near plane" }
     }
 
     override val matrix: MatrixView
@@ -119,7 +111,7 @@ class OrthographicProjection(
     init {
         val inverseDepthRange = 1.0 / (farPlane - nearPlane)
 
-        matrix = Matrices4.of(
+        matrix = Matrices.of(
             2.0 / width, 0.0, 0.0, 0.0,
             0.0, -2.0 / height, 0.0, 0.0,
             0.0, 0.0, inverseDepthRange, -nearPlane * inverseDepthRange,
