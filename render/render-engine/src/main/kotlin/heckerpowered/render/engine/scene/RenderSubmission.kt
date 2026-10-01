@@ -5,13 +5,19 @@
 
 package heckerpowered.render.engine.scene
 
-/**
- * One render element together with the object state under which it was submitted.
- *
- * A submission is independent of any particular view or render pass. Visibility,
- * pass participation, sorting, and RHI commands are determined later.
- */
-internal data class RenderSubmission(
+import java.util.*
+
+/** One occurrence of an element, with captured spatial and raster state. */
+class RenderSubmission(
     val element: RenderElement,
-    val context: ObjectSubmitContext,
-)
+    objectState: ObjectSubmitContext,
+    rasterScope: RasterScope = RasterScope(),
+    val visibility: DepthMode = DepthMode.World,
+    val sourceOrder: Int = 0,
+) {
+    val objectState = objectState.snapshot()
+    val rasterScope = rasterScope.copy(scissors = Collections.unmodifiableList(ArrayList(rasterScope.scissors)))
+
+    fun copy(element: RenderElement = this.element, visibility: DepthMode = this.visibility): RenderSubmission =
+        RenderSubmission(element, objectState, rasterScope, visibility, sourceOrder)
+}
