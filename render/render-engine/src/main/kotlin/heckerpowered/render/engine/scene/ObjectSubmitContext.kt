@@ -25,4 +25,4 @@ fun ObjectSubmitContext.transformed(localToParent: TransformView): ObjectSubmitC
     transformed(localToParent.toAffine())
 
 fun ObjectSubmitContext.snapshot(): ObjectSubmitContext =
-    ObjectSubmitContext(localToWorld = AffineTransforms.copyOf(localToWorld))
+    ObjectSubmitContext(AffineTransforms.copyOf(localToWorld))
