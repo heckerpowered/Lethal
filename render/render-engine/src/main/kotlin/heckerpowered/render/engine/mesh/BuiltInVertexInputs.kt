@@ -12,7 +12,7 @@ import heckerpowered.render.resource.buffer.asView
 
 private val UnitQuadVertexState = vertexState {
     buffer(8) {
-        attribute(location = 0, format = VertexFormat.Float32x2, offset = 0)
+        attribute(0, VertexFormat.Float32x2, 0)
     }
 }
 
