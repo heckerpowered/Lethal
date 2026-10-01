@@ -12,7 +12,7 @@ import java.util.*
 /**
  * Stable host bytes for one push-constant update performed immediately before a prepared draw.
  *
- * Preparation may finish before the render pass begins, so retaining a temporary native address
+ * PassPreparation may finish before the render pass begins, so retaining a temporary native address
  * would be invalid. This value snapshots the bytes instead. Execution copies them into the pass's
  * temporary memory stack immediately before calling `RenderPass.pushConstants`.
  *
