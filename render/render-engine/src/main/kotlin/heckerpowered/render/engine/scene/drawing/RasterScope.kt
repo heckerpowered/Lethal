@@ -7,6 +7,7 @@ package heckerpowered.render.engine.scene.drawing
 
 import heckerpowered.render.command.pass.ScissorRectangle
 import heckerpowered.render.command.pass.Viewport
+import heckerpowered.render.engine.scene.RenderSubmission
 
 /**
  * Carries dynamic raster settings shared by a group of submissions.
@@ -15,7 +16,7 @@ import heckerpowered.render.command.pass.Viewport
  * and intersect in framebuffer coordinates; they do not transform geometry. [stencilReference]
  * supplies the reference value for the pipeline's stencil test, without enabling that test.
  *
- * This value retains the supplied list. [heckerpowered.render.engine.scene.RenderSubmission]
+ * This value retains the supplied list. [RenderSubmission]
  * takes an independent list snapshot when recording an occurrence.
  */
 data class RasterScope(
