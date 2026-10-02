@@ -6,8 +6,12 @@
 package heckerpowered.render.engine.pass
 
 import heckerpowered.render.command.pass.RenderPassDescription
+import heckerpowered.render.engine.material.AlphaQuantity
+import heckerpowered.render.engine.material.AlphaRepresentation
+import heckerpowered.render.engine.material.ColorContent
 import heckerpowered.render.engine.scene.RenderSubmissionList
 import heckerpowered.render.engine.view.ViewParameters
+import java.util.*
 
 /**
  * Draws a submission list into one color raster pass using a common view.
@@ -28,4 +32,14 @@ class RasterPass(
     val collection: RenderSubmissionList,
     val inputs: ViewParameters,
     val requireReplaySafe: Boolean = false,
-)
+    val clearRepresentation: AlphaRepresentation? = null,
+    alphaQuantities: Map<Int, AlphaQuantity> = emptyMap(),
+    initialColors: Map<Int, ColorContent> = emptyMap(),
+) {
+    val alphaQuantities: Map<Int, AlphaQuantity> = Collections.unmodifiableMap(LinkedHashMap(alphaQuantities))
+    val initialColors: Map<Int, ColorContent> = Collections.unmodifiableMap(LinkedHashMap(initialColors))
+
+    init {
+        require((this.alphaQuantities.keys + this.initialColors.keys).all { description.colorAttachments.getOrNull(it) != null }) { "Color content declarations require active pass slots" }
+    }
+}
