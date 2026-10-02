@@ -9,10 +9,10 @@ import heckerpowered.render.RenderPipelineDescription
 import heckerpowered.render.command.pass.RenderPass
 import heckerpowered.render.command.pass.ScissorRectangle
 import heckerpowered.render.command.pass.Viewport
-import heckerpowered.render.engine.collection.toUnmodifiableList
 import heckerpowered.render.engine.geometry.DrawRange
 import heckerpowered.render.engine.geometry.IndexedRange
 import heckerpowered.render.engine.geometry.VertexRange
+import heckerpowered.render.engine.support.collection.toUnmodifiableList
 import heckerpowered.render.resource.buffer.GpuBufferView
 import heckerpowered.render.shader.binding.DescriptorSet
 import java.util.*
@@ -101,14 +101,7 @@ internal class PreparedDrawCommand(
         vertexBuffers.forEach { [slot, view] -> bindVertexBuffer(slot, view) }
         indexInput?.let { bindIndexBuffer(it.view, it.format) }
         descriptorSets.forEach { [set, descriptors] -> bindDescriptorSet(set, descriptors) }
-
-        pushConstants.forEach { write ->
-            memoryStack.frame {
-                val address = reserve(write.sizeBytes, 4)
-                write.copyTo(asByteBuffer(address, write.sizeBytes))
-                pushConstants(write.stages, address, write.sizeBytes, write.destinationOffsetBytes)
-            }
-        }
+        pushConstants.forEach { write -> pushConstants(write.stages, write.asByteBuffer(), write.destinationOffsetBytes) }
 
         when (val draw = arguments) {
             is VertexRange -> draw(draw.vertexCount, draw.firstVertex, draw.instanceCount, draw.firstInstance)
