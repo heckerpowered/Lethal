@@ -5,16 +5,13 @@
 
 package heckerpowered.render.engine.scene.drawing
 
+
 import heckerpowered.math.AffineTransformView
 import heckerpowered.math.AffineTransforms
 import heckerpowered.math.copyOf
 import heckerpowered.render.command.pass.ScissorRectangle
 import heckerpowered.render.command.pass.Viewport
-import heckerpowered.render.engine.geometry.GeometryGroup
-import heckerpowered.render.engine.geometry.RenderGeometry
-import heckerpowered.render.engine.material.CompositingMode
 import heckerpowered.render.engine.scene.*
-import heckerpowered.render.engine.shader.program.MeshShading
 
 /**
  * Describes world-space contributions within a shared placement and raster scope.
@@ -39,12 +36,8 @@ class WorldDrawing private constructor(
         with(objectState) { renderer.submit(state, elements) }
     }
 
-    fun geometry(geometry: GeometryGroup, shading: MeshShading, composition: CompositingMode = CompositingMode.Replace, cullingBound: CullingBounds? = null) {
-        geometry.parts.forEach { geometry(it, shading, composition, cullingBound) }
-    }
-
-    fun geometry(geometry: RenderGeometry, shading: MeshShading, composition: CompositingMode = CompositingMode.Replace, cullingBound: CullingBounds? = null) {
-        submit(GeometryElement(geometry, shading, composition, cullingBound))
+    fun geometry(element: GeometryElement) {
+        submit(element)
     }
 
     fun submit(element: RenderElement) {
