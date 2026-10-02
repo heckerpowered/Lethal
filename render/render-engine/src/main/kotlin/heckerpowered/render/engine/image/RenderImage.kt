@@ -5,6 +5,7 @@
 
 package heckerpowered.render.engine.image
 
+import heckerpowered.render.engine.material.AlphaQuantity
 import heckerpowered.render.engine.material.AlphaRepresentation
 import heckerpowered.render.engine.material.parameter.TextureParameterValue
 import heckerpowered.render.resource.sampler.GpuSampler
@@ -24,6 +25,7 @@ class RenderImage(
     val attachment: RenderAttachment,
     val size: ImageSize,
     val sampler: GpuSampler,
+    val alphaQuantity: AlphaQuantity = AlphaQuantity.Coverage,
 ) {
     /**
      * Returns this [view] and [sampler] as a [TextureParameterValue] for sampled shader input,
@@ -33,9 +35,9 @@ class RenderImage(
      * [RenderImage] itself does not guarantee that representation; this method only wraps the
      * references and declares it, without converting or inspecting texels.
      *
-     * Additive glow instead carries an RGB signal consumed without another source-alpha factor,
-     * and may retain nonzero RGB at zero alpha. Its producer and consumer must agree on that use;
-     * this declaration does not distinguish glow from ordinary premultiplied color.
+     * [AlphaQuantity.Signal] distinguishes additive glow from ordinary coverage. Its RGB is consumed
+     * without another source-alpha factor and may remain nonzero at zero alpha. Producer and consumer
+     * must agree on that use; the meaning is preserved here without inspecting existing contents.
      */
-    fun sampled() = TextureParameterValue(view, sampler, AlphaRepresentation.Premultiplied)
+    fun sampled() = TextureParameterValue(view, sampler, AlphaRepresentation.Premultiplied, alphaQuantity)
 }
