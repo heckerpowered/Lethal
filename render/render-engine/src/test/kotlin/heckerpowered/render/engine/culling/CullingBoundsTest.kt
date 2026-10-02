@@ -10,18 +10,18 @@ import heckerpowered.render.GraphicsDevice
 import heckerpowered.render.command.pass.RenderArea
 import heckerpowered.render.command.pass.RenderPassDescription
 import heckerpowered.render.engine.geometry.DrawRange
-import heckerpowered.render.engine.geometry.GeometryProtocol
+import heckerpowered.render.engine.geometry.GeometrySelection
 import heckerpowered.render.engine.geometry.ShaderGeometry
 import heckerpowered.render.engine.material.parameter.ParameterValues
 import heckerpowered.render.engine.pass.GeometryElementPassProcessor
 import heckerpowered.render.engine.pass.RasterPass
 import heckerpowered.render.engine.pass.visible
 import heckerpowered.render.engine.prepare.PassPreparation
-import heckerpowered.render.engine.scene.GeometryElement
 import heckerpowered.render.engine.scene.ObjectSubmitContext
 import heckerpowered.render.engine.scene.RenderSubmission
 import heckerpowered.render.engine.scene.RenderSubmissionList
 import heckerpowered.render.engine.shader.binding.VertexInterface
+import heckerpowered.render.engine.shader.program.GeometryInput
 import heckerpowered.render.engine.shader.program.MeshShader
 import heckerpowered.render.engine.shader.program.ShaderRealizations
 import heckerpowered.render.engine.view.Frustum
@@ -66,8 +66,13 @@ class CullingBoundsTest {
             for (transform in listOf(placement, separated)) {
                 val corners = inside.vertices().map { transform.transformPosition(it) }
                 val worldBox = Geometry.box(
-                    corners.minOf { it.x }, corners.minOf { it.y }, corners.minOf { it.z },
-                    corners.maxOf { it.x }, corners.maxOf { it.y }, corners.maxOf { it.z })
+                    corners.minOf { it.x },
+                    corners.minOf { it.y },
+                    corners.minOf { it.z },
+                    corners.maxOf { it.x },
+                    corners.maxOf { it.y },
+                    corners.maxOf { it.z }
+                )
                 assertEquals(!frustum.intersects(worldBox), bounds.canCull(frustum, transform))
             }
             assertFalse(bounds.canCull(frustum, placement))
@@ -145,7 +150,9 @@ class CullingBoundsTest {
         val distant = Frustum.fromWorldToClip(
             Matrices.of(
                 1.0, 0.0, 0.0, -origin,
-                0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0
             )
         )
         val placement = AffineTransforms.fromTranslation(Vectors.of(origin, 0.0, 0.0))
@@ -159,20 +166,21 @@ class CullingBoundsTest {
     @Test
     fun visibilityConsumesOnlyTheCapabilityAndRetainsMissingOrUnknownBounds() {
         val inputs = ViewParameters(Matrices.Identity, 1, 1, CompareFunction.Always)
+        val geometry = ShaderGeometry(ParameterValues(), GeometrySelection.Vertices(DrawRange.vertices(3)), PrimitiveState())
         val shader = MeshShader<Unit>(
             listOf(
                 ShaderModuleDescription(
                     ShaderStage.Vertex,
                     ShaderSource(ShaderLanguage.Glsl, "CPU fixture", "test")
-                ), ShaderModuleDescription(
+                ),
+                ShaderModuleDescription(
                     ShaderStage.Fragment,
                     ShaderSource(ShaderLanguage.Glsl, "CPU fixture", "test")
                 )
-            ), GeometryProtocol("generated"),
-            VertexInterface(emptyList()), label = "culling fixture", encode = { ParameterValues() })
-        val geometry = ShaderGeometry(GeometryProtocol("generated"), ParameterValues(), null, DrawRange.vertices(3), PrimitiveState())
+            ),
+            VertexInterface(emptyList()), label = "culling fixture", encode = { GeometryInput(geometry) })
         val context = ObjectSubmitContext(AffineTransforms.fromTranslation(Vectors.of(3.0, 0.0, 0.0)))
-        val element = GeometryElement(geometry, shader.bind(Unit))
+        val element = shader.bind(Unit)
         val submission = RenderSubmission(element, context)
         assertTrue(visible(submission, inputs))
         var calls = 0
@@ -194,7 +202,8 @@ class CullingBoundsTest {
                 val processor = GeometryElementPassProcessor(ShaderRealizations(device, this))
                 val pass = RasterPass(
                     RenderPassDescription("culling", RenderArea(0, 0, 1, 1)),
-                    RenderSubmissionList(listOf(rejectedSubmission)), inputs
+                    RenderSubmissionList(listOf(rejectedSubmission)),
+                    inputs
                 )
                 assertTrue(processor.prepare(rejectedElement, rejectedSubmission, pass, PassPreparation(device, this)).isEmpty())
             } finally {
