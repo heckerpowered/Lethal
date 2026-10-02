@@ -10,21 +10,22 @@ import heckerpowered.render.engine.scene.RenderSubmissionList
 import heckerpowered.render.engine.view.ViewParameters
 
 /**
- * Draws a submission list into one RHI pass using a common view and rendering phase.
+ * Draws a submission list into one color raster pass using a common view.
  *
- * The submissions retain local geometry, appearance, placement, and raster scope. Pass processing
+ * The submissions retain local geometry, shading, placement, and raster scope. Pass processing
  * dispatches each element to its semantic processor, which resolves those inputs into concrete
- * draw commands. A list can be used again with a different view or phase.
+ * draw commands. A list can be reused with different views and attachments.
  *
- * [description] defines attachments and their load/store operations; [phase] selects the rendering
- * purpose the element processors must implement. An unsupported phase fails during preparation.
- * [requireReplaySafe] rejects shaders whose declared behavior does not permit repeating the draw
- * across phases; it does not infer safety from shader code.
+ * [description] defines attachments and their load/store operations. [requireReplaySafe] rejects
+ * shaders whose declared behavior does not permit repeating the draw across passes; it does not
+ * infer safety from shader code.
+ *
+ * TODO: OIT depth bounds, transmittance, accumulation, and outlines need concrete shaders and
+ * pass processing before public helpers can schedule them.
  */
 class RasterPass(
     val description: RenderPassDescription,
     val collection: RenderSubmissionList,
     val inputs: ViewParameters,
-    val phase: RasterPassPhase = RasterPassPhase.Color,
     val requireReplaySafe: Boolean = false,
 )
