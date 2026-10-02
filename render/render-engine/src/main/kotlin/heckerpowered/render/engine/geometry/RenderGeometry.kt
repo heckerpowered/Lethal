@@ -20,5 +20,6 @@ import heckerpowered.render.pipeline.primitive.PrimitiveState
  */
 sealed interface RenderGeometry {
     val primitive: PrimitiveState
-    val range: DrawRange
+    val selection: GeometrySelection
+    val range: DrawRange get() = selection.range
 }
