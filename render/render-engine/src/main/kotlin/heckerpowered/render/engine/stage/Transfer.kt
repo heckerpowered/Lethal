@@ -44,7 +44,8 @@ sealed interface Transfer {
      * padding. Construction validates that footprint; recording checks the destination's access.
      */
     class UploadImage(
-        val destination: ImageRegion, val layout: TextureDataLayout,
+        val destination: ImageRegion,
+        val layout: TextureDataLayout,
         bytes: ByteArray,
     ) : Transfer {
         private val data = UploadData(bytes)
@@ -54,7 +55,7 @@ sealed interface Transfer {
         }
 
         override fun encode(encoder: CommandEncoder) {
-            data.consumeNative { address -> encoder.writeTexture(destination, address, layout) }
+            data.consumeNative(encoder.memoryStack) { address -> encoder.writeTexture(destination, address, layout) }
         }
     }
 
@@ -67,14 +68,16 @@ sealed interface Transfer {
     }
 
     class BufferToImage(
-        val source: GpuBufferView, val destination: ImageRegion,
+        val source: GpuBufferView,
+        val destination: ImageRegion,
         val layout: TextureDataLayout = TextureDataLayout.TightlyPacked,
     ) : Transfer {
         override fun encode(encoder: CommandEncoder) = encoder.copyBufferToTexture(source, destination, layout)
     }
 
     class ImageToBuffer(
-        val source: ImageRegion, val destination: GpuBufferView,
+        val source: ImageRegion,
+        val destination: GpuBufferView,
         val layout: TextureDataLayout = TextureDataLayout.TightlyPacked,
     ) : Transfer {
         override fun encode(encoder: CommandEncoder) = encoder.copyTextureToBuffer(source, destination, layout)
