@@ -18,7 +18,7 @@ import heckerpowered.render.engine.material.parameter.ParameterValues
 import heckerpowered.render.engine.prepare.PassPreparation
 import heckerpowered.render.engine.scene.GeometryElement
 import heckerpowered.render.engine.scene.RenderSubmission
-import heckerpowered.render.engine.shader.binding.ShaderInputInterface
+import heckerpowered.render.engine.shader.binding.ShaderInputLayout
 import heckerpowered.render.engine.shader.program.ShaderRealizations
 import heckerpowered.render.pipeline.rasterization.RasterizationState
 import heckerpowered.render.pipeline.vertex.VertexState
@@ -50,8 +50,8 @@ internal class GeometryElementPassProcessor(
         val viewport = scope.viewport ?: Viewport.from(pass.description.renderArea)
         val parameterValues = resolveParameters(element, submission, pass, shaderInputs, viewport)
         val vertexState = shaderInputs.vertices.lower(geometry)
-        val colorTargets = geometryColorTargets(element, pass.description, shader.outputs, parameterValues, preparation.targetAlphas)
-        validateColorContent(shader.outputs, parameterValues, colorTargets, preparation.targetAlphas, element.compositions)
+        val colorTargets = geometryColorTargets(element, pass.description, shader.outputs, parameterValues, preparation.targetAlphaQuantities)
+        validateColorContent(shader.outputs, parameterValues, colorTargets, preparation.targetAlphaQuantities, element.compositions)
 
         val program = programs.require(shader)
         val basePipeline = RenderPipelineDescription(
@@ -91,7 +91,7 @@ internal class GeometryElementPassProcessor(
         )
     }
 
-    private fun resolveParameters(element: GeometryElement, submission: RenderSubmission, pass: RasterPass, inputs: ShaderInputInterface, viewport: Viewport): ParameterValues {
+    private fun resolveParameters(element: GeometryElement, submission: RenderSubmission, pass: RasterPass, inputs: ShaderInputLayout, viewport: Viewport): ParameterValues {
         val viewValues = pass.inputs.forObject(submission.objectState, viewport)
         val shadingValues = viewValues.mergedWith(element.shading.parameters)
         val geometry = element.geometry
