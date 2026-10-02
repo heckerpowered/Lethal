@@ -10,7 +10,7 @@ import heckerpowered.math.MatrixView
 import heckerpowered.math.times
 import heckerpowered.math.toMatrix4
 import heckerpowered.render.command.pass.Viewport
-import heckerpowered.render.engine.material.parameter.NumericValue
+import heckerpowered.render.engine.material.parameter.NumericParameterValue
 import heckerpowered.render.engine.material.parameter.ParameterValues
 import heckerpowered.render.engine.scene.ObjectSubmitContext
 import heckerpowered.render.pipeline.depthstencil.CompareFunction
@@ -60,9 +60,9 @@ class ViewParameters(
         val model = objectState.localToWorld.toMatrix4()
         val clip = worldToClip * model
         return parameters
-            .replacing("clipFromLocal", NumericValue.floats(*columnMajorFloats(clip)))
-            .replacing("localToWorld", NumericValue.floats(*columnMajorFloats(model)))
-            .replacing("viewportSize", NumericValue.floats(viewport.width, viewport.height))
+            .replacing("clipFromLocal", NumericParameterValue.floats(*columnMajorFloats(clip)))
+            .replacing("localToWorld", NumericParameterValue.floats(*columnMajorFloats(model)))
+            .replacing("viewportSize", NumericParameterValue.floats(viewport.width, viewport.height))
     }
 
     companion object {
