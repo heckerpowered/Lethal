@@ -13,11 +13,11 @@ import heckerpowered.render.pipeline.vertex.VertexFormat
 /**
  * Declares one vertex attribute required by a shader, such as a position, normal, UV, or color.
  *
- * This is the shader's input contract. [VertexInterface] finds the supplying geometry attribute
+ * This is the shader's input contract. [VertexInputMapping] finds the supplying geometry attribute
  * by [semantic], independently of the shader variable's name, and maps it to [location]. For
  * example, a position semantic can supply shader input location 0 from any geometry stream.
  * The location identifies the vertex-shader input, not a vertex-buffer slot or a byte offset.
- * Input semantics and locations must each be unique within the containing [VertexInterface].
+ * Input semantics and locations must each be unique within the containing [VertexInputMapping].
  *
  * The supplying [GeometryAttribute] defines the
  * stored format and byte offset within each element; its containing
