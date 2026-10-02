@@ -5,7 +5,6 @@
 
 package heckerpowered.render.engine.geometry
 
-import heckerpowered.render.engine.geometry.index.IndexSource
 import heckerpowered.render.engine.material.parameter.ParameterValues
 import heckerpowered.render.pipeline.primitive.PrimitiveState
 
@@ -15,7 +14,8 @@ import heckerpowered.render.pipeline.primitive.PrimitiveState
  * [parameters] supplies numeric values and resources interpreted by the shader input contract
  * produced by its encoder. For example, a fullscreen shader can derive positions from vertex IDs with no
  * geometry parameters or vertex streams. An index source can still control the generated vertex
- * IDs; it must be present exactly when [range] is indexed.
+ * IDs; [selection] keeps an indexed range together with its source, or selects generated
+ * vertex IDs directly without an index source.
  *
  * Geometry parameter names must not overlap appearance or view parameter names when they are
  * combined during preparation. Resource parameters reference existing GPU storage rather than
@@ -23,12 +23,6 @@ import heckerpowered.render.pipeline.primitive.PrimitiveState
  */
 class ShaderGeometry(
     val parameters: ParameterValues,
-    val indices: IndexSource?,
-    override val range: DrawRange,
+    override val selection: GeometrySelection,
     override val primitive: PrimitiveState,
-) : RenderGeometry {
-    init {
-        val hasMatchingIndexSource = (range is IndexedRange) == (indices != null)
-        require(hasMatchingIndexSource) { "Indexed ranges require an index source; vertex ranges require none" }
-    }
-}
+) : RenderGeometry
