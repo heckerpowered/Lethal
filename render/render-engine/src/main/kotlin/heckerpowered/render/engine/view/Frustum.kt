@@ -33,10 +33,19 @@ class Frustum private constructor(
      *
      * A false result proves that the complete box lies outside at least one
      * frustum plane. A true result does not imply that geometry inside the box
-     * is actually visible.
+     * is actually visible. Invalid box coordinates or non-finite plane distances also return true.
      */
-    fun intersects(box: BoxView): Boolean =
-        planes.all { plane -> !isCompletelyOutside(box, plane) }
+    fun intersects(box: BoxView): Boolean {
+        val bounds = Geometry.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ)
+        if (!bounds.minX.isFinite() || !bounds.minY.isFinite() || !bounds.minZ.isFinite() ||
+            !bounds.maxX.isFinite() || !bounds.maxY.isFinite() || !bounds.maxZ.isFinite() ||
+            bounds.minX > bounds.maxX || bounds.minY > bounds.maxY || bounds.minZ > bounds.maxZ
+        ) return true
+
+        // Check every distance before rejection: a later plane can overflow even after a finite separator.
+        val distances = planes.map { plane -> maximumPlaneDistance(bounds, plane) }
+        return distances.any { !it.isFinite() } || distances.all { it >= 0.0 }
+    }
 
     companion object {
         /**
@@ -103,7 +112,7 @@ class Frustum private constructor(
 private fun halfSpacePlane(x: Double, y: Double, z: Double, constant: Double): PlaneView =
     Planes.normalized(x, y, z, -constant)
 
-private fun isCompletelyOutside(box: BoxView, plane: PlaneView): Boolean {
+private fun maximumPlaneDistance(box: BoxView, plane: PlaneView): Double {
     val normal = plane.normal
 
     // Vertex furthest toward the plane's positive half-space.
@@ -115,5 +124,5 @@ private fun isCompletelyOutside(box: BoxView, plane: PlaneView): Boolean {
     return normal.x * x +
             normal.y * y +
             normal.z * z -
-            plane.w < 0.0
+            plane.w
 }
