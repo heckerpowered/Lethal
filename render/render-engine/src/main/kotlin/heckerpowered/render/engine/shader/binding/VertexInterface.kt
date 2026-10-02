@@ -48,9 +48,9 @@ class VertexInterface(inputs: List<AttributeInput>) {
     }
 
     private fun lowerStream(stream: VertexStreamLayout): VertexBufferLayout {
-        val attributes = stream.attributes.mapNotNull { attribute ->
-            val input = inputs.singleOrNull { it.semantic == attribute.semantic } ?: return@mapNotNull null
-            VertexAttribute(input.location, attribute.format, attribute.offsetBytes)
+        val attributes = stream.attributes.mapNotNull { [semantic, format, offsetBytes] ->
+            val input = inputs.singleOrNull { it.semantic == semantic } ?: return@mapNotNull null
+            VertexAttribute(input.location, format, offsetBytes)
         }
 
         return VertexBufferLayout(stream.strideBytes, stream.stepMode, attributes)
