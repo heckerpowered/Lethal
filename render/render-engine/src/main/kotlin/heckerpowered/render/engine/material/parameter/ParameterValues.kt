@@ -36,8 +36,8 @@ class ParameterValues(values: Map<ParameterName, ParameterValue> = emptyMap()) {
         return ParameterValues(LinkedHashMap(values).apply { putAll(other.values) })
     }
 
-    fun requireNumeric(name: ParameterName): NumericValue =
-        requireNotNull(require(name) as? NumericValue) { "${name.value} requires numeric bytes" }
+    fun requireNumeric(name: ParameterName): NumericParameterValue =
+        requireNotNull(require(name) as? NumericParameterValue) { "${name.value} requires numeric bytes" }
 
     fun require(name: ParameterName): ParameterValue =
         requireNotNull(values[name]) { "Missing shader parameter ${name.value}" }
