@@ -5,7 +5,6 @@
 
 package heckerpowered.render.engine.geometry
 
-import heckerpowered.render.engine.geometry.index.IndexSource
 import heckerpowered.render.engine.geometry.vertex.GeometryLayout
 import heckerpowered.render.engine.geometry.vertex.VertexSemantics
 import heckerpowered.render.engine.geometry.vertex.VertexStreamSource
@@ -22,31 +21,29 @@ import java.nio.ByteOrder
  *
  * Each source in [streams] supplies the stream at the same position in [layout]. Attribute
  * semantics describe what the values mean; the shader input contract assigns their
- * shader locations. The index source must be present exactly when [range] is indexed.
+ * shader locations. [selection] couples an indexed range with its index source, or selects
+ * vertices directly without an index source.
  *
  * The source list is copied. Upload sources contain host-byte snapshots, while resident sources
  * keep references to existing GPU views whose contents may still change. Resident resources must
- * remain valid through GPU completion. Construction checks the stream count and indexed form;
+ * remain valid through GPU completion. Construction checks the stream count;
  * pass preparation and RHI validation check consumed attributes and accessible byte ranges.
  */
 class VertexGeometry(
     val layout: GeometryLayout,
     streams: List<VertexStreamSource>,
-    val indices: IndexSource?,
-    override val range: DrawRange,
+    override val selection: GeometrySelection,
     override val primitive: PrimitiveState,
 ) : RenderGeometry {
     val streams = streams.toUnmodifiableList()
 
     init {
         require(this.streams.size == layout.streams.size)
-        val hasMatchingIndexSource = (range is IndexedRange) == (indices != null)
-        require(hasMatchingIndexSource) { "Indexed ranges require an index source; vertex ranges require none" }
     }
 
     /** Reuses the same layout and sources with a different element and instance selection. */
-    fun selecting(range: DrawRange): VertexGeometry =
-        VertexGeometry(layout, streams, indices, range, primitive)
+    fun selecting(selection: GeometrySelection): VertexGeometry =
+        VertexGeometry(layout, streams, selection, primitive)
 }
 
 /**
@@ -68,5 +65,5 @@ fun triangle(a: FloatArray, b: FloatArray, c: FloatArray): VertexGeometry {
         attribute(VertexSemantics.Position, VertexFormat.Float32x3, offsetBytes = 0)
     }
 
-    return VertexGeometry(layout, listOf(VertexStreamSource.Upload(data.array())), null, DrawRange.vertices(3), PrimitiveState(PrimitiveTopology.TriangleList))
+    return VertexGeometry(layout, listOf(VertexStreamSource.Upload(data.array())), GeometrySelection.Vertices(DrawRange.vertices(3)), PrimitiveState(PrimitiveTopology.TriangleList))
 }
