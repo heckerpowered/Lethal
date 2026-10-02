@@ -15,7 +15,7 @@ import heckerpowered.render.pipeline.vertex.VertexStepMode
  * for every element rather than inferring a packed stride. [stepMode] selects whether elements
  * advance with vertices or instances, and attribute offsets are relative to each element.
  *
- * The attribute list is copied and must be non-empty, with unique meanings and non-negative
+ * The attribute list is copied and must be non-empty, with unique semantics and non-negative
  * offsets whose attribute ends fit in an `Int`. Attributes need not fill or fit within one
  * stride; the consumed byte ranges are checked against the source during draw preparation.
  */
@@ -29,7 +29,7 @@ class VertexStreamLayout(
     init {
         require(strideBytes >= 0)
         require(this.attributes.isNotEmpty())
-        require(this.attributes.map { it.meaning }.distinct().size == this.attributes.size)
+        require(this.attributes.map { it.semantic }.distinct().size == this.attributes.size)
         require(this.attributes.all { it.offsetBytes >= 0 && it.offsetBytes <= Int.MAX_VALUE - it.format.sizeInBytes })
     }
 }
