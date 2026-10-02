@@ -6,16 +6,19 @@
 package heckerpowered.render.engine.draw
 
 /**
- * Draw arguments that can be translated directly to one RHI draw command.
+ * Selects the vertex or index elements and instances for one RHI draw.
  *
- * This type contains no geometry storage, pipeline, shader resources, viewport, scissor, or
- * attachment state. Those inputs are selected separately by [PreparedDirectDraw] or by the pass
- * coordinator that executes it.
+ * Offsets and counts are measured in elements relative to the bound views, not bytes in a complete
+ * allocation. Pipeline, resource bindings, and raster state are selected by the surrounding prepared
+ * draw. Zero counts represent a draw with no work, not permission to skip its enclosing pass.
  */
 internal sealed interface DirectDrawArguments
 
 /**
- * Arguments for `RenderPass.draw`.
+ * Selects sequential vertex and instance elements from the bound buffer views.
+ *
+ * [firstVertex] is the starting vertex element; [firstInstance] is the starting instance element.
+ * Each count must be nonnegative. If either count is zero, no primitives are produced.
  */
 internal data class NonIndexedDrawArguments(
     val vertexCount: Int,
