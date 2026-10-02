@@ -10,6 +10,8 @@ import heckerpowered.render.engine.culling.CullingBounds
 import heckerpowered.render.engine.geometry.RenderGeometry
 import heckerpowered.render.engine.material.CompositingMode
 import heckerpowered.render.engine.shader.program.MeshShading
+import heckerpowered.render.engine.support.collection.toUnmodifiableMap
+import heckerpowered.render.pipeline.depthstencil.DepthStencilState
 
 /**
  * Retains a complete shader/geometry binding and its destination compositing operator.
@@ -21,13 +23,36 @@ import heckerpowered.render.engine.shader.program.MeshShading
  * [cullingBounds], when supplied, must enclose the rendered result in this element's local space,
  * including shader deformation. Absence disables bounds-based rejection; it does not request
  * bounds to be inferred from the geometry.
+ *
+ * Explicit [depthStencil] uses its fixed comparison by default. [usesViewDepthCompare] opts into
+ * replacing only the active depth comparison with the pass view's comparison, preserving stencil
+ * and other depth settings. With no active depth test the flag has no effect; it never enables one.
+ * [depthWrite] is applied independently after that choice.
  */
-data class GeometryElement(
+class GeometryElement(
     val shading: MeshShading,
-    val composition: CompositingMode = CompositingMode.Replace,
+    compositions: Map<Int, CompositingMode>,
     val cullingBounds: CullingBounds? = null,
+    val depthWrite: Boolean? = null,
+    val depthStencil: DepthStencilState? = null,
+    val usesViewDepthCompare: Boolean = false,
 ) : RenderElement {
+    val compositions: Map<Int, CompositingMode> = compositions.toUnmodifiableMap()
+    val composition: CompositingMode get() = this.compositions[0] ?: CompositingMode.Replace
     val geometry: RenderGeometry get() = shading.geometry
+
+    constructor(shading: MeshShading, cullingBounds: CullingBounds? = null, depthWrite: Boolean? = null, depthStencil: DepthStencilState? = null, usesViewDepthCompare: Boolean = false) :
+            this(shading, emptyMap(), cullingBounds, depthWrite, depthStencil, usesViewDepthCompare)
+
+    constructor(shading: MeshShading, composition: CompositingMode, cullingBounds: CullingBounds? = null, depthWrite: Boolean? = null, depthStencil: DepthStencilState? = null, usesViewDepthCompare: Boolean = false) :
+            this(shading, mapOf(0 to composition), cullingBounds, depthWrite, depthStencil, usesViewDepthCompare)
+
+    init {
+        require(this.compositions.keys.all { it >= 0 }) { "Composition locations must be nonnegative" }
+    }
+
+    fun copy(shading: MeshShading = this.shading, composition: CompositingMode = this.composition, cullingBounds: CullingBounds? = this.cullingBounds, depthWrite: Boolean? = this.depthWrite, depthStencil: DepthStencilState? = this.depthStencil, usesViewDepthCompare: Boolean = this.usesViewDepthCompare): GeometryElement =
+        GeometryElement(shading, if (composition === this.composition) compositions else compositions + (0 to composition), cullingBounds, depthWrite, depthStencil, usesViewDepthCompare)
 }
 
 /** Rejects unsupported element types before a geometry-specific strategy accesses their data. */
