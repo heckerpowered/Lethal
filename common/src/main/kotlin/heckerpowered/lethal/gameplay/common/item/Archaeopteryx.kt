@@ -27,7 +27,7 @@ object Archaeopteryx : RayTraceGun() {
     }
 
     override fun getRayTraceDistanceBlocks(player: PlayerAccess, weaponStack: ItemStackAccess): Double {
-        return 120.0
+        return 28.0
     }
 
     override fun onRayTrace(player: PlayerAccess, weaponStack: ItemStackAccess, shotCount: Long, entityHits: Sequence<EntityRayHit>) {
