@@ -28,8 +28,10 @@ fun loadedPass(label: String, target: RenderImage): RenderPassDescription {
 /**
  * Replaces [target] with [source] sampled over its full extent.
  *
- * The source's sampler controls filtering and the image sizes may differ. This is a fullscreen
- * shader draw rather than a texel-preserving transfer. Source and target must use distinct textures.
+ * [shader] must sample the source and emit geometry covering the target with the intended copy
+ * mapping. An arbitrary shader is accepted; this wrapper does not prove those properties. The
+ * builtin copy shader uses the source sampler, rather than a texel-preserving image transfer.
+ * Source and target must use distinct textures.
  */
 fun RenderStageBuilder.copyImage(source: RenderImage, target: RenderImage, shader: MeshShader<RenderImage>) {
     require(source.view.texture !== target.view.texture) { "Copy-by-sampling cannot sample its output" }
@@ -37,21 +39,22 @@ fun RenderStageBuilder.copyImage(source: RenderImage, target: RenderImage, shade
 }
 
 /**
- * Filters [source] with a weighted 3-by-3 neighborhood and draws it across [target].
- *
- * Sample offsets use source texel size, allowing the same filter to downsample or enlarge an image.
- * Replacement clears the destination first; other operators load its existing color. Source and
- * target must use distinct textures, and [composition] must already specify a concrete operator.
+ * Draws a replacement pass with [source] bound to [shader]. The shader must implement the desired
+ * tent filter and cover the destination; the wrapper neither inspects its code nor forces coverage.
  */
-fun RenderStageBuilder.tent(source: RenderImage, target: RenderImage, shader: MeshShader<RenderImage>, composition: CompositingMode = CompositingMode.Replace) {
-    require(source.view.texture !== target.view.texture) { "Tent source and destination must be disjoint" }
-    val description = if (composition == CompositingMode.Replace) replacementPass("tent replace", target)
-    else loadedPass("tent composite", target)
+fun RenderStageBuilder.tent(source: RenderImage, target: RenderImage, shader: MeshShader<RenderImage>) {
+    tent(source, replacementPass("tent replace", target), shader, CompositingMode.Replace)
+}
+
+/** Draws into explicit attachment operations; [shader] must implement the requested filter. */
+fun RenderStageBuilder.tent(source: RenderImage, description: RenderPassDescription, shader: MeshShader<RenderImage>, composition: CompositingMode) {
+    require(description.colorAttachments.filterNotNull().none { it.attachment === source.attachment }) { "Tent source and destination must be disjoint" }
     screen(description, shader.bind(source), composition)
 }
 
 /**
- * Samples [source] across the pass's render area using a concrete compositing operator.
+ * Binds [source] to [shader] and draws using the selected compositing operator.
+ * Sampling and coverage remain requirements on the supplied shader.
  *
  * [description] determines whether the destination is loaded, cleared, or discarded before the
  * draw. It must not bind the source image as a color destination; resource validity and access
