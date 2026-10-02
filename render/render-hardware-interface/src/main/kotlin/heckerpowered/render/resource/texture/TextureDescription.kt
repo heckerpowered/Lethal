@@ -149,3 +149,6 @@ class TextureDescription(
         }
     }
 }
+
+fun GraphicsDevice.createTexture(label: String, width: Int, height: Int, format: TextureFormat, vararg usage: TextureUsage): GpuTexture =
+    createTexture(TextureDescription(label, width, height, format = format, usage = usage.toSet()))
