@@ -5,8 +5,8 @@
 
 package heckerpowered.render.engine.scene
 
-import heckerpowered.render.engine.collection.CopyOnWriteList
-import heckerpowered.render.engine.collection.toUnmodifiableList
+import heckerpowered.render.engine.support.collection.CopyOnWriteList
+import heckerpowered.render.engine.support.collection.toUnmodifiableList
 
 /**
  * Retains an ordered collection of contributions for later pass preparation.
