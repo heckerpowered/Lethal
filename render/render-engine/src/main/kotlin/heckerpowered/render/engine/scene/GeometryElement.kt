@@ -12,7 +12,7 @@ import heckerpowered.render.engine.material.CompositingMode
 import heckerpowered.render.engine.shader.program.MeshShading
 
 /**
- * Pairs local-space geometry with its bound shader and destination compositing operator.
+ * Retains a complete shader/geometry binding and its destination compositing operator.
  *
  * This is a reusable description of a visual contribution, rather than one GPU draw. Submission
  * captures placement separately, and pass preparation resolves concrete shader inputs, resources, and
@@ -23,11 +23,12 @@ import heckerpowered.render.engine.shader.program.MeshShading
  * bounds to be inferred from the geometry.
  */
 data class GeometryElement(
-    val geometry: RenderGeometry,
     val shading: MeshShading,
     val composition: CompositingMode = CompositingMode.Replace,
     val cullingBounds: CullingBounds? = null,
-) : RenderElement
+) : RenderElement {
+    val geometry: RenderGeometry get() = shading.geometry
+}
 
 /** Rejects unsupported element types before a geometry-specific strategy accesses their data. */
 internal val RenderSubmission.geometryElement: GeometryElement
