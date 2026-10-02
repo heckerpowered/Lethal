@@ -70,10 +70,7 @@ class WorldDrawing private constructor(
 
     /** Adds a framebuffer-space clip intersected with the enclosing clips during pass preparation. */
     fun <R> clip(rectangle: ScissorRectangle, block: WorldDrawing.() -> R): R {
-        return WorldDrawing(
-            collector, objectState,
-            rasterScope.copy(scissors = rasterScope.scissors + rectangle), visibility
-        ).block()
+        return WorldDrawing(collector, objectState, rasterScope.copy(scissors = rasterScope.scissors + rectangle), visibility).block()
     }
 
     fun <R> withStencilReference(reference: UByte, block: WorldDrawing.() -> R): R {
