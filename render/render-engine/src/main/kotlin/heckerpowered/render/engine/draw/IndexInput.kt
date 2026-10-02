@@ -9,11 +9,12 @@ import heckerpowered.render.pipeline.primitive.IndexFormat
 import heckerpowered.render.resource.buffer.GpuBufferView
 
 /**
- * The concrete index binding consumed by one prepared indexed draw.
+ * Selects the buffer range and integer representation used to fetch a draw's indices.
  *
- * This is intentionally a near-RHI value: [view] and [format] translate mechanically to
- * `RenderPass.bindIndexBuffer`. Draw-relative selection remains in [IndexedDrawArguments].
- * The view borrows its buffer and does not snapshot index contents or extend resource lifetime.
+ * The binding translates to `RenderPass.bindIndexBuffer`. [IndexedDrawArguments] selects element
+ * counts and offsets relative to [view]; the view's byte offset already selects its buffer region.
+ * Binding alignment and index usage are checked at construction. Buffer contents and lifetime
+ * remain those of the referenced resource.
  */
 internal data class IndexInput(
     val view: GpuBufferView,
