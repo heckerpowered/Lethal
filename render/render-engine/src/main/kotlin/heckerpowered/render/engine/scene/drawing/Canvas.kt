@@ -7,10 +7,9 @@ package heckerpowered.render.engine.scene.drawing
 
 import heckerpowered.math.AffineTransforms
 import heckerpowered.render.command.pass.ScissorRectangle
-import heckerpowered.render.engine.geometry.RenderGeometry
+import heckerpowered.render.engine.geometry.VertexGeometry
 import heckerpowered.render.engine.material.CompositingMode
 import heckerpowered.render.engine.scene.*
-import heckerpowered.render.engine.shader.program.MeshShading
 
 /**
  * Collects flat geometry and images with scoped framebuffer clipping and no scene-depth test.
@@ -32,16 +31,17 @@ class Canvas private constructor(
         with(context) { renderer.submit(state, elements) }
     }
 
-    fun geometry(geometry: RenderGeometry, shading: MeshShading, composition: CompositingMode = CompositingMode.Replace) {
-        collector.collect(GeometryElement(geometry, shading, composition), context, scope, DepthMode.SeeThrough)
+    fun geometry(element: GeometryElement) {
+        collector.collect(element, context, scope, DepthMode.SeeThrough)
     }
 
     /**
-     * Places a rectangle using source-over compositing for the bound shader's alpha representation.
+     * Binds a rectangle's geometry, then applies source-over for that shader's alpha representation.
      * [uv] selects texture coordinates independently of the rectangle's drawing coordinates.
      */
-    fun image(shading: MeshShading, rectangle: Rectangle, uv: Rectangle = Rectangle(0f, 0f, 1f, 1f)) {
-        geometry(rectangleGeometry(rectangle, uv), shading, CompositingMode.SourceOver(shading.shader.sourceRepresentation))
+    fun image(rectangle: Rectangle, uv: Rectangle = Rectangle(0f, 0f, 1f, 1f), bind: (VertexGeometry) -> GeometryElement) {
+        val element = bind(rectangleGeometry(rectangle, uv))
+        geometry(element.copy(composition = CompositingMode.SourceOver(element.shading.shader.sourceRepresentation)))
     }
 
     /** Clips the block in framebuffer coordinates, intersecting any enclosing clips. */
