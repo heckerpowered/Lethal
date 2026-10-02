@@ -5,12 +5,12 @@
 
 package heckerpowered.render.engine.geometry
 
-import heckerpowered.render.engine.collection.toUnmodifiableList
 import heckerpowered.render.engine.geometry.index.IndexSource
 import heckerpowered.render.engine.geometry.vertex.GeometryLayout
 import heckerpowered.render.engine.geometry.vertex.VertexSemantics
 import heckerpowered.render.engine.geometry.vertex.VertexStreamSource
 import heckerpowered.render.engine.geometry.vertex.geometryLayout
+import heckerpowered.render.engine.support.collection.toUnmodifiableList
 import heckerpowered.render.pipeline.primitive.PrimitiveState
 import heckerpowered.render.pipeline.primitive.PrimitiveTopology
 import heckerpowered.render.pipeline.vertex.VertexFormat
