@@ -19,7 +19,7 @@ import heckerpowered.render.engine.stage.RenderStageBuilder
 import heckerpowered.render.engine.view.ViewParameters
 import heckerpowered.render.pipeline.depthstencil.CompareFunction
 
-/** Appends a fullscreen draw using [description]'s attachment operations and render area. */
+/** Appends the bound draw using [description]; fullscreen coverage is a requirement on [element]. */
 fun RenderStageBuilder.screen(description: RenderPassDescription, element: GeometryElement, composition: CompositingMode = element.composition) {
     rasterPass(screenPass(description, element, composition))
 }
@@ -27,7 +27,8 @@ fun RenderStageBuilder.screen(description: RenderPassDescription, element: Geome
 /**
  * Declares an already-bound geometry contribution over the pass's render area.
  *
- * Drawing uses identity placement and bypasses scene depth tests. The encoder chooses geometry
+ * Drawing uses identity placement and bypasses scene depth tests. It does not force fullscreen
+ * coverage or validate the shader's position output. The encoder chooses geometry
  * and draw selection; attachment load and store behavior still comes from [description].
  */
 fun screenPass(description: RenderPassDescription, element: GeometryElement, composition: CompositingMode = element.composition): RasterPass {
