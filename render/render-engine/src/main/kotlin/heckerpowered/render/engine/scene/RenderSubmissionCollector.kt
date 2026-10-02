@@ -5,6 +5,7 @@
 
 package heckerpowered.render.engine.scene
 
+import heckerpowered.render.engine.collection.CopyOnWriteList
 import heckerpowered.render.engine.scene.drawing.DepthMode
 import heckerpowered.render.engine.scene.drawing.RasterScope
 
@@ -19,7 +20,7 @@ import heckerpowered.render.engine.scene.drawing.RasterScope
  * synchronization if used from more than one thread.
  */
 class RenderSubmissionCollector : RenderElementCollector {
-    private val submissions = ArrayList<RenderSubmission>()
+    private val submissions = CopyOnWriteList<RenderSubmission>()
 
     context(context: ObjectSubmitContext)
     override fun submit(element: RenderElement) {
@@ -27,7 +28,7 @@ class RenderSubmissionCollector : RenderElementCollector {
     }
 
     internal fun collect(element: RenderElement, context: ObjectSubmitContext, rasterScope: RasterScope = RasterScope(), visibility: DepthMode = DepthMode.Scene) {
-        submissions += RenderSubmission(element, context, rasterScope, visibility, submissions.size)
+        submissions.add(RenderSubmission(element, context, rasterScope, visibility, submissions.size))
     }
 
     /** Captures the current membership and order; later submissions do not change the returned list. */
