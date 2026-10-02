@@ -36,7 +36,7 @@ import java.util.*
 internal class PassPreparation(
     val device: GraphicsDevice,
     val lifetime: ResourceLifetime,
-    val targetAlphas: Map<Int, AlphaQuantity> = emptyMap(),
+    val targetAlphaQuantities: Map<Int, AlphaQuantity> = emptyMap(),
     private val images: RenderImageStore? = null,
 ) {
     private val uploadViews = IdentityHashMap<UploadData, MutableMap<BufferUsage, GpuBufferView>>()
