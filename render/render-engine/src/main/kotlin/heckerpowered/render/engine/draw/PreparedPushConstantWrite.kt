@@ -7,14 +7,15 @@ package heckerpowered.render.engine.draw
 
 import heckerpowered.render.shader.ShaderStage
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.*
 
 /**
  * Stable host bytes for one push-constant update performed immediately before a prepared draw.
  *
  * PassPreparation may finish before the render pass begins, so retaining a temporary native address
- * would be invalid. This value snapshots the bytes instead. Execution copies them into the pass's
- * temporary memory stack immediately before calling `RenderPass.pushConstants`.
+ * would be invalid. This value snapshots the bytes instead. Execution supplies a bounded read-only
+ * view of that snapshot to `RenderPass.pushConstants`, which captures the update before returning.
  *
  * The selected pipeline performs the final layout compatibility check when the write is encoded.
  * This type only enforces requirements that are independent of that pipeline: a non-empty stage
@@ -45,4 +46,14 @@ internal class PreparedPushConstantWrite(
         require(destination.remaining() >= data.size) { "Push constant destination is too small" }
         destination.put(data)
     }
+
+    /**
+     * Returns a bounded read-only view of the snapshotted bytes without copying them.
+     *
+     * Each view has independent position and limit, initially covering the complete snapshot.
+     * It permits neither writes nor access to the backing array. Changing a view's position or
+     * limit does not affect later views or this value's stored bytes.
+     */
+    internal fun asByteBuffer(): ByteBuffer =
+        ByteBuffer.wrap(data).asReadOnlyBuffer().order(ByteOrder.nativeOrder())
 }
