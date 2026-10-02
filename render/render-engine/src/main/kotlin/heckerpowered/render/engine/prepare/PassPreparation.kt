@@ -10,7 +10,11 @@ import heckerpowered.render.engine.draw.IndexInput
 import heckerpowered.render.engine.geometry.UploadData
 import heckerpowered.render.engine.geometry.index.IndexSource
 import heckerpowered.render.engine.geometry.vertex.VertexStreamSource
+import heckerpowered.render.engine.image.RenderImageStore
+import heckerpowered.render.engine.material.AlphaQuantity
+import heckerpowered.render.engine.material.AlphaRepresentation
 import heckerpowered.render.engine.material.parameter.NumericParameterValue
+import heckerpowered.render.engine.material.parameter.TextureParameterValue
 import heckerpowered.render.resource.ResourceLifetime
 import heckerpowered.render.resource.buffer.BufferUsage
 import heckerpowered.render.resource.buffer.GpuBufferView
@@ -32,9 +36,16 @@ import java.util.*
 internal class PassPreparation(
     val device: GraphicsDevice,
     val lifetime: ResourceLifetime,
+    val targetAlphas: Map<Int, AlphaQuantity> = emptyMap(),
+    private val images: RenderImageStore? = null,
 ) {
     private val uploadViews = IdentityHashMap<UploadData, MutableMap<BufferUsage, GpuBufferView>>()
     private val uploads = ArrayList<BufferUpload>()
+
+    fun validateTexture(texture: TextureParameterValue) {
+        val owned = images?.find(texture.view.texture) ?: return
+        require(texture.alphaQuantity == owned.alphaQuantity && texture.representation == AlphaRepresentation.Premultiplied) { "Owned image sampling must retain its allocation alpha contract and RGB association" }
+    }
 
     fun upload(bytes: UploadData, role: BufferUsage): GpuBufferView {
         require(bytes.sizeBytes > 0)
