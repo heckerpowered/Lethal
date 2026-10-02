@@ -5,7 +5,8 @@
 
 package heckerpowered.render.engine.scene
 
-import java.util.*
+import heckerpowered.render.engine.collection.CopyOnWriteList
+import heckerpowered.render.engine.collection.toUnmodifiableList
 
 /**
  * Retains an ordered collection of contributions for later pass preparation.
@@ -17,6 +18,8 @@ import java.util.*
  * Element data and GPU resources are not copied. They must remain valid for every preparation
  * and execution that consumes this list.
  */
-class RenderSubmissionList internal constructor(submissions: List<RenderSubmission>) {
-    val submissions: List<RenderSubmission> = Collections.unmodifiableList(ArrayList(submissions))
+class RenderSubmissionList private constructor(val submissions: List<RenderSubmission>) {
+    internal constructor(submissions: Collection<RenderSubmission>) : this(submissions.toUnmodifiableList())
+
+    internal constructor(submissions: CopyOnWriteList<RenderSubmission>) : this(submissions.snapshot())
 }
