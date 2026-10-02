@@ -5,7 +5,7 @@
 
 package heckerpowered.render.engine.geometry.vertex
 
-import heckerpowered.render.engine.toUnmodifiableList
+import heckerpowered.render.engine.collection.toUnmodifiableList
 import heckerpowered.render.pipeline.vertex.VertexStepMode
 
 /**
