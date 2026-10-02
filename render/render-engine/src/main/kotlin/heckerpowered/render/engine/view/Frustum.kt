@@ -8,10 +8,12 @@ package heckerpowered.render.engine.view
 import heckerpowered.math.*
 
 /**
- * A world-space view frustum.
+ * Describes the world-space volume that can contribute to a view.
  *
- * Every plane points inward. A point is inside the frustum when it lies on the
- * non-negative side of every plane.
+ * Pass preparation uses this volume to reject contributions whose conservative bounds lie
+ * completely outside the view. It does not test occlusion or the contents of those bounds.
+ * Every plane points inward; a point on a boundary is included and a point is inside when it
+ * lies on the non-negative side of every plane.
  */
 class Frustum private constructor(
     val left: PlaneView,
