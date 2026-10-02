@@ -23,6 +23,9 @@ repositories {
 }
 
 dependencies {
+    testImplementation(kotlin("test"))
+
+    compileOnly("org.jetbrains:annotations:24.1.0")
     compileOnly(libs.bundles.lwjgl3)
 
     add("ksp", project(":render:render-hardware-interface-codegen"))
