@@ -5,24 +5,16 @@
 
 package heckerpowered.render.engine.pass
 
-import heckerpowered.math.BoxView
-import heckerpowered.math.transformedBy
-import heckerpowered.render.engine.scene.ObjectSubmitContext
 import heckerpowered.render.engine.scene.RenderSubmission
 import heckerpowered.render.engine.scene.geometryElement
 import heckerpowered.render.engine.view.ViewParameters
 
 /**
- * Tests a geometry submission's explicitly supplied conservative bounds against the view frustum.
- *
- * Bounds are transformed from local into world space before testing. Without a bound, the
- * submission remains eligible; no bound is inferred from vertex buffers or shader behavior.
+ * Asks the contribution's conservative culling capability whether this view can exclude it.
+ * Without that capability, or when exclusion cannot be proven, the submission remains eligible.
  * This is frustum rejection, not an occlusion or depth test.
  */
-fun visible(submission: RenderSubmission, inputs: ViewParameters): Boolean =
-    visible(submission.geometryElement.cullingBounds?.bounds, submission.objectState, inputs)
-
-internal fun visible(bounds: BoxView?, context: ObjectSubmitContext, inputs: ViewParameters): Boolean {
-    val bound = bounds ?: return true
-    return inputs.frustum.intersects(bound.transformedBy(context.localToWorld))
+fun visible(submission: RenderSubmission, inputs: ViewParameters): Boolean {
+    val bounds = submission.geometryElement.cullingBounds ?: return true
+    return !bounds.canCull(inputs.frustum, submission.objectState.localToWorld)
 }
