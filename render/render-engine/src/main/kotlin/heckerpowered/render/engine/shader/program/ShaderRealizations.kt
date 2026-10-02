@@ -25,9 +25,9 @@ internal class ShaderRealizations(
     private val device: GraphicsDevice,
     private val lifetime: ResourceLifetime,
 ) {
-    private val programs = IdentityHashMap<MeshShader<*>, ShaderProgram>()
+    private val programs = IdentityHashMap<MeshShader<*>, PreparedMeshShader>()
 
-    fun require(shader: MeshShader<*>): ShaderProgram {
+    fun require(shader: MeshShader<*>): PreparedMeshShader {
         lifetime.checkOpen()
         return programs.getOrPut(shader) {
             val [program, programLifetime] = ResourceLifetime.build {
@@ -38,7 +38,7 @@ internal class ShaderRealizations(
                     PushConstantLayout(blocks.map { PushConstantRange(it.stages, it.offsetBytes, it.sizeBytes) })
                 }
                 val layout = device.createPipelineLayout(inputs.descriptors.map { it.layout }, pushConstants, shader.label).lifetime(this)
-                ShaderProgram(stages, layout, inputs, shader.sourceRepresentation, shader.replaySafe) to this
+                PreparedMeshShader(stages, layout, inputs, shader.sourceRepresentation, shader.replaySafe) to this
             }
             programLifetime.lifetime(lifetime)
             program
