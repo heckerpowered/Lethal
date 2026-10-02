@@ -35,7 +35,6 @@ class VertexGeometry(
     val indices: IndexSource?,
     override val range: DrawRange,
     override val primitive: PrimitiveState,
-    override val protocol: GeometryProtocol = GeometryProtocol("attributes"),
 ) : RenderGeometry {
     val streams = streams.toUnmodifiableList()
 
@@ -47,7 +46,7 @@ class VertexGeometry(
 
     /** Reuses the same layout and sources with a different element and instance selection. */
     fun selecting(range: DrawRange): VertexGeometry =
-        VertexGeometry(layout, streams, indices, range, primitive, protocol)
+        VertexGeometry(layout, streams, indices, range, primitive)
 }
 
 /**
