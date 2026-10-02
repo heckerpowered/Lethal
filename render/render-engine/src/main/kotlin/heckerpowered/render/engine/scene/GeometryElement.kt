@@ -5,6 +5,8 @@
 
 package heckerpowered.render.engine.scene
 
+import heckerpowered.render.engine.culling.CullingBounds
+
 import heckerpowered.render.engine.geometry.RenderGeometry
 import heckerpowered.render.engine.material.CompositingMode
 import heckerpowered.render.engine.shader.program.MeshShading
