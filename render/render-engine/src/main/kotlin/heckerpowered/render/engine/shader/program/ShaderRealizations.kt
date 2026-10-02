@@ -25,15 +25,22 @@ internal class ShaderRealizations(
     private val device: GraphicsDevice,
     private val lifetime: ResourceLifetime,
 ) {
+    private val definitions = IdentityHashMap<MeshShader<*>, ResolvedMeshShader>()
     private val programs = IdentityHashMap<MeshShader<*>, PreparedMeshShader>()
+
+    fun definition(shader: MeshShader<*>): ResolvedMeshShader {
+        lifetime.checkOpen()
+        return definitions.getOrPut(shader) { shader.resolve(device) }
+    }
 
     fun require(shader: MeshShader<*>): PreparedMeshShader {
         lifetime.checkOpen()
         return programs.getOrPut(shader) {
+            val definition = definition(shader)
             val [program, programLifetime] = ResourceLifetime.build {
-                val modules = shader.modules.map { device.createShaderModule(it).lifetime(this) }
+                val modules = definition.modules.map { device.createShaderModule(it).lifetime(this) }
                 val stages = device.createShaderStages(modules, shader.label).lifetime(this)
-                val inputs = shader.inputs
+                val inputs = definition.inputs
                 val pushConstants = inputs.pushes.takeIf { it.isNotEmpty() }?.let { blocks ->
                     PushConstantLayout(blocks.map { PushConstantRange(it.stages, it.offsetBytes, it.sizeBytes) })
                 }
