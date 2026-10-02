@@ -28,6 +28,6 @@ class BufferUpload(
     }
 
     fun encode(encoder: CommandEncoder) {
-        bytes.consumeNative { address -> encoder.writeBuffer(destination, address) }
+        bytes.consumeNative(encoder.memoryStack) { address -> encoder.writeBuffer(destination, address) }
     }
 }
