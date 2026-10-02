@@ -5,9 +5,9 @@
 
 package heckerpowered.render.engine.scene
 
-import heckerpowered.render.engine.collection.CopyOnWriteList
 import heckerpowered.render.engine.scene.drawing.DepthMode
 import heckerpowered.render.engine.scene.drawing.RasterScope
+import heckerpowered.render.engine.support.collection.CopyOnWriteList
 
 /**
  * Collects render-element occurrences while capturing their placement and raster settings.
