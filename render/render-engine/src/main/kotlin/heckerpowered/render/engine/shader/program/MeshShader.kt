@@ -9,10 +9,10 @@ import heckerpowered.render.engine.geometry.RenderGeometry
 import heckerpowered.render.engine.material.AlphaRepresentation
 import heckerpowered.render.engine.material.parameter.ParameterValues
 import heckerpowered.render.engine.scene.GeometryElement
-import heckerpowered.render.engine.shader.binding.DescriptorInterface
-import heckerpowered.render.engine.shader.binding.PushConstantInterface
+import heckerpowered.render.engine.shader.binding.DescriptorInputMapping
+import heckerpowered.render.engine.shader.binding.PushConstantPacking
 import heckerpowered.render.engine.shader.binding.ShaderInputLayout
-import heckerpowered.render.engine.shader.binding.VertexInterface
+import heckerpowered.render.engine.shader.binding.VertexInputMapping
 import heckerpowered.render.engine.shader.parameter.ParameterDerivations
 import heckerpowered.render.engine.support.collection.toUnmodifiableList
 import heckerpowered.render.engine.support.collection.toUnmodifiableMap
@@ -39,9 +39,9 @@ import java.util.*
  */
 class MeshShader<P>(
     modules: List<ShaderModuleDescription>,
-    vertices: VertexInterface,
-    descriptors: List<DescriptorInterface> = emptyList(),
-    pushes: List<PushConstantInterface> = emptyList(),
+    vertices: VertexInputMapping,
+    descriptors: List<DescriptorInputMapping> = emptyList(),
+    pushes: List<PushConstantPacking> = emptyList(),
     derivations: ParameterDerivations = ParameterDerivations(),
     val sourceRepresentation: AlphaRepresentation = AlphaRepresentation.Straight,
     outputs: Map<Int, FragmentOutput> = mapOf(0 to FragmentOutput(sourceRepresentation)),
@@ -60,9 +60,9 @@ class MeshShader<P>(
     }.toUnmodifiableList()
 
     internal val inputs = ShaderInputLayout(
-        VertexInterface(vertices.inputs),
-        descriptors.map { DescriptorInterface(it.layout, it.parameters) },
-        pushes.map { PushConstantInterface(Collections.unmodifiableSet(it.stages.toSet()), it.offsetBytes, it.sizeBytes, it.fields) },
+        VertexInputMapping(vertices.inputs),
+        descriptors.map { DescriptorInputMapping(it.layout, it.parameters) },
+        pushes.map { PushConstantPacking(Collections.unmodifiableSet(it.stages.toSet()), it.offsetBytes, it.sizeBytes, it.fields) },
         derivations,
     )
 
