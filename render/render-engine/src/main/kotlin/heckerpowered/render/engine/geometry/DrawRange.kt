@@ -20,6 +20,13 @@ sealed interface DrawRange {
     val instanceCount: Int
     val firstInstance: Int
 
+    /** Whether element or instance count is zero; an enclosing pass still applies its attachment operations. */
+    val isEmpty: Boolean
+        get() = when (this) {
+            is VertexRange -> vertexCount == 0 || instanceCount == 0
+            is IndexedRange -> indexCount == 0 || instanceCount == 0
+        }
+
     companion object {
         /**
          * Selects consecutive vertex elements starting at [first]. Instance-rate streams instead
