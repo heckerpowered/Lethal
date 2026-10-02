@@ -10,6 +10,9 @@ import heckerpowered.render.command.pass.RenderPass
 import heckerpowered.render.command.pass.ScissorRectangle
 import heckerpowered.render.command.pass.Viewport
 import heckerpowered.render.engine.collection.toUnmodifiableList
+import heckerpowered.render.engine.geometry.DrawRange
+import heckerpowered.render.engine.geometry.IndexedRange
+import heckerpowered.render.engine.geometry.VertexRange
 import heckerpowered.render.resource.buffer.GpuBufferView
 import heckerpowered.render.shader.binding.DescriptorSet
 import java.util.*
@@ -43,7 +46,7 @@ internal class PreparedDrawCommand(
     val indexInput: IndexInput? = null,
     descriptorSets: Map<Int, DescriptorSet> = emptyMap(),
     pushConstants: List<PreparedPushConstantWrite> = emptyList(),
-    val arguments: DirectDrawArguments,
+    val arguments: DrawRange,
     val viewport: Viewport,
     val scissor: ScissorRectangle,
     val stencilReference: UByte = 0u,
@@ -57,12 +60,12 @@ internal class PreparedDrawCommand(
         require(this.descriptorSets.keys.all { it >= 0 }) { "Descriptor set index must not be negative" }
 
         when (val draw = arguments) {
-            is NonIndexedDrawArguments -> {
+            is VertexRange -> {
                 require(indexInput == null) { "A non-indexed prepared draw must not carry an index binding" }
                 pipeline.vertex.validateDrawInputs(this.vertexBuffers, draw.vertexCount, draw.firstVertex, draw.instanceCount, draw.firstInstance)
             }
 
-            is IndexedDrawArguments -> {
+            is IndexedRange -> {
                 val indices = checkNotNull(indexInput) { "An indexed prepared draw requires an index binding" }
                 indices.format.validateDrawRange(indices.view, draw.indexCount, draw.firstIndex)
                 pipeline.vertex.validateIndexedDrawInputs(this.vertexBuffers, draw.indexCount, draw.instanceCount, draw.firstInstance)
@@ -108,8 +111,8 @@ internal class PreparedDrawCommand(
         }
 
         when (val draw = arguments) {
-            is NonIndexedDrawArguments -> draw(draw.vertexCount, draw.firstVertex, draw.instanceCount, draw.firstInstance)
-            is IndexedDrawArguments -> drawIndexed(draw.indexCount, draw.firstIndex, draw.baseVertex, draw.instanceCount, draw.firstInstance)
+            is VertexRange -> draw(draw.vertexCount, draw.firstVertex, draw.instanceCount, draw.firstInstance)
+            is IndexedRange -> drawIndexed(draw.indexCount, draw.firstIndex, draw.baseVertex, draw.instanceCount, draw.firstInstance)
         }
     }
 }
