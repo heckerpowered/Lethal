@@ -6,6 +6,7 @@
 package heckerpowered.render.engine.view
 
 import heckerpowered.math.*
+
 import kotlin.test.*
 
 class ViewFrameTest {
@@ -38,7 +39,7 @@ class ViewFrameTest {
             assertFailsWith<IllegalArgumentException> { ViewFrame.of(Vectors.Zero, basis[0], basis[1], basis[2]) }
         }
         assertFailsWith<IllegalArgumentException> {
-            ViewFrame.of(Vectors.Zero, Vectors.UnitX, Vectors.UnitY, Vectors.NegativeUnitZ, epsilon = 3.0)
+            ViewFrame.of(Vectors.Zero, Vectors.UnitX, Vectors.UnitY, Vectors.NegativeUnitZ, 3.0)
         }
     }
 
@@ -61,8 +62,8 @@ class ViewFrameTest {
         val right = Vectors.of(1.0 + 1.0E-8, 0.0, 0.0)
         val frame = ViewFrame.of(Vectors.Zero, right, Vectors.UnitY, Vectors.UnitZ)
         assertEquals(right.x, frame.right.x)
-        assertFailsWith<IllegalArgumentException> { ViewFrame.of(Vectors.Zero, right, Vectors.UnitY, Vectors.UnitZ, epsilon = 0.0) }
-        ViewFrame.of(Vectors.Zero, Vectors.UnitX, Vectors.UnitY, Vectors.UnitZ, epsilon = 0.0)
+        assertFailsWith<IllegalArgumentException> { ViewFrame.of(Vectors.Zero, right, Vectors.UnitY, Vectors.UnitZ, 0.0) }
+        ViewFrame.of(Vectors.Zero, Vectors.UnitX, Vectors.UnitY, Vectors.UnitZ, 0.0)
     }
 
     @Test

@@ -62,12 +62,8 @@ class ViewFrame private constructor(
             require(abs(upAxis.dot(forwardAxis)) <= epsilon) { "View up and forward axes must be perpendicular" }
 
             val expectedForward = rightAxis.cross(upAxis)
-            require(
-                expectedForward.dot(forwardAxis) > 0.0 &&
-                        (expectedForward - forwardAxis).isNearlyZero(epsilon)
-            ) {
-                "View basis must be right-handed: right × up = forward"
-            }
+            val isRightHanded = expectedForward.dot(forwardAxis) > 0.0 && (expectedForward - forwardAxis).isNearlyZero(epsilon)
+            require(isRightHanded) { "View basis must be right-handed: right × up = forward" }
 
             return ViewFrame(position, rightAxis, upAxis, forwardAxis)
         }
