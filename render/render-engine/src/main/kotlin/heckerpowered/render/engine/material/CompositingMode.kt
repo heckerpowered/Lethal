@@ -22,7 +22,7 @@ import heckerpowered.render.resource.texture.TextureFormat
  * retaining preparation inputs. Depth, ordering, attachment operations and lifetime are separate.
  */
 fun interface CompositingMode {
-    fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaMeaning?): ColorTargetState
+    fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaQuantity?): ColorTargetState
 
     /**
      * Declares that [target]'s final blend equation and write mask preserve premultiplied coverage.
@@ -40,15 +40,15 @@ fun interface CompositingMode {
     fun preservesCoverage(source: FragmentOutput, target: ColorTargetState): Boolean = false
 
     object Replace : CompositingMode {
-        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaMeaning?) = ColorTargetState(format)
+        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaQuantity?) = ColorTargetState(format)
     }
 
     /** Requires known coverage in alpha-bearing destinations; missing stored alpha is implicitly one. */
     object SourceOver : CompositingMode {
-        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaMeaning?): ColorTargetState {
+        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaQuantity?): ColorTargetState {
             val output = requireNotNull(source) { "SourceOver requires a declared fragment output" }
-            require(output.alphaMeaning == AlphaMeaning.Coverage) { "SourceOver requires coverage input" }
-            require(destination == AlphaMeaning.Coverage || !format.colorComponents.alpha) { "SourceOver requires a coverage destination" }
+            require(output.alphaQuantity == AlphaQuantity.Coverage) { "SourceOver requires coverage input" }
+            require(destination == AlphaQuantity.Coverage || !format.colorComponents.alpha) { "SourceOver requires a coverage destination" }
 
             val blend = when (output.representation) {
                 AlphaRepresentation.Straight -> BlendState.StraightAlpha
@@ -59,7 +59,7 @@ fun interface CompositingMode {
     }
 
     object Add : CompositingMode {
-        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaMeaning?) = ColorTargetState(format, BlendState.Additive)
+        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaQuantity?) = ColorTargetState(format, BlendState.Additive)
     }
 
     object AddColorPreserveAlpha : CompositingMode {
@@ -68,7 +68,7 @@ fun interface CompositingMode {
             alpha(BlendFactor.Zero, BlendFactor.One)
         }
 
-        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaMeaning?) = ColorTargetState(format, blend)
+        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaQuantity?) = ColorTargetState(format, blend)
     }
 
     object SourceAlphaAdd : CompositingMode {
@@ -77,6 +77,6 @@ fun interface CompositingMode {
             alpha(BlendFactor.SourceAlpha, BlendFactor.One)
         }
 
-        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaMeaning?) = ColorTargetState(format, blend)
+        override fun target(format: TextureFormat, source: FragmentOutput?, destination: AlphaQuantity?) = ColorTargetState(format, blend)
     }
 }
