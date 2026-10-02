@@ -5,7 +5,7 @@
 
 package heckerpowered.render.engine.geometry.vertex
 
-import heckerpowered.render.engine.collection.toUnmodifiableList
+import heckerpowered.render.engine.support.collection.toUnmodifiableList
 
 /**
  * Describes which attribute semantics are available from a geometry's vertex streams.
