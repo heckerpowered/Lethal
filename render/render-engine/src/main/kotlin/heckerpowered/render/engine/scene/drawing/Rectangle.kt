@@ -6,6 +6,7 @@
 package heckerpowered.render.engine.scene.drawing
 
 import heckerpowered.render.engine.geometry.DrawRange
+import heckerpowered.render.engine.geometry.GeometrySelection
 import heckerpowered.render.engine.geometry.VertexGeometry
 import heckerpowered.render.engine.geometry.vertex.*
 import heckerpowered.render.pipeline.primitive.PrimitiveState
@@ -64,5 +65,5 @@ fun rectangleGeometry(rectangle: Rectangle, uv: Rectangle = Rectangle(0f, 0f, 1f
     )
     val layout = GeometryLayout(listOf(VertexStreamLayout(20, attributes)))
     val streams = listOf(VertexStreamSource.Upload(vertices.array()))
-    return VertexGeometry(layout, streams, null, DrawRange.vertices(4), PrimitiveState(PrimitiveTopology.TriangleStrip))
+    return VertexGeometry(layout, streams, GeometrySelection.Vertices(DrawRange.vertices(4)), PrimitiveState(PrimitiveTopology.TriangleStrip))
 }
