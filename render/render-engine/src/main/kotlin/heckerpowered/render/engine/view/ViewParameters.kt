@@ -13,7 +13,6 @@ import heckerpowered.render.command.pass.Viewport
 import heckerpowered.render.engine.material.parameter.NumericValue
 import heckerpowered.render.engine.material.parameter.ParameterValues
 import heckerpowered.render.engine.scene.ObjectSubmitContext
-import heckerpowered.render.geometry.Matrix4
 import heckerpowered.render.pipeline.depthstencil.CompareFunction
 
 /**
@@ -67,17 +66,9 @@ class ViewParameters(
     }
 
     companion object {
-        /**
-         * Adapts a host's Float clip matrix by copying its entries to Double.
-         * Later object composition uses Double, but conversion cannot restore already rounded values.
-         */
-        fun fromClipMatrix(
-            matrix: Matrix4, width: Int, height: Int, depthCompare: CompareFunction,
-            parameters: ParameterValues = ParameterValues(),
-        ): ViewParameters {
-            val snapshot = Matrices.generate { row, column -> matrix[row, column].toDouble() }
-            return ViewParameters(snapshot, width, height, depthCompare, parameters)
-        }
+        /** Takes an independent Double snapshot before later object composition and shader packing. */
+        fun fromClipMatrix(matrix: MatrixView, width: Int, height: Int, depthCompare: CompareFunction, parameters: ParameterValues = ParameterValues()): ViewParameters =
+            ViewParameters(matrix, width, height, depthCompare, parameters)
     }
 }
 
