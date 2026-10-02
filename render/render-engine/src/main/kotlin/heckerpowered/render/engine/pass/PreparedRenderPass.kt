@@ -8,9 +8,9 @@ package heckerpowered.render.engine.pass
 import heckerpowered.render.command.pass.RenderPass
 import heckerpowered.render.command.pass.RenderPassDescription
 import heckerpowered.render.command.pass.RenderPassResources
-import heckerpowered.render.engine.collection.toUnmodifiableList
 import heckerpowered.render.engine.draw.PreparedDrawCommand
 import heckerpowered.render.engine.prepare.BufferUpload
+import heckerpowered.render.engine.support.collection.toUnmodifiableList
 
 /**
  * A render pass with the draw bindings and uploads needed for command recording already resolved.
