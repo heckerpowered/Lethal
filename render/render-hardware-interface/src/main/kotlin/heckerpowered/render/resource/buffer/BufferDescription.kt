@@ -5,6 +5,7 @@
 
 package heckerpowered.render.resource.buffer
 
+import heckerpowered.render.GraphicsDevice
 import heckerpowered.render.memory.Size
 import java.util.*
 
@@ -37,3 +38,6 @@ class BufferDescription(
         require(this.usage.isNotEmpty()) { "GPU buffer requires at least one usage" }
     }
 }
+
+fun GraphicsDevice.createBuffer(label: String, sizeBytes: Size, vararg usage: BufferUsage): GpuBuffer =
+    createBuffer(BufferDescription(label, sizeBytes, usage.toSet()))
