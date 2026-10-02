@@ -13,8 +13,8 @@ import heckerpowered.render.command.pass.RenderArea
 import heckerpowered.render.command.pass.RenderPassDescription
 import heckerpowered.render.command.pass.ScissorRectangle
 import heckerpowered.render.command.pass.Viewport
-import heckerpowered.render.engine.draw.NonIndexedDrawArguments
 import heckerpowered.render.engine.draw.PreparedDrawCommand
+import heckerpowered.render.engine.geometry.VertexRange
 import heckerpowered.render.engine.scene.ObjectSubmitContext
 import heckerpowered.render.engine.scene.RenderElement
 import heckerpowered.render.engine.scene.drawing.WorldDrawing
@@ -40,7 +40,8 @@ class RasterPassProcessorTest {
             submit(MarkerElement("fourth"))
         }
         val pass = RasterPass(
-            RenderPassDescription("mixed", RenderArea(0, 0, 16, 16)), collection,
+            RenderPassDescription("mixed", RenderArea(0, 0, 16, 16)),
+            collection,
             ViewParameters(Matrices.Identity, 16, 16, CompareFunction.Always)
         )
         ResourceLifetime.build {
@@ -60,7 +61,8 @@ class RasterPassProcessorTest {
     fun anUnsupportedElementFailsBeforeGraphicsAccess() {
         val collection = WorldDrawing.collect(ObjectSubmitContext(AffineTransforms.Identity)) { submit(MarkerElement("unknown")) }
         val pass = RasterPass(
-            RenderPassDescription("unknown", RenderArea(0, 0, 1, 1)), collection,
+            RenderPassDescription("unknown", RenderArea(0, 0, 1, 1)),
+            collection,
             ViewParameters(Matrices.Identity, 1, 1, CompareFunction.Always)
         )
         ResourceLifetime.build {
@@ -76,7 +78,8 @@ class RasterPassProcessorTest {
 
     private fun command(label: String, pass: RasterPass) = PreparedDrawCommand(
         RenderPipelineDescription(label, proxy<ShaderStages>(), colorTargets = emptyList()),
-        arguments = NonIndexedDrawArguments(3), viewport = Viewport.from(pass.description.renderArea),
+        arguments = VertexRange(3),
+        viewport = Viewport.from(pass.description.renderArea),
         scissor = ScissorRectangle.from(pass.description.renderArea)
     )
 
