@@ -41,7 +41,7 @@ class Canvas private constructor(
      */
     fun image(rectangle: Rectangle, uv: Rectangle = Rectangle(0f, 0f, 1f, 1f), bind: (VertexGeometry) -> GeometryElement) {
         val element = bind(rectangleGeometry(rectangle, uv))
-        geometry(element.copy(composition = CompositingMode.SourceOver(element.shading.shader.sourceRepresentation)))
+        geometry(element.copy(composition = CompositingMode.SourceOver))
     }
 
     /** Clips the block in framebuffer coordinates, intersecting any enclosing clips. */
