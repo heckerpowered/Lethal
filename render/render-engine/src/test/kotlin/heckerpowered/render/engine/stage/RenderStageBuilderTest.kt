@@ -6,13 +6,13 @@
 package heckerpowered.render.engine.stage
 
 import heckerpowered.math.AffineTransforms
+import heckerpowered.math.Matrices
 import heckerpowered.render.command.pass.RenderArea
 import heckerpowered.render.command.pass.RenderPassDescription
 import heckerpowered.render.engine.pass.RasterPass
 import heckerpowered.render.engine.scene.ObjectSubmitContext
 import heckerpowered.render.engine.scene.drawing.WorldDrawing
 import heckerpowered.render.engine.view.ViewParameters
-import heckerpowered.render.geometry.Matrix4
 import heckerpowered.render.pipeline.depthstencil.CompareFunction
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,7 +24,8 @@ class RenderStageBuilderTest {
         val collection = WorldDrawing.collect(ObjectSubmitContext(AffineTransforms.Identity)) {}
         val pass = RasterPass(
             RenderPassDescription("empty", renderArea = RenderArea(0, 0, 1, 1)),
-            collection, ViewParameters.fromClipMatrix(Matrix4.Identity, 1, 1, CompareFunction.Always)
+            collection,
+            ViewParameters.fromClipMatrix(Matrices.Identity, 1, 1, CompareFunction.Always)
         )
         builder.rasterPass(pass)
         val first = builder.build()

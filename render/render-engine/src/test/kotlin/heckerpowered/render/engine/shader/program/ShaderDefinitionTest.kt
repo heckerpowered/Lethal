@@ -5,6 +5,7 @@
 
 package heckerpowered.render.engine.shader.program
 
+import heckerpowered.render.resource.ResourceLifetime
 import heckerpowered.render.GraphicsDevice
 import heckerpowered.render.engine.geometry.DrawRange
 import heckerpowered.render.engine.geometry.GeometrySelection
@@ -27,11 +28,11 @@ class ShaderDefinitionTest {
     fun sourceRepresentationRemainsExplicitAndIndependentOfOutputDeclarations() {
         val defaultOutput = shaderDefinition("default output") {
             native(modules(), emptyInputs())
-            sourceRepresentation = AlphaRepresentation.Premultiplied
+            sourceRepresentation(AlphaRepresentation.Premultiplied)
         }
         val explicitOutput = shaderDefinition("explicit output") {
             native(modules(), emptyInputs())
-            sourceRepresentation = AlphaRepresentation.Premultiplied
+            sourceRepresentation(AlphaRepresentation.Premultiplied)
             output(0, FragmentOutput(AlphaRepresentation.Straight))
         }
         assertEquals(AlphaRepresentation.Premultiplied, defaultOutput.outputs.getValue(0).representation)
@@ -85,18 +86,21 @@ class ShaderDefinitionTest {
         second.bind(1)
         assertEquals(0, reads)
         val compiled = mutableListOf<String>()
-        val firstDevice = device(compiled)
-        val failure = assertFailsWith<IllegalStateException> { first.resolve(firstDevice) }
-        assertEquals("generation unavailable", failure.message)
-        assertEquals(1, reads)
-        assertTrue(compiled.isEmpty())
-        failLoad = false
-        first.resolve(firstDevice)
-        generation = "B"
-        second.resolve(device(compiled))
-        assertEquals(3, reads)
-        assertEquals(2, mappings)
-        assertEquals(List(4) { "A" }, compiled)
+        val unusedSources = ShaderSources { error("Canonical memory must not use engine resource IO") }
+        ResourceLifetime.build { this }.use { lifetime ->
+            val firstPrograms = ShaderRealizations(device(compiled), lifetime, unusedSources)
+            val failure = assertFailsWith<IllegalStateException> { firstPrograms.definition(first) }
+            assertEquals("generation unavailable", failure.message)
+            assertEquals(1, reads)
+            assertTrue(compiled.isEmpty())
+            failLoad = false
+            firstPrograms.definition(first)
+            generation = "B"
+            ShaderRealizations(device(compiled), lifetime, unusedSources).definition(second)
+            assertEquals(3, reads)
+            assertEquals(2, mappings)
+            assertEquals(List(4) { "A" }, compiled)
+        }
     }
 
     private fun modules(): List<ShaderModuleDescription> = listOf(ShaderStage.Vertex, ShaderStage.Fragment).map { stage ->

@@ -5,7 +5,7 @@
 
 package heckerpowered.bridge.math
 
-import heckerpowered.math.Geometry
+import heckerpowered.math.Rotator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -22,7 +22,7 @@ class MinecraftDirectionsTest {
 
     @Test
     fun vectorAndRotatorConversionsRoundTripMinecraftViewDirections() {
-        val rotator = Geometry.rotator(20.0, -35.0)
+        val rotator = Rotator(20.0, -35.0)
 
         val roundTrip = rotator.toViewVector().toRotator()
 

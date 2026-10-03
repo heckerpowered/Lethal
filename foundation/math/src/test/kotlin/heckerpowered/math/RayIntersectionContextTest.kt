@@ -10,13 +10,13 @@ import kotlin.test.*
 class RayIntersectionContextTest {
     @Test
     fun zeroAndNearlyZeroDirectionsCannotCreateAContext() {
-        assertNull(RayIntersectionContext.create(Geometry.ray(Vectors.Zero, Vectors.Zero)))
-        assertNull(RayIntersectionContext.create(Geometry.ray(Vectors.Zero, Geometry.vector(1.0E-9, 0.0, 0.0))))
+        assertNull(RayIntersectionContext.create(Ray(Vectors.Zero, Vectors.Zero)))
+        assertNull(RayIntersectionContext.create(Ray(Vectors.Zero, Vector(1.0E-9, 0.0, 0.0))))
     }
 
     @Test
     fun contextCachesCoordinatesAndInverseDirections() {
-        val ray = Geometry.ray(Geometry.vector(1.0, 2.0, 3.0), Geometry.vector(3.0, 0.0, 4.0))
+        val ray = Ray(Vector(1.0, 2.0, 3.0), Vector(3.0, 0.0, 4.0))
         val context = requireNotNull(RayIntersectionContext.create(ray, 20.0))
 
         assertSame(expected = ray, actual = context.ray)
@@ -37,7 +37,7 @@ class RayIntersectionContextTest {
 
     @Test
     fun omittedLengthCreatesAnUnboundedContext() {
-        val context = requireNotNull(RayIntersectionContext.create(Geometry.ray(Vectors.Zero, Vectors.UnitZ)))
+        val context = requireNotNull(RayIntersectionContext.create(Ray(Vectors.Zero, Vectors.UnitZ)))
 
         assertEquals(expected = Double.POSITIVE_INFINITY, actual = context.maximumTime)
     }

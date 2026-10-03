@@ -5,7 +5,8 @@
 
 package heckerpowered.lethal.mixin.impl
 
-import heckerpowered.math.Geometry
+import heckerpowered.math.Ray
+import heckerpowered.math.Vector
 import heckerpowered.math.RayIntersectionContext
 import heckerpowered.math.intersectTime
 import net.minecraft.entity.item.EntityXPOrb
@@ -28,9 +29,9 @@ class EntitySectionRayTraversalTest {
     @Test
     fun traversalMatchesFiniteSectionScanInEveryRayDirection() {
         val rays = listOf(
-            Geometry.ray(Geometry.vector(8.0, 24.0, 8.0), Geometry.vector(1.0, 0.25, 0.5)),
-            Geometry.ray(Geometry.vector(40.0, 40.0, 40.0), Geometry.vector(-1.0, -0.5, -0.25)),
-            Geometry.ray(Geometry.vector(16.0, 16.0, 16.0), Geometry.vector(-1.0, -1.0, 1.0)),
+            Ray(Vector(8.0, 24.0, 8.0), Vector(1.0, 0.25, 0.5)),
+            Ray(Vector(40.0, 40.0, 40.0), Vector(-1.0, -0.5, -0.25)),
+            Ray(Vector(16.0, 16.0, 16.0), Vector(-1.0, -1.0, 1.0)),
         )
 
         for (ray in rays) {
@@ -46,8 +47,8 @@ class EntitySectionRayTraversalTest {
 
     @Test
     fun verticalBoundarySectionsCoverClampedEntityStorage() {
-        val belowWorld = requireNotNull(RayIntersectionContext.create(Geometry.ray(Geometry.vector(8.0, -100.0, 8.0), Geometry.vector(1.0, 0.0, 0.0)), 32.0))
-        val aboveWorld = requireNotNull(RayIntersectionContext.create(Geometry.ray(Geometry.vector(8.0, 300.0, 8.0), Geometry.vector(1.0, 0.0, 0.0)), 32.0))
+        val belowWorld = requireNotNull(RayIntersectionContext.create(Ray(Vector(8.0, -100.0, 8.0), Vector(1.0, 0.0, 0.0)), 32.0))
+        val aboveWorld = requireNotNull(RayIntersectionContext.create(Ray(Vector(8.0, 300.0, 8.0), Vector(1.0, 0.0, 0.0)), 32.0))
 
         assertEquals(expected = EntitySectionIntersection(0, 0, 0, 0.0), actual = EntitySectionRayTraversal(belowWorld, 2.0).first())
         assertEquals(expected = EntitySectionIntersection(0, 15, 0, 0.0), actual = EntitySectionRayTraversal(aboveWorld, 2.0).first())
@@ -57,7 +58,7 @@ class EntitySectionRayTraversalTest {
     fun firstBucketDoesNotQueryTheRemainingRay() {
         Bootstrap.register()
         val world = EntitySearchWorld()
-        val ray = Geometry.ray(Geometry.vector(8.0, 8.0, 8.0), Geometry.vector(1.0, 0.0, 0.0))
+        val ray = Ray(Vector(8.0, 8.0, 8.0), Vector(1.0, 0.0, 0.0))
         val buckets = WorldAccessImpl.getEntityRayBuckets(world, ray, 1024.0)
 
         assertEquals(expected = emptyList(), actual = world.loadedChunkQueries)

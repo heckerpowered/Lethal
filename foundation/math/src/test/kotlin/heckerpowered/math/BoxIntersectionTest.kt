@@ -8,11 +8,11 @@ package heckerpowered.math
 import kotlin.test.*
 
 class BoxIntersectionTest {
-    private val box = Geometry.box(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
+    private val box = Box(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
 
     @Test
     fun outsideRayReportsEntryExitPointsTimesAndNormals() {
-        val ray = Geometry.ray(Geometry.vector(-2.0, 0.5, 0.5), Geometry.vector(2.0, 0.0, 0.0))
+        val ray = Ray(Vector(-2.0, 0.5, 0.5), Vector(2.0, 0.0, 0.0))
 
         val intersection = assertNotNull(box.intersect(ray))
 
@@ -33,7 +33,7 @@ class BoxIntersectionTest {
 
     @Test
     fun insideRayUsesOriginAsNearestHitAndPreservesSurfaceExit() {
-        val ray = Geometry.ray(Geometry.vector(0.5, 0.5, 0.5), Geometry.vector(0.0, 0.0, 2.0))
+        val ray = Ray(Vector(0.5, 0.5, 0.5), Vector(0.0, 0.0, 2.0))
 
         val intersection = assertNotNull(box.intersect(ray, length = 0.1))
 
@@ -53,7 +53,7 @@ class BoxIntersectionTest {
 
     @Test
     fun physicalLengthDeterminesWhetherTheRayReachesTheBox() {
-        val ray = Geometry.ray(Geometry.vector(-2.0, 0.5, 0.5), Geometry.vector(2.0, 0.0, 0.0))
+        val ray = Ray(Vector(-2.0, 0.5, 0.5), Vector(2.0, 0.0, 0.0))
 
         assertNull(box.intersect(ray, length = 1.99))
         assertNotNull(box.intersect(ray, length = 2.0))
@@ -62,9 +62,9 @@ class BoxIntersectionTest {
 
     @Test
     fun parallelBehindAndDegenerateRaysDoNotIntersect() {
-        val parallel = Geometry.ray(Geometry.vector(-2.0, 2.0, 0.5), Vectors.UnitX)
-        val behind = Geometry.ray(Geometry.vector(2.0, 0.5, 0.5), Vectors.UnitX)
-        val degenerate = Geometry.ray(Geometry.vector(0.5, 0.5, 0.5), Vectors.Zero)
+        val parallel = Ray(Vector(-2.0, 2.0, 0.5), Vectors.UnitX)
+        val behind = Ray(Vector(2.0, 0.5, 0.5), Vectors.UnitX)
+        val degenerate = Ray(Vector(0.5, 0.5, 0.5), Vectors.Zero)
 
         assertNull(box.intersect(parallel))
         assertNull(box.intersect(behind))
@@ -76,7 +76,7 @@ class BoxIntersectionTest {
 
     @Test
     fun intersectionTimeUsesZeroForOriginsInsideTheBox() {
-        val ray = Geometry.ray(Geometry.vector(0.5, 0.5, 0.5), Vectors.UnitZ)
+        val ray = Ray(Vector(0.5, 0.5, 0.5), Vectors.UnitZ)
         val context = requireNotNull(RayIntersectionContext.create(ray, length = 0.1))
 
         assertEquals(expected = 0.0, actual = box.intersectTime(context))
@@ -88,7 +88,7 @@ class BoxIntersectionTest {
 
     @Test
     fun everyIntersectionEntryPointUsesTheSameRayParameterSpace() {
-        val ray = Geometry.ray(Geometry.vector(-4.0, 0.25, 0.25), Geometry.vector(2.0, 0.1, 0.05))
+        val ray = Ray(Vector(-4.0, 0.25, 0.25), Vector(2.0, 0.1, 0.05))
         val context = requireNotNull(RayIntersectionContext.create(ray, length = 20.0))
         val expected = assertNotNull(box.intersect(ray, length = 20.0))
         val contextIntersection = assertNotNull(box.intersect(context))
@@ -121,7 +121,7 @@ class BoxIntersectionTest {
 
     @Test
     fun reverseDirectionSwapsMinimumAndMaximumFaceNormals() {
-        val ray = Geometry.ray(Geometry.vector(2.0, 0.5, 0.5), Geometry.vector(-2.0, 0.0, 0.0))
+        val ray = Ray(Vector(2.0, 0.5, 0.5), Vector(-2.0, 0.0, 0.0))
 
         val intersection = assertNotNull(box.intersect(ray))
 
@@ -133,9 +133,9 @@ class BoxIntersectionTest {
 
     @Test
     fun pointBoxProducesOneSharedEntryAndExitSurfacePoint() {
-        val point = Geometry.vector(1.0, 2.0, 3.0)
+        val point = Vector(1.0, 2.0, 3.0)
         val pointBox = point.asPointBox()
-        val ray = Geometry.ray(Geometry.vector(-1.0, 2.0, 3.0), Geometry.vector(2.0, 0.0, 0.0))
+        val ray = Ray(Vector(-1.0, 2.0, 3.0), Vector(2.0, 0.0, 0.0))
 
         val intersection = assertNotNull(pointBox.intersect(ray))
 

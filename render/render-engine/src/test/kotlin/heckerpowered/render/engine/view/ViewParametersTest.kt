@@ -6,7 +6,7 @@
 package heckerpowered.render.engine.view
 
 import heckerpowered.math.AffineTransforms
-import heckerpowered.math.Geometry
+import heckerpowered.math.Vector
 import heckerpowered.math.Matrices
 import heckerpowered.math.MatrixView
 import heckerpowered.render.command.pass.Viewport
@@ -24,8 +24,8 @@ class ViewParametersTest {
     fun clipMatrixFactoryPreservesDoublePrecisionUntilObjectComposition() {
         val cameraX = 1_073_741_824.25
         val shared = ParameterValues()
-        val view = ViewParameters.fromClipMatrix(Matrices.fromTranslation(Geometry.vector(-cameraX, 0.0, 0.0)), 64, 32, CompareFunction.Always, shared)
-        val context = ObjectSubmitContext(AffineTransforms.fromTranslation(Geometry.vector(cameraX + 0.125, 0.0, 0.0)))
+        val view = ViewParameters.fromClipMatrix(Matrices.fromTranslation(Vector(-cameraX, 0.0, 0.0)), 64, 32, CompareFunction.Always, shared)
+        val context = ObjectSubmitContext(AffineTransforms.fromTranslation(Vector(cameraX + 0.125, 0.0, 0.0)))
         val parameters = view.forObject(context, Viewport(0f, 0f, 64f, 32f))
         val clip = ByteBuffer.wrap(parameters.requireNumeric(ParameterName("clipFromLocal")).bytes()).order(ByteOrder.nativeOrder()).asFloatBuffer()
         assertEquals(0.125f, clip[12])
@@ -69,8 +69,8 @@ class ViewParametersTest {
     @Test
     fun largeWorldPlacementCancelsBeforeConversionToFloat() {
         val cameraX = 1_073_741_824.25
-        val view = ViewParameters(Matrices.fromTranslation(Geometry.vector(-cameraX, 0.0, 0.0)), 64, 32, CompareFunction.Always)
-        val context = ObjectSubmitContext(AffineTransforms.fromTranslation(Geometry.vector(cameraX + 0.125, 0.0, 0.0)))
+        val view = ViewParameters(Matrices.fromTranslation(Vector(-cameraX, 0.0, 0.0)), 64, 32, CompareFunction.Always)
+        val context = ObjectSubmitContext(AffineTransforms.fromTranslation(Vector(cameraX + 0.125, 0.0, 0.0)))
         val parameters = view.forObject(context, Viewport(0f, 0f, 64f, 32f))
         val clip = ByteBuffer.wrap(parameters.requireNumeric(ParameterName("clipFromLocal")).bytes()).order(ByteOrder.nativeOrder()).asFloatBuffer()
         assertEquals(0.125f, clip[12])

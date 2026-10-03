@@ -51,7 +51,7 @@ class AffineTransformViewTest {
 
     @Test
     fun factoriesPreserveReferencesAndConvertTrsWithoutLosingGeometry() {
-        val copy = Geometry.affineTransform(shear.axisX, shear.axisY, shear.axisZ, shear.translation)
+        val copy = AffineTransform(shear.axisX, shear.axisY, shear.axisZ, shear.translation)
         assertSame(shear.axisX, copy.axisX)
         assertSame(shear.axisY, copy.axisY)
         assertSame(shear.axisZ, copy.axisZ)

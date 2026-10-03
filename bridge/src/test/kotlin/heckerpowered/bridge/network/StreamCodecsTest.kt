@@ -339,9 +339,9 @@ class StreamCodecsTest {
 
         assertLargeByteArrayEquals(wire, encode(StreamCodecs.StringUTF8, value))
         assertEquals(value, StreamCodecs.StringUTF8.decode(ByteArrayStreamBuffer(wire)))
-        assertFailsWith<IllegalArgumentException> { encode(StreamCodecs.StringUTF8, value + "a") }
+        assertFailsWith<IllegalArgumentException> { encode(StreamCodecs.StringUTF8, "${value}a") }
         assertFailsWith<IllegalArgumentException> {
-            StreamCodecs.StringUTF8.decode(ByteArrayStreamBuffer(hexBytes("80 80 02") + (value + "a").toByteArray(Charsets.UTF_8)))
+            StreamCodecs.StringUTF8.decode(ByteArrayStreamBuffer(hexBytes("80 80 02") + ("${value}a").toByteArray(Charsets.UTF_8)))
         }
     }
 

@@ -5,6 +5,7 @@
 
 package heckerpowered.render.engine.view
 
+import heckerpowered.math.Box
 import heckerpowered.math.*
 
 import kotlin.test.*
@@ -27,14 +28,20 @@ class FrustumTest {
         val frustum = Frustum.fromWorldToClip(Matrices.Identity)
         assertTrue(frustum.contains(Vectors.of(0.0, 0.0, 0.5)))
         val boundaryPoints = listOf(
-            Vectors.of(-1.0, 0.0, 0.5), Vectors.of(1.0, 0.0, 0.5),
-            Vectors.of(0.0, -1.0, 0.5), Vectors.of(0.0, 1.0, 0.5),
-            Vectors.of(0.0, 0.0, 0.0), Vectors.of(0.0, 0.0, 1.0),
+            Vectors.of(-1.0, 0.0, 0.5),
+            Vectors.of(1.0, 0.0, 0.5),
+            Vectors.of(0.0, -1.0, 0.5),
+            Vectors.of(0.0, 1.0, 0.5),
+            Vectors.of(0.0, 0.0, 0.0),
+            Vectors.of(0.0, 0.0, 1.0),
         )
         val outsidePoints = listOf(
-            Vectors.of(-1.01, 0.0, 0.5), Vectors.of(1.01, 0.0, 0.5),
-            Vectors.of(0.0, -1.01, 0.5), Vectors.of(0.0, 1.01, 0.5),
-            Vectors.of(0.0, 0.0, -0.01), Vectors.of(0.0, 0.0, 1.01),
+            Vectors.of(-1.01, 0.0, 0.5),
+            Vectors.of(1.01, 0.0, 0.5),
+            Vectors.of(0.0, -1.01, 0.5),
+            Vectors.of(0.0, 1.01, 0.5),
+            Vectors.of(0.0, 0.0, -0.01),
+            Vectors.of(0.0, 0.0, 1.01),
         )
         for (point in boundaryPoints) assertTrue(frustum.contains(point), "$point")
         for (point in outsidePoints) assertFalse(frustum.contains(point), "$point")
@@ -44,12 +51,12 @@ class FrustumTest {
     fun boxIntersectionRejectsBoxesCompletelyBeyondEachPlane() {
         val frustum = Frustum.fromWorldToClip(Matrices.Identity)
         val outsideBoxes = listOf(
-            Geometry.box(-3.0, -0.5, 0.2, -2.0, 0.5, 0.8),
-            Geometry.box(2.0, -0.5, 0.2, 3.0, 0.5, 0.8),
-            Geometry.box(-0.5, -3.0, 0.2, 0.5, -2.0, 0.8),
-            Geometry.box(-0.5, 2.0, 0.2, 0.5, 3.0, 0.8),
-            Geometry.box(-0.5, -0.5, -2.0, 0.5, 0.5, -1.0),
-            Geometry.box(-0.5, -0.5, 2.0, 0.5, 0.5, 3.0),
+            Box(-3.0, -0.5, 0.2, -2.0, 0.5, 0.8),
+            Box(2.0, -0.5, 0.2, 3.0, 0.5, 0.8),
+            Box(-0.5, -3.0, 0.2, 0.5, -2.0, 0.8),
+            Box(-0.5, 2.0, 0.2, 0.5, 3.0, 0.8),
+            Box(-0.5, -0.5, -2.0, 0.5, 0.5, -1.0),
+            Box(-0.5, -0.5, 2.0, 0.5, 0.5, 3.0),
         )
         for (box in outsideBoxes) assertFalse(frustum.intersects(box), "$box")
     }
@@ -58,15 +65,15 @@ class FrustumTest {
     fun boxIntersectionIncludesTouchingOverlappingAndEnclosingBoxes() {
         val frustum = Frustum.fromWorldToClip(Matrices.Identity)
         val intersectingBoxes = listOf(
-            Geometry.box(-2.0, -0.5, 0.2, -1.0, 0.5, 0.8),
-            Geometry.box(1.0, -0.5, 0.2, 2.0, 0.5, 0.8),
-            Geometry.box(-0.5, -2.0, 0.2, 0.5, -1.0, 0.8),
-            Geometry.box(-0.5, 1.0, 0.2, 0.5, 2.0, 0.8),
-            Geometry.box(-0.5, -0.5, -1.0, 0.5, 0.5, 0.0),
-            Geometry.box(-0.5, -0.5, 1.0, 0.5, 0.5, 2.0),
-            Geometry.box(-0.5, -0.5, 0.2, 0.5, 0.5, 0.8),
-            Geometry.box(0.5, 0.5, 0.5, 2.0, 2.0, 2.0),
-            Geometry.box(-2.0, -2.0, -1.0, 2.0, 2.0, 2.0),
+            Box(-2.0, -0.5, 0.2, -1.0, 0.5, 0.8),
+            Box(1.0, -0.5, 0.2, 2.0, 0.5, 0.8),
+            Box(-0.5, -2.0, 0.2, 0.5, -1.0, 0.8),
+            Box(-0.5, 1.0, 0.2, 0.5, 2.0, 0.8),
+            Box(-0.5, -0.5, -1.0, 0.5, 0.5, 0.0),
+            Box(-0.5, -0.5, 1.0, 0.5, 0.5, 2.0),
+            Box(-0.5, -0.5, 0.2, 0.5, 0.5, 0.8),
+            Box(0.5, 0.5, 0.5, 2.0, 2.0, 2.0),
+            Box(-2.0, -2.0, -1.0, 2.0, 2.0, 2.0),
         )
         for (box in intersectingBoxes) assertTrue(frustum.intersects(box), "$box")
     }
@@ -75,7 +82,7 @@ class FrustumTest {
     fun pointBoxesAgreeWithPointContainment() {
         val frustum = Frustum.fromWorldToClip(perspectiveMatrix)
         for (point in listOf(Vectors.of(0.0, 0.0, 1.5), Vectors.of(0.0, 0.0, 0.5), Vectors.of(3.0, 0.0, 1.5))) {
-            assertEquals(frustum.contains(point), frustum.intersects(Geometry.box(point, point)), "$point")
+            assertEquals(frustum.contains(point), frustum.intersects(Box(point, point)), "$point")
         }
     }
 
@@ -105,8 +112,8 @@ class FrustumTest {
         assertTrue(frustum.contains(Vectors.of(11.5, 20.0, 30.0)))
         assertFalse(frustum.contains(Vectors.of(9.0, 20.0, 30.0)))
         assertFalse(frustum.contains(Vectors.of(11.5, 20.0, 33.0)))
-        assertTrue(frustum.intersects(Geometry.box(11.25, 19.5, 29.5, 11.75, 20.5, 30.5)))
-        assertFalse(frustum.intersects(Geometry.box(8.0, 19.5, 29.5, 9.0, 20.5, 30.5)))
+        assertTrue(frustum.intersects(Box(11.25, 19.5, 29.5, 11.75, 20.5, 30.5)))
+        assertFalse(frustum.intersects(Box(8.0, 19.5, 29.5, 9.0, 20.5, 30.5)))
         assertMatchesClipVolume(worldToClip, frustum, Vectors.of(10.0, 20.0, 30.0))
     }
 
@@ -133,9 +140,9 @@ class FrustumTest {
     fun invalidBoxesAndDistanceOverflowRemainPotentialIntersections() {
         val frustum = Frustum.fromWorldToClip(Matrices.Identity)
         for (box in listOf(
-            Geometry.box(Double.NaN, 0.0, .2, 3.0, .1, .8),
-            Geometry.box(2.0, 0.0, .2, Double.POSITIVE_INFINITY, .1, .8),
-            Geometry.box(3.0, 0.0, .2, 2.0, .1, .8),
+            Box(Double.NaN, 0.0, .2, 3.0, .1, .8),
+            Box(2.0, 0.0, .2, Double.POSITIVE_INFINITY, .1, .8),
+            Box(3.0, 0.0, .2, 2.0, .1, .8),
         )) assertTrue(frustum.intersects(box))
         val mixed = Frustum.fromWorldToClip(
             Matrices.of(
@@ -145,7 +152,7 @@ class FrustumTest {
                 0.0, 0.0, 0.0, 1.0,
             )
         )
-        val huge = Geometry.box(-1.7E308, -1.7E308, -1.7E308, -1.6E308, -1.6E308, -1.6E308)
+        val huge = Box(-1.7E308, -1.7E308, -1.7E308, -1.6E308, -1.6E308, -1.6E308)
         assertTrue(mixed.left.evaluate(huge.max).isFinite())
         assertTrue(mixed.left.evaluate(huge.max) < 0.0)
         assertEquals(Double.NEGATIVE_INFINITY, mixed.near.evaluate(huge.max))

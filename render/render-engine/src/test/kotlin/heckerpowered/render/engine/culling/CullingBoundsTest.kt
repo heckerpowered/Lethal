@@ -5,6 +5,7 @@
 
 package heckerpowered.render.engine.culling
 
+import heckerpowered.math.Box
 import heckerpowered.math.*
 import heckerpowered.render.GraphicsDevice
 import heckerpowered.render.command.pass.RenderArea
@@ -20,9 +21,11 @@ import heckerpowered.render.engine.prepare.PassPreparation
 import heckerpowered.render.engine.scene.ObjectSubmitContext
 import heckerpowered.render.engine.scene.RenderSubmission
 import heckerpowered.render.engine.scene.RenderSubmissionList
-import heckerpowered.render.engine.shader.binding.VertexInterface
-import heckerpowered.render.engine.shader.program.GeometryInput
+import heckerpowered.render.engine.shader.binding.VertexInputMapping
+import heckerpowered.render.engine.shader.binding.ShaderInputLayout
+import heckerpowered.render.engine.shader.program.MeshShaderInput
 import heckerpowered.render.engine.shader.program.MeshShader
+import heckerpowered.render.engine.shader.program.shaderDefinition
 import heckerpowered.render.engine.shader.program.ShaderRealizations
 import heckerpowered.render.engine.view.Frustum
 import heckerpowered.render.engine.view.ViewParameters
@@ -38,18 +41,18 @@ import kotlin.test.*
 
 class CullingBoundsTest {
     private val frustum = Frustum.fromWorldToClip(Matrices.Identity)
-    private val inside = Geometry.box(-.25, -.25, .2, .25, .25, .8)
+    private val inside = Box(-.25, -.25, .2, .25, .25, .8)
 
     @Test
     fun boxesRetainIntersectionsBoundariesAndPointsAndRejectSeparatedPlacements() {
         assertFalse(BoxCullingBounds(inside).canCull(frustum, AffineTransforms.Identity))
         assertTrue(BoxCullingBounds(inside).canCull(frustum, AffineTransforms.fromTranslation(Vectors.of(3.0, 0.0, 0.0))))
-        val outside = BoxCullingBounds(Geometry.box(2.0, -.25, .2, 3.0, .25, .8))
+        val outside = BoxCullingBounds(Box(2.0, -.25, .2, 3.0, .25, .8))
         assertTrue(outside.canCull(frustum, AffineTransforms.Identity))
         assertFalse(outside.canCull(frustum, AffineTransforms.fromTranslation(Vectors.of(-2.0, 0.0, 0.0))))
-        assertFalse(BoxCullingBounds(Geometry.box(1.0, 0.0, .1, 1.2, .1, .2)).canCull(frustum, AffineTransforms.Identity))
-        assertFalse(BoxCullingBounds(Geometry.box(1.0, 0.0, .5, 1.0, 0.0, .5)).canCull(frustum, AffineTransforms.Identity))
-        assertTrue(BoxCullingBounds(Geometry.box(1.01, 0.0, .5, 1.01, 0.0, .5)).canCull(frustum, AffineTransforms.Identity))
+        assertFalse(BoxCullingBounds(Box(1.0, 0.0, .1, 1.2, .1, .2)).canCull(frustum, AffineTransforms.Identity))
+        assertFalse(BoxCullingBounds(Box(1.0, 0.0, .5, 1.0, 0.0, .5)).canCull(frustum, AffineTransforms.Identity))
+        assertTrue(BoxCullingBounds(Box(1.01, 0.0, .5, 1.01, 0.0, .5)).canCull(frustum, AffineTransforms.Identity))
     }
 
     @Test
@@ -65,7 +68,7 @@ class CullingBoundsTest {
             val separated = AffineTransforms.of(placement.axisX, placement.axisY, placement.axisZ, Vectors.of(4.0, 0.0, 0.0))
             for (transform in listOf(placement, separated)) {
                 val corners = inside.vertices().map { transform.transformPosition(it) }
-                val worldBox = Geometry.box(
+                val worldBox = Box(
                     corners.minOf { it.x },
                     corners.minOf { it.y },
                     corners.minOf { it.z },
@@ -130,13 +133,13 @@ class CullingBoundsTest {
     @Test
     fun invalidNonfiniteAndOverflowingQueriesCannotProveExclusion() {
         for (box in listOf(
-            Geometry.box(Double.NaN, 0.0, .2, 3.0, .1, .8),
-            Geometry.box(2.0, 0.0, .2, Double.POSITIVE_INFINITY, .1, .8),
-            Geometry.box(Double.NEGATIVE_INFINITY, 0.0, .2, 3.0, .1, .8),
-            Geometry.box(3.0, 0.0, .2, 2.0, .1, .8),
-            Geometry.box(Double.MAX_VALUE, 0.0, .2, Double.MAX_VALUE, .1, .8),
+            Box(Double.NaN, 0.0, .2, 3.0, .1, .8),
+            Box(2.0, 0.0, .2, Double.POSITIVE_INFINITY, .1, .8),
+            Box(Double.NEGATIVE_INFINITY, 0.0, .2, 3.0, .1, .8),
+            Box(3.0, 0.0, .2, 2.0, .1, .8),
+            Box(Double.MAX_VALUE, 0.0, .2, Double.MAX_VALUE, .1, .8),
         )) assertFalse(BoxCullingBounds(box).canCull(frustum, AffineTransforms.Identity))
-        val bounds = BoxCullingBounds(Geometry.box(2.0, 0.0, .2, 3.0, .1, .8))
+        val bounds = BoxCullingBounds(Box(2.0, 0.0, .2, 3.0, .1, .8))
         for (value in listOf(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)) {
             assertFalse(bounds.canCull(frustum, AffineTransforms.fromTranslation(Vectors.of(value, 0.0, 0.0))))
             assertFalse(bounds.canCull(frustum, AffineTransforms.of(axisX = Vectors.of(value, 0.0, 0.0))))
@@ -156,8 +159,8 @@ class CullingBoundsTest {
             )
         )
         val placement = AffineTransforms.fromTranslation(Vectors.of(origin, 0.0, 0.0))
-        assertFalse(BoxCullingBounds(Geometry.box(.5, 0.0, .5, .5, 0.0, .5)).canCull(distant, placement))
-        assertTrue(BoxCullingBounds(Geometry.box(1.5, 0.0, .5, 1.5, 0.0, .5)).canCull(distant, placement))
+        assertFalse(BoxCullingBounds(Box(.5, 0.0, .5, .5, 0.0, .5)).canCull(distant, placement))
+        assertTrue(BoxCullingBounds(Box(1.5, 0.0, .5, 1.5, 0.0, .5)).canCull(distant, placement))
         val bounds = BoxCullingBounds(inside)
         assertFalse(bounds.canCull(frustum, AffineTransforms.of(Vectors.Zero, Vectors.Zero, Vectors.Zero, Vectors.of(0.0, 0.0, .5))))
         assertTrue(bounds.canCull(frustum, AffineTransforms.of(Vectors.Zero, Vectors.Zero, Vectors.Zero, Vectors.of(3.0, 0.0, .5))))
@@ -167,18 +170,25 @@ class CullingBoundsTest {
     fun visibilityConsumesOnlyTheCapabilityAndRetainsMissingOrUnknownBounds() {
         val inputs = ViewParameters(Matrices.Identity, 1, 1, CompareFunction.Always)
         val geometry = ShaderGeometry(ParameterValues(), GeometrySelection.Vertices(DrawRange.vertices(3)), PrimitiveState())
-        val shader = MeshShader<Unit>(
-            listOf(
-                ShaderModuleDescription(
-                    ShaderStage.Vertex,
-                    ShaderSource(ShaderLanguage.Glsl, "CPU fixture", "test")
+        val shader = MeshShader<Unit>(shaderDefinition("culling fixture") {
+            native(
+                listOf(
+                    ShaderModuleDescription(
+                        ShaderStage.Vertex,
+                        ShaderSource(ShaderLanguage.Glsl, "CPU fixture", "test")
+                    ),
+                    ShaderModuleDescription(
+                        ShaderStage.Fragment,
+                        ShaderSource(ShaderLanguage.Glsl, "CPU fixture", "test")
+                    )
                 ),
-                ShaderModuleDescription(
-                    ShaderStage.Fragment,
-                    ShaderSource(ShaderLanguage.Glsl, "CPU fixture", "test")
-                )
-            ),
-            VertexInterface(emptyList()), label = "culling fixture", encode = { GeometryInput(geometry) })
+                ShaderInputLayout(
+                    VertexInputMapping(emptyList()),
+                    emptyList(),
+                    emptyList(),
+                ),
+            )
+        }) { MeshShaderInput(geometry) }
         val context = ObjectSubmitContext(AffineTransforms.fromTranslation(Vectors.of(3.0, 0.0, 0.0)))
         val element = shader.bind(Unit)
         val submission = RenderSubmission(element, context)

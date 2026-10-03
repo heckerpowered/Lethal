@@ -11,8 +11,8 @@ import kotlin.test.assertEquals
 class VectorCompositionTest {
     @Test
     fun normalAndPlanarProjectionsReconstructTheOriginalVector() {
-        val vector = Geometry.vector(3.0, -4.0, 5.0)
-        val normal = Geometry.vector(2.0, 1.0, -2.0).normalized()
+        val vector = Vector(3.0, -4.0, 5.0)
+        val normal = Vector(2.0, 1.0, -2.0).normalized()
 
         val normalComponent = vector.projectOntoNormal(normal)
         val planarComponent = vector.projectOntoPlane(normal)
@@ -25,8 +25,8 @@ class VectorCompositionTest {
 
     @Test
     fun arbitraryAxisRotationPreservesLengthAndAxialProjection() {
-        val vector = Geometry.vector(-4.0, 5.0, 2.0)
-        val axis = Geometry.vector(1.0, 2.0, 3.0).normalized()
+        val vector = Vector(-4.0, 5.0, 2.0)
+        val axis = Vector(1.0, 2.0, 3.0).normalized()
 
         val rotated = vector.rotateAngleAxis(137.0, axis)
         val restored = rotated.rotateAngleAxis(-137.0, axis)
@@ -38,8 +38,8 @@ class VectorCompositionTest {
 
     @Test
     fun mirroringTwiceAcrossAUnitNormalRestoresTheVector() {
-        val vector = Geometry.vector(-4.0, 5.0, 2.0)
-        val normal = Geometry.vector(1.0, -2.0, 3.0).normalized()
+        val vector = Vector(-4.0, 5.0, 2.0)
+        val normal = Vector(1.0, -2.0, 3.0).normalized()
 
         val restored = vector.mirrorByVector(normal).mirrorByVector(normal)
 
@@ -48,8 +48,8 @@ class VectorCompositionTest {
 
     @Test
     fun crossProductIsOrthogonalAndAnticommutative() {
-        val first = Geometry.vector(2.0, -3.0, 5.0)
-        val second = Geometry.vector(-7.0, 11.0, 13.0)
+        val first = Vector(2.0, -3.0, 5.0)
+        val second = Vector(-7.0, 11.0, 13.0)
 
         val cross = first.cross(second)
 
@@ -60,7 +60,7 @@ class VectorCompositionTest {
 
     @Test
     fun perpendicularBasesReconstructVectorsForBothTemporaryAxisBranches() {
-        val directions = listOf(Geometry.vector(0.1, 0.2, 1.0), Geometry.vector(1.0, 0.2, 0.1))
+        val directions = listOf(Vector(0.1, 0.2, 1.0), Vector(1.0, 0.2, 0.1))
 
         for (direction in directions) {
             val basis = direction.createPerpendicularBasis()
@@ -74,8 +74,8 @@ class VectorCompositionTest {
 
     @Test
     fun interpolationComposesAlongTheSameAffineLine() {
-        val start = Geometry.vector(-2.0, 4.0, 8.0)
-        val end = Geometry.vector(10.0, -2.0, 2.0)
+        val start = Vector(-2.0, 4.0, 8.0)
+        val end = Vector(10.0, -2.0, 2.0)
 
         val midpoint = start.interpolate(end, 0.5)
         val recomposed = start.interpolate(midpoint, 0.5)

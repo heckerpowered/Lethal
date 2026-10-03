@@ -26,7 +26,9 @@ import heckerpowered.render.engine.shader.binding.AttributeInput
 import heckerpowered.render.engine.shader.binding.PushConstantField
 import heckerpowered.render.engine.shader.binding.PushConstantPacking
 import heckerpowered.render.engine.shader.binding.VertexInputMapping
+import heckerpowered.render.engine.shader.binding.ShaderInputLayout
 import heckerpowered.render.engine.shader.program.MeshShader
+import heckerpowered.render.engine.shader.program.shaderDefinition
 import heckerpowered.render.engine.shader.program.MeshShaderInput
 import heckerpowered.render.engine.shader.program.ShaderRealizations
 import heckerpowered.render.engine.view.ViewParameters
@@ -53,11 +55,16 @@ class GeometryElementPassProcessorTest {
         val layout = GeometryLayout(listOf(VertexStreamLayout(12, listOf(GeometryAttribute(semantic = VertexSemantics.Position, format = VertexFormat.Float32x3, offsetBytes = 0)))))
         val indexSource = IndexSource.Resident(IndexSelection(indices, IndexFormat.Uint16))
         val geometry = VertexGeometry(layout, listOf(VertexStreamSource.Resident(vertices)), GeometrySelection.Indexed(indexSource, DrawRange.indices(3, 1, -7, 2, 4)), PrimitiveState(PrimitiveTopology.TriangleList))
-        val shader = MeshShader<RenderGeometry>(
-            modules(),
-            VertexInputMapping(listOf(AttributeInput(semantic = VertexSemantics.Position, location = 0, format = VertexFormat.Float32x3))),
-            label = "test",
-        ) { MeshShaderInput(it) }
+        val shader = MeshShader<RenderGeometry>(shaderDefinition("test") {
+            native(
+                modules(),
+                ShaderInputLayout(
+                    VertexInputMapping(listOf(AttributeInput(semantic = VertexSemantics.Position, location = 0, format = VertexFormat.Float32x3))),
+                    emptyList(),
+                    emptyList(),
+                ),
+            )
+        }) { MeshShaderInput(it) }
         val collected = WorldDrawing.collect(ObjectSubmitContext(AffineTransforms.Identity)) {
             GeometryGroup(listOf(geometry, geometry.selecting(GeometrySelection.Indexed(indexSource, DrawRange.indices(3, 4, 5))))).parts.forEach { geometry(shader.bind(it)) }
         }
@@ -90,7 +97,9 @@ class GeometryElementPassProcessorTest {
 
     @Test
     fun replayAndZeroWorkAreCheckedBeforeDeviceAccess() {
-        val shader = MeshShader<RenderGeometry>(modules(), VertexInputMapping(emptyList()), label = "test") { MeshShaderInput(it) }
+        val shader = MeshShader<RenderGeometry>(shaderDefinition("test") {
+            native(modules(), ShaderInputLayout(VertexInputMapping(emptyList()), emptyList(), emptyList()))
+        }) { MeshShaderInput(it) }
         val geometry = ShaderGeometry(ParameterValues(), GeometrySelection.Vertices(DrawRange.vertices(3)), PrimitiveState(PrimitiveTopology.TriangleList))
         val element = shader.bind(geometry)
         val collection = WorldDrawing.collect(ObjectSubmitContext(AffineTransforms.Identity)) { submit(element) }
@@ -107,11 +116,9 @@ class GeometryElementPassProcessorTest {
                 assertTrue(processor.prepare(empty, submission.copy(element = empty), RasterPass(description, collection, inputs), preparation).isEmpty())
                 val noInstances = shader.bind(ShaderGeometry(ParameterValues(), GeometrySelection.Vertices(DrawRange.vertices(3, instances = 0)), geometry.primitive))
                 assertTrue(processor.prepare(noInstances, submission.copy(element = noInstances), RasterPass(description, collection, inputs), preparation).isEmpty())
-                val requiringAttributes = MeshShader<RenderGeometry>(
-                    modules(),
-                    VertexInputMapping(listOf(AttributeInput(VertexSemantics.Position, 0, VertexFormat.Float32x3))),
-                    label = "required attributes",
-                ) { MeshShaderInput(it) }
+                val requiringAttributes = MeshShader<RenderGeometry>(shaderDefinition("required attributes") {
+                    native(modules(), ShaderInputLayout(VertexInputMapping(listOf(AttributeInput(VertexSemantics.Position, 0, VertexFormat.Float32x3))), emptyList(), emptyList()))
+                }) { MeshShaderInput(it) }
                 val missingAttributes = requiringAttributes.bind(geometry)
                 assertFailsWith<IllegalArgumentException> { processor.prepare(missingAttributes, submission.copy(element = missingAttributes), RasterPass(description, collection, inputs), preparation) }
                 val mismatched = element.copy(composition = CompositingMode.SourceOver)
@@ -125,12 +132,10 @@ class GeometryElementPassProcessorTest {
     @Test
     fun replaySafeShaderPreparesTheSameCollectionForTwoColorPasses() {
         var bound = 0
-        val shader = MeshShader<RenderGeometry>(
-            modules(),
-            VertexInputMapping(emptyList()),
-            replaySafe = true,
-            label = "test",
-        ) { bound++; MeshShaderInput(it) }
+        val shader = MeshShader<RenderGeometry>(shaderDefinition("test") {
+            native(modules(), ShaderInputLayout(VertexInputMapping(emptyList()), emptyList(), emptyList()))
+            replaySafe()
+        }) { bound++; MeshShaderInput(it) }
         val geometry = ShaderGeometry(ParameterValues(), GeometrySelection.Vertices(DrawRange.vertices(3)), PrimitiveState(PrimitiveTopology.TriangleList))
         val collection = WorldDrawing.collect(ObjectSubmitContext(AffineTransforms.Identity)) {
             geometry(shader.bind(geometry))
@@ -169,13 +174,10 @@ class GeometryElementPassProcessorTest {
             ),
         )
         val geometry = ShaderGeometry(ParameterValues(), GeometrySelection.Vertices(DrawRange.vertices(3)), PrimitiveState(PrimitiveTopology.TriangleList))
-        val shader = MeshShader<Float>(
-            modules(),
-            VertexInputMapping(emptyList()),
-            pushes = listOf(pushes),
-            replaySafe = true,
-            label = "test",
-        ) { MeshShaderInput(geometry, ParameterValues().replacing("value", heckerpowered.render.engine.material.parameter.NumericParameterValue.floats(it, 2f, 3f, 4f))) }
+        val shader = MeshShader<Float>(shaderDefinition("test") {
+            native(modules(), ShaderInputLayout(VertexInputMapping(emptyList()), emptyList(), listOf(pushes)))
+            replaySafe()
+        }) { MeshShaderInput(geometry, ParameterValues().replacing("value", heckerpowered.render.engine.material.parameter.NumericParameterValue.floats(it, 2f, 3f, 4f))) }
         val viewport = heckerpowered.render.command.pass.Viewport(0f, 0f, 10f, 10f)
         val clip = heckerpowered.render.command.pass.ScissorRectangle(2, 3, 4, 5)
         val collection = WorldDrawing.collect(ObjectSubmitContext(AffineTransforms.Identity)) {
@@ -218,19 +220,23 @@ class GeometryElementPassProcessorTest {
         val vertices = view(36, BufferUsage.Vertex)
         val layout = GeometryLayout(listOf(VertexStreamLayout(12, listOf(GeometryAttribute(VertexSemantics.Position, VertexFormat.Float32x3, 0)))))
         val geometry = VertexGeometry(layout, listOf(VertexStreamSource.Resident(vertices)), GeometrySelection.Vertices(DrawRange.vertices(3)), PrimitiveState())
-        fun definition(): MeshShader<BentInput> = MeshShader(
-            modules(),
-            VertexInputMapping(listOf(AttributeInput(VertexSemantics.Position, 0, VertexFormat.Float32x3))),
-            pushes = listOf(
-                PushConstantPacking(
-                    setOf(ShaderStage.Vertex),
-                    0,
-                    4,
-                    listOf(PushConstantField(heckerpowered.render.engine.material.parameter.ParameterName("amplitude"), 0, 4)),
-                )
-            ),
-            label = "same label",
-        ) { input ->
+        fun definition(): MeshShader<BentInput> = MeshShader(shaderDefinition("same label") {
+            native(
+                modules(),
+                ShaderInputLayout(
+                    VertexInputMapping(listOf(AttributeInput(VertexSemantics.Position, 0, VertexFormat.Float32x3))),
+                    emptyList(),
+                    listOf(
+                        PushConstantPacking(
+                            setOf(ShaderStage.Vertex),
+                            0,
+                            4,
+                            listOf(PushConstantField(heckerpowered.render.engine.material.parameter.ParameterName("amplitude"), 0, 4)),
+                        )
+                    ),
+                ),
+            )
+        }) { input ->
             require(input.amplitude.isFinite())
             MeshShaderInput(
                 input.geometry,
@@ -284,19 +290,21 @@ class GeometryElementPassProcessorTest {
             GeometryLayout(listOf(VertexStreamLayout(12, listOf(GeometryAttribute(VertexSemantics.UV, VertexFormat.Float32x3, 0))))),
             GeometryLayout(listOf(VertexStreamLayout(12, listOf(GeometryAttribute(VertexSemantics.Position, VertexFormat.Float32x2, 0))))),
         )
-        val vertexShader = MeshShader<VertexGeometry>(
-            modules(),
-            VertexInputMapping(listOf(AttributeInput(VertexSemantics.Position, 0, VertexFormat.Float32x3))),
-            label = "attributes",
-        ) { MeshShaderInput(it) }
+        val vertexShader = MeshShader<VertexGeometry>(shaderDefinition("attributes") {
+            native(modules(), ShaderInputLayout(VertexInputMapping(listOf(AttributeInput(VertexSemantics.Position, 0, VertexFormat.Float32x3))), emptyList(), emptyList()))
+        }) { MeshShaderInput(it) }
         val generated = ShaderGeometry(ParameterValues(), GeometrySelection.Vertices(DrawRange.vertices(3)), PrimitiveState())
         val valueName = heckerpowered.render.engine.material.parameter.ParameterName("value")
-        val parameterShader = MeshShader<MeshShaderInput>(
-            modules(),
-            VertexInputMapping(emptyList()),
-            pushes = listOf(PushConstantPacking(setOf(ShaderStage.Fragment), 0, 4, listOf(PushConstantField(valueName, 0, 4)))),
-            label = "parameters",
-        ) { it }
+        val parameterShader = MeshShader<MeshShaderInput>(shaderDefinition("parameters") {
+            native(
+                modules(),
+                ShaderInputLayout(
+                    VertexInputMapping(emptyList()),
+                    emptyList(),
+                    listOf(PushConstantPacking(setOf(ShaderStage.Fragment), 0, 4, listOf(PushConstantField(valueName, 0, 4)))),
+                ),
+            )
+        }) { it }
         val missing = parameterShader.bind(MeshShaderInput(generated))
         val wrongSize = parameterShader.bind(
             MeshShaderInput(
@@ -345,7 +353,9 @@ class GeometryElementPassProcessorTest {
 
     @Test
     fun screenPassUsesTheBoundGeneratedSelectionWithoutImposingAFullscreenRecipe() {
-        val shader = MeshShader<ShaderGeometry>(modules(), VertexInputMapping(emptyList()), label = "generated") { MeshShaderInput(it) }
+        val shader = MeshShader<ShaderGeometry>(shaderDefinition("generated") {
+            native(modules(), ShaderInputLayout(VertexInputMapping(emptyList()), emptyList(), emptyList()))
+        }) { MeshShaderInput(it) }
         val primitive = PrimitiveState(PrimitiveTopology.TriangleList)
         val index = IndexSource.Resident(IndexSelection(view(8, BufferUsage.Index), IndexFormat.Uint16))
         val geometries = listOf(

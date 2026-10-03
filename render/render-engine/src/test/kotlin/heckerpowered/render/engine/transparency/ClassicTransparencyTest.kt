@@ -14,7 +14,7 @@ import heckerpowered.render.engine.scene.ObjectSubmitContext
 import heckerpowered.render.engine.scene.drawing.WorldDrawing
 import heckerpowered.render.engine.scene.geometryElement
 import heckerpowered.render.engine.shader.program.SurfaceColor
-import heckerpowered.render.engine.testSurfaceShaders
+import heckerpowered.render.engine.testUnlitShader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -52,6 +52,6 @@ class ClassicTransparencyTest {
 
     private fun element(composition: CompositingMode): GeometryElement {
         val geometry = triangle(floatArrayOf(0f, 0f), floatArrayOf(1f, 0f), floatArrayOf(0f, 1f))
-        return testSurfaceShaders.unlit.bind(SurfaceColor(geometry, Color.TransparentBlack)).copy(composition = composition, depthWrite = false)
+        return testUnlitShader.bind(SurfaceColor(geometry, Color.TransparentBlack)).copy(composition = composition, depthWrite = false)
     }
 }

@@ -102,7 +102,11 @@ class ViewFrameTest {
         assertEquals(z, actual.z, 1.0E-12, "z")
     }
 
-    private class SampleOnceVector(private val firstX: Double, private val firstY: Double, private val firstZ: Double) : VectorView {
+    private class SampleOnceVector(
+        private val firstX: Double,
+        private val firstY: Double,
+        private val firstZ: Double
+    ) : VectorView {
         val reads = IntArray(3)
         override val x: Double get() = if (++reads[0] == 1) firstX else Double.NaN
         override val y: Double get() = if (++reads[1] == 1) firstY else Double.NaN

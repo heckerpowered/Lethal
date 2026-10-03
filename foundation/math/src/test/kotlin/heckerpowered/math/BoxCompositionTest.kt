@@ -10,12 +10,12 @@ import kotlin.test.*
 class BoxCompositionTest {
     @Test
     fun translatingTheBoxAndRayTogetherPreservesIntersectionParametersAndNormals() {
-        val box = Geometry.box(0.0, 0.0, 0.0, 2.0, 3.0, 4.0)
-        val ray = Geometry.ray(Geometry.vector(-4.0, 1.0, 1.0), Geometry.vector(2.0, 0.5, 0.25))
-        val offset = Geometry.vector(10.0, -7.0, 3.0)
+        val box = Box(0.0, 0.0, 0.0, 2.0, 3.0, 4.0)
+        val ray = Ray(Vector(-4.0, 1.0, 1.0), Vector(2.0, 0.5, 0.25))
+        val offset = Vector(10.0, -7.0, 3.0)
 
         val original = assertNotNull(box.intersect(ray))
-        val translated = assertNotNull(box.translatedBy(offset).intersect(Geometry.ray(ray.origin + offset, ray.direction)))
+        val translated = assertNotNull(box.translatedBy(offset).intersect(Ray(ray.origin + offset, ray.direction)))
         val originalEnterNormal = assertNotNull(original.enterNormal)
         val translatedEnterNormal = assertNotNull(translated.enterNormal)
 
@@ -29,44 +29,44 @@ class BoxCompositionTest {
 
     @Test
     fun directionScalingChangesTimesWithoutChangingPhysicalReachOrHitPoints() {
-        val box = Geometry.box(0.0, 0.0, 0.0, 2.0, 3.0, 4.0)
-        val origin = Geometry.vector(-4.0, 1.0, 1.0)
-        val direction = Geometry.vector(2.0, 0.5, 0.25)
+        val box = Box(0.0, 0.0, 0.0, 2.0, 3.0, 4.0)
+        val origin = Vector(-4.0, 1.0, 1.0)
+        val direction = Vector(2.0, 0.5, 0.25)
         val scaledDirection = direction * 3.0
-        val entryPoint = Geometry.vector(0.0, 2.0, 1.5)
+        val entryPoint = Vector(0.0, 2.0, 1.5)
         val physicalEntryDistance = origin.distanceTo(entryPoint)
 
-        val original = assertNotNull(box.intersect(Geometry.ray(origin, direction), length = physicalEntryDistance + 1.0E-12))
-        val scaled = assertNotNull(box.intersect(Geometry.ray(origin, scaledDirection), length = physicalEntryDistance + 1.0E-12))
+        val original = assertNotNull(box.intersect(Ray(origin, direction), length = physicalEntryDistance + 1.0E-12))
+        val scaled = assertNotNull(box.intersect(Ray(origin, scaledDirection), length = physicalEntryDistance + 1.0E-12))
         val originalEnterTime = assertNotNull(original.enterTime)
         val scaledEnterTime = assertNotNull(scaled.enterTime)
 
         assertEquals(expected = originalEnterTime / 3.0, actual = scaledEnterTime, absoluteTolerance = 1.0E-12)
         assertVector(entryPoint.x, entryPoint.y, entryPoint.z, original.enterPoint, 1.0E-12)
         assertVector(entryPoint.x, entryPoint.y, entryPoint.z, scaled.enterPoint, 1.0E-12)
-        assertNull(box.intersect(Geometry.ray(origin, direction), length = physicalEntryDistance - 1.0E-9))
-        assertNull(box.intersect(Geometry.ray(origin, scaledDirection), length = physicalEntryDistance - 1.0E-9))
+        assertNull(box.intersect(Ray(origin, direction), length = physicalEntryDistance - 1.0E-9))
+        assertNull(box.intersect(Ray(origin, scaledDirection), length = physicalEntryDistance - 1.0E-9))
     }
 
     @Test
     fun pointExpansionTranslationAndUnionComposeIntoExpectedBounds() {
-        val point = Geometry.vector(1.0, 2.0, 3.0)
+        val point = Vector(1.0, 2.0, 3.0)
 
         val box = point.asPointBox()
-            .expandedBy(Geometry.vector(1.0, 2.0, 3.0))
-            .translatedBy(Geometry.vector(4.0, -1.0, 2.0))
-            .union(Geometry.vector(10.0, 10.0, 10.0))
+            .expandedBy(Vector(1.0, 2.0, 3.0))
+            .translatedBy(Vector(4.0, -1.0, 2.0))
+            .union(Vector(10.0, 10.0, 10.0))
 
         assertBox(4.0, -1.0, 2.0, 10.0, 10.0, 10.0, box)
         assertVector(7.0, 4.5, 6.0, box.center)
-        assertTrue(box.containsOrOn(Geometry.vector(4.0, -1.0, 2.0)))
-        assertTrue(box.containsOrOn(Geometry.vector(10.0, 10.0, 10.0)))
+        assertTrue(box.containsOrOn(Vector(4.0, -1.0, 2.0)))
+        assertTrue(box.containsOrOn(Vector(10.0, 10.0, 10.0)))
     }
 
     @Test
     fun overlapIsContainedByBothInputsWhileUnionContainsBothInputs() {
-        val first = Geometry.box(-3.0, -2.0, -1.0, 4.0, 5.0, 6.0)
-        val second = Geometry.box(1.0, -4.0, 2.0, 8.0, 3.0, 10.0)
+        val first = Box(-3.0, -2.0, -1.0, 4.0, 5.0, 6.0)
+        val second = Box(1.0, -4.0, 2.0, 8.0, 3.0, 10.0)
 
         val overlap = first.overlap(second)
         val union = first.union(second)

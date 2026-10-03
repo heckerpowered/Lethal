@@ -9,7 +9,8 @@ import heckerpowered.bridge.adapter.world.raycast.BlockHitResult
 import heckerpowered.bridge.adapter.world.raycast.BlockRaycastShape
 import heckerpowered.bridge.math.BlockDirection
 import heckerpowered.bridge.math.BlockPositions
-import heckerpowered.math.Geometry
+import heckerpowered.math.Ray
+import heckerpowered.math.Vector
 import heckerpowered.lethal.platform.interop.asHost
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
@@ -37,7 +38,7 @@ class WorldAccessImplTest {
     fun blockRaycastReturnsEveryCollisionInOrder() {
         Bootstrap.register()
         val world = TestWorld(mapOf(BlockPos(0, 0, 2) to Blocks.STONE.defaultState, BlockPos(0, 0, 4) to Blocks.GLASS.defaultState))
-        val ray = Geometry.ray(Geometry.vector(0.5, 0.5, 0.5), Geometry.vector(0.0, 0.0, 2.0))
+        val ray = Ray(Vector(0.5, 0.5, 0.5), Vector(0.0, 0.0, 2.0))
 
         val hits = WorldAccessImpl.raycastBlockHits(world, ray, 6.0).toList()
 
@@ -56,7 +57,7 @@ class WorldAccessImplTest {
     fun blockRaycastIgnoresLiquidsAndBlocksWithoutCollisionBoxes() {
         Bootstrap.register()
         val world = TestWorld(mapOf(BlockPos(0, 0, 2) to Blocks.WATER.defaultState, BlockPos(0, 0, 3) to Blocks.TALLGRASS.defaultState))
-        val ray = Geometry.ray(Geometry.vector(0.5, 0.5, 0.5), Geometry.vector(0.0, 0.0, 1.0))
+        val ray = Ray(Vector(0.5, 0.5, 0.5), Vector(0.0, 0.0, 1.0))
 
         assertNull(WorldAccessImpl.raycastBlockHits(world, ray, 4.0).firstOrNull())
     }
@@ -65,7 +66,7 @@ class WorldAccessImplTest {
     fun outlineBlockRaycastIncludesBlocksWithoutCollisionBoxes() {
         Bootstrap.register()
         val world = TestWorld(mapOf(BlockPos(0, 0, 3) to Blocks.TALLGRASS.defaultState))
-        val ray = Geometry.ray(Geometry.vector(0.5, 0.5, 0.5), Geometry.vector(0.0, 0.0, 1.0))
+        val ray = Ray(Vector(0.5, 0.5, 0.5), Vector(0.0, 0.0, 1.0))
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 4.0, BlockRaycastShape.Outline).single()
 
@@ -81,7 +82,7 @@ class WorldAccessImplTest {
                 return super.getBlockState(position)
             }
         }
-        val ray = Geometry.ray(Geometry.vector(0.5, 0.5, 0.5), Geometry.vector(0.0, 0.0, 1.0))
+        val ray = Ray(Vector(0.5, 0.5, 0.5), Vector(0.0, 0.0, 1.0))
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 512.0).first()
 
@@ -92,7 +93,7 @@ class WorldAccessImplTest {
     fun blockRaycastSupportsNegativeNonUnitDirections() {
         Bootstrap.register()
         val world = TestWorld(mapOf(BlockPos(0, 0, 3) to Blocks.STONE.defaultState, BlockPos(0, 0, 1) to Blocks.STONE.defaultState))
-        val ray = Geometry.ray(Geometry.vector(0.5, 0.5, 5.5), Geometry.vector(0.0, 0.0, -2.0))
+        val ray = Ray(Vector(0.5, 0.5, 5.5), Vector(0.0, 0.0, -2.0))
 
         val hits = WorldAccessImpl.raycastBlockHits(world, ray, 6.0).toList()
 
@@ -108,7 +109,7 @@ class WorldAccessImplTest {
         val forwardBlock = BlockPos(-1, -1, 0)
         val offRayBlock = BlockPos(0, -1, -1)
         val world = TestWorld(mapOf(forwardBlock to Blocks.STONE.defaultState, offRayBlock to Blocks.STONE.defaultState))
-        val ray = Geometry.ray(Geometry.vector(0.0, 0.0, 0.0), Geometry.vector(-1.0, -1.0, 1.0))
+        val ray = Ray(Vector(0.0, 0.0, 0.0), Vector(-1.0, -1.0, 1.0))
 
         val hits = WorldAccessImpl.raycastBlockHits(world, ray, 3.0).toList()
 
@@ -123,7 +124,7 @@ class WorldAccessImplTest {
     fun blockRaycastEntersNegativeNeighborAtZeroTime() {
         Bootstrap.register()
         val world = TestWorld(mapOf(BlockPos(-1, 0, 0) to Blocks.STONE.defaultState))
-        val ray = Geometry.ray(Geometry.vector(0.0, 0.5, 0.5), Geometry.vector(-2.0, 1.0, 0.0))
+        val ray = Ray(Vector(0.0, 0.5, 0.5), Vector(-2.0, 1.0, 0.0))
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 2.0).single()
 
@@ -135,7 +136,7 @@ class WorldAccessImplTest {
     fun blockRaycastUsesFloorOfIntegerEndpoint() {
         Bootstrap.register()
         val negativeWorld = TestWorld(mapOf(BlockPos(-1, 0, 0) to Blocks.STONE.defaultState))
-        val negativeRay = Geometry.ray(Geometry.vector(1.5, 0.5, 0.5), Geometry.vector(-1.0, 0.0, 0.0))
+        val negativeRay = Ray(Vector(1.5, 0.5, 0.5), Vector(-1.0, 0.0, 0.0))
 
         assertNull(WorldAccessImpl.raycastBlockHits(negativeWorld, negativeRay, 1.5).firstOrNull())
     }
@@ -144,7 +145,7 @@ class WorldAccessImplTest {
     fun blockRaycastDoesNotInheritTheVanillaVoxelLimit() {
         Bootstrap.register()
         val world = TestWorld(mapOf(BlockPos(0, 0, 250) to Blocks.STONE.defaultState))
-        val ray = Geometry.ray(Geometry.vector(0.5, 0.5, 0.5), Geometry.vector(0.0, 0.0, 1.0))
+        val ray = Ray(Vector(0.5, 0.5, 0.5), Vector(0.0, 0.0, 1.0))
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 260.0).single()
 
@@ -155,7 +156,7 @@ class WorldAccessImplTest {
     fun blockRaycastIncludesCollisionAtSegmentEndpoint() {
         Bootstrap.register()
         val world = TestWorld(mapOf(BlockPos(0, 0, 6) to Blocks.STONE.defaultState))
-        val ray = Geometry.ray(Geometry.vector(0.5, 0.5, 2.0), Geometry.vector(0.0, 0.0, 1.0))
+        val ray = Ray(Vector(0.5, 0.5, 2.0), Vector(0.0, 0.0, 1.0))
 
         val hit = WorldAccessImpl.raycastBlockHits(world, ray, 4.0).single()
 
