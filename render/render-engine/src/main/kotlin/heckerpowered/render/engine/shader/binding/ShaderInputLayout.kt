@@ -20,10 +20,10 @@ import heckerpowered.render.engine.shader.parameter.ParameterDerivations
  * It retains engine parameter mappings and derivation rules, beyond the descriptor slots and
  * push-constant ranges represented by an RHI pipeline layout.
  */
-internal class ShaderInputLayout(
-    val vertices: VertexInterface,
-    descriptors: List<DescriptorInterface>,
-    pushes: List<PushConstantInterface>,
+class ShaderInputLayout(
+    val vertices: VertexInputMapping,
+    descriptors: List<DescriptorInputMapping>,
+    pushes: List<PushConstantPacking>,
     val derivations: ParameterDerivations = ParameterDerivations(),
 ) {
     val descriptors = descriptors.toList()
