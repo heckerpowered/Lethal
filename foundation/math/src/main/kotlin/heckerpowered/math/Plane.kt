@@ -192,7 +192,7 @@ fun PlaneView.transformedByOrNull(matrix: MatrixView, tolerance: Double = 0.0): 
     require(tolerance.isFinite() && tolerance >= 0.0)
 
     val plane = Planes.copyOf(this)
-    val transform = Matrices4.copyOf(matrix)
+    val transform = Matrices.copyOf(matrix)
 
     require(transform.isAffine()) { "Plane transformation requires an affine matrix" }
     if (!plane.isValid(0.0)) return null

@@ -221,8 +221,22 @@ class PlaneViewTest {
     fun transformationValidatesAndInvertsTheSameMatrixSnapshot() {
         var translationReads = 0
         var affineReads = 0
-        val matrix = object : MatrixView by Matrices.Identity {
+        val matrix = object : MatrixView {
+            override val m00: Double = 1.0
+            override val m01: Double = 0.0
+            override val m02: Double = 0.0
+            override val m03: Double = 0.0
+            override val m10: Double = 0.0
+            override val m11: Double = 1.0
+            override val m12: Double = 0.0
             override val m13: Double get() = if (++translationReads == 1) 4.0 else Double.NaN
+            override val m20: Double = 0.0
+            override val m21: Double = 0.0
+            override val m22: Double = 1.0
+            override val m23: Double = 0.0
+            override val m30: Double = 0.0
+            override val m31: Double = 0.0
+            override val m32: Double = 0.0
             override val m33: Double get() = if (++affineReads == 1) 1.0 else Double.NaN
         }
 
