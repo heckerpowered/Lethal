@@ -5,7 +5,7 @@
 
 package heckerpowered.render.shader
 
-import heckerpowered.render.GpuResource
+import heckerpowered.render.resource.GpuResource
 
 /**
  * Represents shader code prepared for one selected [ShaderStage] and entry point.
