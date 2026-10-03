@@ -5,6 +5,8 @@
 
 package heckerpowered.render.shader
 
+import heckerpowered.render.GraphicsDevice
+
 /**
  * Selects the shader code, stage, and entry point used to create one [ShaderModule].
  *
@@ -39,3 +41,6 @@ data class ShaderModuleDescription(
      */
     val label: String = code.label,
 )
+
+fun GraphicsDevice.createShaderModule(stage: ShaderStage, code: ShaderCode, entryPoint: String = "main", label: String = code.label): ShaderModule =
+    createShaderModule(ShaderModuleDescription(stage, code, entryPoint, label))
