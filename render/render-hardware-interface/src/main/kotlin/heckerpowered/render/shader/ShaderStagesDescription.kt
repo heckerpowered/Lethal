@@ -5,6 +5,8 @@
 
 package heckerpowered.render.shader
 
+import heckerpowered.render.GraphicsDevice
+
 /**
  * Describes shader modules requested to form one set of pipeline stages.
  *
@@ -33,3 +35,6 @@ data class ShaderStagesDescription(
      */
     val label: String,
 )
+
+fun GraphicsDevice.createShaderStages(modules: List<ShaderModule>, label: String): ShaderStages =
+    createShaderStages(ShaderStagesDescription(modules, label))
