@@ -43,4 +43,11 @@ enum class ShaderBinaryFormat(
      * and [ARB_gl_spirv](https://registry.khronos.org/OpenGL/extensions/ARB/ARB_gl_spirv.txt).
      */
     SpirV(ByteOrder.LITTLE_ENDIAN),
+
+    /**
+     * Versioned OpenGL GLSL plus its SPIR-V-derived resource interface, produced at build time.
+     * The package retains RHI addresses and member byte offsets; the driver still compiles GLSL.
+     * See the OpenGL backend's OpenGLShaderArtifact reader and writer for the container schema.
+     */
+    OpenGLGlsl(ByteOrder.BIG_ENDIAN),
 }
