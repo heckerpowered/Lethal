@@ -16,6 +16,7 @@ object ModKeyBindings {
     val PrimarySkill = register("skill/primary", KeyboardKey.X)
     val SecondarySkill = register("skill/secondary", KeyboardKey.C)
     val UltimateSkill = register("skill/ultimate", KeyboardKey.V)
+    val AuxiliarySkill = register("skill/auxiliary", KeyboardKey.Z)
 
     fun onInitialize() {
     }
