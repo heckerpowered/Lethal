@@ -5,7 +5,7 @@
 
 package heckerpowered.render.resource.sampler
 
-import heckerpowered.render.GpuResource
+import heckerpowered.render.resource.GpuResource
 
 /**
  * A reusable texture-sampling configuration established by a graphics device.
