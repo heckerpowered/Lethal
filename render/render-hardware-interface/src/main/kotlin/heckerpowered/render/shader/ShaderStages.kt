@@ -5,7 +5,7 @@
 
 package heckerpowered.render.shader
 
-import heckerpowered.render.GpuResource
+import heckerpowered.render.resource.GpuResource
 
 /**
  * Groups the shader modules that provide the programmable stages of a render pipeline.
