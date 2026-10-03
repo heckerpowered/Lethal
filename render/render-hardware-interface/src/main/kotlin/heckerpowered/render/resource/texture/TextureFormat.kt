@@ -5,6 +5,7 @@
 
 package heckerpowered.render.resource.texture
 
+import heckerpowered.render.pipeline.color.ColorWriteMask
 import heckerpowered.render.pipeline.depthstencil.DepthStencilState
 
 /**
@@ -39,7 +40,11 @@ import heckerpowered.render.pipeline.depthstencil.DepthStencilState
  * supports every use of it. Sampling, filtering, rendering, blending, storage access, transfers,
  * and multisampling may impose additional capability requirements.
  */
-enum class TextureFormat(private val kind: Kind) {
+enum class TextureFormat(
+    private val kind: Kind,
+    /** Actual color channels present in a texel, independent of write selection or device capabilities. Depth and stencil formats have none. */
+    val colorComponents: ColorWriteMask = ColorWriteMask.None,
+) {
     /**
      * One 8-bit unsigned-normalized red component.
      *
@@ -49,7 +54,7 @@ enum class TextureFormat(private val kind: Kind) {
      * This format is commonly used for masks, monochrome data, coverage values, and other
      * single-component texture data.
      */
-    R8UnsignedNormalized(Kind.Color),
+    R8UnsignedNormalized(Kind.Color, ColorWriteMask(red = true, green = false, blue = false, alpha = false)),
 
     /**
      * Two 8-bit unsigned-normalized components in red-green order.
@@ -57,7 +62,7 @@ enum class TextureFormat(private val kind: Kind) {
      * Each component stores a value in the range `0.0` through `1.0`. This format is useful for
      * paired masks, two-component lookup data, or vectors encoded into an unsigned range.
      */
-    Rg8UnsignedNormalized(Kind.Color),
+    Rg8UnsignedNormalized(Kind.Color, ColorWriteMask(red = true, green = true, blue = false, alpha = false)),
 
     /**
      * Four 8-bit unsigned-normalized components in red-green-blue-alpha order.
@@ -66,7 +71,7 @@ enum class TextureFormat(private val kind: Kind) {
      * color values that should remain in their stored numeric representation during ordinary
      * texture access.
      */
-    Rgba8UnsignedNormalized(Kind.Color),
+    Rgba8UnsignedNormalized(Kind.Color, ColorWriteMask.All),
 
     /**
      * Four 8-bit components in red-green-blue-alpha order with sRGB-encoded color components.
@@ -149,7 +154,7 @@ enum class TextureFormat(private val kind: Kind) {
      * Automatic encoding and decoding do not make storage lossless. Values are still quantized to
      * eight bits whenever they are stored.
      */
-    Rgba8UnsignedNormalizedSrgb(Kind.Color),
+    Rgba8UnsignedNormalizedSrgb(Kind.Color, ColorWriteMask.All),
 
     /**
      * Four 8-bit unsigned-normalized components in blue-green-red-alpha storage order.
@@ -161,7 +166,7 @@ enum class TextureFormat(private val kind: Kind) {
      * textures, but it may also be used for ordinary textures when the graphics device supports the
      * requested usage.
      */
-    Bgra8UnsignedNormalized(Kind.Color),
+    Bgra8UnsignedNormalized(Kind.Color, ColorWriteMask.All),
 
     /**
      * Four 8-bit components in blue-green-red-alpha storage order with sRGB-encoded color
@@ -174,7 +179,7 @@ enum class TextureFormat(private val kind: Kind) {
      * This format is particularly common for presentation surfaces whose native component order is
      * blue-green-red-alpha.
      */
-    Bgra8UnsignedNormalizedSrgb(Kind.Color),
+    Bgra8UnsignedNormalizedSrgb(Kind.Color, ColorWriteMask.All),
 
     /**
      * A single-channel format that stores one 16-bit floating-point red component per texel.
@@ -189,7 +194,7 @@ enum class TextureFormat(private val kind: Kind) {
      *
      * The encoded texel size is 2 bytes.
      */
-    R16Float(Kind.Color),
+    R16Float(Kind.Color, ColorWriteMask(red = true, green = false, blue = false, alpha = false)),
 
     /**
      * A two-channel format that stores 16-bit floating-point red and green components per texel.
@@ -200,7 +205,7 @@ enum class TextureFormat(private val kind: Kind) {
      *
      * The encoded texel size is 4 bytes.
      */
-    Rg16Float(Kind.Color),
+    Rg16Float(Kind.Color, ColorWriteMask(red = true, green = true, blue = false, alpha = false)),
 
     /**
      * A four-channel format that stores 16-bit floating-point red, green, blue, and alpha components
@@ -216,7 +221,7 @@ enum class TextureFormat(private val kind: Kind) {
      *
      * The encoded texel size is 8 bytes.
      */
-    Rgba16Float(Kind.Color),
+    Rgba16Float(Kind.Color, ColorWriteMask.All),
 
     /**
      * A single-component format that stores one 32-bit floating-point `R` value per texel.
@@ -237,7 +242,7 @@ enum class TextureFormat(private val kind: Kind) {
      *
      * The encoded texel size is 4 bytes.
      */
-    R32Float(Kind.Color),
+    R32Float(Kind.Color, ColorWriteMask(red = true, green = false, blue = false, alpha = false)),
 
     /**
      * A two-component format that stores 32-bit floating-point `R` and `G` values per texel.
@@ -256,7 +261,7 @@ enum class TextureFormat(private val kind: Kind) {
      *
      * The encoded texel size is 8 bytes.
      */
-    Rg32Float(Kind.Color),
+    Rg32Float(Kind.Color, ColorWriteMask(red = true, green = true, blue = false, alpha = false)),
 
     /**
      * A four-component format that stores 32-bit floating-point `R`, `G`, `B`, and `A` values per
@@ -275,7 +280,7 @@ enum class TextureFormat(private val kind: Kind) {
      *
      * The encoded texel size is 16 bytes.
      */
-    Rgba32Float(Kind.Color),
+    Rgba32Float(Kind.Color, ColorWriteMask.All),
 
     /**
      * Stores one 24-bit unsigned-normalized depth component per texel.
