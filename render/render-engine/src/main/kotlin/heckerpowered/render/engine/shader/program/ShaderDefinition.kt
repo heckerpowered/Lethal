@@ -54,8 +54,8 @@ class ShaderDefinitionBuilder internal constructor(private val label: String) {
     private var mapInputs: (RasterShaderInterface.() -> ShaderInputLayout)? = null
     private val outputs = linkedMapOf<Int, FragmentOutput>()
     private var declaresOutputs = false
-    var sourceRepresentation: AlphaRepresentation = AlphaRepresentation.Straight
-    var replaySafe: Boolean = false
+    private var sourceRepresentation: AlphaRepresentation = AlphaRepresentation.Straight
+    private var replaySafe: Boolean = false
 
     /** Reads one coherent source generation, including includes, on first preparation; failed reads remain retryable. */
     fun canonical(sources: () -> List<CanonicalShaderModule>) {
@@ -80,6 +80,14 @@ class ShaderDefinitionBuilder internal constructor(private val label: String) {
         require(location >= 0) { "Fragment locations must be nonnegative" }
         declaresOutputs = true
         outputs[location] = meaning
+    }
+
+    fun sourceRepresentation(value: AlphaRepresentation) {
+        sourceRepresentation = value
+    }
+
+    fun replaySafe() {
+        replaySafe = true
     }
 
     fun noColorOutputs() {
