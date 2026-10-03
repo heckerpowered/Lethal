@@ -5,7 +5,6 @@
 
 package heckerpowered.render.engine.shader.program
 
-import heckerpowered.render.GraphicsDevice
 import heckerpowered.render.engine.geometry.RenderGeometry
 import heckerpowered.render.engine.material.AlphaRepresentation
 import heckerpowered.render.engine.material.parameter.ParameterValues
@@ -30,8 +29,6 @@ class MeshShader<P>(
         val input = encode(values)
         return GeometryElement(MeshShading(this, input.geometry, input.parameters))
     }
-
-    internal fun resolve(device: GraphicsDevice): ResolvedMeshShader = definition.resolve(device)
 }
 
 /** Retains one encoded draw; referenced GPU resources remain borrowed through completion. */
