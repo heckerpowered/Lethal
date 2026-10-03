@@ -19,6 +19,7 @@ import heckerpowered.render.resource.buffer.GpuBuffer
 import heckerpowered.render.resource.buffer.GpuBufferView
 import heckerpowered.render.shader.ShaderStage
 import heckerpowered.render.shader.binding.DescriptorSet
+import java.nio.ByteBuffer
 
 /**
  * Records draws and the state they use within one logical render pass.
@@ -223,8 +224,16 @@ interface RenderPass {
      * A pipeline must already be selected and expose a push-constant layout. [destinationOffsetBytes]
      * is absolute within that interface, not relative to one range. The write must satisfy
      * [PushConstantLayout.validateWrite], including every stage that exposes the updated bytes.
-     * The command captures [sizeBytes] of data at [sourceAddress] before returning so temporary
-     * host memory can be reused without changing already recorded inputs.
+     * [source]'s remaining region supplies the bytes, from its current position to its limit.
+     * Heap, direct, read-only, and sliced buffers are accepted. The command does not change the
+     * source's position or limit and captures its bytes before returning, so the storage can then
+     * be overwritten or reused without changing already recorded inputs. The caller must keep
+     * that region stable during the call; retaining a buffer does not extend a memory frame.
+     *
+     * Bytes are already encoded for the shader interface and are copied without conversion.
+     * The buffer's byte-order property does not transform them. Typed writers encode their values
+     * using the shader data layout before this operation. Capturing the input does not imply GPU
+     * completion, and a backend need not copy storage already suitable for its native command.
      *
      * Values start undefined for this pass. Updating a subrange replaces only those bytes for
      * the named stages; other values keep their earlier write history. Before a draw reads a
@@ -236,9 +245,23 @@ interface RenderPass {
      * write under an incompatible layout cannot silently be reinterpreted under A; affected
      * bytes needed by A must be written again using a compatible layout.
      *
-     * @throws IllegalArgumentException if the byte range or stage selection violates the layout.
+     * @throws IllegalArgumentException if the remaining byte range or stage selection violates the layout.
      * @throws IllegalStateException if the pass is inactive, no pipeline is selected, or that
      * pipeline exposes no push constants.
+     */
+    fun pushConstants(stages: Set<ShaderStage>, source: ByteBuffer, destinationOffsetBytes: Int = 0)
+
+    /**
+     * Supplies an already encoded push-constant block from native host storage.
+     *
+     * Layout validation, per-stage write history, and capture-before-return semantics are the
+     * same as the ByteBuffer overload. The implementation rejects a zero source address or a
+     * byte range whose address arithmetic wraps, in addition to invalid layout ranges.
+     *
+     * Numeric checks cannot prove allocation, readability, or lifetime. The caller must provide
+     * at least [sizeBytes] readable bytes at [sourceAddress], keep them alive until this call
+     * finishes, and prevent concurrent modification. This overload does not establish that the
+     * source storage is valid or turn an arbitrary address into a memory-stack view.
      */
     fun pushConstants(stages: Set<ShaderStage>, sourceAddress: NativeAddress, sizeBytes: Int, destinationOffsetBytes: Int = 0)
 
@@ -369,7 +392,7 @@ inline fun RenderPass.pushConstants(
 ) {
     memoryStack.alloc(bytes(sizeBytes)) { address ->
         write(address)
-        pushConstants(stages, address, sizeBytes, destinationOffsetBytes)
+        pushConstants(stages, asByteBuffer(address, sizeBytes), destinationOffsetBytes)
     }
 }
 
