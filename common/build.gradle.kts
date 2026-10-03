@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":bridge"))
     implementation(project(":foundation:math"))
     implementation(project(":render:render-hardware-interface"))
+    implementation(project(":render:render-engine"))
 }
 
 java {
