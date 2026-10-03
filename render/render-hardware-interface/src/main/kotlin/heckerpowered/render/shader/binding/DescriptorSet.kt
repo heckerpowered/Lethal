@@ -44,10 +44,10 @@ class DescriptorSet(
         Collections.unmodifiableList(bindings.sortedBy { it.binding })
 
     init {
-        require(this.bindings.zipWithNext().none { (left, right) -> left.binding == right.binding }) { "Descriptor binding numbers must be unique within a set" }
+        require(this.bindings.zipWithNext().none { [left, right] -> left.binding == right.binding }) { "Descriptor binding numbers must be unique within a set" }
         require(this.bindings.map { it.binding } == layout.bindings.map { it.binding }) { "Descriptor set must supply exactly the bindings declared by its layout" }
 
-        for ((index, binding) in this.bindings.withIndex()) {
+        for ([index, binding] in this.bindings.withIndex()) {
             val declaration = layout.bindings[index]
             require(binding.resources.size == declaration.descriptorCount) { "Binding ${binding.binding} requires ${declaration.descriptorCount} resources, but received ${binding.resources.size}" }
             binding.resources.forEachIndexed { element, resource ->
@@ -80,7 +80,7 @@ class DescriptorSet(
         val actualBindings = layout.bindings.map { it.binding }
         val expectedBindings = expectedLayout.bindings.map { it.binding }
         require(actualBindings == expectedBindings) { "Descriptor set '$label' declares bindings $actualBindings, but the target expects $expectedBindings" }
-        for ((actual, expected) in layout.bindings.zip(expectedLayout.bindings)) {
+        for ([actual, expected] in layout.bindings.zip(expectedLayout.bindings)) {
             validateBindingLayout(actual, expected, "Descriptor set '$label', binding ${expected.binding}")
         }
     }
