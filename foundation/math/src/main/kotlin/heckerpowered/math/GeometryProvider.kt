@@ -63,48 +63,40 @@ object Geometry {
 
 object Vector {
     operator fun invoke(x: Double, y: Double, z: Double): VectorView = Geometry.vector(x, y, z)
-
     operator fun invoke(value: Double): VectorView = Geometry.vector(value, value, value)
-
     operator fun invoke(): VectorView = Geometry.vector(0.0, 0.0, 0.0)
-
     operator fun invoke(vector: VectorView): VectorView = Geometry.vector(vector.x, vector.y, vector.z)
 }
 
 object Box {
     operator fun invoke(min: VectorView, max: VectorView): BoxView = Geometry.box(min, max)
     operator fun invoke(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double): BoxView = Geometry.box(minX, minY, minZ, maxX, maxY, maxZ)
-
+    operator fun invoke(): BoxView = Geometry.box(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    operator fun invoke(point: VectorView): BoxView = Geometry.box(point, point)
+    operator fun invoke(x: Double, y: Double, z: Double): BoxView = Geometry.box(x, y, z, x, y, z)
     operator fun invoke(box: BoxView): BoxView = Geometry.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ)
 }
 
 object Rotator {
     operator fun invoke(pitch: Double, yaw: Double, roll: Double = 0.0): RotatorView = Geometry.rotator(pitch, yaw, roll)
-
     operator fun invoke(): RotatorView = Geometry.rotator(0.0, 0.0, 0.0)
-
     operator fun invoke(rotator: RotatorView): RotatorView = Geometry.rotator(rotator.pitch, rotator.yaw, rotator.roll)
 }
 
 object Ray {
     operator fun invoke(origin: VectorView, direction: VectorView): RayView = Geometry.ray(origin, direction)
-
     operator fun invoke(ray: RayView): RayView = Geometry.ray(Vector(ray.origin), Vector(ray.direction))
 }
 
 object Quaternion {
     operator fun invoke(x: Double, y: Double, z: Double, w: Double): QuaternionView = Geometry.quaternion(x, y, z, w)
-
     operator fun invoke(): QuaternionView = Geometry.quaternion(0.0, 0.0, 0.0, 1.0)
-
     operator fun invoke(quaternion: QuaternionView): QuaternionView = Geometry.quaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w)
 }
 
 object Plane {
     operator fun invoke(x: Double, y: Double, z: Double, w: Double): PlaneView = Geometry.plane(x, y, z, w)
-
     operator fun invoke(plane: PlaneView): PlaneView = Planes.copyOf(plane)
-
     operator fun invoke(normal: VectorView, w: Double): PlaneView = Planes.fromNormal(normal, w)
 }
 
@@ -133,35 +125,28 @@ object Matrix {
 
 object Transform {
     operator fun invoke(translation: VectorView, rotation: QuaternionView, scale: VectorView): TransformView = Geometry.transform(translation, rotation, scale)
-
     operator fun invoke(): TransformView = Geometry.transform(Vector(), Quaternion(), Vector(1.0))
-
-    operator fun invoke(transform: TransformView): TransformView =
-        Geometry.transform(Vector(transform.translation), Quaternion(transform.rotation), Vector(transform.scale))
+    operator fun invoke(transform: TransformView): TransformView = Geometry.transform(Vector(transform.translation), Quaternion(transform.rotation), Vector(transform.scale))
 }
 
 object AffineTransform {
     operator fun invoke(axisX: VectorView, axisY: VectorView, axisZ: VectorView, translation: VectorView): AffineTransformView = Geometry.affineTransform(axisX, axisY, axisZ, translation)
-
     operator fun invoke(): AffineTransformView = Geometry.affineTransform(
         Vector(1.0, 0.0, 0.0),
         Vector(0.0, 1.0, 0.0),
         Vector(0.0, 0.0, 1.0),
         Vector(),
     )
-
     operator fun invoke(transform: AffineTransformView): AffineTransformView = AffineTransforms.copyOf(transform)
 }
 
 object Basis {
     operator fun invoke(right: VectorView, up: VectorView, forward: VectorView): BasisView = Geometry.basis(right, up, forward)
-
     operator fun invoke(): BasisView = Geometry.basis(
         Vector(1.0, 0.0, 0.0),
         Vector(0.0, 1.0, 0.0),
         Vector(0.0, 0.0, 1.0),
     )
-
     operator fun invoke(basis: BasisView): BasisView = Geometry.basis(Vector(basis.right), Vector(basis.up), Vector(basis.forward))
 }
 
