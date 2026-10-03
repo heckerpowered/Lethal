@@ -5,7 +5,9 @@
 
 package heckerpowered.render.engine.shader.parameter
 
+import heckerpowered.math.Matrices
 import heckerpowered.math.MatrixView
+import heckerpowered.math.inverseOrNull
 import heckerpowered.render.engine.material.parameter.NumericParameterValue
 import heckerpowered.render.engine.material.parameter.ParameterName
 import heckerpowered.render.engine.material.parameter.ParameterValues
@@ -16,7 +18,9 @@ import heckerpowered.render.engine.material.parameter.ParameterValues
  * Normal transformation is computed only when requested, allowing unlit drawing to use a singular
  * model transform without requiring an inverse. The optional `normalFromLocal` value is the
  * inverse transpose of the transform's linear part, encoded as a column-major Float mat4 after
- * the Double calculation. A non-finite or nearly singular determinant is rejected.
+ * the Double calculation. The linear part must have a finite Double inverse; only zero pivots
+ * are rejected, without imposing an absolute scale threshold or a condition-number test.
+ * Float encoding rejects overflow and nonzero values that underflow to zero.
  *
  * Numeric packing runs in declaration order, so a later block may consume an earlier result.
  * Derived names must be absent from the supplied values; they cannot override a provider.
@@ -37,26 +41,20 @@ class ParameterDerivations(
 }
 
 internal fun normalMatrix(localToWorld: MatrixView): NumericParameterValue {
-    val linearColumns = Array(3) { column -> DoubleArray(3) { row -> localToWorld[row, column] } }
-    fun cross(firstColumn: DoubleArray, secondColumn: DoubleArray) = doubleArrayOf(
-        firstColumn[1] * secondColumn[2] - firstColumn[2] * secondColumn[1],
-        firstColumn[2] * secondColumn[0] - firstColumn[0] * secondColumn[2],
-        firstColumn[0] * secondColumn[1] - firstColumn[1] * secondColumn[0],
-    )
-
-    val cofactorColumns = arrayOf(
-        cross(linearColumns[1], linearColumns[2]),
-        cross(linearColumns[2], linearColumns[0]),
-        cross(linearColumns[0], linearColumns[1]),
-    )
-    val determinant = (0..2).sumOf { row -> linearColumns[0][row] * cofactorColumns[0][row] }
-    require(determinant.isFinite() && kotlin.math.abs(determinant) > 1e-20) { "Lighting requires an invertible model transform" }
+    val linear = Matrices.generate { row, column ->
+        if (row < 3 && column < 3) localToWorld[row, column]
+        else if (row == column) 1.0 else 0.0
+    }
+    val inverse = requireNotNull(linear.inverseOrNull()) { "Lighting requires a finite inverse of the model transform's linear part" }
 
     // A mat4-sized block avoids exposing a packed 3x3 as if it satisfied std140's column alignment.
     val normalFromLocal = FloatArray(16)
     for (column in 0..2) {
         for (row in 0..2) {
-            normalFromLocal[column * 4 + row] = (cofactorColumns[column][row] / determinant).toFloat()
+            val component = inverse[column, row]
+            val encoded = component.toFloat()
+            require(encoded.isFinite() && (component == 0.0 || encoded != 0f)) { "Normal transform component cannot be represented as a finite nonzero Float" }
+            normalFromLocal[column * 4 + row] = encoded
         }
     }
     normalFromLocal[15] = 1f
