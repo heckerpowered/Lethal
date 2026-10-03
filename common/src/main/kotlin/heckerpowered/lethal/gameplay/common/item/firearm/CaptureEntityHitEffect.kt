@@ -23,10 +23,11 @@ object CaptureEntityHitEffect : EntityHitEffect {
         val deferredExperienceDrops = if (target.health <= 0.0) target as? DeferredExperienceDropAccess else null
         deferredExperienceDrops?.sendDeferredExperienceTo(result.player)
 
-        val (experienceOrbs, droppedItems) = world.getEntities(captureArea)
+        val [experienceOrbs, droppedItems] = world.getEntities(captureArea)
             .filter { it is ExperienceOrbAccess || it is DroppedItemAccess }
             .partition { it is ExperienceOrbAccess }
-            .let { (experienceOrbs, droppedItems) -> experienceOrbs.map { it as ExperienceOrbAccess } to droppedItems.map { it as DroppedItemAccess } }
+            .let { [experienceOrbs, droppedItems] -> experienceOrbs.map { it as ExperienceOrbAccess } to droppedItems.map { it as DroppedItemAccess } }
+
         // Some hosts update their spatial entity storage immediately when an entity moves or is
         // removed. Finish the lazy query before applying either mutation so its iterator stays valid.
         for (experienceOrb in experienceOrbs) {
