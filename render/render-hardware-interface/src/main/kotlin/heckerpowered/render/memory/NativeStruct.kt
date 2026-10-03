@@ -29,7 +29,8 @@ package heckerpowered.render.memory
  * and nested Kotlin declarations are rejected rather than assigning ambiguous layout rules.
  *
  * A MemoryFrame.withExample overload reserves within an existing frame without opening another
- * one. All generated views and buffers borrow that memory and must not outlive its reservation.
+ * one. All generated views and buffers refer to the reservation's storage and must only be used
+ * while that reservation is active.
  * The original allocExample address-callback overloads remain available for address-based native
  * APIs; they also reserve the entire structure once. Layout constants remain available for
  * diagnostics and interoperability, not routine field access.
