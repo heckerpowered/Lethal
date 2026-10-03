@@ -288,7 +288,7 @@ private fun coversBuffer(requested: GpuBufferView, declared: List<GpuBufferView>
 
 private fun coversInterval(requested: Interval, declared: List<Interval>): Boolean {
     var coveredUntil = requested.start
-    for ((start, end) in declared.sortedBy { it.start }) {
+    for ([start, end] in declared.sortedBy { it.start }) {
         if (start > coveredUntil) return false
         coveredUntil = maxOf(coveredUntil, end)
         if (coveredUntil >= requested.end) return true
@@ -320,7 +320,7 @@ private fun coversSubresources(requested: GpuTextureView, declared: List<GpuText
     // Combining independent mip/layer unions would falsely fill diagonal holes.
     val bands = mipBoundaries.distinct().sorted()
     val layers = Interval(requested.baseArrayLayer.toLong(), requested.baseArrayLayer.toLong() + requested.arrayLayerCount)
-    return bands.zipWithNext().all { (begin, end) ->
+    return bands.zipWithNext().all { [begin, end] ->
         val coveredLayers = declared.filter {
             it.baseMipLevel <= begin && it.baseMipLevel.toLong() + it.mipLevelCount >= end
         }.map { Interval(it.baseArrayLayer.toLong(), it.baseArrayLayer.toLong() + it.arrayLayerCount) }
