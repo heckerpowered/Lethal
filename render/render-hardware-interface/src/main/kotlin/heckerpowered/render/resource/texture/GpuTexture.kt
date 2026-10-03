@@ -5,8 +5,8 @@
 
 package heckerpowered.render.resource.texture
 
-import heckerpowered.render.GpuResource
 import heckerpowered.render.pipeline.multisample.SampleCount
+import heckerpowered.render.resource.GpuResource
 
 /**
  * Stores a one-dimensional sequence, a two-dimensional image, or a three-dimensional volume
