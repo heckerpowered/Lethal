@@ -8,7 +8,8 @@ package heckerpowered.lethal.gameplay.common.skill
 enum class SkillSlot(internal val networkId: Byte) {
     Primary(0),
     Secondary(1),
-    Ultimate(2);
+    Ultimate(2),
+    Auxiliary(3);
 
     companion object {
         internal fun fromNetworkId(networkId: Byte): SkillSlot {
@@ -16,6 +17,7 @@ enum class SkillSlot(internal val networkId: Byte) {
                 0 -> Primary
                 1 -> Secondary
                 2 -> Ultimate
+                3 -> Auxiliary
                 else -> throw IllegalArgumentException("Unknown skill slot: $networkId")
             }
         }
