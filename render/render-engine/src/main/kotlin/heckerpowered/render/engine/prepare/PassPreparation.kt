@@ -28,7 +28,9 @@ import java.util.*
  * Resident views keep their existing storage. Host data receives buffers registered with
  * [lifetime] and uploads that the executor records before entering the pass. The same [UploadData]
  * object and buffer-usage role reuse one allocation within this preparation; equal bytes in distinct
- * snapshots are independent, and different roles use separate allocations.
+ * snapshots are independent, and different roles use separate allocations. Uniform bindings also
+ * reuse the same [NumericParameterValue] object within this pass; equal values in distinct objects
+ * remain independent.
  *
  * [snapshot] copies the pending upload list without ending collection. The caller must retain
  * [lifetime] through GPU completion and ensure resident resources remain valid independently.
@@ -40,6 +42,7 @@ internal class PassPreparation(
     private val images: RenderImageStore? = null,
 ) {
     private val uploadViews = IdentityHashMap<UploadData, MutableMap<BufferUsage, GpuBufferView>>()
+    private val uniformViews = IdentityHashMap<NumericParameterValue, GpuBufferView>()
     private val uploads = ArrayList<BufferUpload>()
 
     fun validateTexture(texture: TextureParameterValue) {
@@ -59,7 +62,9 @@ internal class PassPreparation(
         }
     }
 
-    fun uniform(value: NumericParameterValue): GpuBufferView = upload(UploadData(value.bytes()), BufferUsage.Uniform)
+    fun uniform(value: NumericParameterValue): GpuBufferView = uniformViews.getOrPut(value) {
+        upload(UploadData(value.bytes()), BufferUsage.Uniform)
+    }
 
     fun stream(source: VertexStreamSource): GpuBufferView = when (source) {
         is VertexStreamSource.Resident -> source.view
