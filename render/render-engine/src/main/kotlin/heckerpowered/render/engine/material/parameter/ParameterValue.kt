@@ -5,6 +5,7 @@
 
 package heckerpowered.render.engine.material.parameter
 
+import heckerpowered.render.engine.material.AlphaQuantity
 import heckerpowered.render.engine.material.AlphaRepresentation
 import heckerpowered.render.resource.buffer.GpuBufferView
 import heckerpowered.render.resource.sampler.GpuSampler
@@ -62,7 +63,12 @@ data class TextureParameterValue(
     val view: GpuTextureView,
     val sampler: GpuSampler,
     val representation: AlphaRepresentation = AlphaRepresentation.Straight,
-) : ParameterValue
+    val alphaQuantity: AlphaQuantity = AlphaQuantity.Coverage,
+) : ParameterValue {
+    private val hasImplicitOpaqueAlpha: Boolean get() = view.format.isColor && !view.format.colorComponents.alpha
+    internal val sampledAlphaQuantity: AlphaQuantity get() = if (hasImplicitOpaqueAlpha) AlphaQuantity.Coverage else alphaQuantity
+    internal val sampledRepresentation: AlphaRepresentation? get() = if (hasImplicitOpaqueAlpha || alphaQuantity == AlphaQuantity.Signal) null else representation
+}
 
 /**
  * Supplies an already formed RHI resource selection when the consuming parameter interface
