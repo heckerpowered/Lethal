@@ -5,7 +5,7 @@
 
 package heckerpowered.render.pipeline
 
-import heckerpowered.render.GpuResource
+import heckerpowered.render.resource.GpuResource
 import heckerpowered.render.shader.binding.DescriptorSetLayout
 
 /**
