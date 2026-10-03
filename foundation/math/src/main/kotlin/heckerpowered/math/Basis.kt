@@ -5,14 +5,9 @@
 
 package heckerpowered.math
 
-interface Basis3dView {
+/** Three linear axes in right, up, forward order; scale and shear need not be removed. */
+interface BasisView {
     val right: VectorView
     val up: VectorView
     val forward: VectorView
 }
-
-data class Basis3d(
-    override val right: VectorView,
-    override val up: VectorView,
-    override val forward: VectorView,
-) : Basis3dView
