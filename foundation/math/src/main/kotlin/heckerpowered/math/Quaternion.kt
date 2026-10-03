@@ -147,7 +147,7 @@ fun QuaternionView.axisY(): VectorView = rotateVector(Vectors.UnitY)
 fun QuaternionView.axisZ(): VectorView = rotateVector(Vectors.UnitZ)
 
 /** For a unit quaternion, returns rotated +X, +Y and +Z as right, up and forward. */
-fun QuaternionView.toBasis(): Basis3dView = Basis3d(axisX(), axisY(), axisZ())
+fun QuaternionView.toBasis(): BasisView = Basis(axisX(), axisY(), axisZ())
 
 /** Shortest separation in [0, PI] radians. Both quaternions must be normalized. */
 fun QuaternionView.angularDistanceRadians(other: QuaternionView): Double =
@@ -249,7 +249,7 @@ object Quaternions {
      * Converts a right-handed orthonormal basis whose columns are rotated +X, +Y and +Z.
      * Scale, shear and reflections must be removed by the caller.
      */
-    fun fromBasis(basis: Basis3dView): QuaternionView {
+    fun fromBasis(basis: BasisView): QuaternionView {
         val right = basis.right
         val up = basis.up
         val forward = basis.forward
