@@ -424,7 +424,7 @@ fun VectorView.horizontalHeadingRadians(): Double {
     return atan2(z, x)
 }
 
-fun VectorView.createPerpendicularBasis(): Basis3dView {
+fun VectorView.createPerpendicularBasis(): BasisView {
     val forward = normalized()
     val temporaryRight = if (abs(forward.z) > abs(forward.x) && abs(forward.z) > abs(forward.y)) Vectors.UnitX else Vectors.UnitZ
 
@@ -434,7 +434,7 @@ fun VectorView.createPerpendicularBasis(): Basis3dView {
         .cross(right)
         .normalized()
 
-    return Basis3d(right, up, forward)
+    return Basis(right, up, forward)
 }
 
 fun VectorView.asPointBox(): BoxView {
