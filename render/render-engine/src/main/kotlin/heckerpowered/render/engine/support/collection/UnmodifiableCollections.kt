@@ -15,3 +15,12 @@ import java.util.*
  */
 internal fun <T> Collection<T>.toUnmodifiableList(): List<T> =
     Collections.unmodifiableList(ArrayList(this))
+
+/**
+ * Copies this map's entries and iteration order into a map that rejects mutation.
+ *
+ * Keys and values, including nulls, are retained by reference. Later structural changes to this
+ * map do not affect the returned map.
+ */
+internal fun <K, V> Map<K, V>.toUnmodifiableMap(): Map<K, V> =
+    Collections.unmodifiableMap(LinkedHashMap(this))
