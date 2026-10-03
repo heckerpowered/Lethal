@@ -5,6 +5,8 @@
 
 package heckerpowered.render.resource.sampler
 
+import heckerpowered.render.GraphicsDevice
+
 /**
  * Describes how a texture sampler filters texels, selects mip levels, and handles image edges.
  *
@@ -59,3 +61,6 @@ data class SamplerDescription(
      */
     val mipmapMode: SamplerMipmapMode = SamplerMipmapMode.Disabled,
 )
+
+fun GraphicsDevice.createSampler(minificationFilter: TextureFilter, magnificationFilter: TextureFilter, addressModeU: SamplerAddressMode, addressModeV: SamplerAddressMode, addressModeW: SamplerAddressMode = SamplerAddressMode.ClampToEdge, mipmapMode: SamplerMipmapMode = SamplerMipmapMode.Disabled): GpuSampler =
+    createSampler(SamplerDescription(minificationFilter, magnificationFilter, addressModeU, addressModeV, addressModeW, mipmapMode))
