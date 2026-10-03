@@ -305,7 +305,7 @@ fun MatrixView.translatedWorld(translation: VectorView): MatrixView = Matrices.f
 fun MatrixView.scaledLocal(scale: VectorView): MatrixView = this * Matrices.fromScale(scale)
 
 /** Returns the linear columns, retaining scale and shear. */
-fun MatrixView.toBasis(): Basis3dView = Basis3d(axisX, axisY, axisZ)
+fun MatrixView.toBasis(): BasisView = Basis(axisX, axisY, axisZ)
 
 /** Requires a right-handed orthonormal linear part. Translation is ignored. */
 fun MatrixView.toQuaternion(): QuaternionView = Quaternions.fromBasis(toBasis())
@@ -387,7 +387,7 @@ object Matrices {
     fun fromRotation(rotation: QuaternionView): MatrixView = fromBasis(rotation.toBasis())
 
     /** Basis vectors become the linear columns; scale and shear are retained. */
-    fun fromBasis(basis: Basis3dView, translation: VectorView = Vectors.Zero): MatrixView = of(
+    fun fromBasis(basis: BasisView, translation: VectorView = Vectors.Zero): MatrixView = of(
         basis.right.x, basis.up.x, basis.forward.x, translation.x,
         basis.right.y, basis.up.y, basis.forward.y, translation.y,
         basis.right.z, basis.up.z, basis.forward.z, translation.z,
