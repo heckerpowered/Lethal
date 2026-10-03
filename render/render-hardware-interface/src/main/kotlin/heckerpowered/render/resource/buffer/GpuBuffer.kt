@@ -5,8 +5,8 @@
 
 package heckerpowered.render.resource.buffer
 
-import heckerpowered.render.GpuResource
 import heckerpowered.render.memory.Size
+import heckerpowered.render.resource.GpuResource
 
 /**
  * Stores bytes that graphics and compute operations can read or write.
