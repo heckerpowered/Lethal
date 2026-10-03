@@ -24,8 +24,18 @@ value class MemoryFrame @PublishedApi internal constructor(@PublishedApi interna
      * Invalid arguments or insufficient capacity leave the allocation pointer unchanged.
      */
     fun reserve(byteCount: Int, alignment: Int): NativeAddress {
+        return checkNotNull(tryReserve(byteCount, alignment)) { reservationFailure(byteCount, alignment) }
+    }
+
+    /**
+     * Reserves an aligned native range, returning null when the remaining storage cannot hold it.
+     *
+     * Failure leaves the allocation pointer unchanged. Invalid sizes or alignments still throw;
+     * the caller chooses any fallback storage and must keep the address within its frame.
+     */
+    fun tryReserve(byteCount: Int, alignment: Int): NativeAddress? {
         val address = reservationAddress(byteCount, alignment)
-        check(reservationFits(address, byteCount)) { reservationFailure(byteCount, alignment) }
+        if (!reservationFits(address, byteCount)) return null
         pointer = address + byteCount
         return address
     }
@@ -65,11 +75,8 @@ value class MemoryFrame @PublishedApi internal constructor(@PublishedApi interna
      * @throws IllegalArgumentException if [byteCount] is negative or [alignment] is invalid.
      */
     fun tryReserveBuffer(byteCount: Int, alignment: Int = 1): ByteBuffer? {
-        val address = reservationAddress(byteCount, alignment)
-        if (!reservationFits(address, byteCount)) return null
-        val buffer = bufferAt(offset(address, byteCount), byteCount)
-        pointer = address + byteCount
-        return buffer
+        val address = tryReserve(byteCount, alignment) ?: return null
+        return asByteBuffer(address, byteCount)
     }
 
     /**
