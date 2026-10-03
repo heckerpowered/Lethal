@@ -25,17 +25,17 @@ internal class ShaderRealizations(
     private val device: GraphicsDevice,
     private val lifetime: ResourceLifetime,
 ) {
-    private val definitions = IdentityHashMap<MeshShader<*>, ResolvedMeshShader>()
-    private val programs = IdentityHashMap<MeshShader<*>, PreparedMeshShader>()
+    private val definitions = IdentityHashMap<ShaderDefinition, ResolvedMeshShader>()
+    private val programs = IdentityHashMap<ShaderDefinition, PreparedMeshShader>()
 
     fun definition(shader: MeshShader<*>): ResolvedMeshShader {
         lifetime.checkOpen()
-        return definitions.getOrPut(shader) { shader.resolve(device) }
+        return definitions.getOrPut(shader.definition) { shader.resolve(device) }
     }
 
     fun require(shader: MeshShader<*>): PreparedMeshShader {
         lifetime.checkOpen()
-        return programs.getOrPut(shader) {
+        return programs.getOrPut(shader.definition) {
             val definition = definition(shader)
             val [program, programLifetime] = ResourceLifetime.build {
                 val modules = definition.modules.map { device.createShaderModule(it).lifetime(this) }
