@@ -12,7 +12,7 @@ import java.nio.ByteOrder
 import kotlin.concurrent.getOrSet
 
 /**
- * Owns a fixed-capacity native region reused by nested memory frames.
+ * Keeps a fixed-capacity native region for reuse by nested memory frames.
  *
  * Keep one stack for the rendering context and use the receiver supplied by [frame] to reserve,
  * read, write, or view its memory. Each frame saves the allocation pointer in the caller's scope
@@ -56,13 +56,29 @@ class MemoryStack(capacity: Int, addressOf: (ByteBuffer) -> NativeAddress) {
     }
 }
 
+/**
+ * Returns the native address corresponding to index zero of a direct buffer.
+ *
+ * The address is independent of the buffer's position and limit. For a slice, index zero is
+ * the start of that slice's selected region, which can differ from the underlying allocation's
+ * base address. Direct read-only views are also supported.
+ *
+ * The address does not extend the storage's lifetime. The caller must keep the buffer and
+ * its native storage valid until all uses of the address have finished.
+ */
+fun directBufferAddress(buffer: ByteBuffer): NativeAddress {
+    require(buffer.isDirect) { "A native address requires a direct buffer" }
+    val address = DirectBufferAddresses.address(buffer)
+    check(address.rawValue != 0L) { "Direct memory address must not be zero" }
+    return address
+}
+
 private object DirectBufferAddresses {
     private val AddressMethod = findAddressMethod()
-    private val UnsafeAddress = if (AddressMethod == null) UnsafeDirectBufferAddress() else null
 
     fun address(buffer: ByteBuffer): NativeAddress {
-        val method = AddressMethod ?: return NativeAddress(requireNotNull(UnsafeAddress).address(buffer))
-        return NativeAddress((method.invoke(null, buffer) as Number).toLong())
+        val method = AddressMethod ?: return NativeAddress(UnsafeNativeMemory.address(buffer))
+        return NativeAddress((invokeMemoryMethod(method, null, buffer) as Number).toLong())
     }
 
     private fun findAddressMethod(): Method? {
@@ -74,15 +90,6 @@ private object DirectBufferAddresses {
             }.getOrNull()
         }
     }
-}
-
-private class UnsafeDirectBufferAddress {
-    private val unsafeClass = Class.forName("sun.misc.Unsafe")
-    private val unsafe = unsafeClass.getDeclaredField("theUnsafe").apply { isAccessible = true }.get(null)
-    private val addressOffset = unsafeClass.getMethod("objectFieldOffset", java.lang.reflect.Field::class.java).invoke(unsafe, Buffer::class.java.getDeclaredField("address")) as Long
-    private val getLong = unsafeClass.getMethod("getLong", Any::class.java, Long::class.javaPrimitiveType)
-
-    fun address(buffer: ByteBuffer): Long = getLong.invoke(unsafe, buffer, addressOffset) as Long
 }
 
 private val threadMemoryLocal = ThreadLocal<MemoryStack>()
