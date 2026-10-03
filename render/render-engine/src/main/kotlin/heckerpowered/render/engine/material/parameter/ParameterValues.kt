@@ -5,7 +5,7 @@
 
 package heckerpowered.render.engine.material.parameter
 
-import java.util.*
+import heckerpowered.render.engine.support.collection.toUnmodifiableMap
 
 /**
  * Keeps a named set of shader inputs independent of their eventual binding locations.
@@ -16,7 +16,7 @@ import java.util.*
  * silently choosing one provider's value.
  */
 class ParameterValues(values: Map<ParameterName, ParameterValue> = emptyMap()) {
-    val values: Map<ParameterName, ParameterValue> = Collections.unmodifiableMap(LinkedHashMap(values))
+    val values: Map<ParameterName, ParameterValue> = values.toUnmodifiableMap()
 
     /** Returns a new set with [name] added or replaced; this set remains unchanged. */
     fun replacing(name: String, value: ParameterValue): ParameterValues {
