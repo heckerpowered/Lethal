@@ -5,6 +5,7 @@
 
 package heckerpowered.render.pipeline
 
+import heckerpowered.render.GraphicsDevice
 import heckerpowered.render.shader.ShaderStage
 import heckerpowered.render.shader.binding.DescriptorSet
 import heckerpowered.render.shader.binding.DescriptorSetLayout
@@ -152,3 +153,6 @@ class PipelineLayoutDescription(
 
     override fun hashCode(): Int = 31 * descriptorSets.hashCode() + pushConstants.hashCode()
 }
+
+fun GraphicsDevice.createPipelineLayout(descriptorSets: List<DescriptorSetLayout> = emptyList(), pushConstants: PushConstantLayout? = null, label: String): PipelineLayout =
+    createPipelineLayout(PipelineLayoutDescription(descriptorSets, pushConstants, label))
