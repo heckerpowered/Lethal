@@ -45,7 +45,7 @@ internal class GeometryElementPassProcessor(
         val shader = element.shading.shader
         require(!pass.requireReplaySafe || shader.replaySafe) { "Shader '${shader.label}' cannot be replayed in multiple passes" }
 
-        val shaderInputs = shader.inputs
+        val shaderInputs = programs.definition(shader).inputs
         val scope = submission.rasterScope
         val viewport = scope.viewport ?: Viewport.from(pass.description.renderArea)
         val parameterValues = resolveParameters(element, submission, pass, shaderInputs, viewport)
