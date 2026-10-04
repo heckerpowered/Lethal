@@ -9,6 +9,7 @@ plugins {
     // Apply the shared build logic from a convention plugin.
     // The shared code is located in `buildSrc/src/main/kotlin/kotlin-jvm.gradle.kts`.
     id("heckerpowered.convention.kotlin-jvm")
+    alias(libs.plugins.kotlinPluginSerialization)
     alias(libs.plugins.ksp)
 }
 
