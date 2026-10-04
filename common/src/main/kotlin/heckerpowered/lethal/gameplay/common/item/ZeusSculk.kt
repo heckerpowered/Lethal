@@ -5,4 +5,11 @@
 
 package heckerpowered.lethal.gameplay.common.item
 
-object ZeusSculk : Zeus("zeus_sculk", 18_000_000.0, 90.0, 5.0, ZeusChainMode.FullCoverage)
+import heckerpowered.bridge.adapter.entity.PlayerAccess
+import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
+
+object ZeusSculk : Zeus("zeus_sculk", 18_000_000.0, chainRadiusBlocks = 5.0, chainMode = ZeusChainMode.FullCoverage, maximumEnergyPoints = 2_400.0) {
+    override fun getRayTraceDistanceBlocks(player: PlayerAccess, weaponStack: ItemStackAccess): Double {
+        return 96.0
+    }
+}
