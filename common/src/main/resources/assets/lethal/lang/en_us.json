@@ -1,0 +1,10 @@
+{
+  "item.lethal.cosmic_starshatter_shotgun": "Cosmic Starshatter Shotgun",
+  "item.lethal.archaeopteryx": "AK103",
+  "lethal.sound.archaeopteryx_fire": "Archaeopteryx fire",
+  "item.lethal.zeus_helmet": "Zeus Helmet",
+  "item.lethal.zeus_chestplate": "Zeus Chestplate",
+  "item.lethal.zeus_leggings": "Zeus Leggings",
+  "item.lethal.zeus_boots": "Zeus Boots",
+  "tooltip.lethal.zeus_armor": "Full set: immune to vanilla damage, except the void and /kill."
+}

@@ -1,0 +1,10 @@
+{
+  "item.lethal.cosmic_starshatter_shotgun": "瀚宇碎星霰弹枪",
+  "item.lethal.archaeopteryx": "AK103",
+  "lethal.sound.archaeopteryx_fire": "AK103开火",
+  "item.lethal.zeus_helmet": "宙斯头盔",
+  "item.lethal.zeus_chestplate": "宙斯胸甲",
+  "item.lethal.zeus_leggings": "宙斯护腿",
+  "item.lethal.zeus_boots": "宙斯靴子",
+  "tooltip.lethal.zeus_armor": "穿齐四件后免疫原版伤害，虚空和 /kill 除外。"
+}

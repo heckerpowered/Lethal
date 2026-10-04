@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "lethal:zeus"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "lethal:zeus"
+      }
+    ]
+  }
+}

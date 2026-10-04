@@ -1,7 +1,6 @@
-#version 120
-#extension GL_ARB_uniform_buffer_object : require
+#version 450
 
-layout(std140) uniform ElectricLineStyle {
+layout (std140, set = 1, binding = 0) uniform ElectricLineStyle {
     float coreHalfWidthPixels;
     float ribbonHalfWidthPixels;
     float spikeReachPixels;
@@ -10,12 +9,16 @@ layout(std140) uniform ElectricLineStyle {
     float lightningAnimationFrequency;
 };
 
-uniform float animationTimeSeconds;
+layout (push_constant) uniform ElectricLineAnimation {
+    layout (offset = 48) float animationTimeSeconds;
+};
 
-varying vec2 beamStartPixels;
-varying vec2 beamDirectionPixels;
-varying float beamLengthPixels;
-varying vec4 beamColor;
+layout (location = 0) in vec2 beamStartPixels;
+layout (location = 1) in vec2 beamDirectionPixels;
+layout (location = 2) in float beamLengthPixels;
+layout (location = 3) in vec4 beamColor;
+layout (location = 4) in vec3 fragmentPixelHomogeneous;
+layout (location = 0) out vec4 result;
 
 float randomValue(float seed) {
     return fract(sin(seed * 12.9898) * 43758.5453);
@@ -35,7 +38,7 @@ float spike(float positionPixels, float spacingPixels, float seed) {
 }
 
 void main() {
-    vec2 positionFromStartPixels = gl_FragCoord.xy - beamStartPixels;
+    vec2 positionFromStartPixels = fragmentPixelHomogeneous.xy / fragmentPixelHomogeneous.z - beamStartPixels;
     float positionAlongBeamPixels = clamp(dot(positionFromStartPixels, beamDirectionPixels), 0.0, beamLengthPixels);
     float positionPixels = (positionAlongBeamPixels + animationTimeSeconds * 72.0 * lightningAnimationFrequency) * lightningSpikeDensity;
     vec2 perpendicularPixels = vec2(-beamDirectionPixels.y, beamDirectionPixels.x);
@@ -51,5 +54,5 @@ void main() {
     float edgeCoverage = 1.0 - smoothstep(edgePosition - 1.0, edgePosition + 0.5, distanceFromCenter);
     float fringeFade = 1.0 - smoothstep(coreHalfWidthPixels, max(edgePosition, coreHalfWidthPixels + 0.001), distanceFromCenter);
     float coverage = max(coreCoverage, edgeCoverage * fringeFade * 0.7 * lightningVisibility);
-    gl_FragColor = vec4(beamColor.rgb, beamColor.a * coverage);
+    result = vec4(beamColor.rgb, beamColor.a * coverage);
 }
