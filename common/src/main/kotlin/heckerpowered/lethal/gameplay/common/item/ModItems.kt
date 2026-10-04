@@ -17,6 +17,7 @@ object ModItems {
         }
 
         register(Archaeopteryx)
+        register(CosmicStarshatterShotgun)
         register(Fortune)
         register(EnhancedFortune)
         register(Chaos)
@@ -25,6 +26,8 @@ object ModItems {
         register(ZeusBlackGold)
         register(ZeusGlowSquid)
         register(ZeusSculk)
+        register(ZeusBlood)
+        ZeusArmor.Pieces.forEach(::register)
     }
 
     fun onInitialize() {
