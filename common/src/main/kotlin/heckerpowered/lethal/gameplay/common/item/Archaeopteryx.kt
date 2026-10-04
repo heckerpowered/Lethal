@@ -13,10 +13,10 @@ import heckerpowered.bridge.resources.Identifier
 import heckerpowered.bridge.time.Frequency
 import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.common.item.firearm.EntityHitDamage
-import heckerpowered.lethal.gameplay.common.item.firearm.RayTraceGun
+import heckerpowered.lethal.gameplay.common.item.firearm.RegularGun
 import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
-object Archaeopteryx : RayTraceGun() {
+object Archaeopteryx : RegularGun() {
     private val HitDamage = EntityHitDamage(VanillaDamageType.Generic, 7.0)
 
     override val identifier: Identifier
