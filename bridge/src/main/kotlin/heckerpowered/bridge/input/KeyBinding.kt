@@ -29,6 +29,7 @@ enum class KeyboardKey {
     C,
     V,
     X,
+    Z,
 }
 
 data class KeyBindingPressedEvent(val bindingIdentifier: Identifier)
