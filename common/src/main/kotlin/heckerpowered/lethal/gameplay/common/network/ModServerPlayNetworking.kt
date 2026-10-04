@@ -15,6 +15,7 @@ object ModServerPlayNetworking {
 
         PayloadTypeRegistry.ClientboundPlay.register(ZeusChainPayload.Type, ZeusChainPayload.Codec)
         PayloadTypeRegistry.ClientboundPlay.register(ZeusShotPayload.Type, ZeusShotPayload.Codec)
+        PayloadTypeRegistry.ClientboundPlay.register(ZeusJudgementPayload.Type, ZeusJudgementPayload.Codec)
 
         ServerPlayNetworking.registerReceiver(FireStatePayload.Type, FireStatePayload::handle)
         ServerPlayNetworking.registerReceiver(SkillActivationPayload.Type, SkillActivationPayload::handle)
