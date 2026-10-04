@@ -17,7 +17,7 @@ import heckerpowered.lethal.gameplay.common.item.firearm.RegularGun
 import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
 object Archaeopteryx : RegularGun() {
-    private val HitDamage = EntityHitDamage(VanillaDamageType.Generic, 7.0)
+    private val HitDamage = EntityHitDamage(VanillaDamageType.Generic, 6.0, bypassHurtCooldown = true)
 
     override val identifier: Identifier
         get() = Constants.identifier("archaeopteryx")
