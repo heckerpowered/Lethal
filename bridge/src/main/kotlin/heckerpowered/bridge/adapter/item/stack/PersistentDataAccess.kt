@@ -5,23 +5,14 @@
 
 package heckerpowered.bridge.adapter.item.stack
 
-import heckerpowered.bridge.resources.Identifier
-
 /**
- * Provides namespaced primitive state that survives host serialization.
+ * Provides namespaced values that survive the item stack's host serialization.
  *
- * Reads must not create or otherwise mutate host storage. Persistent data remains a separate
- * capability because hosts expose it through different storage APIs. Extending [ItemStackAccess]
- * preserves the capability's stable ownership by the item stack.
+ * Input and output resolve the stack's current storage on each operation. Use them on the owning
+ * game thread; output changes are visible before the call returns.
  */
 interface PersistentDataAccess : ItemStackAccess {
-    fun getLong(key: Identifier): Long?
+    val input: PersistentValueInput
 
-    fun setLong(key: Identifier, value: Long)
-
-    fun getDouble(key: Identifier): Double?
-
-    fun setDouble(key: Identifier, value: Double)
-
-    fun remove(key: Identifier)
+    val output: PersistentValueOutput
 }
