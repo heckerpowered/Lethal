@@ -5,8 +5,6 @@
 
 package heckerpowered.lethal.gameplay.common.network
 
-import heckerpowered.math.Geometry
-import heckerpowered.math.VectorView
 import heckerpowered.bridge.network.ClientPlayNetworking.Context
 import heckerpowered.bridge.network.ClientboundPayload
 import heckerpowered.bridge.network.Payload
@@ -14,14 +12,19 @@ import heckerpowered.bridge.network.StreamBuffer
 import heckerpowered.bridge.network.StreamCodecs
 import heckerpowered.bridge.network.codec.StreamCodec
 import heckerpowered.lethal.Constants
+import heckerpowered.lethal.gameplay.client.render.zeus.ZeusBloodLaserEffect
 import heckerpowered.lethal.gameplay.client.render.zeus.ZeusElectricLineEffect
+import heckerpowered.lethal.gameplay.common.item.ZeusColors
+import heckerpowered.math.Geometry
+import heckerpowered.math.VectorView
+import heckerpowered.render.color.Color
 
 data class ZeusChainSegment(
     val startPosition: VectorView,
     val endPosition: VectorView,
 )
 
-class ZeusChainPayload(chainSegments: List<ZeusChainSegment>) : ClientboundPayload<ZeusChainPayload> {
+class ZeusChainPayload(chainSegments: List<ZeusChainSegment>, val usesBloodLaser: Boolean = false, val color: Color = if (usesBloodLaser) ZeusColors.BloodLaser else ZeusColors.ElectricLine) : ClientboundPayload<ZeusChainPayload> {
     val chainSegments = chainSegments.toList()
 
     init {
@@ -62,14 +65,29 @@ class ZeusChainPayload(chainSegments: List<ZeusChainSegment>) : ClientboundPaylo
                 List(segmentCount) { ChainSegmentCodec.decode(input) }
             },
         )
-        val Codec = StreamCodec.composite(ChainSegmentsCodec, ZeusChainPayload::chainSegments, ::ZeusChainPayload)
+        val Codec = StreamCodec.of<StreamBuffer, ZeusChainPayload>(
+            { output, payload ->
+                ChainSegmentsCodec.encode(output, payload.chainSegments)
+                StreamCodecs.Boolean.encode(output, payload.usesBloodLaser)
+                ZeusColorCodec.encode(output, payload.color)
+            },
+            { input ->
+                val segments = ChainSegmentsCodec.decode(input)
+                val usesBloodLaser = StreamCodecs.Boolean.decode(input)
+                val color = if (input.readableByteCount == 0) {
+                    if (usesBloodLaser) ZeusColors.BloodLaser else ZeusColors.ElectricLine
+                } else ZeusColorCodec.decode(input)
+                ZeusChainPayload(segments, usesBloodLaser, color)
+            },
+        )
     }
 
     override val type: Payload.Type<ZeusChainPayload>
         get() = Type
 
     fun handle(context: Context) {
-        ZeusElectricLineEffect.play(chainSegments)
+        if (usesBloodLaser) ZeusBloodLaserEffect.play(chainSegments, color)
+        else ZeusElectricLineEffect.play(chainSegments, color)
     }
 }
 
