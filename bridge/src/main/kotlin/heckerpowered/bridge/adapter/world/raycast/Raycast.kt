@@ -9,10 +9,8 @@ import heckerpowered.bridge.adapter.entity.EntityAccess
 import heckerpowered.bridge.adapter.entity.EntityPartAccess
 import heckerpowered.bridge.adapter.entity.MultipartEntityAccess
 import heckerpowered.bridge.adapter.world.WorldAccess
-import heckerpowered.math.Geometry
-import heckerpowered.math.RayIntersectionContext
-import heckerpowered.math.RayView
-import heckerpowered.math.intersect
+import heckerpowered.math.*
+import heckerpowered.math.Vector
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -120,9 +118,9 @@ fun WorldAccess.raycastEntityHits(ray: RayView, distance: Double, excluded: Enti
             val endX = context.originX + context.directionX * context.maximumTime
             val endY = context.originY + context.directionY * context.maximumTime
             val endZ = context.originZ + context.directionZ * context.maximumTime
-            val minimum = Geometry.vector(min(context.originX, endX), min(context.originY, endY), min(context.originZ, endZ))
-            val maximum = Geometry.vector(max(context.originX, endX), max(context.originY, endY), max(context.originZ, endZ))
-            val searchBox = Geometry.box(minimum, maximum)
+            val minimum = Vector(min(context.originX, endX), min(context.originY, endY), min(context.originZ, endZ))
+            val maximum = Vector(max(context.originX, endX), max(context.originY, endY), max(context.originZ, endZ))
+            val searchBox = Box(minimum, maximum)
 
             getEntities(searchBox)
                 .asEntityRayHits(context, excluded)
