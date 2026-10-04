@@ -8,15 +8,7 @@ package heckerpowered.lethal.gameplay.common.creativetab
 import heckerpowered.bridge.adapter.item.creativetab.CreativeModeTabBlueprint
 import heckerpowered.bridge.adapter.item.creativetab.CreativeModeTabRegistry
 import heckerpowered.lethal.Constants
-import heckerpowered.lethal.gameplay.common.item.Archaeopteryx
-import heckerpowered.lethal.gameplay.common.item.Chaos
-import heckerpowered.lethal.gameplay.common.item.EnhancedFortune
-import heckerpowered.lethal.gameplay.common.item.Fortune
-import heckerpowered.lethal.gameplay.common.item.Zeus
-import heckerpowered.lethal.gameplay.common.item.ZeusBlackGold
-import heckerpowered.lethal.gameplay.common.item.ZeusGlowSquid
-import heckerpowered.lethal.gameplay.common.item.ZeusGolden
-import heckerpowered.lethal.gameplay.common.item.ZeusSculk
+import heckerpowered.lethal.gameplay.common.item.*
 
 object ModCreativeModeTabs {
     val Lethal = register(
@@ -24,6 +16,7 @@ object ModCreativeModeTabs {
             Constants.identifier("main"), "itemGroup.lethal", Fortune,
             listOf(
                 Archaeopteryx,
+                CosmicStarshatterShotgun,
                 Fortune,
                 EnhancedFortune,
                 Chaos,
@@ -32,6 +25,10 @@ object ModCreativeModeTabs {
                 ZeusBlackGold,
                 ZeusGlowSquid,
                 ZeusSculk,
+                ZeusArmor.Helmet,
+                ZeusArmor.Chestplate,
+                ZeusArmor.Leggings,
+                ZeusArmor.Boots,
             ),
         ),
     )
