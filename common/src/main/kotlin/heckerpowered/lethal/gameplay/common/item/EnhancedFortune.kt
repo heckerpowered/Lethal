@@ -49,7 +49,7 @@ object EnhancedFortune : RegularGun(), SkillWeapon, ItemTooltip, ItemGlint {
             SkillSlot.Primary -> FortunePrimary
             SkillSlot.Secondary -> FortuneSonicBoom
             SkillSlot.Ultimate -> Ultimate
-            SkillSlot.Auxiliary -> null
+            else -> null
         }
     }
 
