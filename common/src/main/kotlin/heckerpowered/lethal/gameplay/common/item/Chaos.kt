@@ -14,10 +14,10 @@ import heckerpowered.bridge.time.Frequency
 import heckerpowered.lethal.Constants
 import heckerpowered.lethal.gameplay.common.item.firearm.EntityHitDamage
 import heckerpowered.lethal.gameplay.common.item.firearm.HeadshotExecutionEffect
-import heckerpowered.lethal.gameplay.common.item.firearm.RayTraceGun
+import heckerpowered.lethal.gameplay.common.item.firearm.RegularGun
 import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
-object Chaos : RayTraceGun() {
+object Chaos : RegularGun() {
     private val HitDamage = EntityHitDamage(VanillaDamageType.Generic, 30_000.0, HeadshotExecutionEffect.Mythic)
 
     override val identifier: Identifier
