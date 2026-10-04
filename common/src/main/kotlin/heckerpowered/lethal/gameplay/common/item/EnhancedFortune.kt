@@ -15,20 +15,20 @@ import heckerpowered.bridge.adapter.world.raycast.EntityRayHit
 import heckerpowered.bridge.resources.Identifier
 import heckerpowered.bridge.time.Frequency
 import heckerpowered.lethal.Constants
+import heckerpowered.lethal.gameplay.common.entity.starjudgement.StarJudgementKind
 import heckerpowered.lethal.gameplay.common.item.firearm.EntityHitDamage
 import heckerpowered.lethal.gameplay.common.item.firearm.HeadshotExecutionEffect
-import heckerpowered.lethal.gameplay.common.item.firearm.RayTraceGun
-import heckerpowered.lethal.gameplay.common.sound.ModSounds
-import heckerpowered.lethal.gameplay.common.skill.FortunePrimary
-import heckerpowered.lethal.gameplay.common.skill.FortuneSkillTooltip
-import heckerpowered.lethal.gameplay.common.skill.FortuneSonicBoom
-import heckerpowered.lethal.gameplay.common.skill.FortuneUltimateSkill
+import heckerpowered.lethal.gameplay.common.item.firearm.RegularGun
 import heckerpowered.lethal.gameplay.common.skill.SkillSlot
 import heckerpowered.lethal.gameplay.common.skill.SkillWeapon
-import heckerpowered.lethal.gameplay.common.skill.StarJudgementKind
 import heckerpowered.lethal.gameplay.common.skill.WeaponSkill
+import heckerpowered.lethal.gameplay.common.skill.fortune.FortunePrimary
+import heckerpowered.lethal.gameplay.common.skill.fortune.FortuneSkillTooltip
+import heckerpowered.lethal.gameplay.common.skill.fortune.FortuneSonicBoom
+import heckerpowered.lethal.gameplay.common.skill.fortune.FortuneUltimateSkill
+import heckerpowered.lethal.gameplay.common.sound.ModSounds
 
-object EnhancedFortune : RayTraceGun(), SkillWeapon, ItemTooltip, ItemGlint {
+object EnhancedFortune : RegularGun(), SkillWeapon, ItemTooltip, ItemGlint {
     private val Ultimate = FortuneUltimateSkill(2_000.0, StarJudgementKind.Enhanced)
     private val Tooltip = FortuneSkillTooltip(FortunePrimary, FortuneSonicBoom, Ultimate)
     private val HitDamage = EntityHitDamage(VanillaDamageType.FellOutOfWorld, 42_000.0, HeadshotExecutionEffect.Legendary, FortuneSonicBoom, Ultimate)
@@ -49,6 +49,7 @@ object EnhancedFortune : RayTraceGun(), SkillWeapon, ItemTooltip, ItemGlint {
             SkillSlot.Primary -> FortunePrimary
             SkillSlot.Secondary -> FortuneSonicBoom
             SkillSlot.Ultimate -> Ultimate
+            SkillSlot.Auxiliary -> null
         }
     }
 
