@@ -40,9 +40,9 @@ interface EntityAccess : BridgeAccess, UniquelyIdentifiable {
     var yaw: Double
 
     val previousRotation: RotatorView
-        get() = Geometry.rotator(previousPitch, previousYaw)
+        get() = Rotator(previousPitch, previousYaw)
     val rotation: RotatorView
-        get() = Geometry.rotator(pitch, yaw)
+        get() = Rotator(pitch, yaw)
     val viewVector: VectorView
         get() = rotation.toViewVector()
 
@@ -59,6 +59,8 @@ interface EntityAccess : BridgeAccess, UniquelyIdentifiable {
     fun distanceTo(other: EntityAccess): Double {
         return position.distanceTo(other.position)
     }
+
+    fun isAlliedTo(other: EntityAccess): Boolean
 
     fun hurt(source: DamageSourceView, damagePoints: Double): Boolean
     fun remove()
@@ -90,7 +92,7 @@ fun EntityAccess.interpolateRotation(partialTick: Float): RotatorView {
     val alpha = partialTick.toDouble()
     val pitch = interpolate(previousPitch, pitch, alpha)
     val yaw = interpolate(previousYaw, yaw, alpha)
-    return Geometry.rotator(pitch, yaw)
+    return Rotator(pitch, yaw)
 }
 
 private fun interpolate(previousValue: Double, currentValue: Double, alpha: Double): Double {
