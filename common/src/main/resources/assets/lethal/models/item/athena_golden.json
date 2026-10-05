@@ -1,0 +1,11 @@
+{
+  "parent": "lethal:item/athena_golden_bullet",
+  "overrides": [
+    {
+      "predicate": {
+        "lethal:athena_grenade_mode": 1.0
+      },
+      "model": "lethal:item/athena_golden_grenade"
+    }
+  ]
+}

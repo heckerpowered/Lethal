@@ -23,6 +23,25 @@ lethal.perk.fortune.sonic_boom=Sonic Boom
 lethal.perk.fortune.ultimate=Star judgment
 lethal.cooldown.ready=Ready
 lethal.cooldown.seconds=%.2fs
-lethal.precondition.damage=Required to deal %2.f damage
+lethal.precondition.damage=Required to deal %.2f damage
 entity.lethal.star_judgement.name=Star judgment
 entity.lethal.enhanced_star_judgement.name=Enhanced star judgment
+
+key.lethal.skill.berserk=Zeus Berserk
+item.lethal.cosmic_starshatter_shotgun.name=Cosmic Starshatter Shotgun
+item.lethal.zeus_helmet.name=Zeus Helmet
+item.lethal.zeus_chestplate.name=Zeus Chestplate
+item.lethal.zeus_leggings.name=Zeus Leggings
+item.lethal.zeus_boots.name=Zeus Boots
+
+item.lethal.zeus_blood.name=Blood Zeus
+enchantment.lethal.one_hit_kill=Deathblow
+lethal.perk.zeus.missile=Missile
+lethal.perk.zeus.judgement=Judgment
+lethal.perk.zeus.berserk=Berserk
+item.lethal.athena.name=Electric Gun Athena
+item.lethal.athena_golden.name=Electric Gun Athena — Golden
+item.lethal.ares.name=Energy Sword Ares
+item.lethal.ares_golden.name=Energy Sword Ares — Golden
+entity.lethal.zeus_missile.name=Zeus Missile
+entity.lethal.athena_grenade.name=Athena Grenade

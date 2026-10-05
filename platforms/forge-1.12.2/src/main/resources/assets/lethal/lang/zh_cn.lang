@@ -1,4 +1,4 @@
-item.lethal.archaeopteryx.name=AK103
+item.lethal.archaeopteryx.name=AK103远古神鹰
 item.lethal.fortune.name=赤焰灵狐
 item.lethal.enhanced_fortune.name=紫莹石步枪
 item.lethal.chaos.name=混沌
@@ -26,3 +26,22 @@ lethal.cooldown.seconds=%.2fs
 lethal.precondition.damage=需要造成%.2f点伤害
 entity.lethal.star_judgement.name=星辰审判
 entity.lethal.enhanced_star_judgement.name=增幅星辰审判
+
+key.lethal.skill.berserk=宙斯 狂暴
+item.lethal.cosmic_starshatter_shotgun.name=瀚宇碎星霰弹枪
+item.lethal.zeus_helmet.name=宙斯头盔
+item.lethal.zeus_chestplate.name=宙斯胸甲
+item.lethal.zeus_leggings.name=宙斯护腿
+item.lethal.zeus_boots.name=宙斯靴子
+
+item.lethal.zeus_blood.name=血族宙斯
+enchantment.lethal.one_hit_kill=一击致命
+lethal.perk.zeus.missile=导弹
+lethal.perk.zeus.judgement=审判
+lethal.perk.zeus.berserk=狂暴
+item.lethal.athena.name=电能枪雅典娜
+item.lethal.athena_golden.name=电能枪雅典娜 - 金色
+item.lethal.ares.name=能量剑阿瑞斯
+item.lethal.ares_golden.name=能量剑阿瑞斯 - 金色
+entity.lethal.zeus_missile.name=宙斯导弹
+entity.lethal.athena_grenade.name=雅典娜榴弹
