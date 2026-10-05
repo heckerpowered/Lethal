@@ -17,6 +17,6 @@ class ParticleEffect(val particle: VanillaParticle, val count: Int = 1, val posi
         require(positionSpread.y.isFinite() && positionSpread.y >= 0.0) { "Particle Y spread must be finite and non-negative" }
         require(positionSpread.z.isFinite() && positionSpread.z >= 0.0) { "Particle Z spread must be finite and non-negative" }
         require(velocitySpread.isFinite() && velocitySpread >= 0.0) { "Particle velocity spread must be finite and non-negative" }
-        require(data.size == particle.dataCount) { "Particle data count must be " + particle.dataCount }
+        require(data.size == particle.dataCount) { "Particle data count must be ${particle.dataCount}" }
     }
 }
