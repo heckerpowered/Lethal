@@ -6,6 +6,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    `java-library`
     id("heckerpowered.convention.kotlin-jvm")
 }
 
@@ -15,6 +16,8 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+
+    api(libs.kotlinxSerializationCore)
 
     implementation(project(":render:render-hardware-interface"))
     implementation(project(":foundation:math"))
