@@ -5,6 +5,7 @@
 
 package heckerpowered.bridge.math
 
+import heckerpowered.bridge.FreestandingRepresentation
 import heckerpowered.bridge.platform.Services
 import heckerpowered.bridge.platform.loadOrNull
 import kotlin.math.abs
@@ -57,7 +58,10 @@ interface BlockPositionView {
 
 interface BlockPositionProvider {
     companion object {
-        val Freestanding: BlockPositionProvider = FreestandingBlockPositionProvider
+        // JVM default methods initialize this interface before its implementing singleton is constructed.
+        // Resolve the singleton on access so the companion cannot capture an unassigned INSTANCE.
+        val Freestanding: BlockPositionProvider
+            get() = FreestandingBlockPositionProvider
         val Hosting: BlockPositionProvider?
             get() = Services.loadOrNull<BlockPositionProvider>()
         val Auto: BlockPositionProvider
@@ -107,7 +111,7 @@ private data class FreestandingBlockPosition(
     override val x: Int,
     override val y: Int,
     override val z: Int,
-) : BlockPositionView
+) : BlockPositionView, FreestandingRepresentation
 
 object BlockPositions {
     var Provider: BlockPositionProvider = BlockPositionProvider.Auto
