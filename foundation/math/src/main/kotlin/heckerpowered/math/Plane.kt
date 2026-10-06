@@ -27,7 +27,7 @@ interface PlaneView : Interpolatable<PlaneView> {
     val w: Double
 
     val normal: VectorView
-        get() = Geometry.vector(x, y, z)
+        get() = Vector(x, y, z)
 
     val normalLengthSquared: Double
         get() = x * x + y * y + z * z
@@ -102,7 +102,7 @@ interface PlaneView : Interpolatable<PlaneView> {
     }
 
     /** Linear coefficient interpolation; may produce a degenerate plane. Alpha is not clamped. */
-    override fun interpolate(target: PlaneView, alpha: Double): PlaneView = Geometry.plane(
+    override fun interpolate(target: PlaneView, alpha: Double): PlaneView = Plane(
         x + (target.x - x) * alpha,
         y + (target.y - y) * alpha,
         z + (target.z - z) * alpha,
@@ -111,16 +111,16 @@ interface PlaneView : Interpolatable<PlaneView> {
 }
 
 /** Coefficient addition; does not represent a geometric union of planes. */
-operator fun PlaneView.plus(other: PlaneView): PlaneView = Geometry.plane(x + other.x, y + other.y, z + other.z, w + other.w)
-operator fun PlaneView.minus(other: PlaneView): PlaneView = Geometry.plane(x - other.x, y - other.y, z - other.z, w - other.w)
+operator fun PlaneView.plus(other: PlaneView): PlaneView = Plane(x + other.x, y + other.y, z + other.z, w + other.w)
+operator fun PlaneView.minus(other: PlaneView): PlaneView = Plane(x - other.x, y - other.y, z - other.z, w - other.w)
 
 /** Reverses orientation while preserving the geometric plane. */
-operator fun PlaneView.unaryMinus(): PlaneView = Geometry.plane(-x, -y, -z, -w)
+operator fun PlaneView.unaryMinus(): PlaneView = Plane(-x, -y, -z, -w)
 
 /** Scales coefficients, preserving the geometric plane for finite nonzero scale; negative scale reverses orientation. */
-operator fun PlaneView.times(scale: Double): PlaneView = Geometry.plane(x * scale, y * scale, z * scale, w * scale)
+operator fun PlaneView.times(scale: Double): PlaneView = Plane(x * scale, y * scale, z * scale, w * scale)
 operator fun Double.times(plane: PlaneView): PlaneView = plane * this
-operator fun PlaneView.div(scale: Double): PlaneView = Geometry.plane(x / scale, y / scale, z / scale, w / scale)
+operator fun PlaneView.div(scale: Double): PlaneView = Plane(x / scale, y / scale, z / scale, w / scale)
 
 fun PlaneView.flipped(): PlaneView = -this
 
@@ -164,20 +164,20 @@ fun PlaneView.normalized(tolerance: Double = 1.0E-8): PlaneView =
 /** Moves the plane by [offset], preserving its normal and coefficient scale. */
 fun PlaneView.translated(offset: VectorView): PlaneView {
     val plane = Planes.copyOf(this)
-    return Geometry.plane(plane.x, plane.y, plane.z, plane.w + plane.normal.dot(offset))
+    return Plane(plane.x, plane.y, plane.z, plane.w + plane.normal.dot(offset))
 }
 
 /** Orthogonal projection onto a finite plane with a nonzero normal. */
 fun PlaneView.projectPosition(position: VectorView): VectorView {
     val plane = requireNotNull(normalizedOrNull(0.0)) { "Cannot project onto an invalid plane" }
-    val point = Geometry.vector(position.x, position.y, position.z)
+    val point = Vector(position.x, position.y, position.z)
     return point - plane.normal * plane.evaluate(point)
 }
 
 /** Reflection across a finite plane with a nonzero normal. */
 fun PlaneView.mirrorPosition(position: VectorView): VectorView {
     val plane = requireNotNull(normalizedOrNull(0.0)) { "Cannot reflect across an invalid plane" }
-    val point = Geometry.vector(position.x, position.y, position.z)
+    val point = Vector(position.x, position.y, position.z)
     return point - plane.normal * (2.0 * plane.evaluate(point))
 }
 
@@ -200,7 +200,7 @@ fun PlaneView.transformedByOrNull(matrix: MatrixView, tolerance: Double = 0.0): 
     val inverse = transform.inverseOrNull(tolerance) ?: return null
 
     // Plane covectors transform by the inverse transpose.
-    return Geometry.plane(
+    return Plane(
         inverse.m00 * plane.x + inverse.m10 * plane.y + inverse.m20 * plane.z - inverse.m30 * plane.w,
         inverse.m01 * plane.x + inverse.m11 * plane.y + inverse.m21 * plane.z - inverse.m31 * plane.w,
         inverse.m02 * plane.x + inverse.m12 * plane.y + inverse.m22 * plane.z - inverse.m32 * plane.w,
@@ -214,9 +214,9 @@ fun PlaneView.transformedBy(matrix: MatrixView, tolerance: Double = 0.0): PlaneV
 
 object Planes {
     /** Degenerate coefficients, useful as a sentinel; does not describe a geometric plane. */
-    val Zero: PlaneView = Geometry.plane(0.0, 0.0, 0.0, 0.0)
+    val Zero: PlaneView = Plane(0.0, 0.0, 0.0, 0.0)
 
-    fun of(x: Double, y: Double, z: Double, w: Double): PlaneView = Geometry.plane(x, y, z, w)
+    fun of(x: Double, y: Double, z: Double, w: Double): PlaneView = Plane(x, y, z, w)
     fun fromNormal(normal: VectorView, w: Double): PlaneView = of(normal.x, normal.y, normal.z, w)
     fun copyOf(plane: PlaneView): PlaneView = of(plane.x, plane.y, plane.z, plane.w)
 
@@ -226,11 +226,11 @@ object Planes {
         y: Double,
         z: Double,
         offset: Double,
-    ): PlaneView = Geometry.plane(x, y, z, offset).normalized()
+    ): PlaneView = Plane(x, y, z, offset).normalized()
 
     /** Constructs a plane through [point], preserving the supplied normal's length. */
     fun fromPointAndNormal(point: VectorView, normal: VectorView): PlaneView {
-        val direction = Geometry.vector(normal.x, normal.y, normal.z)
+        val direction = Vector(normal.x, normal.y, normal.z)
         return fromNormal(direction, direction.dot(point))
     }
 
@@ -241,7 +241,7 @@ object Planes {
      */
     fun fromPointsOrNull(first: VectorView, second: VectorView, third: VectorView, tolerance: Double = 1.0E-8): PlaneView? {
         require(tolerance.isFinite() && tolerance >= 0.0)
-        val firstPoint = Geometry.vector(first.x, first.y, first.z)
+        val firstPoint = Vector(first.x, first.y, first.z)
         val unnormalizedNormal = (second - firstPoint).cross(third - firstPoint)
         val unitNormal = fromNormal(unnormalizedNormal, 0.0).normalizedOrNull(tolerance)?.normal ?: return null
         return fromPointAndNormal(firstPoint, unitNormal).takeIf { it.isFinite() }

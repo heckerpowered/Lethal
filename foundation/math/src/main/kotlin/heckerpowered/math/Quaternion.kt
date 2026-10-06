@@ -56,28 +56,28 @@ interface QuaternionView : Interpolatable<QuaternionView> {
 }
 
 operator fun QuaternionView.plus(other: QuaternionView): QuaternionView =
-    Geometry.quaternion(x + other.x, y + other.y, z + other.z, w + other.w)
+    Quaternion(x + other.x, y + other.y, z + other.z, w + other.w)
 
 operator fun QuaternionView.minus(other: QuaternionView): QuaternionView =
-    Geometry.quaternion(x - other.x, y - other.y, z - other.z, w - other.w)
+    Quaternion(x - other.x, y - other.y, z - other.z, w - other.w)
 
-operator fun QuaternionView.unaryMinus(): QuaternionView = Geometry.quaternion(-x, -y, -z, -w)
-operator fun QuaternionView.times(scale: Double): QuaternionView = Geometry.quaternion(x * scale, y * scale, z * scale, w * scale)
+operator fun QuaternionView.unaryMinus(): QuaternionView = Quaternion(-x, -y, -z, -w)
+operator fun QuaternionView.times(scale: Double): QuaternionView = Quaternion(x * scale, y * scale, z * scale, w * scale)
 operator fun Double.times(quaternion: QuaternionView): QuaternionView = quaternion * this
-operator fun QuaternionView.div(scale: Double): QuaternionView = Geometry.quaternion(x / scale, y / scale, z / scale, w / scale)
+operator fun QuaternionView.div(scale: Double): QuaternionView = Quaternion(x / scale, y / scale, z / scale, w / scale)
 
 /** Composes rotations: `(first * second)` applies second, then first. */
-operator fun QuaternionView.times(other: QuaternionView): QuaternionView = Geometry.quaternion(
+operator fun QuaternionView.times(other: QuaternionView): QuaternionView = Quaternion(
     w * other.x + x * other.w + y * other.z - z * other.y,
     w * other.y - x * other.z + y * other.w + z * other.x,
     w * other.z + x * other.y - y * other.x + z * other.w,
     w * other.w - x * other.x - y * other.y - z * other.z
 )
 
-fun QuaternionView.withX(x: Double): QuaternionView = Geometry.quaternion(x, y, z, w)
-fun QuaternionView.withY(y: Double): QuaternionView = Geometry.quaternion(x, y, z, w)
-fun QuaternionView.withZ(z: Double): QuaternionView = Geometry.quaternion(x, y, z, w)
-fun QuaternionView.withW(w: Double): QuaternionView = Geometry.quaternion(x, y, z, w)
+fun QuaternionView.withX(x: Double): QuaternionView = Quaternion(x, y, z, w)
+fun QuaternionView.withY(y: Double): QuaternionView = Quaternion(x, y, z, w)
+fun QuaternionView.withZ(z: Double): QuaternionView = Quaternion(x, y, z, w)
+fun QuaternionView.withW(w: Double): QuaternionView = Quaternion(x, y, z, w)
 
 /** Normalizes without checking for zero length or non-finite components. */
 fun QuaternionView.normalizedUnsafe(): QuaternionView = this / length
@@ -89,7 +89,7 @@ fun QuaternionView.normalizedUnsafe(): QuaternionView = this / length
  */
 fun QuaternionView.normalizedOrNull(tolerance: Double = 1.0E-8): QuaternionView? {
     require(tolerance.isFinite() && tolerance >= 0.0)
-    val quaternion = Geometry.quaternion(x, y, z, w)
+    val quaternion = Quaternion(x, y, z, w)
     if (!quaternion.isFinite()) return null
 
     // Compare lengths to avoid overflow or underflow when squaring the quaternion length.
@@ -112,7 +112,7 @@ fun QuaternionView.normalized(tolerance: Double = 1.0E-8): QuaternionView =
     requireNotNull(normalizedOrNull(tolerance)) { "Cannot normalize a degenerate or non-finite quaternion" }
 
 /** For a unit quaternion, conjugation reverses the rotation. */
-fun QuaternionView.conjugate(): QuaternionView = Geometry.quaternion(-x, -y, -z, w)
+fun QuaternionView.conjugate(): QuaternionView = Quaternion(-x, -y, -z, w)
 
 /** Algebraic inverse, including non-unit quaternions. Zero has no inverse and produces NaN. */
 fun QuaternionView.inverse(): QuaternionView = conjugate() / lengthSquared
@@ -124,7 +124,7 @@ fun QuaternionView.inverseOrNull(): QuaternionView? {
     val w = w
     val squareSum = x * x + y * y + z * z + w * w
     if (squareSum == 0.0 || !squareSum.isFinite()) return null
-    return Geometry.quaternion(-x / squareSum, -y / squareSum, -z / squareSum, w / squareSum)
+    return Quaternion(-x / squareSum, -y / squareSum, -z / squareSum, w / squareSum)
 }
 
 fun QuaternionView.requireInverse(): QuaternionView =
@@ -132,7 +132,7 @@ fun QuaternionView.requireInverse(): QuaternionView =
 
 /** Rotates a vector by this unit quaternion, preserving its length. */
 fun QuaternionView.rotateVector(vector: VectorView): VectorView {
-    val imaginary = Geometry.vector(x, y, z)
+    val imaginary = Vector(x, y, z)
     val twiceCross = imaginary.cross(vector) * 2.0
     return vector + twiceCross * w + imaginary.cross(twiceCross)
 }
@@ -161,7 +161,7 @@ fun QuaternionView.angleDegrees(): Double = Math.toDegrees(angleRadians())
 
 /** Axis of the shortest rotation. Identity has no unique axis and returns [resultIfIdentity]. */
 fun QuaternionView.rotationAxis(resultIfIdentity: VectorView = Vectors.UnitX): VectorView {
-    val imaginary = Geometry.vector(x, y, z)
+    val imaginary = Vector(x, y, z)
     val squareSum = imaginary.lengthSquared
     if (squareSum == 0.0) return resultIfIdentity
     val direction = if (w < 0.0) -imaginary else imaginary
@@ -169,7 +169,7 @@ fun QuaternionView.rotationAxis(resultIfIdentity: VectorView = Vectors.UnitX): V
 }
 
 /** Component-wise interpolation; does not normalize or choose a rotation path. */
-fun QuaternionView.lerp(target: QuaternionView, alpha: Double): QuaternionView = Geometry.quaternion(
+fun QuaternionView.lerp(target: QuaternionView, alpha: Double): QuaternionView = Quaternion(
     x + (target.x - x) * alpha,
     y + (target.y - y) * alpha,
     z + (target.z - z) * alpha,
@@ -211,16 +211,16 @@ fun QuaternionView.sphericalInterpolate(target: QuaternionView, alpha: Double): 
 }
 
 object Quaternions {
-    val Zero: QuaternionView = Geometry.quaternion(0.0, 0.0, 0.0, 0.0)
-    val Identity: QuaternionView = Geometry.quaternion(0.0, 0.0, 0.0, 1.0)
+    val Zero: QuaternionView = Quaternion(0.0, 0.0, 0.0, 0.0)
+    val Identity: QuaternionView = Quaternion(0.0, 0.0, 0.0, 1.0)
 
-    fun of(x: Double, y: Double, z: Double, w: Double): QuaternionView = Geometry.quaternion(x, y, z, w)
+    fun of(x: Double, y: Double, z: Double, w: Double): QuaternionView = Quaternion(x, y, z, w)
 
     /** Axis must be normalized; positive angles follow [VectorView.rotateAroundAxisRadians]. */
     fun fromAxisAngleRadians(axis: VectorView, angleRadians: Double): QuaternionView {
         val halfAngle = angleRadians * 0.5
         val scale = sin(halfAngle)
-        return Geometry.quaternion(axis.x * scale, axis.y * scale, axis.z * scale, cos(halfAngle))
+        return Quaternion(axis.x * scale, axis.y * scale, axis.z * scale, cos(halfAngle))
     }
 
     fun fromAxisAngleDegrees(axis: VectorView, angleDegrees: Double): QuaternionView =
@@ -257,22 +257,22 @@ object Quaternions {
         val quaternion = when {
             trace > 0.0 -> {
                 val scale = 2.0 * sqrt(trace + 1.0)
-                Geometry.quaternion((up.z - forward.y) / scale, (forward.x - right.z) / scale, (right.y - up.x) / scale, scale * 0.25)
+                Quaternion((up.z - forward.y) / scale, (forward.x - right.z) / scale, (right.y - up.x) / scale, scale * 0.25)
             }
 
             right.x > up.y && right.x > forward.z -> {
                 val scale = 2.0 * sqrt(1.0 + right.x - up.y - forward.z)
-                Geometry.quaternion(scale * 0.25, (up.x + right.y) / scale, (forward.x + right.z) / scale, (up.z - forward.y) / scale)
+                Quaternion(scale * 0.25, (up.x + right.y) / scale, (forward.x + right.z) / scale, (up.z - forward.y) / scale)
             }
 
             up.y > forward.z -> {
                 val scale = 2.0 * sqrt(1.0 + up.y - right.x - forward.z)
-                Geometry.quaternion((up.x + right.y) / scale, scale * 0.25, (forward.y + up.z) / scale, (forward.x - right.z) / scale)
+                Quaternion((up.x + right.y) / scale, scale * 0.25, (forward.y + up.z) / scale, (forward.x - right.z) / scale)
             }
 
             else -> {
                 val scale = 2.0 * sqrt(1.0 + forward.z - right.x - up.y)
-                Geometry.quaternion((forward.x + right.z) / scale, (forward.y + up.z) / scale, scale * 0.25, (right.y - up.x) / scale)
+                Quaternion((forward.x + right.z) / scale, (forward.y + up.z) / scale, scale * 0.25, (right.y - up.x) / scale)
             }
         }
         return quaternion.normalized()

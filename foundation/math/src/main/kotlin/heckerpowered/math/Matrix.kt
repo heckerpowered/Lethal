@@ -90,22 +90,22 @@ interface MatrixView : Interpolatable<MatrixView>, Iterable<Double> {
 
     /** Local +X axis of the linear 3 x 3 part, including scale and shear. */
     val axisX: VectorView
-        get() = Geometry.vector(m00, m10, m20)
+        get() = Vector(m00, m10, m20)
 
     /** Local +Y axis of the linear 3 x 3 part, including scale and shear. */
     val axisY: VectorView
-        get() = Geometry.vector(m01, m11, m21)
+        get() = Vector(m01, m11, m21)
 
     /** Local +Z axis of the linear 3 x 3 part, including scale and shear. */
     val axisZ: VectorView
-        get() = Geometry.vector(m02, m12, m22)
+        get() = Vector(m02, m12, m22)
 
     /** Linear column lengths; these do not uniquely determine signed scale. */
     val axisLengths: VectorView
-        get() = Geometry.vector(axisX.length, axisY.length, axisZ.length)
+        get() = Vector(axisX.length, axisY.length, axisZ.length)
 
     val translation: VectorView
-        get() = Geometry.vector(m03, m13, m23)
+        get() = Vector(m03, m13, m23)
 
     /** Linear interpolation of coefficients; does not preserve rigid rotations. Alpha is not clamped. */
     override fun interpolate(target: MatrixView, alpha: Double): MatrixView = combineComponents(target) { start, end ->
@@ -198,14 +198,14 @@ fun MatrixView.safeInverse(tolerance: Double = 0.0, resultIfSingular: MatrixView
  * Transforms (x, y, z, 1), returning XYZ without perspective division.
  * For projective matrices, use [projectPosition] to divide by the resulting W.
  */
-fun MatrixView.transformPosition(position: VectorView): VectorView = Geometry.vector(
+fun MatrixView.transformPosition(position: VectorView): VectorView = Vector(
     m00 * position.x + m01 * position.y + m02 * position.z + m03,
     m10 * position.x + m11 * position.y + m12 * position.z + m13,
     m20 * position.x + m21 * position.y + m22 * position.z + m23
 )
 
 /** Applies the linear 3 x 3 part, ignoring translation and the homogeneous output W. */
-fun MatrixView.transformVector(vector: VectorView): VectorView = Geometry.vector(
+fun MatrixView.transformVector(vector: VectorView): VectorView = Vector(
     m00 * vector.x + m01 * vector.y + m02 * vector.z,
     m10 * vector.x + m11 * vector.y + m12 * vector.z,
     m20 * vector.x + m21 * vector.y + m22 * vector.z
@@ -248,7 +248,7 @@ fun MatrixView.projectPosition(position: VectorView): VectorView {
     val y = position.y
     val z = position.z
     val homogeneousW = m30 * x + m31 * y + m32 * z + m33
-    return Geometry.vector(
+    return Vector(
         (m00 * x + m01 * y + m02 * z + m03) / homogeneousW,
         (m10 * x + m11 * y + m12 * z + m13) / homogeneousW,
         (m20 * x + m21 * y + m22 * z + m23) / homogeneousW
@@ -315,7 +315,7 @@ fun MatrixView.toAffine(): AffineTransformView {
     val snapshot = Matrices.copyOf(this)
     require(snapshot.isAffine()) { "A projective matrix cannot be represented as an affine transform" }
 
-    return Geometry.affineTransform(
+    return AffineTransform(
         axisX = snapshot.axisX,
         axisY = snapshot.axisY,
         axisZ = snapshot.axisZ,
@@ -344,7 +344,7 @@ object Matrices {
         m10: Double, m11: Double, m12: Double, m13: Double,
         m20: Double, m21: Double, m22: Double, m23: Double,
         m30: Double, m31: Double, m32: Double, m33: Double,
-    ): MatrixView = Geometry.matrix(
+    ): MatrixView = Matrix(
         m00, m01, m02, m03,
         m10, m11, m12, m13,
         m20, m21, m22, m23,
