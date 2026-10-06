@@ -19,6 +19,7 @@ plugins {
 rootProject.name = "Lethal"
 
 include("foundation:math")
+include("foundation:nbt")
 
 include("common")
 include("bridge")
