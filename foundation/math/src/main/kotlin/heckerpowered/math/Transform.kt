@@ -39,7 +39,7 @@ interface TransformView : Interpolatable<TransformView> {
         rotation.rotateVector(vector)
 
     override fun interpolate(target: TransformView, alpha: Double): TransformView =
-        Geometry.transform(
+        Transform(
             translation = translation.interpolate(target.translation, alpha),
             rotation = rotation.interpolate(target.rotation, alpha),
             scale = scale.interpolate(target.scale, alpha),
@@ -72,7 +72,7 @@ fun TransformView.tryCompose(other: TransformView): TransformView? {
     val scaleCommutesWithOtherRotation = scale.allComponentsEqual(0.0) || other.rotation.isIdentity(0.0)
     if (!scaleCommutesWithOtherRotation) return null
 
-    return Geometry.transform(
+    return Transform(
         translation = transformPosition(other.translation),
         rotation = rotation * other.rotation,
         scale = scale * other.scale,
@@ -90,10 +90,10 @@ operator fun TransformView.times(other: TransformView): AffineTransformView =
     compose(other)
 
 object Transforms {
-    val Identity: TransformView = Geometry.transform(Vectors.Zero, Quaternions.Identity, Vectors.One)
+    val Identity: TransformView = Transform(Vectors.Zero, Quaternions.Identity, Vectors.One)
 
     fun of(translation: VectorView = Vectors.Zero, rotation: QuaternionView = Quaternions.Identity, scale: VectorView = Vectors.One): TransformView =
-        Geometry.transform(translation, rotation, scale)
+        Transform(translation, rotation, scale)
 
     fun fromTranslation(translation: VectorView): TransformView =
         of(translation = translation)
