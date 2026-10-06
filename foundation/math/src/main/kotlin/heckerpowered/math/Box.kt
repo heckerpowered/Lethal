@@ -17,16 +17,16 @@ interface BoxView {
     val maxZ: Double
 
     val min: VectorView
-        get() = Geometry.vector(minX, minY, minZ)
+        get() = Vector(minX, minY, minZ)
     val max: VectorView
-        get() = Geometry.vector(maxX, maxY, maxZ)
+        get() = Vector(maxX, maxY, maxZ)
 
     val center: VectorView
-        get() = Geometry.vector((minX + maxX) * 0.5, (minY + maxY) * 0.5, (minZ + maxZ) * 0.5)
+        get() = Vector((minX + maxX) * 0.5, (minY + maxY) * 0.5, (minZ + maxZ) * 0.5)
     val size: VectorView
-        get() = Geometry.vector(maxX - minX, maxY - minY, maxZ - minZ)
+        get() = Vector(maxX - minX, maxY - minY, maxZ - minZ)
     val extent: VectorView
-        get() = Geometry.vector((maxX - minX) * 0.5, (maxY - minY) * 0.5, (maxZ - minZ) * 0.5)
+        get() = Vector((maxX - minX) * 0.5, (maxY - minY) * 0.5, (maxZ - minZ) * 0.5)
     val volume: Double
         get() = (maxX - minX) * (maxY - minY) * (maxZ - minZ)
 }
@@ -69,38 +69,38 @@ data class BoxIntersection(
 }
 
 fun BoxView.expandedBy(amount: Double): BoxView {
-    return Geometry.box(minX - amount, minY - amount, minZ - amount, maxX + amount, maxY + amount, maxZ + amount)
+    return Box(minX - amount, minY - amount, minZ - amount, maxX + amount, maxY + amount, maxZ + amount)
 }
 
 fun BoxView.expandedBy(amount: VectorView): BoxView {
-    return Geometry.box(minX - amount.x, minY - amount.y, minZ - amount.z, maxX + amount.x, maxY + amount.y, maxZ + amount.z)
+    return Box(minX - amount.x, minY - amount.y, minZ - amount.z, maxX + amount.x, maxY + amount.y, maxZ + amount.z)
 }
 
 fun BoxView.expandedBy(negative: VectorView, positive: VectorView): BoxView {
-    return Geometry.box(minX - negative.x, minY - negative.y, minZ - negative.z, maxX + positive.x, maxY + positive.y, maxZ + positive.z)
+    return Box(minX - negative.x, minY - negative.y, minZ - negative.z, maxX + positive.x, maxY + positive.y, maxZ + positive.z)
 }
 
 fun BoxView.translatedBy(offset: VectorView): BoxView {
-    return Geometry.box(minX + offset.x, minY + offset.y, minZ + offset.z, maxX + offset.x, maxY + offset.y, maxZ + offset.z)
+    return Box(minX + offset.x, minY + offset.y, minZ + offset.z, maxX + offset.x, maxY + offset.y, maxZ + offset.z)
 }
 
 fun BoxView.movedTo(destination: VectorView): BoxView {
     val offsetX = destination.x - (minX + maxX) * 0.5
     val offsetY = destination.y - (minY + maxY) * 0.5
     val offsetZ = destination.z - (minZ + maxZ) * 0.5
-    return Geometry.box(minX + offsetX, minY + offsetY, minZ + offsetZ, maxX + offsetX, maxY + offsetY, maxZ + offsetZ)
+    return Box(minX + offsetX, minY + offsetY, minZ + offsetZ, maxX + offsetX, maxY + offsetY, maxZ + offsetZ)
 }
 
 fun BoxView.union(point: VectorView): BoxView {
-    return Geometry.box(minOf(minX, point.x), minOf(minY, point.y), minOf(minZ, point.z), maxOf(maxX, point.x), maxOf(maxY, point.y), maxOf(maxZ, point.z))
+    return Box(minOf(minX, point.x), minOf(minY, point.y), minOf(minZ, point.z), maxOf(maxX, point.x), maxOf(maxY, point.y), maxOf(maxZ, point.z))
 }
 
 fun BoxView.union(other: BoxView): BoxView {
-    return Geometry.box(minOf(minX, other.minX), minOf(minY, other.minY), minOf(minZ, other.minZ), maxOf(maxX, other.maxX), maxOf(maxY, other.maxY), maxOf(maxZ, other.maxZ))
+    return Box(minOf(minX, other.minX), minOf(minY, other.minY), minOf(minZ, other.minZ), maxOf(maxX, other.maxX), maxOf(maxY, other.maxY), maxOf(maxZ, other.maxZ))
 }
 
 fun BoxView.closestPointTo(point: VectorView): VectorView {
-    return Geometry.vector(point.x.coerceIn(minX, maxX), point.y.coerceIn(minY, maxY), point.z.coerceIn(minZ, maxZ))
+    return Vector(point.x.coerceIn(minX, maxX), point.y.coerceIn(minY, maxY), point.z.coerceIn(minZ, maxZ))
 }
 
 fun BoxView.distanceSquaredTo(point: VectorView): Double {
@@ -174,22 +174,22 @@ fun BoxView.intersectsHorizontal(other: BoxView): Boolean {
 
 fun BoxView.overlap(other: BoxView): BoxView {
     if (!intersects(other)) {
-        return Geometry.box(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        return Box(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     }
 
-    return Geometry.box(maxOf(minX, other.minX), maxOf(minY, other.minY), maxOf(minZ, other.minZ), minOf(maxX, other.maxX), minOf(maxY, other.maxY), minOf(maxZ, other.maxZ))
+    return Box(maxOf(minX, other.minX), maxOf(minY, other.minY), maxOf(minZ, other.minZ), minOf(maxX, other.maxX), minOf(maxY, other.maxY), minOf(maxZ, other.maxZ))
 }
 
 fun BoxView.vertices(): Array<VectorView> {
     return arrayOf(
-        Geometry.vector(minX, minY, minZ),
-        Geometry.vector(minX, minY, maxZ),
-        Geometry.vector(minX, maxY, minZ),
-        Geometry.vector(minX, maxY, maxZ),
-        Geometry.vector(maxX, minY, minZ),
-        Geometry.vector(maxX, minY, maxZ),
-        Geometry.vector(maxX, maxY, minZ),
-        Geometry.vector(maxX, maxY, maxZ)
+        Vector(minX, minY, minZ),
+        Vector(minX, minY, maxZ),
+        Vector(minX, maxY, minZ),
+        Vector(minX, maxY, maxZ),
+        Vector(maxX, minY, minZ),
+        Vector(maxX, minY, maxZ),
+        Vector(maxX, maxY, minZ),
+        Vector(maxX, maxY, maxZ)
     )
 }
 
@@ -384,7 +384,7 @@ fun BoxView.transformedBy(transform: AffineTransformView): BoxView {
     val maxY = maxY
     val maxZ = maxZ
 
-    val center = Geometry.vector(
+    val center = Vector(
         (minX + maxX) * 0.5,
         (minY + maxY) * 0.5,
         (minZ + maxZ) * 0.5,
@@ -412,7 +412,7 @@ fun BoxView.transformedBy(transform: AffineTransformView): BoxView {
             abs(transform.axisY.z) * extentY +
             abs(transform.axisZ.z) * extentZ
 
-    return Geometry.box(
+    return Box(
         transformedCenter.x - transformedExtentX,
         transformedCenter.y - transformedExtentY,
         transformedCenter.z - transformedExtentZ,
