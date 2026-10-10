@@ -22,6 +22,7 @@ dependencies {
     add("ksp", project(":render:render-hardware-interface-codegen"))
 
     implementation(project(":bridge"))
+    implementation(project(":foundation:nbt"))
     implementation(project(":foundation:math"))
     implementation(project(":render:render-hardware-interface"))
     implementation(project(":render:render-engine"))
