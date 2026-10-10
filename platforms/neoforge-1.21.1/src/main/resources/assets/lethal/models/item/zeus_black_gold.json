@@ -1,0 +1,7 @@
+{
+  "parent": "lethal:item/zeus",
+  "textures": {
+    "5": "lethal:items/zeus_black_gold",
+    "particle": "lethal:items/zeus_black_gold"
+  }
+}

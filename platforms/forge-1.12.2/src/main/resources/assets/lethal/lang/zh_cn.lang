@@ -29,13 +29,13 @@ entity.lethal.enhanced_star_judgement.name=增幅星辰审判
 
 key.lethal.skill.berserk=宙斯 狂暴
 item.lethal.cosmic_starshatter_shotgun.name=瀚宇碎星霰弹枪
-item.lethal.zeus_helmet.name=宙斯头盔
-item.lethal.zeus_chestplate.name=宙斯胸甲
-item.lethal.zeus_leggings.name=宙斯护腿
-item.lethal.zeus_boots.name=宙斯靴子
+item.lethal.zeus_helmet.name=天神头盔
+item.lethal.zeus_chestplate.name=天神胸甲
+item.lethal.zeus_leggings.name=天神护腿
+item.lethal.zeus_boots.name=天神靴子
 
 item.lethal.zeus_blood.name=血族宙斯
-enchantment.lethal.one_hit_kill=一击致命
+enchantment.lethal.deathblow=一击致命
 lethal.perk.zeus.missile=导弹
 lethal.perk.zeus.judgement=审判
 lethal.perk.zeus.berserk=狂暴

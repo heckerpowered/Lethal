@@ -1,0 +1,11 @@
+{
+  "acesStablePackage": "v2.0.0+2025.04.04",
+  "acesPackageCommit": "35e1e6ac2c26ec75433547d5d0a3a881f39bd9f5",
+  "acesCoreCommit": "2d7af39344725aaa8ac3bf1746693c9a1d6c4792",
+  "acesOutputCommit": "aab74723f76728c37345ed01e51ebb24fb1f2f1f",
+  "generator": "OpenColorIO 2.6.0",
+  "builtin": "ACES-OUTPUT - ACES2065-1_to_CIE-XYZ-D65 - SDR-100nit-REC709_2.0",
+  "input": "linear Rec709/sRGB D65",
+  "display": "100 nit SDR Rec709 D65",
+  "encoding": "sRGB or explicit display-linear"
+}

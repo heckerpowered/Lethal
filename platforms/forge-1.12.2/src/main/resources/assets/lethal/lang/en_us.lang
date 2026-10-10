@@ -35,7 +35,7 @@ item.lethal.zeus_leggings.name=Zeus Leggings
 item.lethal.zeus_boots.name=Zeus Boots
 
 item.lethal.zeus_blood.name=Blood Zeus
-enchantment.lethal.one_hit_kill=Deathblow
+enchantment.lethal.deathblow=Deathblow
 lethal.perk.zeus.missile=Missile
 lethal.perk.zeus.judgement=Judgment
 lethal.perk.zeus.berserk=Berserk
