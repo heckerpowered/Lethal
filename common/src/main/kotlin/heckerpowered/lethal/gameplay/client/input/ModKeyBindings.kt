@@ -13,6 +13,8 @@ import heckerpowered.lethal.Constants
 object ModKeyBindings {
     private val SkillCategory = Constants.identifier("weapon/skills")
 
+    val ZeusCapture = register("zeus/capture", KeyboardKey.B)
+
     val PrimarySkill = register("skill/primary", KeyboardKey.X)
     val SecondarySkill = register("skill/secondary", KeyboardKey.C)
     val UltimateSkill = register("skill/ultimate", KeyboardKey.V)
