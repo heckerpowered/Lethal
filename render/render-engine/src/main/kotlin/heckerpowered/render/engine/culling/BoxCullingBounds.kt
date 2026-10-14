@@ -5,23 +5,25 @@
 
 package heckerpowered.render.engine.culling
 
-import heckerpowered.math.*
+import heckerpowered.math.AffineTransformView
+import heckerpowered.math.BoxView
+import heckerpowered.math.transformedBy
 import heckerpowered.render.engine.view.Frustum
 
 /**
  * Uses a conservative local box to exclude contributions completely outside the view.
  *
- * Construction copies the coordinates, without deriving bounds from geometry. Rotation, scale,
+ * Construction captures stable coordinates, without deriving bounds from geometry. Rotation, scale,
  * reflection and shear are applied in Double coordinates. Invalid bounds, non-finite placement,
  * or overflow leave the contribution eligible rather than proving exclusion.
  */
 class BoxCullingBounds(bounds: BoxView) : CullingBounds {
-    private val localBox = Box(bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ)
+    private val localBox = bounds.snapshot()
 
     override fun canCull(frustum: Frustum, localToWorld: AffineTransformView): Boolean {
         if (!localBox.isUsableForCulling()) return false
 
-        val placement = AffineTransforms.copyOf(localToWorld)
+        val placement = localToWorld.snapshot()
         if (!placement.isFinite()) return false
 
         val worldBox = localBox.transformedBy(placement)
