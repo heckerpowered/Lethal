@@ -16,7 +16,7 @@ import heckerpowered.render.engine.view.Frustum
  * or overflow leave the contribution eligible rather than proving exclusion.
  */
 class BoxCullingBounds(bounds: BoxView) : CullingBounds {
-    private val localBox = Geometry.box(bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ)
+    private val localBox = Box(bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ)
 
     override fun canCull(frustum: Frustum, localToWorld: AffineTransformView): Boolean {
         if (!localBox.isUsableForCulling()) return false
