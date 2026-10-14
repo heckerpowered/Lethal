@@ -5,7 +5,7 @@
 
 package heckerpowered.render.engine.pass
 
-import heckerpowered.render.engine.draw.PreparedDrawCommand
+import heckerpowered.render.engine.draw.PreparedDraw
 import heckerpowered.render.engine.prepare.PassPreparation
 import heckerpowered.render.engine.scene.RenderElement
 import heckerpowered.render.engine.scene.RenderSubmission
@@ -18,5 +18,5 @@ import heckerpowered.render.engine.scene.RenderSubmission
  * for interpreting local-space data. Processor implementations must preserve their element's semantics.
  */
 internal fun interface RenderElementPassProcessor<T : RenderElement> {
-    fun prepare(element: T, submission: RenderSubmission, pass: RasterPass, preparation: PassPreparation): List<PreparedDrawCommand>
+    fun prepare(element: T, submission: RenderSubmission, pass: RasterPass, preparation: PassPreparation): List<PreparedDraw>
 }
