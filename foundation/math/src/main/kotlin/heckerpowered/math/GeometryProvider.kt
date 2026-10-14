@@ -7,9 +7,17 @@ package heckerpowered.math
 
 import java.util.*
 
+/**
+ * Selects the host or freestanding representation used by the ordinary geometry constructors.
+ *
+ * Scalar factories must return stable values for the supplied components. Composite factories
+ * retain their supplied child references; with stable children the resulting value must also be
+ * stable. They do not implicitly snapshot live children or normalize supplied coefficients.
+ */
 interface GeometryProvider {
     companion object {
-        val Freestanding: GeometryProvider = FreestandingGeometryProvider
+        val Freestanding: GeometryProvider
+            get() = FreestandingGeometryProvider
         val Hosting: GeometryProvider?
             get() = ServiceLoader
                 .load(GeometryProvider::class.java, GeometryProvider::class.java.classLoader)
@@ -154,7 +162,9 @@ private data class FreestandingVector(
     override val x: Double,
     override val y: Double,
     override val z: Double,
-) : VectorView
+) : VectorView {
+    override fun snapshot(): VectorView = this
+}
 
 private data class FreestandingBox(
     override val minX: Double,
@@ -170,51 +180,103 @@ private data class FreestandingBox(
 
     override val max: VectorView
         get() = FreestandingGeometryProvider.vector(maxX, maxY, maxZ)
+
+    override fun snapshot(): BoxView = this
 }
 
 private data class FreestandingRotator(
     override val pitch: Double,
     override val yaw: Double,
     override val roll: Double = 0.0,
-) : RotatorView
+) : RotatorView {
+    override fun snapshot(): RotatorView = this
+}
 
 private data class FreestandingRay(
     override val origin: VectorView,
     override val direction: VectorView,
-) : RayView
+) : RayView {
+    override fun snapshot(): RayView {
+        val sourceOrigin = this.origin
+        val sourceDirection = this.direction
+        val origin = sourceOrigin.snapshot()
+        val direction = sourceDirection.snapshot()
+        if (origin === sourceOrigin && direction === sourceDirection) return this
+        return Ray(origin, direction)
+    }
+}
 
 private data class FreestandingQuaternion(
     override val x: Double,
     override val y: Double,
     override val z: Double,
     override val w: Double,
-) : QuaternionView
+) : QuaternionView {
+    override fun snapshot(): QuaternionView = this
+}
 
 private data class FreestandingPlane(
     override val x: Double,
     override val y: Double,
     override val z: Double,
     override val w: Double,
-) : PlaneView
+) : PlaneView {
+    override fun snapshot(): PlaneView = this
+}
 
 private data class FreestandingTransform(
     override val translation: VectorView,
     override val rotation: QuaternionView,
     override val scale: VectorView,
-) : TransformView
+) : TransformView {
+    override fun snapshot(): TransformView {
+        val sourceTranslation = this.translation
+        val sourceRotation = this.rotation
+        val sourceScale = this.scale
+        val translation = sourceTranslation.snapshot()
+        val rotation = sourceRotation.snapshot()
+        val scale = sourceScale.snapshot()
+        if (translation === sourceTranslation && rotation === sourceRotation && scale === sourceScale) return this
+        return Transform(translation, rotation, scale)
+    }
+}
 
 private data class FreestandingAffineTransform(
     override val axisX: VectorView,
     override val axisY: VectorView,
     override val axisZ: VectorView,
     override val translation: VectorView,
-) : AffineTransformView
+) : AffineTransformView {
+    override fun snapshot(): AffineTransformView {
+        val sourceAxisX = this.axisX
+        val sourceAxisY = this.axisY
+        val sourceAxisZ = this.axisZ
+        val sourceTranslation = this.translation
+        val axisX = sourceAxisX.snapshot()
+        val axisY = sourceAxisY.snapshot()
+        val axisZ = sourceAxisZ.snapshot()
+        val translation = sourceTranslation.snapshot()
+        if (axisX === sourceAxisX && axisY === sourceAxisY && axisZ === sourceAxisZ && translation === sourceTranslation) return this
+        return AffineTransform(axisX, axisY, axisZ, translation)
+    }
+}
 
 private data class FreestandingBasis(
     override val right: VectorView,
     override val up: VectorView,
     override val forward: VectorView,
-) : BasisView
+) : BasisView {
+    override fun snapshot(): BasisView {
+        val sourceRight = this.right
+        val sourceUp = this.up
+        val sourceForward = this.forward
+        val right = sourceRight.snapshot()
+        val up = sourceUp.snapshot()
+        val forward = sourceForward.snapshot()
+        if (right === sourceRight && up === sourceUp && forward === sourceForward) return this
+        return Basis(right, up, forward)
+    }
+}
 
 private data class FreestandingMatrix(
     override val m00: Double,
@@ -233,4 +295,6 @@ private data class FreestandingMatrix(
     override val m31: Double,
     override val m32: Double,
     override val m33: Double,
-) : MatrixView
+) : MatrixView {
+    override fun snapshot(): MatrixView = this
+}

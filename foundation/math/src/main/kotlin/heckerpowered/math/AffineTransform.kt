@@ -58,6 +58,19 @@ interface AffineTransformView : Interpolatable<AffineTransformView> {
                 axisZ * vector.z
 
     /**
+     * Stabilizes child values recursively. Immutable children may be shared; sampling does not
+     * synchronize concurrent changes or preserve mutable object-graph alias identity.
+     * Delegating wrappers that override values must also override this method to sample the wrapper.
+     */
+    fun snapshot(): AffineTransformView {
+        val axisX = this.axisX
+        val axisY = this.axisY
+        val axisZ = this.axisZ
+        val translation = this.translation
+        return AffineTransform(axisX.snapshot(), axisY.snapshot(), axisZ.snapshot(), translation.snapshot())
+    }
+
+    /**
      * Linearly interpolates every coefficient of the affine transformation.
      *
      * The result remains affine, but does not generally preserve properties such

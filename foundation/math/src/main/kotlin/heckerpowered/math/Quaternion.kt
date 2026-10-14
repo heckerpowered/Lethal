@@ -52,6 +52,12 @@ interface QuaternionView : Interpolatable<QuaternionView> {
         else -> throw IllegalArgumentException("Quaternion component index must be between 0 and 3: $index")
     }
 
+    /**
+     * Returns stable values, reusing this instance when it is immutable. Source sampling is
+     * sequential and does not synchronize concurrent changes or promise a distinct identity.
+     */
+    fun snapshot(): QuaternionView = Quaternion(x, y, z, w)
+
     override fun interpolate(target: QuaternionView, alpha: Double): QuaternionView = sphericalInterpolate(target, alpha)
 }
 

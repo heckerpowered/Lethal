@@ -80,13 +80,13 @@ interface MatrixView : Interpolatable<MatrixView>, Iterable<Double> {
 
     val determinant: Double
         get() {
-            val snapshot = Matrices.copyOf(this)
+            val snapshot = this.snapshot()
             return (0..3).sumOf { column -> snapshot[0, column] * snapshot.cofactor(0, column) }
         }
 
     /** Determinant of the linear 3 x 3 part, including scale and shear, computed from one snapshot. */
     val linearDeterminant: Double
-        get() = Matrices.copyOf(this).computeLinearDeterminant()
+        get() = this.snapshot().computeLinearDeterminant()
 
     /** Local +X axis of the linear 3 x 3 part, including scale and shear. */
     val axisX: VectorView
@@ -106,6 +106,18 @@ interface MatrixView : Interpolatable<MatrixView>, Iterable<Double> {
 
     val translation: VectorView
         get() = Vector(m03, m13, m23)
+
+    /**
+     * Returns stable values, reusing this instance when it is immutable. Source sampling is
+     * sequential and does not synchronize concurrent changes or promise a distinct identity.
+     * Delegating wrappers that override values must also override this method to sample the wrapper.
+     */
+    fun snapshot(): MatrixView = Matrix(
+        m00, m01, m02, m03,
+        m10, m11, m12, m13,
+        m20, m21, m22, m23,
+        m30, m31, m32, m33,
+    )
 
     /** Linear interpolation of coefficients; does not preserve rigid rotations. Alpha is not clamped. */
     override fun interpolate(target: MatrixView, alpha: Double): MatrixView = combineComponents(target) { start, end ->
@@ -128,6 +140,13 @@ interface MatrixView : Interpolatable<MatrixView>, Iterable<Double> {
 
 operator fun MatrixView.plus(other: MatrixView): MatrixView = combineComponents(other) { left, right -> left + right }
 operator fun MatrixView.minus(other: MatrixView): MatrixView = combineComponents(other) { left, right -> left - right }
+
+/** Samples a complete zero-based row into an independent value; concurrent source changes are not synchronized. */
+fun MatrixView.row(index: Int): Vector4 = Vector4(this[index, 0], this[index, 1], this[index, 2], this[index, 3])
+
+/** Samples a complete zero-based column into an independent value; concurrent source changes are not synchronized. */
+fun MatrixView.column(index: Int): Vector4 = Vector4(this[0, index], this[1, index], this[2, index], this[3, index])
+
 operator fun MatrixView.unaryMinus(): MatrixView = mapComponents { -it }
 operator fun MatrixView.times(scale: Double): MatrixView = mapComponents { it * scale }
 operator fun MatrixView.div(scale: Double): MatrixView = mapComponents { it / scale }
@@ -216,7 +235,7 @@ fun MatrixView.transformVector(vector: VectorView): VectorView = Vector(
  * use `inverse().projectPosition(position)` for inverse projection. Validation and inversion use the same snapshot.
  */
 fun MatrixView.inverseTransformPosition(position: VectorView): VectorView {
-    val snapshot = Matrices.copyOf(this)
+    val snapshot = this.snapshot()
     require(snapshot.isAffine()) { "Inverse position transformation requires an affine matrix" }
     return snapshot.inverse().transformPosition(position)
 }
@@ -226,7 +245,7 @@ fun MatrixView.inverseTransformPosition(position: VectorView): VectorView {
  * Rejects projective matrices with IllegalArgumentException. Validation and inversion use the same snapshot.
  */
 fun MatrixView.inverseTransformVector(vector: VectorView): VectorView {
-    val snapshot = Matrices.copyOf(this)
+    val snapshot = this.snapshot()
     require(snapshot.isAffine()) { "Inverse vector transformation requires an affine matrix" }
     return snapshot.inverse().transformVector(vector)
 }
@@ -237,7 +256,7 @@ fun MatrixView.inverseTransformVector(vector: VectorView): VectorView {
  * matrix. The result is not normalized. Validation and inversion use the same snapshot.
  */
 fun MatrixView.transformNormal(normal: VectorView): VectorView {
-    val snapshot = Matrices.copyOf(this)
+    val snapshot = this.snapshot()
     require(snapshot.isAffine()) { "Surface normal transformation requires an affine matrix" }
     return snapshot.inverse().transposed().transformVector(normal)
 }
@@ -312,7 +331,7 @@ fun MatrixView.toQuaternion(): QuaternionView = Quaternions.fromBasis(toBasis())
 
 /** Rejects a projective last row instead of discarding it. */
 fun MatrixView.toAffine(): AffineTransformView {
-    val snapshot = Matrices.copyOf(this)
+    val snapshot = this.snapshot()
     require(snapshot.isAffine()) { "A projective matrix cannot be represented as an affine transform" }
 
     return AffineTransform(

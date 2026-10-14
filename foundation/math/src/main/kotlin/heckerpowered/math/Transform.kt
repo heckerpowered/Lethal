@@ -38,6 +38,17 @@ interface TransformView : Interpolatable<TransformView> {
     fun transformVectorNoScale(vector: VectorView): VectorView =
         rotation.rotateVector(vector)
 
+    /**
+     * Stabilizes child values recursively. Immutable children may be shared; sampling does not
+     * synchronize concurrent changes or preserve mutable object-graph alias identity.
+     */
+    fun snapshot(): TransformView {
+        val translation = this.translation
+        val rotation = this.rotation
+        val scale = this.scale
+        return Transform(translation.snapshot(), rotation.snapshot(), scale.snapshot())
+    }
+
     override fun interpolate(target: TransformView, alpha: Double): TransformView =
         Transform(
             translation = translation.interpolate(target.translation, alpha),

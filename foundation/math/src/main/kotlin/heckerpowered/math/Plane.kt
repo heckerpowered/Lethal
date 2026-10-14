@@ -56,7 +56,7 @@ interface PlaneView : Interpolatable<PlaneView> {
     /** Tolerance is the minimum squared normal length, finite and nonnegative. */
     fun isValid(tolerance: Double = 1.0E-8): Boolean {
         require(tolerance.isFinite() && tolerance >= 0.0)
-        val plane = Planes.copyOf(this)
+        val plane = snapshot()
         // Compare lengths to avoid overflow or underflow when squaring the normal length.
         val length = plane.normalLength
         val minimumLength = sqrt(tolerance)
@@ -101,6 +101,12 @@ interface PlaneView : Interpolatable<PlaneView> {
         else -> throw IllegalArgumentException("Plane component index must be between 0 and 3: $index")
     }
 
+    /**
+     * Returns stable coefficients without normalization, reusing this instance when it is immutable. Source sampling is
+     * sequential and does not synchronize concurrent changes or promise a distinct identity.
+     */
+    fun snapshot(): PlaneView = Plane(x, y, z, w)
+
     /** Linear coefficient interpolation; may produce a degenerate plane. Alpha is not clamped. */
     override fun interpolate(target: PlaneView, alpha: Double): PlaneView = Plane(
         x + (target.x - x) * alpha,
@@ -126,7 +132,7 @@ fun PlaneView.flipped(): PlaneView = -this
 
 /** Normalizes all four coefficients without checking degeneracy or non-finite values. */
 fun PlaneView.normalizedUnsafe(): PlaneView {
-    val plane = Planes.copyOf(this)
+    val plane = snapshot()
     return plane / plane.normalLength
 }
 
@@ -137,7 +143,7 @@ fun PlaneView.normalizedUnsafe(): PlaneView {
  */
 fun PlaneView.normalizedOrNull(tolerance: Double = 1.0E-8): PlaneView? {
     require(tolerance.isFinite() && tolerance >= 0.0)
-    val plane = Planes.copyOf(this)
+    val plane = snapshot()
     if (!plane.isFinite()) return null
 
     // Compare lengths to avoid overflow or underflow when squaring the normal length.
@@ -163,21 +169,21 @@ fun PlaneView.normalized(tolerance: Double = 1.0E-8): PlaneView =
 
 /** Moves the plane by [offset], preserving its normal and coefficient scale. */
 fun PlaneView.translated(offset: VectorView): PlaneView {
-    val plane = Planes.copyOf(this)
+    val plane = snapshot()
     return Plane(plane.x, plane.y, plane.z, plane.w + plane.normal.dot(offset))
 }
 
 /** Orthogonal projection onto a finite plane with a nonzero normal. */
 fun PlaneView.projectPosition(position: VectorView): VectorView {
     val plane = requireNotNull(normalizedOrNull(0.0)) { "Cannot project onto an invalid plane" }
-    val point = Vector(position.x, position.y, position.z)
+    val point = position.snapshot()
     return point - plane.normal * plane.evaluate(point)
 }
 
 /** Reflection across a finite plane with a nonzero normal. */
 fun PlaneView.mirrorPosition(position: VectorView): VectorView {
     val plane = requireNotNull(normalizedOrNull(0.0)) { "Cannot reflect across an invalid plane" }
-    val point = Vector(position.x, position.y, position.z)
+    val point = position.snapshot()
     return point - plane.normal * (2.0 * plane.evaluate(point))
 }
 
@@ -191,8 +197,8 @@ fun PlaneView.mirrorPosition(position: VectorView): VectorView {
 fun PlaneView.transformedByOrNull(matrix: MatrixView, tolerance: Double = 0.0): PlaneView? {
     require(tolerance.isFinite() && tolerance >= 0.0)
 
-    val plane = Planes.copyOf(this)
-    val transform = Matrices.copyOf(matrix)
+    val plane = snapshot()
+    val transform = matrix.snapshot()
 
     require(transform.isAffine()) { "Plane transformation requires an affine matrix" }
     if (!plane.isValid(0.0)) return null
@@ -230,7 +236,7 @@ object Planes {
 
     /** Constructs a plane through [point], preserving the supplied normal's length. */
     fun fromPointAndNormal(point: VectorView, normal: VectorView): PlaneView {
-        val direction = Vector(normal.x, normal.y, normal.z)
+        val direction = normal.snapshot()
         return fromNormal(direction, direction.dot(point))
     }
 
@@ -241,7 +247,7 @@ object Planes {
      */
     fun fromPointsOrNull(first: VectorView, second: VectorView, third: VectorView, tolerance: Double = 1.0E-8): PlaneView? {
         require(tolerance.isFinite() && tolerance >= 0.0)
-        val firstPoint = Vector(first.x, first.y, first.z)
+        val firstPoint = first.snapshot()
         val unnormalizedNormal = (second - firstPoint).cross(third - firstPoint)
         val unitNormal = fromNormal(unnormalizedNormal, 0.0).normalizedOrNull(tolerance)?.normal ?: return null
         return fromPointAndNormal(firstPoint, unitNormal).takeIf { it.isFinite() }

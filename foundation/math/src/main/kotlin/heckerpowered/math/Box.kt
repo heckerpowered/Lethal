@@ -29,6 +29,12 @@ interface BoxView {
         get() = Vector((maxX - minX) * 0.5, (maxY - minY) * 0.5, (maxZ - minZ) * 0.5)
     val volume: Double
         get() = (maxX - minX) * (maxY - minY) * (maxZ - minZ)
+
+    /**
+     * Returns stable values, reusing this instance when it is immutable. Source sampling is
+     * sequential and does not synchronize concurrent changes or promise a distinct identity.
+     */
+    fun snapshot(): BoxView = Box(minX, minY, minZ, maxX, maxY, maxZ)
 }
 
 data class BoxIntersection(
@@ -76,6 +82,10 @@ fun BoxView.expandedBy(amount: VectorView): BoxView {
     return Box(minX - amount.x, minY - amount.y, minZ - amount.z, maxX + amount.x, maxY + amount.y, maxZ + amount.z)
 }
 
+fun BoxView.expandedBy(x: Double, y: Double, z: Double): BoxView {
+    return Box(minX - x, minY - y, minZ - z, maxX + x, maxY + y, maxZ + z)
+}
+
 fun BoxView.expandedBy(negative: VectorView, positive: VectorView): BoxView {
     return Box(minX - negative.x, minY - negative.y, minZ - negative.z, maxX + positive.x, maxY + positive.y, maxZ + positive.z)
 }
@@ -106,14 +116,18 @@ fun BoxView.closestPointTo(point: VectorView): VectorView {
 fun BoxView.distanceSquaredTo(point: VectorView): Double {
     var distanceSquared = 0.0
 
-    if (point.x < minX) distanceSquared += (point.x - minX).square()
-    else if (point.x > maxX) distanceSquared += (point.x - maxX).square()
-
-    if (point.y < minY) distanceSquared += (point.y - minY).square()
-    else if (point.y > maxY) distanceSquared += (point.y - maxY).square()
-
-    if (point.z < minZ) distanceSquared += (point.z - minZ).square()
-    else if (point.z > maxZ) distanceSquared += (point.z - maxZ).square()
+    when {
+        point.x < minX -> distanceSquared += (point.x - minX).square()
+        point.x > maxX -> distanceSquared += (point.x - maxX).square()
+    }
+    when {
+        point.y < minY -> distanceSquared += (point.y - minY).square()
+        point.y > maxY -> distanceSquared += (point.y - maxY).square()
+    }
+    when {
+        point.z < minZ -> distanceSquared += (point.z - minZ).square()
+        point.z > maxZ -> distanceSquared += (point.z - maxZ).square()
+    }
 
     return distanceSquared
 }
@@ -394,30 +408,17 @@ fun BoxView.transformedBy(transform: AffineTransformView): BoxView {
     val extentY = (maxY - minY) * 0.5
     val extentZ = (maxZ - minZ) * 0.5
 
-    val transform = AffineTransforms.copyOf(transform)
+    val transform = transform.snapshot()
     val transformedCenter = transform.transformPosition(center)
 
     // For an affine transform A, the AABB extent is |A| * localExtent.
     // This remains exact for the AABB of the transformed box under rotation,
     // non-uniform scale, reflection, and shear.
-    val transformedExtentX = abs(transform.axisX.x) * extentX +
-            abs(transform.axisY.x) * extentY +
-            abs(transform.axisZ.x) * extentZ
-
-    val transformedExtentY = abs(transform.axisX.y) * extentX +
-            abs(transform.axisY.y) * extentY +
-            abs(transform.axisZ.y) * extentZ
-
-    val transformedExtentZ = abs(transform.axisX.z) * extentX +
-            abs(transform.axisY.z) * extentY +
-            abs(transform.axisZ.z) * extentZ
-
-    return Box(
-        transformedCenter.x - transformedExtentX,
-        transformedCenter.y - transformedExtentY,
-        transformedCenter.z - transformedExtentZ,
-        transformedCenter.x + transformedExtentX,
-        transformedCenter.y + transformedExtentY,
-        transformedCenter.z + transformedExtentZ,
+    val transformedExtent = Vector(
+        abs(transform.axisX.x) * extentX + abs(transform.axisY.x) * extentY + abs(transform.axisZ.x) * extentZ,
+        abs(transform.axisX.y) * extentX + abs(transform.axisY.y) * extentY + abs(transform.axisZ.y) * extentZ,
+        abs(transform.axisX.z) * extentX + abs(transform.axisY.z) * extentY + abs(transform.axisZ.z) * extentZ,
     )
+
+    return Box(transformedCenter).expandedBy(transformedExtent)
 }

@@ -11,6 +11,16 @@ interface RayView {
     val origin: VectorView
     val direction: VectorView
 
+    /**
+     * Stabilizes child values recursively. Immutable children may be shared; sampling does not
+     * synchronize concurrent changes or preserve mutable object-graph alias identity.
+     */
+    fun snapshot(): RayView {
+        val origin = this.origin
+        val direction = this.direction
+        return Ray(origin.snapshot(), direction.snapshot())
+    }
+
     fun pointAt(time: Double): VectorView {
         return origin + direction * time
     }

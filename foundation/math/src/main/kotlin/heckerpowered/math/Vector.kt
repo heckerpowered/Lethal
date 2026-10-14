@@ -96,6 +96,12 @@ interface VectorView : Interpolatable<VectorView> {
         }
     }
 
+    /**
+     * Returns stable values, reusing this instance when it is immutable. Source sampling is
+     * sequential and does not synchronize concurrent changes or promise a distinct identity.
+     */
+    fun snapshot(): VectorView = Vector(x, y, z)
+
     override fun interpolate(target: VectorView, alpha: Double): VectorView {
         return Vector(
             x + (target.x - x) * alpha,
