@@ -36,7 +36,7 @@ class Frustum private constructor(
      * is actually visible. Invalid box coordinates or non-finite plane distances also return true.
      */
     fun intersects(box: BoxView): Boolean {
-        val bounds = Geometry.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ)
+        val bounds = box.snapshot()
         if (!bounds.minX.isFinite() || !bounds.minY.isFinite() || !bounds.minZ.isFinite() ||
             !bounds.maxX.isFinite() || !bounds.maxY.isFinite() || !bounds.maxZ.isFinite() ||
             bounds.minX > bounds.maxX || bounds.minY > bounds.maxY || bounds.minZ > bounds.maxZ
@@ -60,57 +60,32 @@ class Frustum private constructor(
          * ```
          */
         fun fromWorldToClip(worldToClip: MatrixView): Frustum {
-            val matrix = Matrices.copyOf(worldToClip)
+            val matrix = worldToClip.snapshot()
+
+            val rowX = matrix.row(0)
+            val rowY = matrix.row(1)
+            val rowZ = matrix.row(2)
+            val rowW = matrix.row(3)
 
             return Frustum(
-                left = halfSpacePlane(
-                    matrix.m30 + matrix.m00,
-                    matrix.m31 + matrix.m01,
-                    matrix.m32 + matrix.m02,
-                    matrix.m33 + matrix.m03,
-                ),
-                right = halfSpacePlane(
-                    matrix.m30 - matrix.m00,
-                    matrix.m31 - matrix.m01,
-                    matrix.m32 - matrix.m02,
-                    matrix.m33 - matrix.m03,
-                ),
+                left = halfSpacePlane(rowW + rowX),
+                right = halfSpacePlane(rowW - rowX),
 
                 // NDC y = -1 is the upper edge of the framebuffer.
-                top = halfSpacePlane(
-                    matrix.m30 + matrix.m10,
-                    matrix.m31 + matrix.m11,
-                    matrix.m32 + matrix.m12,
-                    matrix.m33 + matrix.m13,
-                ),
-                bottom = halfSpacePlane(
-                    matrix.m30 - matrix.m10,
-                    matrix.m31 - matrix.m11,
-                    matrix.m32 - matrix.m12,
-                    matrix.m33 - matrix.m13,
-                ),
+                top = halfSpacePlane(rowW + rowY),
+                bottom = halfSpacePlane(rowW - rowY),
 
                 // The RHI depth interval is 0 <= z <= w.
-                near = halfSpacePlane(
-                    matrix.m20,
-                    matrix.m21,
-                    matrix.m22,
-                    matrix.m23,
-                ),
-                far = halfSpacePlane(
-                    matrix.m30 - matrix.m20,
-                    matrix.m31 - matrix.m21,
-                    matrix.m32 - matrix.m22,
-                    matrix.m33 - matrix.m23,
-                ),
+                near = halfSpacePlane(rowZ),
+                far = halfSpacePlane(rowW - rowZ),
             )
         }
     }
 }
 
 /** Inward boundary of `x * point.x + y * point.y + z * point.z + constant >= 0`. */
-private fun halfSpacePlane(x: Double, y: Double, z: Double, constant: Double): PlaneView =
-    Planes.normalized(x, y, z, -constant)
+private fun halfSpacePlane(coefficients: Vector4View): PlaneView =
+    Planes.normalized(coefficients.x, coefficients.y, coefficients.z, -coefficients.w)
 
 private fun maximumPlaneDistance(box: BoxView, plane: PlaneView): Double {
     val normal = plane.normal
