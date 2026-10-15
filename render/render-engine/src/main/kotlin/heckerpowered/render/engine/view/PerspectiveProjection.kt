@@ -21,7 +21,7 @@ class PerspectiveProjection(
     aspectRatio: Double,
     override val nearPlane: Double,
     override val farPlane: Double,
-) : Projection {
+) : ProjectionView {
     init {
         require(verticalFieldOfViewRadians > 0.0 && verticalFieldOfViewRadians < PI) { "Vertical field of view must be between zero and PI radians" }
         require(aspectRatio.isFinite() && aspectRatio > 0.0) { "Aspect ratio must be finite and positive" }
@@ -44,8 +44,10 @@ class PerspectiveProjection(
             0.0, -verticalScale, 0.0, 0.0,
             0.0, 0.0, depthScale, depthTranslation,
             0.0, 0.0, 1.0, 0.0,
-        )
+        ).snapshot()
     }
+
+    override fun snapshot(): PerspectiveProjection = this
 
     companion object {
         fun degrees(verticalFieldOfViewDegrees: Double, aspectRatio: Double, nearPlane: Double, farPlane: Double): PerspectiveProjection =

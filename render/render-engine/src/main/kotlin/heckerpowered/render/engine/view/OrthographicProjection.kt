@@ -18,7 +18,7 @@ class OrthographicProjection(
     val height: Double,
     override val nearPlane: Double,
     override val farPlane: Double,
-) : Projection {
+) : ProjectionView {
     init {
         require(width.isFinite() && width > 0.0) { "Orthographic width must be finite and positive" }
         require(height.isFinite() && height > 0.0) { "Orthographic height must be finite and positive" }
@@ -36,6 +36,8 @@ class OrthographicProjection(
             0.0, -2.0 / height, 0.0, 0.0,
             0.0, 0.0, inverseDepthRange, -nearPlane * inverseDepthRange,
             0.0, 0.0, 0.0, 1.0,
-        )
+        ).snapshot()
     }
+
+    override fun snapshot(): OrthographicProjection = this
 }
