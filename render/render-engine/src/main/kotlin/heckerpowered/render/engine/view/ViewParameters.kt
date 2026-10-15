@@ -5,7 +5,6 @@
 
 package heckerpowered.render.engine.view
 
-import heckerpowered.math.Matrices
 import heckerpowered.math.MatrixView
 import heckerpowered.math.times
 import heckerpowered.math.toMatrix4
@@ -22,7 +21,7 @@ import heckerpowered.render.pipeline.depthstencil.CompareFunction
  * [forObject] combines each placement with [worldToClip] and supplies the current viewport size,
  * so an object renderer need not build its own camera or projection matrices.
  *
- * Construction copies the Double matrix values. Object-to-clip composition also uses Double;
+ * Construction captures stable Double matrix values. Object-to-clip composition also uses Double;
  * only the final shader payload is converted to Float. This preserves camera-relative precision
  * when large world translations cancel, but does not recover precision already lost in the
  * supplied matrix. Input sampling does not synchronize concurrent changes.
@@ -41,7 +40,7 @@ class ViewParameters(
     val depthCompare: CompareFunction,
     val parameters: ParameterValues = ParameterValues(),
 ) {
-    val worldToClip: MatrixView = Matrices.copyOf(worldToClip)
+    val worldToClip: MatrixView = worldToClip.snapshot()
     internal val frustum: Frustum by lazy { Frustum.fromWorldToClip(this.worldToClip) }
 
     init {
@@ -57,18 +56,12 @@ class ViewParameters(
      * existing values with those names are replaced, while all other view parameters are retained.
      */
     fun forObject(objectState: ObjectSubmitContext, viewport: Viewport): ParameterValues {
-        val model = objectState.localToWorld.toMatrix4()
-        val clip = worldToClip * model
+        val localToWorld = objectState.localToWorld.toMatrix4()
+        val localToClip = worldToClip * localToWorld
         return parameters
-            .replacing("clipFromLocal", NumericParameterValue.floats(*columnMajorFloats(clip)))
-            .replacing("localToWorld", NumericParameterValue.floats(*columnMajorFloats(model)))
+            .replacing("clipFromLocal", NumericParameterValue.floats(*columnMajorFloats(localToClip)))
+            .replacing("localToWorld", NumericParameterValue.floats(*columnMajorFloats(localToWorld)))
             .replacing("viewportSize", NumericParameterValue.floats(viewport.width, viewport.height))
-    }
-
-    companion object {
-        /** Takes an independent Double snapshot before later object composition and shader packing. */
-        fun fromClipMatrix(matrix: MatrixView, width: Int, height: Int, depthCompare: CompareFunction, parameters: ParameterValues = ParameterValues()): ViewParameters =
-            ViewParameters(matrix, width, height, depthCompare, parameters)
     }
 }
 
