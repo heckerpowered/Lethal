@@ -6,6 +6,7 @@
 package heckerpowered.render.engine.stage
 
 import heckerpowered.render.engine.pass.RasterPassProcessor
+import heckerpowered.render.engine.prepare.StaticVertexStreams
 import heckerpowered.render.resource.ResourceLifetime
 
 /**
@@ -18,16 +19,14 @@ import heckerpowered.render.resource.ResourceLifetime
  * fails, allocations registered during preparation are released before the failure propagates.
  */
 internal object RenderStageProcessor {
-    fun prepare(stage: RenderStage, raster: RasterPassProcessor): PreparedRenderStage {
-        return ResourceLifetime.build {
-            val operations = stage.operations.map { operation ->
-                when (operation) {
-                    is RenderStageOperation.ImageTransfer -> PreparedStageOperation.ImageTransfer(operation.transfer)
-                    is RenderStageOperation.CopyBuffer -> PreparedStageOperation.CopyBuffer(operation.source, operation.destination)
-                    is RenderStageOperation.Raster -> PreparedStageOperation.Pass(raster.prepare(operation.pass, this))
-                }
+    fun prepare(stage: RenderStage, raster: RasterPassProcessor, staticVertices: StaticVertexStreams.Preparation? = null): PreparedRenderStage = ResourceLifetime.build {
+        val operations = stage.operations.map { operation ->
+            when (operation) {
+                is RenderStageOperation.ImageTransfer -> PreparedStageOperation.ImageTransfer(operation.transfer)
+                is RenderStageOperation.CopyBuffer -> PreparedStageOperation.CopyBuffer(operation.source, operation.destination)
+                is RenderStageOperation.Raster -> PreparedStageOperation.Pass(raster.prepare(operation.pass, this, staticVertices))
             }
-            PreparedRenderStage(operations, this)
         }
+        PreparedRenderStage(operations, this)
     }
 }
