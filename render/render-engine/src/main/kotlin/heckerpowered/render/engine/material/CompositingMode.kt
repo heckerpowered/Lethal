@@ -16,7 +16,7 @@ import heckerpowered.render.resource.texture.TextureFormat
  * Produces one color slot's RHI state from resolved source and destination facts.
  *
  * Source is null when the shader declares no output at that location; destination is null when
- * borrowed storage has no declared alpha contract. A writing result still needs a shader output.
+ * existing destination storage has no declared alpha contract. A writing result still needs a shader output.
  * alphaFromTexture has already been resolved in source, without changing allocation metadata.
  * Implementations must be immutable and deterministic, without allocating device resources or
  * retaining preparation inputs. Depth, ordering, attachment operations and lifetime are separate.
