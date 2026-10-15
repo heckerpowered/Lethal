@@ -27,6 +27,7 @@ interface GeometryProvider {
     }
 
     fun vector(x: Double, y: Double, z: Double): VectorView = Freestanding.vector(x, y, z)
+    fun vector4(x: Double, y: Double, z: Double, w: Double): Vector4View = Freestanding.vector4(x, y, z, w)
     fun box(min: VectorView, max: VectorView): BoxView = box(min.x, min.y, min.z, max.x, max.y, max.z)
     fun box(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double): BoxView = Freestanding.box(minX, minY, minZ, maxX, maxY, maxZ)
     fun rotator(pitch: Double, yaw: Double, roll: Double = 0.0): RotatorView = Freestanding.rotator(pitch, yaw, roll)
@@ -41,6 +42,7 @@ interface GeometryProvider {
 
 object FreestandingGeometryProvider : GeometryProvider {
     override fun vector(x: Double, y: Double, z: Double): VectorView = FreestandingVector(x, y, z)
+    override fun vector4(x: Double, y: Double, z: Double, w: Double): Vector4View = FreestandingVector4(x, y, z, w)
     override fun box(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double): BoxView = FreestandingBox(minX, minY, minZ, maxX, maxY, maxZ)
     override fun rotator(pitch: Double, yaw: Double, roll: Double): RotatorView = FreestandingRotator(pitch, yaw, roll)
     override fun ray(origin: VectorView, direction: VectorView): RayView = FreestandingRay(origin, direction)
@@ -57,6 +59,7 @@ object Geometry {
 
     @JvmStatic
     fun vector(x: Double, y: Double, z: Double) = Provider.vector(x, y, z)
+    fun vector4(x: Double, y: Double, z: Double, w: Double): Vector4View = Provider.vector4(x, y, z, w)
     fun box(min: VectorView, max: VectorView) = Provider.box(min, max)
     fun box(minX: Double, minY: Double, minZ: Double, maxX: Double, maxY: Double, maxZ: Double) = Provider.box(minX, minY, minZ, maxX, maxY, maxZ)
     fun rotator(pitch: Double, yaw: Double, roll: Double = 0.0) = Provider.rotator(pitch, yaw, roll)
@@ -74,6 +77,13 @@ object Vector {
     operator fun invoke(value: Double): VectorView = Geometry.vector(value, value, value)
     operator fun invoke(): VectorView = Geometry.vector(0.0, 0.0, 0.0)
     operator fun invoke(vector: VectorView): VectorView = Geometry.vector(vector.x, vector.y, vector.z)
+}
+
+object Vector4 {
+    operator fun invoke(x: Double, y: Double, z: Double, w: Double): Vector4View = Geometry.vector4(x, y, z, w)
+    operator fun invoke(value: Double): Vector4View = Geometry.vector4(value, value, value, value)
+    operator fun invoke(): Vector4View = Geometry.vector4(0.0, 0.0, 0.0, 0.0)
+    operator fun invoke(vector: Vector4View): Vector4View = Geometry.vector4(vector.x, vector.y, vector.z, vector.w)
 }
 
 object Box {
@@ -164,6 +174,15 @@ private data class FreestandingVector(
     override val z: Double,
 ) : VectorView {
     override fun snapshot(): VectorView = this
+}
+
+private data class FreestandingVector4(
+    override val x: Double,
+    override val y: Double,
+    override val z: Double,
+    override val w: Double,
+) : Vector4View {
+    override fun snapshot(): Vector4View = this
 }
 
 private data class FreestandingBox(
