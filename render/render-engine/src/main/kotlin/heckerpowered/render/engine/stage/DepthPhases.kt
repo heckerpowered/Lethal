@@ -29,14 +29,18 @@ class DepthPhases(
     val onTopTarget: RenderPassDescription,
     val integration: RasterPass?,
 ) {
+    init {
+        require(seeThroughTarget.depthAttachment == null && seeThroughTarget.stencilAttachment == null) { "See-through geometry requires a target without depth or stencil attachments" }
+        require(onTopTarget.depthAttachment?.operation?.load is AttachmentLoadOperation.Clear) { "Always-on-top geometry requires a cleared depth attachment" }
+    }
+
     fun append(stageBuilder: RenderStageBuilder, collection: RenderSubmissionList, inputs: ViewParameters) {
         val through = collection.submissions.filter { it.visibility == DepthMode.SeeThrough }
         val onTop = collection.submissions.filter { it.visibility == DepthMode.AlwaysOnTop }
 
-        require(seeThroughTarget.depthAttachment == null && seeThroughTarget.stencilAttachment == null)
-        require(onTopTarget.depthAttachment?.operation?.load is AttachmentLoadOperation.Clear)
+        if (through.isNotEmpty())
+            stageBuilder.rasterPass(RasterPass(seeThroughTarget, RenderSubmissionList(through), inputs))
         
-        if (through.isNotEmpty()) stageBuilder.rasterPass(RasterPass(seeThroughTarget, RenderSubmissionList(through), inputs))
         if (onTop.isNotEmpty()) {
             val resolved = RenderSubmissionList(onTop.map { it.copy(visibility = DepthMode.Scene) })
             stageBuilder.rasterPass(RasterPass(onTopTarget, resolved, inputs))
