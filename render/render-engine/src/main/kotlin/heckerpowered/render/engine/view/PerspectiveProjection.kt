@@ -18,12 +18,11 @@ import kotlin.math.tan
  */
 class PerspectiveProjection(
     val verticalFieldOfViewRadians: Double,
-    val aspectRatio: Double,
+    aspectRatio: Double,
     override val nearPlane: Double,
     override val farPlane: Double,
 ) : Projection {
     init {
-        require(verticalFieldOfViewRadians.isFinite()) { "Vertical field of view must be finite" }
         require(verticalFieldOfViewRadians > 0.0 && verticalFieldOfViewRadians < PI) { "Vertical field of view must be between zero and PI radians" }
         require(aspectRatio.isFinite() && aspectRatio > 0.0) { "Aspect ratio must be finite and positive" }
         require(nearPlane.isFinite() && nearPlane > 0.0) { "Perspective near plane must be finite and positive" }
@@ -50,11 +49,6 @@ class PerspectiveProjection(
 
     companion object {
         fun degrees(verticalFieldOfViewDegrees: Double, aspectRatio: Double, nearPlane: Double, farPlane: Double): PerspectiveProjection =
-            PerspectiveProjection(
-                verticalFieldOfViewRadians = Math.toRadians(verticalFieldOfViewDegrees),
-                aspectRatio = aspectRatio,
-                nearPlane = nearPlane,
-                farPlane = farPlane,
-            )
+            PerspectiveProjection(Math.toRadians(verticalFieldOfViewDegrees), aspectRatio, nearPlane, farPlane)
     }
 }
