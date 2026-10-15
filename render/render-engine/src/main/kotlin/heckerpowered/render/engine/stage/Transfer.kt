@@ -19,7 +19,7 @@ import heckerpowered.render.resource.buffer.GpuBufferView
  * as drawing. They delegate access, format, sample-count, and region validation to the matching
  * RHI operation rather than deriving those requirements from an effect or geometry type.
  *
- * Upload variants copy their host bytes at construction. Resource selections remain borrowed and
+ * Upload variants copy their host bytes at construction. Resource views refer to existing storage, and
  * their contents are read or written at the transfer's position in the command stream, not when
  * this value is created.
  */
