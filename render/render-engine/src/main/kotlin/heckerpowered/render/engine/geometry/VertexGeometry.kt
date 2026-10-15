@@ -64,6 +64,8 @@ fun triangle(a: FloatArray, b: FloatArray, c: FloatArray): VertexGeometry {
     val layout = geometryLayout(strideBytes = 12) {
         attribute(VertexSemantics.Position, VertexFormat.Float32x3, offsetBytes = 0)
     }
-
-    return VertexGeometry(layout, listOf(VertexStreamSource.Upload(data.array())), GeometrySelection.Vertices(DrawRange.vertices(3)), PrimitiveState(PrimitiveTopology.TriangleList))
+    val streams = listOf(VertexStreamSource.Upload(data.array()))
+    val selection = GeometrySelection.Vertices(VertexRange(3))
+    val primitiveState = PrimitiveState(PrimitiveTopology.TriangleList)
+    return VertexGeometry(layout, streams, selection, primitiveState)
 }
