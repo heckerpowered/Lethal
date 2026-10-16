@@ -13,7 +13,7 @@ import heckerpowered.render.engine.support.collection.toUnmodifiableList
  *
  * Membership is an immutable snapshot, and each submission already captures its placement and
  * raster scope. The same list can be prepared for another view without rerunning object
- * renderers. Pass strategies still decide whether a shader's replay contract permits multiple phases.
+ * renderers.
  *
  * Element data and GPU resources are not copied. They must remain valid for every preparation
  * and execution that consumes this list.
