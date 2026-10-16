@@ -18,4 +18,9 @@ data class GeometryAttribute(
     val semantic: VertexSemantic,
     val format: VertexFormat,
     val offsetBytes: Int,
-)
+) {
+    init {
+        require(offsetBytes >= 0) { "Geometry attribute offset must not be negative" }
+        require(offsetBytes <= Int.MAX_VALUE - format.sizeInBytes) { "Geometry attribute end exceeds Int capacity" }
+    }
+}
