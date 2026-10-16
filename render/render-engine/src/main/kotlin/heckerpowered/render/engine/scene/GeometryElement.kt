@@ -38,7 +38,7 @@ class GeometryElement(
     val usesViewDepthCompare: Boolean = false,
 ) : RenderElement {
     val compositions: Map<Int, CompositingMode> = compositions.toUnmodifiableMap()
-    val composition: CompositingMode get() = this.compositions[0] ?: CompositingMode.Replace
+    val composition: CompositingMode get() = compositionAt(0)
     val geometry: RenderGeometry get() = shading.geometry
 
     constructor(shading: MeshShading, cullingBounds: CullingBounds? = null, depthWrite: Boolean? = null, depthStencil: DepthStencilState? = null, usesViewDepthCompare: Boolean = false) :
@@ -49,7 +49,10 @@ class GeometryElement(
 
     init {
         require(this.compositions.keys.all { it >= 0 }) { "Composition locations must be nonnegative" }
+        require(depthWrite != true || depthStencil == null || depthStencil.depth != null) { "Depth writes require active depth processing" }
     }
+
+    internal fun compositionAt(location: Int): CompositingMode = compositions[location] ?: CompositingMode.Replace
 
     fun copy(shading: MeshShading = this.shading, composition: CompositingMode = this.composition, cullingBounds: CullingBounds? = this.cullingBounds, depthWrite: Boolean? = this.depthWrite, depthStencil: DepthStencilState? = this.depthStencil, usesViewDepthCompare: Boolean = this.usesViewDepthCompare): GeometryElement =
         GeometryElement(shading, if (composition === this.composition) compositions else compositions + (0 to composition), cullingBounds, depthWrite, depthStencil, usesViewDepthCompare)
