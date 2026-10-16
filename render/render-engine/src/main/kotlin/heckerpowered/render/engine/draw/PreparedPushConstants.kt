@@ -5,6 +5,7 @@
 
 package heckerpowered.render.engine.draw
 
+import heckerpowered.render.command.pass.RenderPass
 import heckerpowered.render.shader.ShaderStage
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -21,24 +22,27 @@ import java.util.*
  * This type only enforces requirements that are independent of that pipeline: a non-empty stage
  * set, non-negative four-byte-aligned destination offset, and a positive four-byte-aligned size.
  */
-internal class PreparedPushConstantWrite(
+internal class PreparedPushConstants private constructor(
     stages: Set<ShaderStage>,
-    bytes: ByteArray,
-    val destinationOffsetBytes: Int = 0,
+    val destinationOffsetBytes: Int,
+    private val data: ByteArray,
 ) {
+    constructor(stages: Set<ShaderStage>, bytes: ByteArray, destinationOffsetBytes: Int = 0) :
+            this(stages, destinationOffsetBytes, bytes.copyOf())
+
+    /** Captures the remaining bytes without changing the source position or retaining its storage. */
+    constructor(stages: Set<ShaderStage>, source: ByteBuffer, destinationOffsetBytes: Int = 0) :
+            this(stages, destinationOffsetBytes, ByteArray(source.remaining()).also { source.duplicate().get(it) })
     val stages: Set<ShaderStage>
     val sizeBytes: Int get() = data.size
-
-    private val data: ByteArray
 
     init {
         require(stages.isNotEmpty()) { "Push constant write requires at least one shader stage" }
         require(destinationOffsetBytes >= 0 && destinationOffsetBytes % 4 == 0) { "Push constant destination offset must be non-negative and four-byte aligned" }
-        require(bytes.isNotEmpty() && bytes.size % 4 == 0) { "Push constant data must be positive in size and four-byte aligned" }
-        require(bytes.size <= Int.MAX_VALUE - destinationOffsetBytes) { "Push constant write end exceeds Int capacity" }
+        require(data.isNotEmpty() && data.size % 4 == 0) { "Push constant data must be positive in size and four-byte aligned" }
+        require(data.size <= Int.MAX_VALUE - destinationOffsetBytes) { "Push constant write end exceeds Int capacity" }
 
         this.stages = Collections.unmodifiableSet(EnumSet.copyOf(stages))
-        data = bytes.copyOf()
     }
 
     /** Copies the snapshotted bytes without exposing mutable backing storage. */
@@ -56,4 +60,8 @@ internal class PreparedPushConstantWrite(
      */
     internal fun asByteBuffer(): ByteBuffer =
         ByteBuffer.wrap(data).asReadOnlyBuffer().order(ByteOrder.nativeOrder())
+}
+
+internal fun RenderPass.pushConstants(write: PreparedPushConstants) {
+    pushConstants(write.stages, write.asByteBuffer(), write.destinationOffsetBytes)
 }
