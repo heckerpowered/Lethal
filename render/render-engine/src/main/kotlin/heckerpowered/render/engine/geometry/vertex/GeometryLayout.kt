@@ -20,9 +20,13 @@ import heckerpowered.render.engine.support.collection.toUnmodifiableList
  */
 class GeometryLayout(streams: List<VertexStreamLayout>) {
     val streams: List<VertexStreamLayout> = streams.toUnmodifiableList()
+    private val attributesBySemantic: Map<VertexSemantic, GeometryAttribute>
 
     init {
-        val semantics = this.streams.flatMap { it.attributes }.map { it.semantic }
-        require(semantics.distinct().size == semantics.size) { "Geometry attributes must be unambiguous" }
+        val attributes = this.streams.flatMap { it.attributes }
+        attributesBySemantic = attributes.associateBy { it.semantic }
+        require(attributesBySemantic.size == attributes.size) { "Geometry attributes must be unambiguous" }
     }
+
+    internal fun attribute(semantic: VertexSemantic): GeometryAttribute? = attributesBySemantic[semantic]
 }
