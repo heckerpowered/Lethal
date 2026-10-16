@@ -18,4 +18,10 @@ data class PushConstantField(
     val name: ParameterName,
     val offsetBytes: Int,
     val sizeBytes: Int,
-)
+) {
+    init {
+        require(offsetBytes >= 0) { "Parameter field offset must not be negative" }
+        require(sizeBytes > 0) { "Parameter field size must be positive" }
+        require(offsetBytes <= Int.MAX_VALUE - sizeBytes) { "Parameter field end exceeds Int capacity" }
+    }
+}
