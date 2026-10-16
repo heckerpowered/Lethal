@@ -30,6 +30,5 @@ class VertexStreamLayout(
         require(strideBytes >= 0)
         require(this.attributes.isNotEmpty())
         require(this.attributes.map { it.semantic }.distinct().size == this.attributes.size)
-        require(this.attributes.all { it.offsetBytes >= 0 && it.offsetBytes <= Int.MAX_VALUE - it.format.sizeInBytes })
     }
 }
