@@ -7,7 +7,6 @@ package heckerpowered.render.engine.scene
 
 import heckerpowered.render.engine.scene.drawing.DepthMode
 import heckerpowered.render.engine.scene.drawing.RasterScope
-import heckerpowered.render.engine.support.collection.toUnmodifiableList
 
 /**
  * Records one occurrence of a render element at a particular placement and raster scope.
@@ -28,7 +27,7 @@ class RenderSubmission(
     val sourceOrder: Int = 0,
 ) {
     val objectState = objectState.snapshot()
-    val rasterScope = rasterScope.copy(scissors = rasterScope.scissors.toUnmodifiableList())
+    val rasterScope = rasterScope.snapshot()
 
     fun copy(element: RenderElement = this.element, visibility: DepthMode = this.visibility): RenderSubmission =
         RenderSubmission(element, objectState, rasterScope, visibility, sourceOrder)
