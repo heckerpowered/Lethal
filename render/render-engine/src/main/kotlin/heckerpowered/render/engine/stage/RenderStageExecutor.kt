@@ -15,92 +15,86 @@ import heckerpowered.render.terminateOnFailure
  * Uploads are recorded before their pass, and operations retain declaration order. A pass with
  * no draws still executes because its attachment operations may have observable effects.
  *
- * The executor waits after both successful and exceptional recording. A failed wait retains
- * pending lifetimes and prevents another execution until [awaitIdle] succeeds. Final [close]
- * releases allocations without waiting and therefore requires completion to be established first.
+ * Every execution attempts to wait for GPU completion, even if recording fails. If the wait
+ * fails, the stage's resources remain retained and new work is blocked until [awaitIdle] succeeds.
+ * [close] releases resources without waiting, so callers must establish GPU completion first.
  */
-internal class RenderStageExecutor(
-    private val device: GraphicsDevice,
-) : AutoCloseable {
-    private val pendingLifetimes = ArrayList<ResourceLifetime>()
-    private var completionRequired = false
+internal class RenderStageExecutor(private val device: GraphicsDevice) : AutoCloseable {
+    /** A failed wait can be pending even when there are no resources to retire. */
+    private class PendingCompletion(val lifetime: ResourceLifetime? = null)
 
-    internal fun checkReady() {
-        check(!completionRequired && pendingLifetimes.isEmpty()) { "Retry GPU completion before preparing another stage" }
+    private var pendingCompletion: PendingCompletion? = null
+
+    internal fun checkReady() = check(pendingCompletion == null) { "Retry GPU completion before preparing another stage" }
+
+    /**
+     * Records a stage while retaining its temporary resources until GPU completion.
+     *
+     * Reusing a stage after its lifetime was released fails before recording starts. A recording
+     * failure is propagated after completion has been attempted; if completion also fails, both
+     * errors are preserved, with a completion [Error] taking precedence.
+     */
+    fun execute(stage: PreparedRenderStage) = withGpuWork(stage.temporaryLifetime) {
+        record(stage)
+    }
+
+    private inline fun withGpuWork(lifetime: ResourceLifetime, action: () -> Unit) {
+        retainUntilIdle(lifetime)
+
+        val recording = runCatching { action() }
+        val completion = runCatching { awaitIdle() }
+
+        propagateFailure(recording.exceptionOrNull(), completion.exceptionOrNull())
+    }
+
+    private fun retainUntilIdle(lifetime: ResourceLifetime) {
+        checkReady()
+        lifetime.checkOpen()
+        pendingCompletion = PendingCompletion(lifetime)
     }
 
     /**
-     * Waits for pending GPU work before closing every retained preparation lifetime.
+     * Waits for GPU completion and releases retained resources only after the wait succeeds.
      *
-     * If the wait throws, the lifetimes remain available for retry and no allocations are released.
-     * Execution remains blocked even when no preparation lifetimes are retained.
+     * On failure, the pending completion (possibly without a lifetime) remains available for
+     * retry; no subsequent stage may be prepared until completion is confirmed.
      */
     fun awaitIdle() {
-        completionRequired = true
+        val completion = pendingCompletion ?: PendingCompletion()
+        pendingCompletion = completion
+
         device.awaitIdle()
-        pendingLifetimes.forEach { it.close() }
-        pendingLifetimes.clear()
-        completionRequired = false
+        completion.lifetime?.close()
+        pendingCompletion = null
     }
 
     /** GPU completion must already be established before final destruction. */
     override fun close() = terminateOnFailure {
-        pendingLifetimes.forEach { it.close() }
-        pendingLifetimes.clear()
+        pendingCompletion?.lifetime?.close()
+        pendingCompletion = null
     }
 
     /**
-     * Records this stage while its temporary lifetime is still open.
-     *
-     * The lifetime is registered for retirement before recording starts, including when recording
-     * later fails. Reusing a stage whose lifetime has been released fails before any GPU commands.
-     *
-     * Recording failure is rethrown after one completion attempt. A distinct completion failure is
-     * attached to it when suppression is supported, except that a completion [Error] is propagated
-     * with the recording failure attached. Recording Errors remain primary over non-Error completion
-     * failures. Disabled suppression prevents attachment of the second diagnostic.
+     * Preserves both failures when recording and completion fail.
+     * Completion [Error]s take precedence; otherwise the recording failure stays primary.
      */
-    fun execute(stage: PreparedRenderStage) {
-        checkReady()
-        stage.temporaryLifetime.checkOpen()
-        pendingLifetimes += stage.temporaryLifetime
-
-        try {
-            record(stage)
-        } catch (recordingFailure: Throwable) {
-            awaitIdleAfterFailedRecording(recordingFailure)
-        }
-        awaitIdle()
-    }
-
-    private fun awaitIdleAfterFailedRecording(recordingFailure: Throwable): Nothing {
-        try {
-            awaitIdle()
-        } catch (completionFailure: Throwable) {
-            if (completionFailure === recordingFailure) throw recordingFailure
-            if (completionFailure is Error) {
-                completionFailure.addSuppressed(recordingFailure)
-                throw completionFailure
+    private fun propagateFailure(recording: Throwable?, completion: Throwable?) {
+        if (recording != null && completion != null && recording !== completion) {
+            if (completion is Error) {
+                completion.addSuppressed(recording)
+            } else {
+                recording.addSuppressed(completion)
             }
-            recordingFailure.addSuppressed(completionFailure)
         }
-        throw recordingFailure
+
+        if (completion is Error) throw completion
+        if (recording != null) throw recording
+        if (completion != null) throw completion
     }
 
     private fun record(stage: PreparedRenderStage) {
         device.encode("render-engine") {
-            for (operation in stage.operations) when (operation) {
-                is PreparedStageOperation.ImageTransfer -> operation.transfer.encode(this)
-                is PreparedStageOperation.CopyBuffer -> copyBuffer(operation.source, operation.destination)
-                is PreparedStageOperation.Pass -> {
-                    val prepared = operation.pass
-                    prepared.uploads.forEach { it.encode(this) }
-                    // Empty draws can still clear, store, or resolve attachments.
-                    renderPass(prepared.description, prepared.resources) {
-                        prepared.encode(this)
-                    }
-                }
-            }
+            stage.operations.forEach { it.encode(this) }
         }
     }
 }
