@@ -5,7 +5,10 @@
 
 package heckerpowered.render.engine.scene
 
-import heckerpowered.math.*
+import heckerpowered.math.AffineTransformView
+import heckerpowered.math.TransformView
+import heckerpowered.math.times
+import heckerpowered.math.toAffine
 
 /**
  * Places an object's local coordinate system in the world.
@@ -15,7 +18,7 @@ import heckerpowered.math.*
  * object. Composition uses Double coordinates so large world translations can cancel against the
  * camera transform before the final shader values are converted to Float.
  *
- * The constructor retains the supplied transform view. [snapshot] copies its values, and
+ * The constructor retains the supplied transform view. [snapshot] stabilizes its values, and
  * [RenderSubmission] takes that snapshot when capturing a placement. Sampling a mutable view does
  * not synchronize concurrent changes.
  */
@@ -30,6 +33,6 @@ fun ObjectSubmitContext.transformed(localToParent: AffineTransformView): ObjectS
 fun ObjectSubmitContext.transformed(localToParent: TransformView): ObjectSubmitContext =
     transformed(localToParent.toAffine())
 
-/** Retains independent transform values so later changes to the source view cannot move submissions. */
+/** Retains stable transform values so later changes to the source view cannot move submissions. */
 fun ObjectSubmitContext.snapshot(): ObjectSubmitContext =
-    ObjectSubmitContext(AffineTransforms.copyOf(localToWorld))
+    ObjectSubmitContext(localToWorld.snapshot())
