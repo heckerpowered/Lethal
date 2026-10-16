@@ -20,9 +20,7 @@ import heckerpowered.render.engine.view.ViewParameters
  * dispatches each element to its semantic processor, which resolves those inputs into concrete
  * draw commands. A list can be reused with different views and attachments.
  *
- * [description] defines attachments and their load/store operations. [requireReplaySafe] rejects
- * shaders whose declared behavior does not permit repeating the draw across passes; it does not
- * infer safety from shader code.
+ * [description] defines attachments and their load/store operations.
  *
  * TODO: OIT depth bounds, transmittance, accumulation, and outlines need concrete shaders and
  * pass processing before public helpers can schedule them.
@@ -31,8 +29,8 @@ class RasterPass(
     val description: RenderPassDescription,
     val collection: RenderSubmissionList,
     val inputs: ViewParameters,
-    val requireReplaySafe: Boolean = false,
     val clearRepresentation: AlphaRepresentation? = null,
+
     alphaQuantities: Map<Int, AlphaQuantity> = emptyMap(),
     initialColors: Map<Int, ColorContent> = emptyMap(),
 ) {
