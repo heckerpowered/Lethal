@@ -5,7 +5,6 @@
 
 package heckerpowered.render.engine.view
 
-import heckerpowered.math.Matrices
 import heckerpowered.math.MatrixView
 import heckerpowered.math.times
 import heckerpowered.math.toMatrix4
@@ -20,9 +19,9 @@ import heckerpowered.math.toMatrix4
  */
 class View(
     val frame: ViewFrame,
-    projection: Projection,
+    projection: ProjectionView,
 ) {
-    val projection: Projection = snapshotProjection(projection)
+    val projection: ProjectionView = projection.snapshot()
     val worldToView = frame.worldToView
 
     /**
@@ -31,15 +30,4 @@ class View(
     val worldToClip: MatrixView = this.projection.matrix * worldToView.toMatrix4()
 
     val frustum: Frustum = Frustum.fromWorldToClip(worldToClip)
-}
-
-private fun snapshotProjection(projection: Projection): Projection {
-    val near = projection.nearPlane
-    val far = projection.farPlane
-    val matrix = Matrices.copyOf(projection.matrix)
-    return object : Projection {
-        override val nearPlane = near
-        override val farPlane = far
-        override val matrix = matrix
-    }
 }
