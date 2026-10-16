@@ -46,7 +46,7 @@ class Canvas private constructor(
 
     /** Clips the block in framebuffer coordinates, intersecting any enclosing clips. */
     fun clip(rectangle: ScissorRectangle, block: Canvas.() -> Unit) {
-        Canvas(collector, context, scope.copy(scissors = scope.scissors + rectangle)).block()
+        Canvas(collector, context, scope.clipped(rectangle)).block()
     }
 
     companion object {
