@@ -7,8 +7,6 @@ package heckerpowered.render.engine.scene.drawing
 
 
 import heckerpowered.math.AffineTransformView
-import heckerpowered.math.AffineTransforms
-import heckerpowered.math.copyOf
 import heckerpowered.render.command.pass.ScissorRectangle
 import heckerpowered.render.command.pass.Viewport
 import heckerpowered.render.engine.scene.*
@@ -56,11 +54,11 @@ class WorldDrawing private constructor(
     /**
      * Runs the block once for each placement, in list order.
      *
-     * All placements are copied before the first invocation. This repeats collection at different
+     * All placement values are stabilized before the first invocation. This repeats collection at different
      * transforms; it does not request a hardware-instanced draw or combine their draw arguments.
      */
     fun instances(placements: List<AffineTransformView>, block: WorldDrawing.() -> Unit) {
-        val snapshots = placements.map(AffineTransforms::copyOf)
+        val snapshots = placements.map { it.snapshot() }
         snapshots.forEach { transformed(it, block) }
     }
 
@@ -70,7 +68,7 @@ class WorldDrawing private constructor(
 
     /** Adds a framebuffer-space clip intersected with the enclosing clips during pass preparation. */
     fun <R> clip(rectangle: ScissorRectangle, block: WorldDrawing.() -> R): R {
-        return WorldDrawing(collector, objectState, rasterScope.copy(scissors = rasterScope.scissors + rectangle), visibility).block()
+        return WorldDrawing(collector, objectState, rasterScope.clipped(rectangle), visibility).block()
     }
 
     fun <R> withStencilReference(reference: UByte, block: WorldDrawing.() -> R): R {
