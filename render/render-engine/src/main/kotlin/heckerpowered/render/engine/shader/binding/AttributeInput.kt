@@ -31,4 +31,8 @@ data class AttributeInput(
     val semantic: VertexSemantic,
     val location: Int,
     val format: VertexFormat,
-)
+) {
+    init {
+        require(location >= 0) { "Vertex attribute location must not be negative" }
+    }
+}
