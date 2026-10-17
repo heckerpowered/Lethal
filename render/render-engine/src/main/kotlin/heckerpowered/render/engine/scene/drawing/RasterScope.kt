@@ -8,6 +8,7 @@ package heckerpowered.render.engine.scene.drawing
 import heckerpowered.render.command.pass.ScissorRectangle
 import heckerpowered.render.command.pass.Viewport
 import heckerpowered.render.engine.scene.RenderSubmission
+import heckerpowered.render.engine.support.collection.toUnmodifiableList
 
 /**
  * Carries dynamic raster settings shared by a group of submissions.
@@ -23,4 +24,8 @@ data class RasterScope(
     val viewport: Viewport? = null,
     val scissors: List<ScissorRectangle> = emptyList(),
     val stencilReference: UByte = 0u,
-)
+) {
+    internal fun clipped(rectangle: ScissorRectangle): RasterScope = copy(scissors = scissors + rectangle)
+
+    internal fun snapshot(): RasterScope = copy(scissors = scissors.toUnmodifiableList())
+}
