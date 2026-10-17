@@ -8,6 +8,7 @@ package heckerpowered.render.engine.shader.binding
 import heckerpowered.render.engine.geometry.RenderGeometry
 import heckerpowered.render.engine.geometry.VertexGeometry
 import heckerpowered.render.engine.geometry.vertex.VertexStreamLayout
+import heckerpowered.render.engine.support.collection.toUnmodifiableList
 import heckerpowered.render.pipeline.vertex.VertexAttribute
 import heckerpowered.render.pipeline.vertex.VertexBufferLayout
 import heckerpowered.render.pipeline.vertex.VertexState
@@ -25,11 +26,13 @@ import heckerpowered.render.pipeline.vertex.VertexState
  * mapping because it supplies no vertex attributes.
  */
 class VertexInputMapping(inputs: List<AttributeInput>) {
-    val inputs = inputs.toList()
+    val inputs = inputs.toUnmodifiableList()
+
+    private val inputsBySemantic = this.inputs.associateBy { it.semantic }
 
     init {
-        require(this.inputs.map { it.location }.distinct().size == this.inputs.size)
-        require(this.inputs.map { it.semantic }.distinct().size == this.inputs.size)
+        require(inputsBySemantic.size == this.inputs.size) { "Duplicate vertex input semantic" }
+        require(this.inputs.map { it.location }.toSet().size == this.inputs.size) { "Duplicate vertex input location" }
     }
 
     fun lower(source: RenderGeometry): VertexState {
@@ -38,9 +41,8 @@ class VertexInputMapping(inputs: List<AttributeInput>) {
             return VertexState.Empty
         }
 
-        val attributesBySemantic = source.layout.streams.flatMap { it.attributes }.associateBy { it.semantic }
         for ([semantic, _, format] in inputs) {
-            val attribute = requireNotNull(attributesBySemantic[semantic]) { "Missing $semantic" }
+            val attribute = requireNotNull(source.layout.attribute(semantic)) { "Missing $semantic" }
             require(attribute.format == format) { "Unsupported format conversion for $semantic" }
         }
 
@@ -48,9 +50,9 @@ class VertexInputMapping(inputs: List<AttributeInput>) {
     }
 
     private fun lowerStream(stream: VertexStreamLayout): VertexBufferLayout {
-        val attributes = stream.attributes.mapNotNull { [semantic, format, offsetBytes] ->
-            val input = inputs.singleOrNull { it.semantic == semantic } ?: return@mapNotNull null
-            VertexAttribute(input.location, format, offsetBytes)
+        val attributes = stream.attributes.mapNotNull { (semantic, format, offsetBytes) ->
+            val location = inputsBySemantic[semantic]?.location ?: return@mapNotNull null
+            VertexAttribute(location, format, offsetBytes)
         }
 
         return VertexBufferLayout(stream.strideBytes, stream.stepMode, attributes)
