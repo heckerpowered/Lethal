@@ -24,7 +24,7 @@ class RenderStageBuilder internal constructor() {
     /**
      * Allocates a name prefix for one effect invocation within this builder.
      *
-     * The ordinal follows invocation order. Repeating that order in later stages lets an image store
+     * The ordinal follows invocation order. Repeating that order in later stages lets an image cache
      * reuse corresponding names; changing it can associate a name with a different invocation.
      */
     fun imageNamespace(base: String): String {
