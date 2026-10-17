@@ -8,7 +8,8 @@ package heckerpowered.render.engine.pass
 import heckerpowered.render.command.pass.RenderPass
 import heckerpowered.render.command.pass.RenderPassDescription
 import heckerpowered.render.command.pass.RenderPassResources
-import heckerpowered.render.engine.draw.PreparedDrawCommand
+import heckerpowered.render.engine.draw.DrawInvocation
+import heckerpowered.render.engine.draw.PreparedDraw
 import heckerpowered.render.engine.prepare.BufferUpload
 import heckerpowered.render.engine.support.collection.toUnmodifiableList
 
@@ -26,14 +27,16 @@ import heckerpowered.render.engine.support.collection.toUnmodifiableList
 internal class PreparedRenderPass(
     val description: RenderPassDescription,
     uploads: List<BufferUpload>,
-    draws: List<PreparedDrawCommand>,
+    draws: List<PreparedDraw>,
 ) {
     val uploads: List<BufferUpload> = uploads.toUnmodifiableList()
-    val draws: List<PreparedDrawCommand> = draws.toUnmodifiableList()
+    val draws: List<PreparedDraw> = draws.toUnmodifiableList()
     val resources = if (this.draws.isEmpty()) RenderPassResources.Empty else RenderPassResources(
-        descriptors = this.draws.flatMap { it.descriptorSets.values },
-        vertexBuffers = this.draws.flatMap { it.vertexBuffers.values },
-        indexBuffers = this.draws.mapNotNull { it.indexInput?.view },
+        this.draws.flatMap { it.bindings.descriptorSets.values },
+        this.draws.flatMap { it.geometry.vertexBuffers.values },
+        this.draws.map { it.geometry.invocation }
+            .filterIsInstance<DrawInvocation.Indexed>()
+            .map { it.indices.view }
     )
 
     init {
