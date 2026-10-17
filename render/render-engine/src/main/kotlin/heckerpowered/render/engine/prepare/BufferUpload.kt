@@ -16,7 +16,7 @@ import heckerpowered.render.resource.buffer.GpuBufferView
  * staging during [encode]; that staging is valid only for the call. The RHI consumes or saves it
  * before returning, while completion of the destination's GPU writes is a separate concern.
  *
- * The destination buffer is borrowed and requires transfer-destination access at recording time.
+ * The destination view selects existing buffer storage and requires transfer-destination access at recording time.
  * This value does not allocate or release that buffer.
  */
 class BufferUpload(
