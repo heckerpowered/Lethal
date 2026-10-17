@@ -16,7 +16,7 @@ import heckerpowered.render.resource.texture.GpuTextureView
  * Makes one effect image available both as a render destination and as a sampled input.
  *
  * [attachment] and [view] must describe the same image region, with [size] matching its dimensions.
- * Images created by [RenderImageStore] stay valid until that allocation is released by the store.
+ * Images created by [RenderImageCache] stay valid until that allocation is released by the cache.
  * The sampler is supplied externally and must remain valid for every use; this value does not
  * register or close any resources itself.
  */
