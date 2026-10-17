@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "license": "${mod_license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "heckerpowered.lethal.loader.fabric.LethalMod"
+    ],
+    "client": [
+      "heckerpowered.lethal.loader.fabric.LethalClientMod"
+    ]
+  },
+  "mixins": [
+    "mixins.lethal.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": ">=${fabric_api_version}",
+    "minecraft": "${minecraft_version}",
+    "java": ">=${java_version}"
+  },
+  "accessWidener": "lethal.accesswidener"
+}
