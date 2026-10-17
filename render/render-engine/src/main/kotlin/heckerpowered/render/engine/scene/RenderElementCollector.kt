@@ -16,3 +16,11 @@ interface RenderElementCollector {
     context(context: ObjectSubmitContext)
     fun submit(element: RenderElement)
 }
+
+/** Submits elements in argument order; a failure stops submission of the remaining elements. */
+context(context: ObjectSubmitContext)
+fun RenderElementCollector.submit(vararg elements: RenderElement) {
+    for (element in elements) {
+        submit(element)
+    }
+}
