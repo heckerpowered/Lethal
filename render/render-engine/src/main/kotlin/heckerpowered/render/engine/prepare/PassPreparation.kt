@@ -6,8 +6,8 @@
 package heckerpowered.render.engine.prepare
 
 import heckerpowered.render.GraphicsDevice
-import heckerpowered.render.engine.draw.IndexInput
 import heckerpowered.render.engine.geometry.UploadData
+import heckerpowered.render.engine.geometry.index.IndexSelection
 import heckerpowered.render.engine.geometry.index.IndexSource
 import heckerpowered.render.engine.geometry.vertex.VertexStreamSource
 import heckerpowered.render.engine.image.RenderImageStore
@@ -40,6 +40,7 @@ internal class PassPreparation(
     val lifetime: ResourceLifetime,
     val targetAlphaQuantities: Map<Int, AlphaQuantity> = emptyMap(),
     private val images: RenderImageStore? = null,
+    private val staticVertices: StaticVertexStreams.Preparation? = null,
 ) {
     private val uploadViews = IdentityHashMap<UploadData, MutableMap<BufferUsage, GpuBufferView>>()
     private val uniformViews = IdentityHashMap<NumericParameterValue, GpuBufferView>()
@@ -69,12 +70,16 @@ internal class PassPreparation(
     fun stream(source: VertexStreamSource): GpuBufferView = when (source) {
         is VertexStreamSource.Resident -> source.view
         is VertexStreamSource.Upload -> upload(source.bytes, BufferUsage.Vertex)
+        is VertexStreamSource.Static -> {
+            val prepared = checkNotNull(staticVertices) { "Static streams require engine stage preparation" }.stream(source)
+            prepared.upload?.let(uploads::add)
+            prepared.view
+        }
     }
 
-    fun indices(source: IndexSource?): IndexInput? = when (source) {
-        null -> null
-        is IndexSource.Resident -> IndexInput(source.selection.view, source.format)
-        is IndexSource.Upload -> IndexInput(upload(source.bytes, BufferUsage.Index), source.format)
+    fun indices(source: IndexSource): IndexSelection = when (source) {
+        is IndexSource.Resident -> source.selection
+        is IndexSource.Upload -> IndexSelection(upload(source.bytes, BufferUsage.Index), source.format)
     }
 
     fun snapshot(): List<BufferUpload> = uploads.toList()
