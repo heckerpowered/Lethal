@@ -34,8 +34,9 @@ internal class RenderStageExecutor(private val device: GraphicsDevice) : AutoClo
      * failure is propagated after completion has been attempted; if completion also fails, both
      * errors are preserved, with a completion [Error] taking precedence.
      */
-    fun execute(stage: PreparedRenderStage) = withGpuWork(stage.temporaryLifetime) {
-        record(stage)
+    fun execute(stage: PreparedRenderStage) {
+        withGpuWork(stage.temporaryLifetime) { record(stage) }
+        for (completion in stage.completions) completion.complete()
     }
 
     private inline fun withGpuWork(lifetime: ResourceLifetime, action: () -> Unit) {
