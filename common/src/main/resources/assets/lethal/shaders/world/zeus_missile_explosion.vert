@@ -47,6 +47,8 @@ vec3 fragmentPosition(float ageSeconds) {
     float shardLength = (0.065 + speed * 0.0045) * (0.82 + 0.18 * growth)
         * (1.0 - smoothstep(0.72, 1.0, life));
     float shardWidth = (0.017 + random * 0.017) * growth * burnout;
+    shardLength *= explosion.tint.x;
+    shardWidth *= explosion.tint.x;
     float elevation = 1.0 - 2.0 * (fragment + 0.5) / 48.0;
     float azimuth = fragment * 2.39996323 + explosion.timing.z * 0.37;
     float horizontal = sqrt(max(1.0 - elevation * elevation, 0.0));

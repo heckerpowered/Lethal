@@ -4,10 +4,20 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "AABBMixin",
+    "AbstractHorseMixin",
     "BlockMixin",
     "BlockPosMixin",
     "BlockStateMixin",
+    "DamagePipelineLivingEntityMixin",
+    "DamagePipelinePlayerMixin",
     "DamageSourceMixin",
+    "ZeusSculkEffectMixin",
+    "ArmorStandDamageMixin",
+    "VexOwnershipMixin",
+    "ThrownPotionEffectMixin",
+    "AreaEffectCloudEffectMixin",
+    "EvokerFangsDamageMixin",
+    "WitherSkullDamageMixin",
     "EnderDragonMixin",
     "EntityMixin",
     "EntityTypeMixin",
@@ -18,18 +28,27 @@
     "LevelMixin",
     "LivingEntityMixin",
     "PartEntityMixin",
+    "PlayerInventoryMixin",
     "PlayerMixin",
     "ResourceLocationMixin",
+    "ServerPacksSourceMixin",
     "ServerPlayerMixin",
+    "TamableAnimalMixin",
     "Vec3Mixin"
   ],
   "client": [
+    "ClientPacketListenerMixin",
     "LocalPlayerMixin",
+    "GameRendererMixin",
+    "LevelRendererMixin",
+    "ItemInHandRendererMixin",
+    "ItemRendererMixin",
     "MinecraftMixin"
   ],
   "server": [],
   "injectors": {
     "defaultRequire": 1
   },
-  "minVersion": "0.8"
+  "minVersion": "0.8",
+  "plugin": "heckerpowered.lethal.mixin.impl.LethalMixinPlugin"
 }

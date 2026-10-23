@@ -13,6 +13,7 @@ layout(push_constant) uniform Explosion {
 } explosion;
 
 const float PI = 3.14159265359;
+const float overallBrightness = 0.096;
 
 float hashPoint(vec3 point) {
     point = fract(point * 0.1031);
@@ -31,8 +32,16 @@ float fieldNoise(vec3 point) {
     return mix(lower, upper, weight.z);
 }
 
-vec3 blueRadiance(float peak) {
-    return vec3(0.0, 0.0, 1.0) * peak;
+vec3 blueRadiance() {
+    return vec3(0.0, 0.1, 1000.0);
+}
+
+vec3 bodyRadiance() {
+    const vec3 paleBlue = vec3(0.2, 0.45, 1.0);
+    const vec3 luminanceWeights = vec3(0.2126, 0.7152, 0.0722);
+    // Match the previous linear luminance while moving energy from blue into red and green.
+    float baselineLuminance = dot(blueRadiance(), luminanceWeights);
+    return paleBlue * (baselineLuminance / dot(paleBlue, luminanceWeights));
 }
 
 vec4 brightCore(float ageSeconds, vec3 point, vec3 viewDirection) {
@@ -41,10 +50,10 @@ vec4 brightCore(float ageSeconds, vec3 point, vec3 viewDirection) {
     float facing = clamp(abs(dot(normalize(point), viewDirection)), 0.0, 1.0);
     float coverage = smoothstep(0.06, 0.12, facing);
     float cooling = 1.0 - smoothstep(0.018, 0.105, ageSeconds);
-    float hotCore = smoothstep(0.975, 0.998, facing)
+    float whiteHot = smoothstep(0.975, 0.998, facing)
         * smoothstep(0.54, 0.78, turbulence) * cooling;
-    vec3 radiance = blueRadiance(1.6) * (0.55 + turbulence * 0.45)
-        + blueRadiance(1600.0) * hotCore;
+    vec3 radiance = bodyRadiance() * (0.55 + turbulence * 0.45)
+        + bodyRadiance() * whiteHot;
     return vec4(radiance * coverage * cooling, coverage * cooling);
 }
 
@@ -97,8 +106,8 @@ vec4 electricalFork(float ageSeconds, vec3 point, vec3 forward, vec3 sideways, f
         * shorteningSegment(segment, 0.0, 0.41)
         * smoothstep(-0.15, 0.05, angle);
     float arcLength = smoothstep(-1.35, -1.1, angle) * (1.0 - smoothstep(0.9, 1.3, angle));
-    vec3 light = blueRadiance(1.5) * mainLine
-        + blueRadiance(1.0) * branchLine;
+    vec3 light = bodyRadiance() * mainLine
+        + bodyRadiance() * branchLine;
     return vec4(light * arcLength, (mainLine + branchLine * 0.65) * arcLength);
 }
 
@@ -133,19 +142,13 @@ vec4 breakingShell(float ageSeconds, vec3 point, vec3 viewDirection) {
     float cloud = smoothstep(cloudErosion, cloudErosion + max(cloudEdge, 0.12), cloudField);
     float coverage = veins * breakup;
     float cloudCoverage = cloud * (0.65 + cloudField * 0.35);
-    vec3 radiance = blueRadiance(1.8)
+    vec3 radiance = bodyRadiance()
         * (1.0 + veins * rim * 0.3);
     vec4 arcs = shortElectricalArcs(ageSeconds, normalize(point));
-    vec3 cloudRadiance = blueRadiance(1.55)
+    vec3 cloudRadiance = bodyRadiance()
         * (0.55 + cloudField * 0.45);
     vec3 light = cloudRadiance * cloudCoverage
         + radiance * coverage * (1.0 - cloudCoverage) + arcs.rgb * 0.55;
-    // Sparse vein hotspots carry the local HDR peak; the surrounding shell stays blue.
-    float junctionField = fieldNoise(point * 10.0 + drift + vec3(7.0, 3.0, 11.0));
-    float junction = coverage * smoothstep(0.65, 0.79, junctionField)
-        * (1.0 - cloudCoverage);
-    float junctionLife = 1.0 - smoothstep(0.08, 0.22, ageSeconds);
-    light += blueRadiance(900.0) * junction * junctionLife;
     float remaining = 1.0 - smoothstep(0.28, 0.62, ageSeconds);
     return vec4(light * remaining, clamp(max(max(coverage, arcs.a), cloudCoverage), 0.0, 1.0) * remaining);
 }
@@ -160,7 +163,7 @@ vec4 shockRing(float ageSeconds, vec3 point) {
     float band = narrowingLine(abs(radius - 1.0), 0.007, collapse, radialWidth);
     float piece = shorteningSegment(segment, collapse, 0.40);
     float coverage = band * piece;
-    vec3 radiance = blueRadiance(1.8);
+    vec3 radiance = bodyRadiance();
     return vec4(radiance * coverage, coverage);
 }
 
@@ -175,8 +178,8 @@ vec4 outwardFragment(vec3 point) {
     float spark = step(0.88, hashPoint(floor(normalize(localPosition) * 5.0)
         + vec3(explosion.timing.z))) * tip;
     float hotLife = 1.0 - smoothstep(0.04, 0.32, explosion.timing.x);
-    vec3 radiance = blueRadiance(1.6) * (0.65 + head * 0.35) * brightness
-        + vec3(0.0, 0.0, 8.0) * spark * hotLife;
+    vec3 radiance = bodyRadiance() * (0.65 + head * 0.35) * brightness
+        + bodyRadiance() * spark * hotLife;
     return vec4(radiance * coverage, coverage * brightness);
 }
 
@@ -200,6 +203,7 @@ void main() {
     if (energy.a < 0.0001) discard;
     float cameraFade = smoothstep(0.35, 3.0, length(explosion.cameraLocal.xyz));
     if (explosion.timing.w < 0.5) cameraFade *= smoothstep(1.5, 4.0, length(explosion.cameraLocal.xyz));
-    float radianceScale = explosion.timing.w >= 2.5 ? 10.0 : (explosion.timing.w >= 0.5 ? 1.075 : 0.43);
-    result = vec4(energy.rgb * explosion.tint.w * radianceScale * 1.1, clamp(energy.a, 0.0, 1.0) * cameraFade);
+    if (clamp(energy.a, 0.0, 1.0) * cameraFade < 0.0001) discard;
+    if (explosion.timing.w < 2.5) energy.rgb *= 0.8;
+    result = vec4(energy.rgb * explosion.tint.w * overallBrightness, 1.0);
 }

@@ -1,0 +1,10 @@
+accessWidener v2 official
+accessible field net/minecraft/world/level/entity/LevelEntityGetterAdapter visibleEntities Lnet/minecraft/world/level/entity/EntityLookup;
+accessible field net/minecraft/world/level/entity/LevelEntityGetterAdapter sectionStorage Lnet/minecraft/world/level/entity/EntitySectionStorage;
+accessible field net/minecraft/world/level/entity/EntitySectionStorage sectionIds Lit/unimi/dsi/fastutil/longs/LongSortedSet;
+accessible field net/minecraft/world/level/entity/EntitySection storage Lnet/minecraft/util/ClassInstanceMultiMap;
+accessible method net/minecraft/world/damagesource/DamageSource <init> (Lnet/minecraft/core/Holder;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/Vec3;)V
+accessible class net/minecraft/world/item/CreativeModeTab$Output
+accessible class net/minecraft/world/item/CreativeModeTab$TabVisibility
+accessible field net/minecraft/world/entity/projectile/Projectile owner Lnet/minecraft/world/entity/EntityReference;
+accessible field net/minecraft/world/entity/AreaEffectCloud owner Lnet/minecraft/world/entity/EntityReference;

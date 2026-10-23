@@ -22,10 +22,11 @@ void main() {
     float style = effect.motion.y;
     float textureTime = trailArcState.y;
     float strength;
-    if (trailState.w > 0.5) {
+    float particleLifetimeSeconds = trailState.w;
+    if (particleLifetimeSeconds > 0.0) {
         float localDistance = trailState.y * trailState.y + trailState.z * trailState.z;
-        float particleBrightness = 1.0 - smoothstep(0.0, 1.0, age / 0.29);
-        strength = exp(-localDistance * 5.0) * 7.0 * particleBrightness;
+        float particleBrightness = 1.0 - smoothstep(0.0, 1.0, age / particleLifetimeSeconds);
+        strength = exp(-localDistance * 5.0) * 3.0 * particleBrightness;
     } else {
         float radial = trailState.y;
         float speed = trailState.z;
@@ -45,13 +46,11 @@ void main() {
             float sheath = exp(-pow((radial - 0.82) / 0.22, 2.0));
             strength = edge * 11.0 + sheath * (0.10 + detail * 0.18) + wakes * sheath * 0.24;
         } else {
-            float fractureNoise = noise(vec2(textureTime * 41.0 + radial * 2.7, radial * 5.0));
-            float seam = abs(sin(textureTime * (102.0 + noise(vec2(radial * 4.5, 3.1)) * 34.0) + radial * 8.0 + fractureNoise * 3.1));
-            float breaks = smoothstep(0.16 + life * 0.27, 0.28 + life * 0.26, seam + fractureNoise * 0.15);
-            float shards = pow(max(0.0, sin(radial * 33.0 + detail * 5.2 - textureTime * 62.0)), 4.2);
-            float plate = smoothstep(0.36 + life * 0.22, 0.58 + life * 0.25, fractureNoise);
-            float searing = exp(-pow((radial - 0.87 - (detail - 0.5) * 0.03) / 0.01, 2.0));
-            strength = (edge * 9.0 + body * (shards * (0.58 + detail) + plate * 0.24) + searing * 1.2) * breaks * erosion;
+            float core = exp(-pow((radial - 0.97) / 0.0055, 2.0));
+            float sheath = exp(-pow((radial - 0.93) / 0.035, 2.0));
+            float halo = exp(-pow((radial - 0.86) / 0.075, 2.0));
+            float grain = 0.88 + detail * 0.12;
+            strength = core * 4.8 + (sheath * 0.26 + halo * 0.08) * grain;
         }
         strength *= tail * (0.22 + speed * 1.5) * fresh;
     }

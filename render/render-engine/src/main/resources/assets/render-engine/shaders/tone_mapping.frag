@@ -3,7 +3,7 @@
  * OpenColorIO 2.6.0 (stable ACES package v2.0.0+2025.04.04).
  * GPU hue-table nearest fetches are replaced by equivalent constant-array indexing.
  * Input linear sRGB D65; output display-linear Rec.709 D65. No HDR 3D LUT/domain cap.
- * Generator and provenance: tools/aces/generate_aces20.py
+ * Generator and provenance: external Lethal-tools/aces/generate_aces20.py (--repo-root <checkout>)
  */
 /*
 Copyright Contributors to the OpenColorIO Project.
@@ -36,7 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 layout(set = 0, binding = 0) uniform sampler2D content;
 layout(set = 0, binding = 1) uniform sampler2D glow;
-layout(push_constant) uniform ToneMapping { vec4 mapping; vec2 controls; } toneMapping;
+layout(set = 0, binding = 2) uniform sampler2D adaptedExposure;
+layout(push_constant) uniform ToneMapping { vec4 mapping; vec4 controls; } toneMapping;
 layout(location = 0) in vec2 coordinates;
 layout(location = 0) out vec4 result;
 
@@ -346,10 +347,12 @@ void main() {
     vec4 surface = texture(content,coordinates);
     vec4 halo = texture(glow,coordinates)*toneMapping.controls.x;
     vec3 radiance = max(surface.rgb+halo.rgb,vec3(0.0));
-    vec3 mapped = aces2DisplayLinear(vec4(radiance*toneMapping.mapping.x,1.0)).rgb;
+    float exposure = toneMapping.mapping.x;
+    if (toneMapping.controls.z > 0.5) exposure *= texture(adaptedExposure, vec2(0.5)).r;
+    vec3 mapped = aces2DisplayLinear(vec4(radiance*exposure,1.0)).rgb;
     if (toneMapping.mapping.y > 0.5) mapped = encodeSrgb(mapped);
     float totalEnergy = dot(radiance,vec3(0.2126,0.7152,0.0722));
     float share = totalEnergy > 0.0 ? clamp(dot(surface.rgb,vec3(0.2126,0.7152,0.0722))/totalEnergy,0.0,1.0) : 0.0;
     // Encode the combined color once, then split; alpha remains coverage or numeric signal.
-    result = toneMapping.controls.y > 0.5 ? vec4(mapped*(1.0-share),halo.a) : vec4(mapped*share,surface.a);
+    result = toneMapping.controls.y > 1.5 ? vec4(mapped,surface.a) : toneMapping.controls.y > 0.5 ? vec4(mapped*(1.0-share),halo.a) : vec4(mapped*share,surface.a);
 }

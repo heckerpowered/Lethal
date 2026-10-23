@@ -12,13 +12,23 @@ void main() {
     vec2 footprint = sourceSize / targetSize;
     vec2 lower = pixel * footprint;
     vec2 upper = (pixel + 1.0) * footprint;
-    vec4 total = vec4(0.0);
-    for (int y = int(floor(lower.y)); y < int(ceil(upper.y)); y++) {
-        float height = max(0.0, min(upper.y, float(y + 1)) - max(lower.y, float(y)));
-        for (int x = int(floor(lower.x)); x < int(ceil(upper.x)); x++) {
-            float width = max(0.0, min(upper.x, float(x + 1)) - max(lower.x, float(x)));
-            total += texture(image, (clamp(vec2(x, y), vec2(0.0), sourceSize - 1.0) + 0.5) / sourceSize) * width * height;
+    // Integrate the bilinear reconstruction, splitting at source texel centers.
+    // Texel-center box samples would replicate the coarse grid during enlargement.
+    vec4 mean = vec4(0.0);
+    float accumulatedArea = 0.0;
+    for (int y = int(floor(lower.y + 0.5)); y < int(ceil(upper.y + 0.5)); y++) {
+        for (int x = int(floor(lower.x + 0.5)); x < int(ceil(upper.x + 0.5)); x++) {
+            vec2 segmentLower = max(lower, vec2(x, y) - 0.5);
+            vec2 segmentUpper = min(upper, vec2(x, y) + 0.5);
+            vec2 extent = max(segmentUpper - segmentLower, vec2(0.0));
+            float area = extent.x * extent.y;
+            if (area > 0.0) {
+                vec4 sampleColor = texture(image, (segmentLower + segmentUpper) * 0.5 / sourceSize);
+                // A running convex average keeps finite HDR samples inside their input range.
+                accumulatedArea += area;
+                mean += (sampleColor - mean) * (area / accumulatedArea);
+            }
         }
     }
-    result = total / (footprint.x * footprint.y);
+    result = mean;
 }
