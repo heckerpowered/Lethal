@@ -111,14 +111,6 @@ fun TransformView.toAffine(): AffineTransformView =
         translation
     )
 
-fun AffineTransforms.copyOf(transform: AffineTransformView): AffineTransformView =
-    AffineTransform(
-        Vectors.of(transform.axisX.x, transform.axisX.y, transform.axisX.z),
-        Vectors.of(transform.axisY.x, transform.axisY.y, transform.axisY.z),
-        Vectors.of(transform.axisZ.x, transform.axisZ.y, transform.axisZ.z),
-        Vectors.of(transform.translation.x, transform.translation.y, transform.translation.z),
-    )
-
 object AffineTransforms {
     val Identity: AffineTransformView = AffineTransform(
         axisX = Vectors.UnitX,
