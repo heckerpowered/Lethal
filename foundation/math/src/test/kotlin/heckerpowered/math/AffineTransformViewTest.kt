@@ -12,10 +12,10 @@ import kotlin.test.assertTrue
 
 class AffineTransformViewTest {
     private val shear = AffineTransforms.of(
-        axisX = Vectors.of(2.0, 0.0, 0.0),
-        axisY = Vectors.of(1.0, 3.0, 0.0),
-        axisZ = Vectors.of(0.0, 0.0, -4.0),
-        translation = Vectors.of(5.0, 6.0, 7.0)
+        axisX = Vector(2.0, 0.0, 0.0),
+        axisY = Vector(1.0, 3.0, 0.0),
+        axisZ = Vector(0.0, 0.0, -4.0),
+        translation = Vector(5.0, 6.0, 7.0)
     )
 
     @Test
@@ -30,7 +30,7 @@ class AffineTransformViewTest {
 
     @Test
     fun compositionAppliesTheRightOperandFirstAndRetainsShear() {
-        val translation = AffineTransforms.fromTranslation(Vectors.of(1.0, 2.0, 3.0))
+        val translation = AffineTransforms.fromTranslation(Vector(1.0, 2.0, 3.0))
         val composed = shear * translation
         assertVector(shear.transformPosition(translation.transformPosition(Vectors.One)), composed.transformPosition(Vectors.One))
         assertVector(shear.transformVector(Vectors.One), composed.transformVector(Vectors.One))
@@ -56,12 +56,12 @@ class AffineTransformViewTest {
         assertSame(shear.axisY, copy.axisY)
         assertSame(shear.axisZ, copy.axisZ)
         assertSame(shear.translation, copy.translation)
-        val transform = Transforms.of(shear.translation, Quaternions.fromAxisAngleDegrees(Vectors.UnitY, 40.0), Vectors.of(-2.0, 3.0, 4.0))
+        val transform = Transforms.of(shear.translation, Quaternions.fromAxisAngleDegrees(Vectors.UnitY, 40.0), Vector(-2.0, 3.0, 4.0))
         assertVector(transform.transformPosition(Vectors.One), AffineTransforms.fromTransform(transform).transformPosition(Vectors.One))
         assertTrue(AffineTransforms.of().isIdentity())
         assertTrue(AffineTransforms.Identity.isFinite())
         assertFalse(shear.isIdentity())
-        assertFalse(AffineTransforms.of(axisX = Vectors.of(Double.NaN, 0.0, 0.0)).isFinite())
-        assertFalse(AffineTransforms.fromTranslation(Vectors.of(Double.POSITIVE_INFINITY, 0.0, 0.0)).isFinite())
+        assertFalse(AffineTransforms.of(axisX = Vector(Double.NaN, 0.0, 0.0)).isFinite())
+        assertFalse(AffineTransforms.fromTranslation(Vector(Double.POSITIVE_INFINITY, 0.0, 0.0)).isFinite())
     }
 }
