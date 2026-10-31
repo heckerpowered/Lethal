@@ -46,5 +46,9 @@
   "item.lethal.ares": "能量剑阿瑞斯",
   "item.lethal.ares_golden": "能量剑阿瑞斯 - 金色",
   "entity.lethal.zeus_missile": "宙斯导弹",
-  "entity.lethal.athena_grenade": "雅典娜榴弹"
+  "entity.lethal.athena_grenade": "雅典娜榴弹",
+  "lethal.hud.fortune.ultimate": "星辰审判",
+  "lethal.hud.fortune.sonic_boom": "声波炮",
+  "lethal.hud.zeus.judgement": "审判",
+  "lethal.hud.zeus.missile": "导弹"
 }
