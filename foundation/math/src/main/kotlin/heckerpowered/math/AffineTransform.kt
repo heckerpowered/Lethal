@@ -119,11 +119,8 @@ object AffineTransforms {
         translation = Vectors.Zero,
     )
 
-    fun of(axisX: VectorView = Vectors.UnitX, axisY: VectorView = Vectors.UnitY, axisZ: VectorView = Vectors.UnitZ, translation: VectorView = Vectors.Zero): AffineTransformView =
-        AffineTransform(axisX, axisY, axisZ, translation)
-
     fun fromTranslation(translation: VectorView): AffineTransformView =
-        of(translation = translation)
+        AffineTransform(translation = translation)
 
     fun fromTransform(transform: TransformView): AffineTransformView =
         transform.toAffine()
