@@ -11,11 +11,11 @@ import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class AffineTransformViewTest {
-    private val shear = AffineTransforms.of(
-        axisX = Vector(2.0, 0.0, 0.0),
-        axisY = Vector(1.0, 3.0, 0.0),
-        axisZ = Vector(0.0, 0.0, -4.0),
-        translation = Vector(5.0, 6.0, 7.0)
+    private val shear = AffineTransform(
+        Vector(2.0, 0.0, 0.0),
+        Vector(1.0, 3.0, 0.0),
+        Vector(0.0, 0.0, -4.0),
+        Vector(5.0, 6.0, 7.0)
     )
 
     @Test
@@ -56,12 +56,12 @@ class AffineTransformViewTest {
         assertSame(shear.axisY, copy.axisY)
         assertSame(shear.axisZ, copy.axisZ)
         assertSame(shear.translation, copy.translation)
-        val transform = Transforms.of(shear.translation, Quaternions.fromAxisAngleDegrees(Vectors.UnitY, 40.0), Vector(-2.0, 3.0, 4.0))
+        val transform = Transform(shear.translation, Quaternions.fromAxisAngleDegrees(Vectors.UnitY, 40.0), Vector(-2.0, 3.0, 4.0))
         assertVector(transform.transformPosition(Vectors.One), AffineTransforms.fromTransform(transform).transformPosition(Vectors.One))
-        assertTrue(AffineTransforms.of().isIdentity())
+        assertTrue(AffineTransform(Vectors.UnitX, Vectors.UnitY, Vectors.UnitZ, Vectors.Zero).isIdentity())
         assertTrue(AffineTransforms.Identity.isFinite())
         assertFalse(shear.isIdentity())
-        assertFalse(AffineTransforms.of(axisX = Vector(Double.NaN, 0.0, 0.0)).isFinite())
+        assertFalse(AffineTransform(axisX = Vector(Double.NaN, 0.0, 0.0)).isFinite())
         assertFalse(AffineTransforms.fromTranslation(Vector(Double.POSITIVE_INFINITY, 0.0, 0.0)).isFinite())
     }
 }
