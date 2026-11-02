@@ -1,8 +1,11 @@
 #version 450
 
 layout(set = 0, binding = 0) uniform sampler2D image;
-layout(push_constant) uniform Resample { vec4 sizes; } resample;
+layout (push_constant) uniform Resample {
+    vec4 sizes;
+} resample;
 layout(location = 0) in vec2 coordinates;
+
 layout(location = 0) out vec4 result;
 
 void main() {
@@ -12,10 +15,12 @@ void main() {
     vec2 footprint = sourceSize / targetSize;
     vec2 lower = pixel * footprint;
     vec2 upper = (pixel + 1.0) * footprint;
+
     // Integrate the bilinear reconstruction, splitting at source texel centers.
     // Texel-center box samples would replicate the coarse grid during enlargement.
     vec4 mean = vec4(0.0);
     float accumulatedArea = 0.0;
+
     for (int y = int(floor(lower.y + 0.5)); y < int(ceil(upper.y + 0.5)); y++) {
         for (int x = int(floor(lower.x + 0.5)); x < int(ceil(upper.x + 0.5)); x++) {
             vec2 segmentLower = max(lower, vec2(x, y) - 0.5);
@@ -30,5 +35,6 @@ void main() {
             }
         }
     }
+
     result = mean;
 }
