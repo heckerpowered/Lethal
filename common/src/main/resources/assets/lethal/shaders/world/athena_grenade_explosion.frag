@@ -3,6 +3,7 @@
 layout(location = 0) in vec3 surfacePoint;
 layout(location = 1) in vec3 localPosition;
 layout(location = 2) in vec4 lifeState;
+
 layout(location = 0) out vec4 result;
 
 layout(push_constant) uniform Explosion {
@@ -46,14 +47,17 @@ vec3 bodyRadiance() {
 
 vec4 brightCore(float ageSeconds, vec3 point, vec3 viewDirection) {
     if (ageSeconds >= 0.105) return vec4(0.0);
+
     float turbulence = fieldNoise(point * 9.0 + vec3(explosion.timing.z, -ageSeconds * 5.0, 0.0));
     float facing = clamp(abs(dot(normalize(point), viewDirection)), 0.0, 1.0);
     float coverage = smoothstep(0.06, 0.12, facing);
     float cooling = 1.0 - smoothstep(0.018, 0.105, ageSeconds);
+
     float whiteHot = smoothstep(0.975, 0.998, facing)
         * smoothstep(0.54, 0.78, turbulence) * cooling;
     vec3 radiance = bodyRadiance() * (0.55 + turbulence * 0.45)
         + bodyRadiance() * whiteHot;
+
     return vec4(radiance * coverage * cooling, coverage * cooling);
 }
 
@@ -91,20 +95,24 @@ vec4 electricalFork(float ageSeconds, vec3 point, vec3 forward, vec3 sideways, f
     vec3 normal = cross(forward, sideways);
     float angle = atan(dot(point, sideways), dot(point, forward));
     float lateral = dot(point, normal);
+
     float jagged = triangleWave(angle * 4.3 + phase) * 0.052
         + triangleWave(angle * 11.1 - phase) * 0.017;
     float mainDistance = abs(lateral - jagged);
     float branchOffset = smoothstep(-0.15, 1.1, angle) * 0.27;
     float branchDistance = abs(lateral - jagged - branchOffset);
     float pixelWidth = max(fwidth(lateral) * 1.1, 0.002);
+
     float segment = angle * 2.7 + phase;
     float mainLife = segmentLife(ageSeconds, segment, phase, 0.32, 0.28);
     float branchLife = segmentLife(ageSeconds, segment, phase + 2.3, 0.22, 0.23);
+
     float mainLine = narrowingArc(mainDistance, 0.003, mainLife, pixelWidth)
         * shorteningSegment(segment, 0.0, 0.41);
     float branchLine = narrowingArc(branchDistance, 0.002, branchLife, pixelWidth)
         * shorteningSegment(segment, 0.0, 0.41)
         * smoothstep(-0.15, 0.05, angle);
+
     float arcLength = smoothstep(-1.35, -1.1, angle) * (1.0 - smoothstep(0.9, 1.3, angle));
     vec3 light = bodyRadiance() * mainLine
         + bodyRadiance() * branchLine;
@@ -125,21 +133,26 @@ vec4 breakingShell(float ageSeconds, vec3 point, vec3 viewDirection) {
     float field = fieldNoise(point * 5.5 + drift) * 0.7 + fieldNoise(point * 16.0 - drift) * 0.3;
     float ridgeDistance = abs(field - 0.52);
     float pixelWidth = max(fwidth(field) * 0.9, 0.0015);
+
     float patchRandom = hashPoint(vec3(floor(point.xy * 3.2), explosion.timing.z));
     float patchLife = clamp(ageSeconds / (0.36 + patchRandom * 0.23), 0.0, 1.0);
     float halfWidth = 0.012 * (1.0 - smoothstep(0.28, 1.0, patchLife) * 0.92);
     float veins = 1.0 - smoothstep(halfWidth, halfWidth + pixelWidth, ridgeDistance);
+
     float facing = clamp(abs(dot(normalize(point), viewDirection)), 0.0, 1.0);
     float rim = pow(1.0 - facing, 2.5);
+
     float fractureField = fieldNoise(point * 3.2 + vec3(explosion.timing.z, 1.0, 3.0));
     float erosion = 0.23 + 0.79 * smoothstep(0.15, 1.0, patchLife);
     float erosionEdge = max(fwidth(fractureField) * 0.75, 0.003);
     float breakup = smoothstep(erosion, erosion + erosionEdge, fractureField);
+
     float cloudField = fieldNoise(point * 3.2 + vec3(explosion.timing.z + 2.0, geometryAgeSeconds * 4.0, 5.0));
     float cloudLife = clamp(ageSeconds / (0.16 + patchRandom * 0.13), 0.0, 1.0);
     float cloudErosion = 0.25 + 0.82 * smoothstep(0.10, 1.0, cloudLife);
     float cloudEdge = max(fwidth(cloudField), 0.004);
     float cloud = smoothstep(cloudErosion, cloudErosion + max(cloudEdge, 0.12), cloudField);
+
     float coverage = veins * breakup;
     float cloudCoverage = cloud * (0.65 + cloudField * 0.35);
     vec3 radiance = bodyRadiance()
@@ -157,39 +170,48 @@ vec4 shockRing(float ageSeconds, vec3 point) {
     float radius = length(point.xz);
     float angle = atan(point.z, point.x);
     float segment = angle * 36.0 / (2.0 * PI) + explosion.timing.z;
+
     float life = segmentLife(ageSeconds, segment, explosion.timing.z, 0.22, 0.27);
     float collapse = smoothstep(0.28, 1.0, life);
+
     float radialWidth = max(fwidth(radius), 0.0005);
     float band = narrowingLine(abs(radius - 1.0), 0.007, collapse, radialWidth);
     float piece = shorteningSegment(segment, collapse, 0.40);
     float coverage = band * piece;
+
     vec3 radiance = bodyRadiance();
     return vec4(radiance * coverage, coverage);
 }
 
 vec4 outwardFragment(vec3 point) {
     if (point.z < 0.5 || lifeState.z <= 0.0 || lifeState.w <= 0.0) return vec4(0.0);
+
     float side = 1.0 - smoothstep(0.35, 0.95, abs(point.y));
     float head = smoothstep(0.0, 0.8, point.x);
     float coverage = side * (0.3 + head * 0.7);
     float brightness = 1.0 - smoothstep(0.0, 1.0, lifeState.x);
+
     float tip = smoothstep(0.88, 1.0, point.x)
         * (1.0 - smoothstep(0.12, 0.40, abs(point.y)));
     float spark = step(0.88, hashPoint(floor(normalize(localPosition) * 5.0)
         + vec3(explosion.timing.z))) * tip;
     float hotLife = 1.0 - smoothstep(0.04, 0.32, explosion.timing.x);
+
     vec3 radiance = bodyRadiance() * (0.65 + head * 0.35) * brightness
         + bodyRadiance() * spark * hotLife;
+
     return vec4(radiance * coverage, coverage * brightness);
 }
 
 void main() {
     float ageSeconds = explosion.timing.x;
     if (ageSeconds < 0.0 || ageSeconds >= explosion.timing.y) discard;
+
     vec3 cameraOffset = explosion.cameraLocal.xyz - localPosition;
     vec3 viewDirection = cameraOffset / max(length(cameraOffset), 0.0001);
     // The engine mesh path is two-sided; select one physical hemisphere before shading.
     if (explosion.timing.w < 1.5 && dot(normalize(surfacePoint), viewDirection) * explosion.cameraLocal.w < 0.0) discard;
+
     vec4 energy;
     if (explosion.timing.w < 0.5) {
         energy = brightCore(ageSeconds, surfacePoint, viewDirection);
@@ -200,10 +222,13 @@ void main() {
     } else {
         energy = outwardFragment(surfacePoint);
     }
+
     if (energy.a < 0.0001) discard;
+
     float cameraFade = smoothstep(0.35, 3.0, length(explosion.cameraLocal.xyz));
     if (explosion.timing.w < 0.5) cameraFade *= smoothstep(1.5, 4.0, length(explosion.cameraLocal.xyz));
     if (clamp(energy.a, 0.0, 1.0) * cameraFade < 0.0001) discard;
     if (explosion.timing.w < 2.5) energy.rgb *= 0.8;
+
     result = vec4(energy.rgb * explosion.tint.w * overallBrightness, 1.0);
 }
