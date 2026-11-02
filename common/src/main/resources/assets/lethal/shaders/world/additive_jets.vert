@@ -74,10 +74,12 @@ vec3 fragmentPosition(float ageSeconds, vec2 corner) {
     float secondRandom = fragmentRandom(fragment, explosion.timing.z + 4.7);
     float jet = 1.0;
     vec3 particle = jetParameters(fragment);
+
     float bornAt = particle.x;
     float endsAt = bornAt + particle.y;
     float elapsed = max(ageSeconds - bornAt, 0.0);
     float life = (ageSeconds - bornAt) / (endsAt - bornAt);
+
     float fastDrag = 26.0 + secondRandom * 8.0;
     float driftDrag = 5.5 + secondRandom * 2.5;
     float initialSpeed = particle.z;
@@ -88,16 +90,19 @@ vec3 fragmentPosition(float ageSeconds, vec2 corner) {
     (exp(-fastDrag * motionTime) * 0.80 + exp(-driftDrag * motionTime) * 0.20) * timeSpeed;
     float speed = initialSpeed * speedFraction;
     float travel = radialTravel(elapsed, fastDrag, driftDrag, initialSpeed, secondRandom);
+
     float growth = fragmentGrowth(elapsed);
     float burnout = 1.0 - smoothstep(0.46, 1.0, life);
     float shardLength = (0.065 + speed * 0.0045) * (0.82 + 0.18 * growth) *
     (1.0 - smoothstep(0.72, 1.0, life)) * explosion.appearance.x;
     float shardWidth =
     (0.017 + random * 0.017) * growth * burnout * explosion.appearance.x * mix(.78, .58, jet);
+
     float tailLength =
     min(max(travel - radialTravel(elapsed - 0.006, fastDrag, driftDrag, initialSpeed, secondRandom), 0.0),
         0.45);
     tailLength *= (1.0 - smoothstep(0.45, 0.85, life)) * explosion.shutter.z;
+
     // These shape integrals allocate at most 10% of body light to the artistic tail.
     const float coreShapeIntegral = 0.484688;
     const float tailShapeIntegral = 0.081666667;
@@ -105,6 +110,7 @@ vec3 fragmentPosition(float ageSeconds, vec2 corner) {
     min(0.35, 0.10 * shardLength * coreShapeIntegral / max(tailLength * tailShapeIntegral, 0.000001));
     coreEnergyScale = 1.0 - tailEnergyScale * tailLength * tailShapeIntegral /
     max(shardLength * coreShapeIntegral, 0.000001);
+
     float elevation = 1.0 - 2.0 * (fragment + 0.5) / 12.0;
     float azimuth = fragment * 2.39996323 + explosion.timing.z * 0.37 + .83;
     float horizontal = sqrt(max(1.0 - elevation * elevation, 0.0));
@@ -112,6 +118,7 @@ vec3 fragmentPosition(float ageSeconds, vec2 corner) {
     vec3 sight = explosion.cameraLocal.xyz - direction * travel;
     vec3 sideways = cross(direction, sight);
     sideways /= max(length(sideways), 0.0001);
+
     float alive = jetAlive(particle, ageSeconds);
     float taper;
     float radialPosition;
@@ -125,6 +132,7 @@ vec3 fragmentPosition(float ageSeconds, vec2 corner) {
         radialPosition = travel + corner.x * shardLength;
         lifeState = vec4(life, speedFraction, shardLength, shardWidth);
     }
+
     surfacePoint = vec3(corner.x, corner.y, alive);
     return direction * radialPosition + sideways * corner.y * shardWidth * taper;
 }
@@ -133,9 +141,11 @@ void main() {
     fragmentIndex = coordinates.x;
     vec2 lower = vec2(1e10);
     vec2 upper = vec2(-1e10);
+
     for (int sampleIndex = 0; sampleIndex < 8; sampleIndex++) {
         if (float(sampleIndex) >= explosion.shutter.y)
         break;
+
         float age =
         explosion.timing.x - explosion.shutter.x * (float(sampleIndex) + 0.5) / explosion.shutter.y;
         for (int cornerIndex = 0; cornerIndex < 4; cornerIndex++) {
@@ -147,6 +157,7 @@ void main() {
             }
         }
     }
+
     // No projected sample (or a wholly offscreen box) contributes any visible pixels.
     // Leaving the initial +/-1e10 bounds intact would rasterize a giant discard-only quad.
     if (any(greaterThanEqual(lower, upper)) || any(greaterThan(lower, vec2(1.0))) ||
@@ -155,6 +166,7 @@ void main() {
         gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
         return;
     }
+
     screenPosition = mix(lower, upper, vec2(coordinates.y, (coordinates.z + 1.0) * 0.5));
     gl_Position = vec4(screenPosition, 0.5, 1.0);
 }
