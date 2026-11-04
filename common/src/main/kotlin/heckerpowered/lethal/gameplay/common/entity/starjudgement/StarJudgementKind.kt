@@ -3,7 +3,7 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.gameplay.common.skill
+package heckerpowered.lethal.gameplay.common.entity.starjudgement
 
 /**
  * Selects the Legacy Star Judgement behavior hosted by a platform entity.
