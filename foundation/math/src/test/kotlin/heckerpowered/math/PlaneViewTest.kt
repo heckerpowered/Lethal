@@ -13,7 +13,7 @@ class PlaneViewTest {
         val plane = Planes.normalized(0.0, 3.0, 4.0, offset = 10.0)
 
         assertPlane(0.0, 0.6, 0.8, 2.0, plane)
-        assertEquals(0.0, plane.evaluate(Vectors.of(0.0, 2.0, 1.0)), 1.0E-12)
+        assertEquals(0.0, plane.evaluate(Vector(0.0, 2.0, 1.0)), 1.0E-12)
         assertTrue(plane.isNormalized())
         assertPlane(0.0, -0.6, -0.8, -2.0, Planes.normalized(0.0, -3.0, -4.0, offset = -10.0))
     }
@@ -29,36 +29,36 @@ class PlaneViewTest {
 
     @Test
     fun factoriesUseTheNormalDotPointEqualsOffsetConvention() {
-        val point = Vectors.of(2.0, 3.0, 4.0)
-        val plane = Planes.fromPointAndNormal(point, Vectors.of(0.0, 2.0, 0.0))
+        val point = Vector(2.0, 3.0, 4.0)
+        val plane = Planes.fromPointAndNormal(point, Vector(0.0, 2.0, 0.0))
 
         assertPlane(0.0, 2.0, 0.0, 6.0, plane)
         assertEquals(0.0, plane.evaluate(point))
-        assertEquals(4.0, plane.evaluate(Vectors.of(2.0, 5.0, 4.0)))
-        assertEquals(2.0, plane.signedDistanceTo(Vectors.of(2.0, 5.0, 4.0)))
-        assertEquals(-2.0, plane.signedDistanceTo(Vectors.of(2.0, 1.0, 4.0)))
-        assertEquals(2.0, plane.distanceTo(Vectors.of(2.0, 1.0, 4.0)))
+        assertEquals(4.0, plane.evaluate(Vector(2.0, 5.0, 4.0)))
+        assertEquals(2.0, plane.signedDistanceTo(Vector(2.0, 5.0, 4.0)))
+        assertEquals(-2.0, plane.signedDistanceTo(Vector(2.0, 1.0, 4.0)))
+        assertEquals(2.0, plane.distanceTo(Vector(2.0, 1.0, 4.0)))
         assertVector(0.0, 3.0, 0.0, plane.origin)
         assertVector(0.0, 2.0, 0.0, plane.normal)
     }
 
     @Test
     fun threePointsDetermineAUnitNormalWithWindingOrientation() {
-        val first = Vectors.of(0.0, 0.0, 2.0)
-        val second = Vectors.of(1.0, 0.0, 2.0)
-        val third = Vectors.of(0.0, 1.0, 2.0)
+        val first = Vector(0.0, 0.0, 2.0)
+        val second = Vector(1.0, 0.0, 2.0)
+        val third = Vector(0.0, 1.0, 2.0)
 
         assertPlane(0.0, 0.0, 1.0, 2.0, Planes.fromPoints(first, second, third))
         assertPlane(0.0, 0.0, -1.0, -2.0, Planes.fromPoints(first, third, second))
         assertNull(Planes.fromPointsOrNull(first, second, second))
-        assertNull(Planes.fromPointsOrNull(first, second, Vectors.of(Double.NaN, 0.0, 0.0)))
+        assertNull(Planes.fromPointsOrNull(first, second, Vector(Double.NaN, 0.0, 0.0)))
         assertFailsWith<IllegalArgumentException> { Planes.fromPoints(first, second, second) }
     }
 
     @Test
     fun coefficientOperationsDoNotPretendToBeGeometricComposition() {
-        val first = Planes.of(1.0, 2.0, 3.0, 4.0)
-        val second = Planes.of(5.0, 6.0, 7.0, 8.0)
+        val first = Plane(1.0, 2.0, 3.0, 4.0)
+        val second = Plane(5.0, 6.0, 7.0, 8.0)
 
         assertPlane(6.0, 8.0, 10.0, 12.0, first + second)
         assertPlane(-4.0, -4.0, -4.0, -4.0, first - second)
@@ -75,7 +75,7 @@ class PlaneViewTest {
 
     @Test
     fun normalizationPreservesThePlaneAndScalesTheOffset() {
-        val plane = Planes.of(0.0, 3.0, 4.0, 10.0)
+        val plane = Plane(0.0, 3.0, 4.0, 10.0)
 
         assertPlane(0.0, 0.6, 0.8, 2.0, plane.normalized())
         assertTrue(plane.normalized().isNormalized())
@@ -84,24 +84,24 @@ class PlaneViewTest {
         assertTrue(plane.isSamePlane(plane * 3.0))
         assertTrue(plane.isSamePlane(plane * -3.0))
         assertFalse(plane.isNearlyEqual(plane * 3.0))
-        assertFalse(plane.isSamePlane(Planes.of(0.0, 3.0, 4.0, 11.0)))
+        assertFalse(plane.isSamePlane(Plane(0.0, 3.0, 4.0, 11.0)))
         assertFalse(Planes.Zero.isSamePlane(Planes.Zero))
     }
 
     @Test
     fun normalizationHandlesExtremeCoefficientScalesWithoutSquaringOverflowOrUnderflow() {
-        assertPlane(1.0, 0.0, 0.0, 2.0, Planes.of(1.0E200, 0.0, 0.0, 2.0E200).normalizedOrNull(0.0)!!)
-        assertPlane(1.0, 0.0, 0.0, 2.0, Planes.of(1.0E-200, 0.0, 0.0, 2.0E-200).normalizedOrNull(0.0)!!)
-        assertNull(Planes.of(Double.MIN_VALUE, 0.0, 0.0, Double.MAX_VALUE).normalizedOrNull(0.0))
+        assertPlane(1.0, 0.0, 0.0, 2.0, Plane(1.0E200, 0.0, 0.0, 2.0E200).normalizedOrNull(0.0)!!)
+        assertPlane(1.0, 0.0, 0.0, 2.0, Plane(1.0E-200, 0.0, 0.0, 2.0E-200).normalizedOrNull(0.0)!!)
+        assertNull(Plane(Double.MIN_VALUE, 0.0, 0.0, Double.MAX_VALUE).normalizedOrNull(0.0))
     }
 
     @Test
     fun degenerateAndNonFinitePlanesHaveExplicitFailurePaths() {
         val invalidPlanes = listOf(
             Planes.Zero,
-            Planes.of(0.0, 0.0, 0.0, 1.0),
-            Planes.of(Double.NaN, 0.0, 0.0, 0.0),
-            Planes.of(1.0, 0.0, 0.0, Double.POSITIVE_INFINITY),
+            Plane(0.0, 0.0, 0.0, 1.0),
+            Plane(Double.NaN, 0.0, 0.0, 0.0),
+            Plane(1.0, 0.0, 0.0, Double.POSITIVE_INFINITY),
         )
         val fallback = Planes.fromNormal(Vectors.UnitY, 0.0)
         for (plane in invalidPlanes) {
@@ -119,7 +119,7 @@ class PlaneViewTest {
 
     @Test
     fun toleranceBoundaryAndInvalidParametersAreConsistent() {
-        val plane = Planes.of(0.0, 0.5, 0.0, 1.0)
+        val plane = Plane(0.0, 0.5, 0.0, 1.0)
         assertFalse(plane.isValid(0.25))
         assertNull(plane.normalizedOrNull(0.25))
         assertTrue(plane.isValid(0.0))
@@ -137,8 +137,8 @@ class PlaneViewTest {
 
     @Test
     fun projectionAndReflectionSupportNonUnitNormals() {
-        val plane = Planes.of(0.0, 2.0, 0.0, 6.0)
-        val point = Vectors.of(4.0, 5.0, -2.0)
+        val plane = Plane(0.0, 2.0, 0.0, 6.0)
+        val point = Vector(4.0, 5.0, -2.0)
 
         assertVector(4.0, 3.0, -2.0, plane.projectPosition(point))
         assertVector(4.0, 1.0, -2.0, plane.mirrorPosition(point))
@@ -148,33 +148,28 @@ class PlaneViewTest {
 
     @Test
     fun translationPreservesCoefficientScale() {
-        val plane = Planes.of(0.0, 2.0, 0.0, 6.0)
-        assertPlane(0.0, 2.0, 0.0, 14.0, plane.translated(Vectors.of(9.0, 4.0, 8.0)))
+        val plane = Plane(0.0, 2.0, 0.0, 6.0)
+        assertPlane(0.0, 2.0, 0.0, 14.0, plane.translated(Vector(9.0, 4.0, 8.0)))
     }
 
     @Test
     fun affineTransformationUsesInverseTransposeIncludingOffsetAndReflection() {
-        val matrix = Matrices.of(
-            -2.0, 1.0, 0.0, 5.0,
-            0.0, 3.0, 0.0, 7.0,
-            0.0, 0.0, 4.0, 9.0,
-            0.0, 0.0, 0.0, 1.0,
-        )
-        val plane = Planes.of(2.0, 0.0, 0.0, 4.0)
+        val matrix = Matrix(-2.0, 1.0, 0.0, 5.0, 0.0, 3.0, 0.0, 7.0, 0.0, 0.0, 4.0, 9.0, 0.0, 0.0, 0.0, 1.0)
+        val plane = Plane(2.0, 0.0, 0.0, 4.0)
         val transformed = plane.transformedBy(matrix)
 
         assertPlane(-1.0, 1.0 / 3.0, 0.0, 4.0 / 3.0, transformed)
-        for (point in listOf(Vectors.of(2.0, 0.0, 0.0), Vectors.of(2.0, 3.0, -4.0))) {
+        for (point in listOf(Vector(2.0, 0.0, 0.0), Vector(2.0, 3.0, -4.0))) {
             assertEquals(0.0, transformed.evaluate(matrix.transformPosition(point)), 1.0E-12)
         }
-        val positivePoint = Vectors.of(3.0, 0.0, 0.0)
+        val positivePoint = Vector(3.0, 0.0, 0.0)
         assertEquals(plane.evaluate(positivePoint), transformed.evaluate(matrix.transformPosition(positivePoint)), 1.0E-12)
     }
 
     @Test
     fun transformationRejectsSingularInvalidAndProjectiveInput() {
         val plane = Planes.fromNormal(Vectors.UnitX, 1.0)
-        val singular = Matrices.fromScale(Vectors.of(0.0, 1.0, 1.0))
+        val singular = Matrices.fromScale(Vector(0.0, 1.0, 1.0))
         val projective = Matrices.Identity.withComponent(3, 0, 1.0)
 
         assertNull(plane.transformedByOrNull(singular))
@@ -204,7 +199,7 @@ class PlaneViewTest {
             { assertTrue(it.isValid()) },
             { assertPlane(0.0, 1.0, 0.0, 3.0, it.normalizedOrNull()!!) },
             { assertVector(0.0, 3.0, 0.0, it.origin) },
-            { assertEquals(1.0, it.signedDistanceTo(Vectors.of(0.0, 4.0, 0.0))) },
+            { assertEquals(1.0, it.signedDistanceTo(Vector(0.0, 4.0, 0.0))) },
             { assertVector(0.0, 3.0, 0.0, it.projectPosition(Vectors.Zero)) },
             { assertVector(0.0, 6.0, 0.0, it.mirrorPosition(Vectors.Zero)) },
             { assertPlane(0.0, 2.0, 0.0, 8.0, it.translated(Vectors.UnitY)) },
@@ -240,7 +235,7 @@ class PlaneViewTest {
             override val m33: Double get() = if (++affineReads == 1) 1.0 else Double.NaN
         }
 
-        assertPlane(0.0, 2.0, 0.0, 14.0, Planes.of(0.0, 2.0, 0.0, 6.0).transformedBy(matrix))
+        assertPlane(0.0, 2.0, 0.0, 14.0, Plane(0.0, 2.0, 0.0, 6.0).transformedBy(matrix))
         assertEquals(1, translationReads)
         assertEquals(1, affineReads)
     }

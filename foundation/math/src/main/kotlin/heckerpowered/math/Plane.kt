@@ -222,9 +222,8 @@ object Planes {
     /** Degenerate coefficients, useful as a sentinel; does not describe a geometric plane. */
     val Zero: PlaneView = Plane(0.0, 0.0, 0.0, 0.0)
 
-    fun of(x: Double, y: Double, z: Double, w: Double): PlaneView = Plane(x, y, z, w)
-    fun fromNormal(normal: VectorView, w: Double): PlaneView = of(normal.x, normal.y, normal.z, w)
-    fun copyOf(plane: PlaneView): PlaneView = of(plane.x, plane.y, plane.z, plane.w)
+    fun fromNormal(normal: VectorView, w: Double): PlaneView = Plane(normal, w)
+    fun copyOf(plane: PlaneView): PlaneView = Plane(plane)
 
     /** Normalizes both the normal and offset, preserving the plane. Failure follows [PlaneView.normalized]. */
     fun normalized(
