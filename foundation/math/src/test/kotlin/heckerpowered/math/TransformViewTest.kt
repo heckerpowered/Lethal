@@ -13,7 +13,7 @@ class TransformViewTest {
 
     @Test
     fun positionsVectorsAndRotationOnlyFollowScaleRotationTranslationOrder() {
-        val transform = Transforms.of(Vectors.of(10.0, 20.0, 30.0), rotation, Vectors.of(2.0, 3.0, 4.0))
+        val transform = Transform(Vector(10.0, 20.0, 30.0), rotation, Vector(2.0, 3.0, 4.0))
         assertVector(7.0, 22.0, 34.0, transform.transformPosition(Vectors.One), 1e-12)
         assertVector(-3.0, 2.0, 4.0, transform.transformVector(Vectors.One), 1e-12)
         assertVector(-1.0, 1.0, 1.0, transform.transformVectorNoScale(Vectors.One), 1e-12)
@@ -23,8 +23,8 @@ class TransformViewTest {
 
     @Test
     fun composingNonuniformScaleAndRotationPreservesShearInAffineResult() {
-        val first = Transforms.of(Vectors.of(4.0, -2.0, 1.0), scale = Vectors.of(2.0, 3.0, 4.0))
-        val second = Transforms.of(Vectors.of(1.0, 2.0, 3.0), Quaternions.fromAxisAngleDegrees(Vectors.UnitZ, 45.0))
+        val first = Transform(Vector(4.0, -2.0, 1.0), scale = Vector(2.0, 3.0, 4.0))
+        val second = Transform(Vector(1.0, 2.0, 3.0), Quaternions.fromAxisAngleDegrees(Vectors.UnitZ, 45.0))
         val composed = first * second
         assertNull(first.tryCompose(second))
         assertTrue(abs(composed.axisX.dot(composed.axisY)) > 1.0)
@@ -34,19 +34,19 @@ class TransformViewTest {
 
     @Test
     fun representableCompositionsKeepTrsWhenScaleCommutesWithRotation() {
-        val first = Transforms.of(Vectors.of(1.0, 2.0, 3.0), rotation, Vectors.of(-2.0, -2.0, -2.0))
-        val second = Transforms.of(Vectors.UnitY, rotation, Vectors.of(2.0, 3.0, 4.0))
+        val first = Transform(Vector(1.0, 2.0, 3.0), rotation, Vector(-2.0, -2.0, -2.0))
+        val second = Transform(Vectors.UnitY, rotation, Vector(2.0, 3.0, 4.0))
         val uniform = assertNotNull(first.tryCompose(second))
         assertVector(first.transformPosition(second.transformPosition(Vectors.One)), uniform.transformPosition(Vectors.One))
-        val nonuniform = Transforms.fromScale(Vectors.of(2.0, 3.0, 4.0))
-        val unrotated = Transforms.of(Vectors.UnitX, scale = Vectors.of(5.0, 6.0, 7.0))
+        val nonuniform = Transforms.fromScale(Vector(2.0, 3.0, 4.0))
+        val unrotated = Transform(Vectors.UnitX, scale = Vector(5.0, 6.0, 7.0))
         val result = assertNotNull(nonuniform.tryCompose(unrotated))
         assertVector(nonuniform.transformPosition(unrotated.transformPosition(Vectors.One)), result.transformPosition(Vectors.One))
     }
 
     @Test
     fun interpolationBlendsTranslationScaleAndShortestRotation() {
-        val target = Transforms.of(Vectors.of(10.0, 20.0, 30.0), -rotation, Vectors.of(3.0, 5.0, 7.0))
+        val target = Transform(Vector(10.0, 20.0, 30.0), -rotation, Vector(3.0, 5.0, 7.0))
         val midpoint = Transforms.Identity.interpolate(target, 0.5)
         assertVector(5.0, 10.0, 15.0, midpoint.translation)
         assertVector(2.0, 3.0, 4.0, midpoint.scale)
@@ -58,15 +58,15 @@ class TransformViewTest {
 
     @Test
     fun factoriesAndPredicatesPreserveIdentityAndDetectInvalidComponents() {
-        assertTrue(Transforms.of().isIdentity())
+        assertTrue(Transform(Vectors.Zero, Quaternions.Identity, Vectors.One).isIdentity())
         assertTrue(Transforms.Identity.isFinite())
-        assertTrue(Transforms.of(rotation = -Quaternions.Identity).isIdentity())
+        assertTrue(Transform(rotation = -Quaternions.Identity).isIdentity())
         assertFalse(Transforms.fromTranslation(Vectors.UnitX).isIdentity())
         assertVector(Vectors.UnitX, Transforms.fromTranslation(Vectors.UnitX).transformPosition(Vectors.Zero))
         assertVector(rotation * Vectors.One, Transforms.fromRotation(rotation).transformVector(Vectors.One))
         assertFalse(Transforms.fromScale(Vectors.Zero).isIdentity())
-        assertFalse(Transforms.fromTranslation(Vectors.of(Double.NaN, 0.0, 0.0)).isFinite())
-        assertFalse(Transforms.fromScale(Vectors.of(1.0, Double.POSITIVE_INFINITY, 1.0)).isFinite())
+        assertFalse(Transforms.fromTranslation(Vector(Double.NaN, 0.0, 0.0)).isFinite())
+        assertFalse(Transforms.fromScale(Vector(1.0, Double.POSITIVE_INFINITY, 1.0)).isFinite())
         assertFalse(Transforms.fromRotation(Quaternions.Identity.withW(Double.NaN)).isFinite())
     }
 }
