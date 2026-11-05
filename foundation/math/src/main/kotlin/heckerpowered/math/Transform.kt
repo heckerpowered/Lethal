@@ -103,15 +103,12 @@ operator fun TransformView.times(other: TransformView): AffineTransformView =
 object Transforms {
     val Identity: TransformView = Transform(Vectors.Zero, Quaternions.Identity, Vectors.One)
 
-    fun of(translation: VectorView = Vectors.Zero, rotation: QuaternionView = Quaternions.Identity, scale: VectorView = Vectors.One): TransformView =
-        Transform(translation, rotation, scale)
-
     fun fromTranslation(translation: VectorView): TransformView =
-        of(translation = translation)
+        Transform(translation = translation)
 
     fun fromRotation(rotation: QuaternionView): TransformView =
-        of(rotation = rotation)
+        Transform(rotation = rotation)
 
     fun fromScale(scale: VectorView): TransformView =
-        of(scale = scale)
+        Transform(scale = scale)
 }
