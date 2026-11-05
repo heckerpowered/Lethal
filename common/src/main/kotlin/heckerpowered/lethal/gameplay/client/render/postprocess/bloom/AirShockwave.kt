@@ -15,7 +15,9 @@ import heckerpowered.render.engine.material.AlphaQuantity
 import heckerpowered.render.engine.material.AlphaRepresentation
 import heckerpowered.render.engine.material.parameter.TextureParameterValue
 import heckerpowered.render.engine.scene.GeometryElement
-import heckerpowered.render.engine.shader.parameter.*
+import heckerpowered.render.engine.shader.parameter.SampledImage
+import heckerpowered.render.engine.shader.parameter.ShaderParameters
+import heckerpowered.render.engine.shader.parameter.UniformBlock
 import heckerpowered.render.engine.shader.program.FragmentOutput
 import heckerpowered.render.engine.shader.program.VertexFragmentShader
 import heckerpowered.render.geometry.Matrix4
@@ -65,8 +67,8 @@ internal fun airShockwaveElement(program: VertexFragmentShader<AirShockwaveParam
     require(source.size.width > 0 && source.size.height > 0)
 
     val camera = shockwaveCamera(context)
-    for (wave in waves) {
-        require(wave.center.isFinite() && wave.ageSeconds.isFinite() && wave.ageSeconds >= 0F)
+    for ([center, ageSeconds] in waves) {
+        require(center.isFinite() && ageSeconds.isFinite() && ageSeconds >= 0F)
     }
 
     val parameters = frame.allocAirShockwaveParameters()
