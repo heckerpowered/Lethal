@@ -60,13 +60,23 @@ class TextureViewDescription(
      */
     val arrayLayerCount: Int = 1,
 ) {
+    /** Captures a view's selection; resource availability is still checked when it is consumed. */
+    constructor(view: GpuTextureView) : this(
+        dimension = view.dimension,
+        aspects = view.aspects,
+        baseMipLevel = view.baseMipLevel,
+        mipLevelCount = view.mipLevelCount,
+        baseArrayLayer = view.baseArrayLayer,
+        arrayLayerCount = view.arrayLayerCount,
+    )
+
     /**
      * Selects the image data to expose at the requested mip levels and array layers.
      *
-     * For example, `{Depth}` requests only the depth image from combined depth-stencil storage;
-     * `{Depth, Stencil}` requests both parts for a use that accepts them together. The source
-     * format must contain every selected aspect. See [TextureAspect] for why a combined texture
-     * can need different selections.
+     * For example, `setOf(TextureAspect.Depth)` requests only depth from combined depth-stencil storage.
+     * `setOf(TextureAspect.Depth, TextureAspect.Stencil)` requests both parts for a use that accepts them together.
+     * The source format must contain every selected aspect. See [TextureAspect] for why a combined
+     * texture can need different selections.
      *
      * The default selects Color alone. The other supported selections are Depth alone, Stencil
      * alone, and Depth with Stencil. The set is copied into an unmodifiable snapshot so later
@@ -80,28 +90,19 @@ class TextureViewDescription(
         require(baseArrayLayer >= 0) { "Texture view base array layer must not be negative" }
         require(arrayLayerCount > 0) { "Texture view array layer count must be positive" }
         require(this.aspects.isNotEmpty()) { "Texture view requires at least one aspect" }
-        require(TextureAspect.Color !in this.aspects || this.aspects.size == 1) {
-            "Color cannot be combined with depth or stencil in a texture view"
-        }
+        require(TextureAspect.Color !in this.aspects || this.aspects.size == 1) { "Color cannot be combined with depth or stencil in a texture view" }
+        validateLayerSelection()
+    }
 
+    private fun validateLayerSelection() {
         when (dimension) {
             TextureViewDimension.OneDimensional,
             TextureViewDimension.TwoDimensional,
-                -> require(arrayLayerCount == 1) {
-                "Non-array texture views select exactly one array layer"
-            }
+                -> require(arrayLayerCount == 1) { "Non-array texture views select exactly one array layer" }
 
-            TextureViewDimension.Cube -> require(arrayLayerCount == 6) {
-                "A cube view selects exactly six array layers"
-            }
-
-            TextureViewDimension.CubeArray -> require(arrayLayerCount % 6 == 0) {
-                "A cube-array view selects a multiple of six array layers"
-            }
-
-            TextureViewDimension.ThreeDimensional -> require(baseArrayLayer == 0 && arrayLayerCount == 1) {
-                "Three-dimensional views include the volume rather than an array-layer slice"
-            }
+            TextureViewDimension.Cube -> require(arrayLayerCount == 6) { "A cube view selects exactly six array layers" }
+            TextureViewDimension.CubeArray -> require(arrayLayerCount % 6 == 0) { "A cube-array view selects a multiple of six array layers" }
+            TextureViewDimension.ThreeDimensional -> require(baseArrayLayer == 0 && arrayLayerCount == 1) { "Three-dimensional views include the volume rather than an array-layer slice" }
 
             TextureViewDimension.OneDimensionalArray,
             TextureViewDimension.TwoDimensionalArray,
@@ -123,20 +124,22 @@ class TextureViewDescription(
      * are incompatible with [texture].
      */
     fun validateFor(texture: GpuTexture) {
-        require(baseMipLevel < texture.mipLevelCount) {
-            "Texture view base mip level $baseMipLevel is outside ${texture.mipLevelCount} levels"
-        }
-        // Subtract only after validating the base, so an invalid end index cannot overflow.
-        require(mipLevelCount <= texture.mipLevelCount - baseMipLevel) {
-            "Texture view mip range exceeds the source texture"
-        }
-        require(baseArrayLayer < texture.arrayLayerCount) {
-            "Texture view base array layer $baseArrayLayer is outside ${texture.arrayLayerCount} layers"
-        }
-        require(arrayLayerCount <= texture.arrayLayerCount - baseArrayLayer) {
-            "Texture view array layer range exceeds the source texture"
-        }
+        validateSubresourceRanges(texture)
+        validateStorageDimension(texture)
+        validateAspects(texture)
+        validateCubeCompatibility(texture)
+        validateMultisampling(texture)
+    }
 
+    private fun validateSubresourceRanges(texture: GpuTexture) {
+        require(baseMipLevel < texture.mipLevelCount) { "Texture view base mip level $baseMipLevel is outside ${texture.mipLevelCount} levels" }
+        // Subtract only after validating the base, so an invalid end index cannot overflow.
+        require(mipLevelCount <= texture.mipLevelCount - baseMipLevel) { "Texture view mip range exceeds the source texture" }
+        require(baseArrayLayer < texture.arrayLayerCount) { "Texture view base array layer $baseArrayLayer is outside ${texture.arrayLayerCount} layers" }
+        require(arrayLayerCount <= texture.arrayLayerCount - baseArrayLayer) { "Texture view array layer range exceeds the source texture" }
+    }
+
+    private fun validateStorageDimension(texture: GpuTexture) {
         val requiredDimension = when (dimension) {
             TextureViewDimension.OneDimensional,
             TextureViewDimension.OneDimensionalArray,
@@ -150,10 +153,10 @@ class TextureViewDescription(
 
             TextureViewDimension.ThreeDimensional -> TextureDimension.ThreeDimensional
         }
-        require(texture.dimension == requiredDimension) {
-            "View dimension $dimension requires $requiredDimension storage, not ${texture.dimension}"
-        }
+        require(texture.dimension == requiredDimension) { "View dimension $dimension requires $requiredDimension storage, not ${texture.dimension}" }
+    }
 
+    private fun validateAspects(texture: GpuTexture) {
         for (aspect in aspects) {
             val present = when (aspect) {
                 TextureAspect.Color -> texture.format.isColor
@@ -162,23 +165,23 @@ class TextureViewDescription(
             }
             require(present) { "Texture format ${texture.format} does not contain the $aspect aspect" }
         }
+    }
 
+    private fun validateCubeCompatibility(texture: GpuTexture) {
         if (dimension == TextureViewDimension.Cube || dimension == TextureViewDimension.CubeArray) {
             require(texture.cubeCompatible) { "The source texture does not permit cube views" }
             require(texture.width == texture.height) { "Cube views require square source images" }
             require(texture.sampleCount == SampleCount.One) { "Cube views require single-sampled storage" }
         }
+    }
 
+    private fun validateMultisampling(texture: GpuTexture) {
         if (texture.sampleCount != SampleCount.One) {
             require(
                 dimension == TextureViewDimension.TwoDimensional ||
                         dimension == TextureViewDimension.TwoDimensionalArray
-            ) {
-                "Multisampled storage requires a two-dimensional or two-dimensional-array view"
-            }
-            require(baseMipLevel == 0 && mipLevelCount == 1) {
-                "Multisampled views select only mip level zero"
-            }
+            ) { "Multisampled storage requires a two-dimensional or two-dimensional-array view" }
+            require(baseMipLevel == 0 && mipLevelCount == 1) { "Multisampled views select only mip level zero" }
         }
     }
 }
