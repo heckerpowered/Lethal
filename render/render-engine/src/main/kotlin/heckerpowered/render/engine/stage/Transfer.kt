@@ -87,3 +87,7 @@ sealed interface Transfer {
         override fun encode(encoder: CommandEncoder) = encoder.discardContents(region)
     }
 }
+
+fun RenderStageBuilder.copy(source: ImageRegion, destination: ImageRegion) {
+    transfer(Transfer.CopyImage(source, destination))
+}
