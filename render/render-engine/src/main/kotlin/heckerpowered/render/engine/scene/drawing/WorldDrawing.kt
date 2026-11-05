@@ -10,6 +10,8 @@ import heckerpowered.math.AffineTransformView
 import heckerpowered.render.command.pass.ScissorRectangle
 import heckerpowered.render.command.pass.Viewport
 import heckerpowered.render.engine.scene.*
+import heckerpowered.render.memory.MemoryFrame
+import heckerpowered.render.memory.MemoryStack
 
 /**
  * Describes world-space contributions within a shared placement and raster scope.
@@ -87,6 +89,10 @@ class WorldDrawing private constructor(
          * is independent of later collection, including submissions through a retained facade;
          * retaining a facade does not extend GPU-resource lifetimes.
          */
+        /** The returned elements must snapshot parameter bytes before this collection frame closes. */
+        fun collect(memoryStack: MemoryStack, objectState: ObjectSubmitContext, block: context(MemoryFrame) WorldDrawing.() -> Unit): RenderSubmissionList =
+            memoryStack.frame { context(this) { collect(objectState) { block() } } }
+
         fun collect(context: ObjectSubmitContext, block: WorldDrawing.() -> Unit): RenderSubmissionList {
             val collector = RenderSubmissionCollector()
             WorldDrawing(collector, context.snapshot(), RasterScope(), DepthMode.Scene).block()
