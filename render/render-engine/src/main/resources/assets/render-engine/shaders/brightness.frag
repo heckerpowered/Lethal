@@ -6,6 +6,7 @@ layout(push_constant) uniform Brightness {
 } bloom;
 
 layout(location = 0) in vec2 coordinates;
+
 layout(location = 0) out vec4 result;
 
 void main() {
