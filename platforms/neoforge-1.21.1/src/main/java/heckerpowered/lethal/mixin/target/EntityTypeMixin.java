@@ -5,11 +5,9 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.bridge.MixinInterop;
 import heckerpowered.bridge.adapter.entity.EntityTypeAccess;
 import heckerpowered.bridge.resources.Identifier;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import heckerpowered.lethal.mixin.impl.EntityTypeAccessImpl;
 import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Implements;
@@ -21,7 +19,6 @@ import org.spongepowered.asm.mixin.Mixin;
 abstract class EntityTypeMixin {
     @NotNull
     public Identifier entityTypeAccess$getIdentifier() {
-        ResourceLocation identifier = BuiltInRegistries.ENTITY_TYPE.getKey((EntityType<?>) (Object) this);
-        return MixinInterop.requireAccess(identifier, Identifier.class);
+        return EntityTypeAccessImpl.identifier((EntityType<?>) (Object) this);
     }
 }
