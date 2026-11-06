@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ArmorStand.class)
 abstract class ArmorStandDamageMixin {
     @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
-    private void lethal$protectDamage(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
+    private void lethal$protectDamage(ServerLevel level, DamageSource source, float damage, CallbackInfoReturnable<Boolean> callback) {
         DamagePipelineImpl.protectArmorStandDamage((ArmorStand) (Object) this, source, callback);
     }
 }
