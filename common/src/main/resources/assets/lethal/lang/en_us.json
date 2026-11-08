@@ -1,4 +1,5 @@
 {
+  "item.lethal.enchanted_golden_apple": "Enchanted Golden Apple",
   "item.lethal.cosmic_starshatter_shotgun": "Cosmic Starshatter Shotgun",
   "item.lethal.archaeopteryx": "AK103",
   "lethal.sound.archaeopteryx_fire": "Archaeopteryx fire",
@@ -46,5 +47,9 @@
   "item.lethal.ares": "Energy Sword Ares",
   "item.lethal.ares_golden": "Energy Sword Ares — Golden",
   "entity.lethal.zeus_missile": "Zeus Missile",
-  "entity.lethal.athena_grenade": "Athena Grenade"
+  "entity.lethal.athena_grenade": "Athena Grenade",
+  "lethal.hud.fortune.ultimate": "ULT",
+  "lethal.hud.fortune.sonic_boom": "SONIC",
+  "lethal.hud.zeus.judgement": "ULT",
+  "lethal.hud.zeus.missile": "MISSILE"
 }

@@ -1,0 +1,44 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/archaeopteryx"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/cosmic_starshatter_shotgun"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/fortune"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/enhanced_fortune"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/chaos"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/zeus"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/zeus_golden"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/zeus_black_gold"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/zeus_glow_squid"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "lethal:items/zeus_sculk"
+    }
+  ]
+}
