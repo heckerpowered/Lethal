@@ -11,6 +11,11 @@ import heckerpowered.bridge.time.Frequency
 
 interface Gun {
     fun getFrequency(player: PlayerAccess, weaponStack: ItemStackAccess): Frequency
+
+    fun getFireMode(player: PlayerAccess, weaponStack: ItemStackAccess): GunFireMode {
+        return GunFireMode.Automatic
+    }
+
     fun mayFire(player: PlayerAccess, weaponStack: ItemStackAccess): Boolean
 
     /**
