@@ -23,7 +23,7 @@ abstract class AreaEffectCloudEffectMixin {
     public EntityReference<LivingEntity> owner;
 
     @WrapOperation(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z"))
-    private boolean lethal$protectDamagingEffect(LivingEntity target, MobEffectInstance effectInstance, Entity source, Operation<Boolean> original) {
-        return PotionDamageProtectionImpl.protectCloudEffect((AreaEffectCloud) (Object) this, owner, target, effectInstance, source, original);
+    private boolean lethal$protectDamagingEffect(LivingEntity target, MobEffectInstance newEffect, Entity source, Operation<Boolean> original) {
+        return PotionDamageProtectionImpl.protectCloudEffect((AreaEffectCloud) (Object) this, owner, target, newEffect, source, original);
     }
 }
