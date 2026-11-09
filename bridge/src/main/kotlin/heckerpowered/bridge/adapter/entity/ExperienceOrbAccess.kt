@@ -6,7 +6,7 @@
 package heckerpowered.bridge.adapter.entity
 
 /**
- * An experience orb entity with a stable experience value.
+ * An experience orb entity exposing all remaining experience, including merged entries.
  */
 interface ExperienceOrbAccess : EntityAccess {
     val experiencePoints: Int
