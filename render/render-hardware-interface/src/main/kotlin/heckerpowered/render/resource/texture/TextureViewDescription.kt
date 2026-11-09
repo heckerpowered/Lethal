@@ -177,11 +177,11 @@ class TextureViewDescription(
 
     private fun validateMultisampling(texture: GpuTexture) {
         if (texture.sampleCount != SampleCount.One) {
-            require(
-                dimension == TextureViewDimension.TwoDimensional ||
-                        dimension == TextureViewDimension.TwoDimensionalArray
-            ) { "Multisampled storage requires a two-dimensional or two-dimensional-array view" }
+            require(dimension == TextureViewDimension.TwoDimensional || dimension == TextureViewDimension.TwoDimensionalArray) { "Multisampled storage requires a two-dimensional or two-dimensional-array view" }
             require(baseMipLevel == 0 && mipLevelCount == 1) { "Multisampled views select only mip level zero" }
         }
     }
 }
+
+fun GraphicsDevice.createTextureView(texture: GpuTexture, label: String = "", dimension: TextureViewDimension = TextureViewDimension.TwoDimensional, aspects: Set<TextureAspect> = setOf(TextureAspect.Color), baseMipLevel: Int = 0, mipLevelCount: Int = 1, baseArrayLayer: Int = 0, arrayLayerCount: Int = 1): GpuTextureView =
+    createTextureView(texture, TextureViewDescription(label, dimension, aspects, baseMipLevel, mipLevelCount, baseArrayLayer, arrayLayerCount))
