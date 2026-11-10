@@ -10,7 +10,7 @@ import heckerpowered.render.command.pass.RenderPassDescription
 import heckerpowered.render.command.pass.RenderPassResources
 import heckerpowered.render.engine.draw.DrawInvocation
 import heckerpowered.render.engine.draw.PreparedDraw
-import heckerpowered.render.engine.prepare.BufferUpload
+import heckerpowered.render.engine.prepare.PreparedBufferUpload
 import heckerpowered.render.engine.support.collection.toUnmodifiableList
 
 /**
@@ -26,10 +26,10 @@ import heckerpowered.render.engine.support.collection.toUnmodifiableList
  */
 internal class PreparedRenderPass(
     val description: RenderPassDescription,
-    uploads: List<BufferUpload>,
+    uploads: List<PreparedBufferUpload>,
     draws: List<PreparedDraw>,
 ) {
-    val uploads: List<BufferUpload> = uploads.toUnmodifiableList()
+    val uploads: List<PreparedBufferUpload> = uploads.toUnmodifiableList()
     val draws: List<PreparedDraw> = draws.toUnmodifiableList()
     val resources = if (this.draws.isEmpty()) RenderPassResources.Empty else RenderPassResources(
         this.draws.flatMap { it.bindings.descriptorSets.values },
