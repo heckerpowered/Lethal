@@ -220,8 +220,6 @@ object Quaternions {
     val Zero: QuaternionView = Quaternion(0.0, 0.0, 0.0, 0.0)
     val Identity: QuaternionView = Quaternion(0.0, 0.0, 0.0, 1.0)
 
-    fun of(x: Double, y: Double, z: Double, w: Double): QuaternionView = Quaternion(x, y, z, w)
-
     /** Axis must be normalized; positive angles follow [VectorView.rotateAroundAxisRadians]. */
     fun fromAxisAngleRadians(axis: VectorView, angleRadians: Double): QuaternionView {
         val halfAngle = angleRadians * 0.5

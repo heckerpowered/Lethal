@@ -12,7 +12,7 @@ import kotlin.test.*
 class QuaternionViewTest {
     @Test
     fun componentsAndPredicatesIncludeTheRealComponent() {
-        val quaternion = Quaternions.of(1.0, -2.0, 3.0, -4.0)
+        val quaternion = Quaternion(1.0, -2.0, 3.0, -4.0)
         assertEquals(listOf(1.0, -2.0, 3.0, -4.0), (0..3).map { quaternion[it] })
         assertEquals(30.0, quaternion.lengthSquared)
         assertEquals(sqrt(30.0), quaternion.length)
@@ -21,7 +21,7 @@ class QuaternionViewTest {
         assertFailsWith<IllegalArgumentException> { quaternion[4] }
         assertTrue(Quaternions.Zero.isZero())
         assertFalse(Quaternions.Identity.isZero())
-        assertTrue(Quaternions.of(1e-7, -1e-7, 0.0, 1e-7).isNearlyZero())
+        assertTrue(Quaternion(1e-7, -1e-7, 0.0, 1e-7).isNearlyZero())
         assertFalse(Quaternions.Identity.isNearlyZero())
         assertTrue(Quaternions.Identity.isExactlyNormalized())
         assertTrue(Quaternions.Identity.withW(1.0 + 1e-7).isNearlyNormalized())
@@ -34,16 +34,16 @@ class QuaternionViewTest {
 
     @Test
     fun arithmeticAndComponentCopiesDoNotNormalizeOrModifyTheSource() {
-        val first = Quaternions.of(1.0, 2.0, 3.0, 4.0)
-        val second = Quaternions.of(4.0, -3.0, 2.0, -1.0)
-        assertQuaternion(Quaternions.of(5.0, -1.0, 5.0, 3.0), first + second)
-        assertQuaternion(Quaternions.of(-3.0, 5.0, 1.0, 5.0), first - second)
-        assertQuaternion(Quaternions.of(-1.0, -2.0, -3.0, -4.0), -first)
-        assertQuaternion(Quaternions.of(2.0, 4.0, 6.0, 8.0), first * 2.0)
+        val first = Quaternion(1.0, 2.0, 3.0, 4.0)
+        val second = Quaternion(4.0, -3.0, 2.0, -1.0)
+        assertQuaternion(Quaternion(5.0, -1.0, 5.0, 3.0), first + second)
+        assertQuaternion(Quaternion(-3.0, 5.0, 1.0, 5.0), first - second)
+        assertQuaternion(Quaternion(-1.0, -2.0, -3.0, -4.0), -first)
+        assertQuaternion(Quaternion(2.0, 4.0, 6.0, 8.0), first * 2.0)
         assertQuaternion(first * 2.0, 2.0 * first)
         assertQuaternion(first, (first * 2.0) / 2.0)
-        assertQuaternion(Quaternions.of(5.0, 6.0, 7.0, 8.0), first.withX(5.0).withY(6.0).withZ(7.0).withW(8.0))
-        assertQuaternion(Quaternions.of(1.0, 2.0, 3.0, 4.0), first)
+        assertQuaternion(Quaternion(5.0, 6.0, 7.0, 8.0), first.withX(5.0).withY(6.0).withZ(7.0).withW(8.0))
+        assertQuaternion(Quaternion(1.0, 2.0, 3.0, 4.0), first)
     }
 
     @Test
@@ -59,8 +59,8 @@ class QuaternionViewTest {
 
     @Test
     fun normalizationHandlesZeroAndExplicitSquaredLengthThresholds() {
-        val quaternion = Quaternions.of(0.0, 3.0, 0.0, 4.0)
-        val expected = Quaternions.of(0.0, 0.6, 0.0, 0.8)
+        val quaternion = Quaternion(0.0, 3.0, 0.0, 4.0)
+        val expected = Quaternion(0.0, 0.6, 0.0, 0.8)
         assertQuaternion(expected, quaternion.normalizedUnsafe())
         assertQuaternion(expected, quaternion.normalized())
         assertQuaternion(Quaternions.Identity, Quaternions.Identity.normalizedOr(Quaternions.Zero))
@@ -76,7 +76,7 @@ class QuaternionViewTest {
 
     @Test
     fun inverseIsAlgebraicForNonUnitQuaternionsAndRejectsUndefinedInputs() {
-        val quaternion = Quaternions.of(1.0, -2.0, 3.0, 4.0)
+        val quaternion = Quaternion(1.0, -2.0, 3.0, 4.0)
         assertQuaternion(Quaternions.Identity, quaternion * quaternion.inverse())
         assertQuaternion(Quaternions.Identity, quaternion.inverse() * quaternion)
         assertQuaternion(quaternion.inverse(), quaternion.requireInverse())
@@ -98,14 +98,14 @@ class QuaternionViewTest {
             override val z: Double get() = if (++reads[2] == 1) 3.0 else 0.0
             override val w: Double get() = if (++reads[3] == 1) 4.0 else 0.0
         }
-        assertQuaternion(Quaternions.of(-1.0 / 30.0, -2.0 / 30.0, -3.0 / 30.0, 4.0 / 30.0), quaternion.requireInverse())
+        assertQuaternion(Quaternion(-1.0 / 30.0, -2.0 / 30.0, -3.0 / 30.0, 4.0 / 30.0), quaternion.requireInverse())
         assertContentEquals(intArrayOf(1, 1, 1, 1), reads)
     }
 
     @Test
     fun axisAngleRotationsFollowVectorConventionsAndPreserveLengths() {
-        val vector = Vectors.of(2.0, -3.0, 5.0)
-        val axes = listOf(Vectors.UnitX, Vectors.UnitY, Vectors.UnitZ, Vectors.of(1.0, 2.0, 3.0).normalized())
+        val vector = Vector(2.0, -3.0, 5.0)
+        val axes = listOf(Vectors.UnitX, Vectors.UnitY, Vectors.UnitZ, Vector(1.0, 2.0, 3.0).normalized())
         for (axis in axes) {
             for (angle in listOf(-2.0, 0.0, 0.7, PI)) {
                 val rotation = Quaternions.fromAxisAngleRadians(axis, angle)
@@ -130,7 +130,7 @@ class QuaternionViewTest {
 
     @Test
     fun basisRoundTripsIncludingHalfTurnsAboutEveryAxis() {
-        val axes = listOf(Vectors.UnitX, Vectors.UnitY, Vectors.UnitZ, Vectors.of(2.0, -3.0, 4.0).normalized())
+        val axes = listOf(Vectors.UnitX, Vectors.UnitY, Vectors.UnitZ, Vector(2.0, -3.0, 4.0).normalized())
         for (axis in axes) {
             for (angle in listOf(0.0, 0.4, 2.0, PI)) {
                 val rotation = Quaternions.fromAxisAngleRadians(axis, angle)
@@ -146,8 +146,8 @@ class QuaternionViewTest {
 
     @Test
     fun fromToHandlesScaledParallelOppositeAndNearlyOppositeDirections() {
-        val start = Vectors.of(1.0, 2.0, -3.0)
-        val targets = listOf(start * 4.0, -start, Vectors.of(2.0, -1.0, 5.0), -start + Vectors.UnitX * 1e-7)
+        val start = Vector(1.0, 2.0, -3.0)
+        val targets = listOf(start * 4.0, -start, Vector(2.0, -1.0, 5.0), -start + Vectors.UnitX * 1e-7)
         for (target in targets) {
             val rotation = Quaternions.fromTo(start, target)
             assertTrue(rotation.isNormalized())
