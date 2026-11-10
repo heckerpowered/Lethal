@@ -5,7 +5,7 @@
 
 package heckerpowered.render.engine.view
 
-import heckerpowered.math.Matrices
+import heckerpowered.math.Matrix
 import heckerpowered.math.MatrixView
 import kotlin.math.PI
 import kotlin.math.tan
@@ -39,11 +39,11 @@ class PerspectiveProjection(
         val depthScale = farPlane * inverseDepthRange
         val depthTranslation = -farPlane * nearPlane * inverseDepthRange
 
-        matrix = Matrices.of(
+        matrix = Matrix(
             horizontalScale, 0.0, 0.0, 0.0,
             0.0, -verticalScale, 0.0, 0.0,
             0.0, 0.0, depthScale, depthTranslation,
-            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0, 0.0
         ).snapshot()
     }
 
