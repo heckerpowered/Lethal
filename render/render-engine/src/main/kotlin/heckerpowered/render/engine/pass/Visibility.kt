@@ -5,8 +5,8 @@
 
 package heckerpowered.render.engine.pass
 
-import heckerpowered.render.engine.scene.RenderSubmission
-import heckerpowered.render.engine.scene.geometryElement
+import heckerpowered.math.AffineTransformView
+import heckerpowered.render.engine.culling.CullingBounds
 import heckerpowered.render.engine.view.ViewParameters
 
 /**
@@ -14,7 +14,7 @@ import heckerpowered.render.engine.view.ViewParameters
  * Without that capability, or when exclusion cannot be proven, the submission remains eligible.
  * This is frustum rejection, not an occlusion or depth test.
  */
-fun visible(submission: RenderSubmission, inputs: ViewParameters): Boolean {
-    val bounds = submission.geometryElement.cullingBounds ?: return true
-    return !bounds.canCull(inputs.frustum, submission.objectState.localToWorld)
+fun CullingBounds?.visible(view: ViewParameters, localToWorld: AffineTransformView): Boolean {
+    if (this == null) return true
+    return !canCull(view.frustum, localToWorld)
 }
