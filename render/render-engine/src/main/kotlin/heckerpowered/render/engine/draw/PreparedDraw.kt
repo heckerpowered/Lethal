@@ -24,10 +24,6 @@ internal class PreparedDraw(
     val bindings: ShaderBindings,
     val state: DrawDynamicState,
 ) {
-    init {
-        geometry.validate(pipeline.vertex)
-    }
-
     /**
      * Encodes this draw into an active pass whose resource declaration covers its bindings.
      * The caller enters the prepared pass without additional raster scopes. RHI scope operations
