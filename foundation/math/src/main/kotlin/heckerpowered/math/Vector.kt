@@ -274,11 +274,10 @@ fun VectorView.coerceComponentsIn(min: Double, max: Double): VectorView =
 fun VectorView.coerceComponentsIn(radius: Double): VectorView = coerceComponentsIn(-radius, radius)
 
 fun VectorView.coerceLengthIn(min: Double, max: Double): VectorView {
-    var vectorLength = length
+    val vectorLength = length
     val vectorDirection = if (vectorLength > 1.0e-8) this / vectorLength else Vectors.Zero
-
-    vectorLength = vectorLength.coerceIn(min, max)
-    return vectorDirection * vectorLength
+    val coercedLength = vectorLength.coerceIn(min, max)
+    return vectorDirection * coercedLength
 }
 
 fun VectorView.coerceLengthAtMost(max: Double): VectorView {
@@ -459,17 +458,8 @@ object Vectors {
     val NegativeUnitY: VectorView = Vector(0.0, -1.0, 0.0)
     val NegativeUnitZ: VectorView = Vector(0.0, 0.0, -1.0)
 
-    fun of(x: Double, y: Double, z: Double): VectorView {
-        return Vector(x, y, z)
-    }
-
-    fun min(a: VectorView, b: VectorView): VectorView {
-        return Vector(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z))
-    }
-
-    fun max(a: VectorView, b: VectorView): VectorView {
-        return Vector(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z))
-    }
+    fun min(a: VectorView, b: VectorView): VectorView = a.componentMin(b)
+    fun max(a: VectorView, b: VectorView): VectorView = a.componentMax(b)
 
     fun distanceSquared(a: VectorView, b: VectorView) = a.distanceSquaredTo(b)
     fun distance(a: VectorView, b: VectorView) = a.distanceTo(b)
