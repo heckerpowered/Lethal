@@ -5,8 +5,6 @@
 
 package heckerpowered.render.shader
 
-import heckerpowered.render.resource.GpuResource
-
 /**
  * Groups the shader modules that provide the programmable stages of a render pipeline.
  *
@@ -23,12 +21,13 @@ import heckerpowered.render.resource.GpuResource
  * attachment configuration, or other fixed-function state. Those requirements are established
  * separately during render-pipeline creation.
  *
- * This resource borrows the shader modules used to create it rather than taking ownership of them.
- * Every constituent [ShaderModule] must remain open for the complete lifetime of this
- * [ShaderStages].
+ * This handle does not own its input modules. Keep modules open until all pipelines that need
+ * them have been created: a backend may retain the modules as creation inputs or link a program
+ * when establishing the stage combination. Created pipelines do not require their input modules
+ * to remain open. A linked program is runtime state and belongs to the lifetime supplied when
+ * these stages were created; that lifetime must cover every pipeline use of the program.
  *
- * Closing this resource releases only the established stage combination. It does not close its
- * constituent shader modules.
+ * The stage combination has no separate close obligation.
  *
  * [ShaderStagesDescription] can be constructed and copied freely because it only records which
  * shader modules should be combined. A [ShaderStages] represents the combination after it has been
@@ -36,4 +35,4 @@ import heckerpowered.render.resource.GpuResource
  * Copying a description therefore copies only the request; it does not duplicate an established
  * stage combination. The concrete representation of that combination is not exposed by this API.
  */
-interface ShaderStages : GpuResource
+interface ShaderStages
