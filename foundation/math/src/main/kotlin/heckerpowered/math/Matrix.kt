@@ -142,10 +142,10 @@ operator fun MatrixView.plus(other: MatrixView): MatrixView = combineComponents(
 operator fun MatrixView.minus(other: MatrixView): MatrixView = combineComponents(other) { left, right -> left - right }
 
 /** Samples a complete zero-based row into an independent value; concurrent source changes are not synchronized. */
-fun MatrixView.row(index: Int): Vector4 = Vector4(this[index, 0], this[index, 1], this[index, 2], this[index, 3])
+fun MatrixView.row(index: Int): Vector4View = Vector4(this[index, 0], this[index, 1], this[index, 2], this[index, 3])
 
 /** Samples a complete zero-based column into an independent value; concurrent source changes are not synchronized. */
-fun MatrixView.column(index: Int): Vector4 = Vector4(this[0, index], this[1, index], this[2, index], this[3, index])
+fun MatrixView.column(index: Int): Vector4View = Vector4(this[0, index], this[1, index], this[2, index], this[3, index])
 
 operator fun MatrixView.unaryMinus(): MatrixView = mapComponents { -it }
 operator fun MatrixView.times(scale: Double): MatrixView = mapComponents { it * scale }
@@ -300,22 +300,23 @@ fun MatrixView.withNormalizedAxes(tolerance: Double = 1.0E-8): MatrixView {
     val normalizedY = normalizedAxis(axisY, tolerance)
     val normalizedZ = normalizedAxis(axisZ, tolerance)
 
-    return Matrices.of(
-        normalizedX.x, normalizedY.x, normalizedZ.x, m03,
-        normalizedX.y, normalizedY.y, normalizedZ.y, m13,
-        normalizedX.z, normalizedY.z, normalizedZ.z, m23,
-        m30, m31, m32, m33
-    )
+    return Matrix(normalizedX.x, normalizedY.x, normalizedZ.x, m03, normalizedX.y, normalizedY.y, normalizedZ.y, m13, normalizedX.z, normalizedY.z, normalizedZ.z, m23, m30, m31, m32, m33)
 }
 
-fun MatrixView.withTranslation(translation: VectorView): MatrixView = Matrices.of(
-    m00, m01, m02, translation.x,
-    m10, m11, m12, translation.y,
-    m20, m21, m22, translation.z,
-    m30, m31, m32, m33
-)
+fun MatrixView.withTranslation(translation: VectorView): MatrixView = Matrix(m00, m01, m02, translation.x, m10, m11, m12, translation.y, m20, m21, m22, translation.z, m30, m31, m32, m33)
 
 fun MatrixView.withoutTranslation(): MatrixView = withTranslation(Vectors.Zero)
+
+/**
+ * Keeps the linear 3 x 3 part in a homogeneous matrix. Translation and the projective
+ * last row are discarded without being sampled; retained components are read once in row-major order.
+ */
+fun MatrixView.linearPart(): MatrixView = Matrix(
+    this[0, 0], this[0, 1], this[0, 2], 0.0,
+    this[1, 0], this[1, 1], this[1, 2], 0.0,
+    this[2, 0], this[2, 1], this[2, 2], 0.0,
+    0.0, 0.0, 0.0, 1.0,
+)
 
 /** Adds a world-space translation after this transformation, including for projective matrices. */
 fun MatrixView.translatedWorld(translation: VectorView): MatrixView = Matrices.fromTranslation(translation) * this
@@ -351,35 +352,13 @@ object Matrices {
     val Identity: MatrixView = generate { row, column -> if (row == column) 1.0 else 0.0 }
 
     /** Evaluates each coordinate once in row-major order and stores the resulting values. */
-    fun generate(element: (row: Int, column: Int) -> Double): MatrixView = of(
-        element(0, 0), element(0, 1), element(0, 2), element(0, 3),
-        element(1, 0), element(1, 1), element(1, 2), element(1, 3),
-        element(2, 0), element(2, 1), element(2, 2), element(2, 3),
-        element(3, 0), element(3, 1), element(3, 2), element(3, 3)
-    )
-
-    fun of(
-        m00: Double, m01: Double, m02: Double, m03: Double,
-        m10: Double, m11: Double, m12: Double, m13: Double,
-        m20: Double, m21: Double, m22: Double, m23: Double,
-        m30: Double, m31: Double, m32: Double, m33: Double,
-    ): MatrixView = Matrix(
-        m00, m01, m02, m03,
-        m10, m11, m12, m13,
-        m20, m21, m22, m23,
-        m30, m31, m32, m33
-    )
+    fun generate(element: (row: Int, column: Int) -> Double): MatrixView = Matrix(element(0, 0), element(0, 1), element(0, 2), element(0, 3), element(1, 0), element(1, 1), element(1, 2), element(1, 3), element(2, 0), element(2, 1), element(2, 2), element(2, 3), element(3, 0), element(3, 1), element(3, 2), element(3, 3))
 
     /**
      * Takes an independent snapshot, reading each source component once in row-major order.
      * Sampling is sequential, not atomic with respect to changes to the source view.
      */
-    fun copyOf(matrix: MatrixView): MatrixView = of(
-        matrix.m00, matrix.m01, matrix.m02, matrix.m03,
-        matrix.m10, matrix.m11, matrix.m12, matrix.m13,
-        matrix.m20, matrix.m21, matrix.m22, matrix.m23,
-        matrix.m30, matrix.m31, matrix.m32, matrix.m33
-    )
+    fun copyOf(matrix: MatrixView): MatrixView = Matrix(matrix)
 
     /** Copies sixteen values in row-major order. */
     fun fromRowMajor(values: DoubleArray): MatrixView {
@@ -395,30 +374,15 @@ object Matrices {
 
     fun fromTranslation(translation: VectorView): MatrixView = Identity.withTranslation(translation)
 
-    fun fromScale(scale: VectorView): MatrixView = of(
-        scale.x, 0.0, 0.0, 0.0,
-        0.0, scale.y, 0.0, 0.0,
-        0.0, 0.0, scale.z, 0.0,
-        0.0, 0.0, 0.0, 1.0
-    )
+    fun fromScale(scale: VectorView): MatrixView = Matrix(scale.x, 0.0, 0.0, 0.0, 0.0, scale.y, 0.0, 0.0, 0.0, 0.0, scale.z, 0.0, 0.0, 0.0, 0.0, 1.0)
 
     /** Rotation must be a unit quaternion. */
     fun fromRotation(rotation: QuaternionView): MatrixView = fromBasis(rotation.toBasis())
 
     /** Basis vectors become the linear columns; scale and shear are retained. */
-    fun fromBasis(basis: BasisView, translation: VectorView = Vectors.Zero): MatrixView = of(
-        basis.right.x, basis.up.x, basis.forward.x, translation.x,
-        basis.right.y, basis.up.y, basis.forward.y, translation.y,
-        basis.right.z, basis.up.z, basis.forward.z, translation.z,
-        0.0, 0.0, 0.0, 1.0
-    )
+    fun fromBasis(basis: BasisView, translation: VectorView = Vectors.Zero): MatrixView = Matrix(basis.right.x, basis.up.x, basis.forward.x, translation.x, basis.right.y, basis.up.y, basis.forward.y, translation.y, basis.right.z, basis.up.z, basis.forward.z, translation.z, 0.0, 0.0, 0.0, 1.0)
 
-    fun fromAffine(transform: AffineTransformView): MatrixView = of(
-        transform.axisX.x, transform.axisY.x, transform.axisZ.x, transform.translation.x,
-        transform.axisX.y, transform.axisY.y, transform.axisZ.y, transform.translation.y,
-        transform.axisX.z, transform.axisY.z, transform.axisZ.z, transform.translation.z,
-        0.0, 0.0, 0.0, 1.0
-    )
+    fun fromAffine(transform: AffineTransformView): MatrixView = Matrix(transform.axisX.x, transform.axisY.x, transform.axisZ.x, transform.translation.x, transform.axisX.y, transform.axisY.y, transform.axisZ.y, transform.translation.y, transform.axisX.z, transform.axisY.z, transform.axisZ.z, transform.translation.z, 0.0, 0.0, 0.0, 1.0)
 
     fun fromTransform(transform: TransformView): MatrixView = transform.toMatrix4()
 
