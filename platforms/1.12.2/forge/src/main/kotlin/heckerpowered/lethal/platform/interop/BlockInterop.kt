@@ -5,11 +5,11 @@
 
 package heckerpowered.lethal.platform.interop
 
-import heckerpowered.bridge.requireAccess
-import heckerpowered.bridge.requireHost
 import heckerpowered.bridge.adapter.block.BlockAccess
 import heckerpowered.bridge.adapter.block.BlockClassificationAccess
 import heckerpowered.bridge.adapter.block.BlockStateAccess
+import heckerpowered.bridge.requireAccess
+import heckerpowered.bridge.requireHost
 import heckerpowered.lethal.platform.adapter.block.ForgeBlockClassificationView
 import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
