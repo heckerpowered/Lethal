@@ -61,8 +61,8 @@ import heckerpowered.render.shader.ShaderStages
  * These conventions do not prescribe a texture-coordinate origin. Texture coordinates are shader
  * data whose interpretation is determined separately by the sampled texture and shader.
  *
- * This description may reference existing GPU resources, such as [shaders] and [layout], but does
- * not take ownership of them.
+ * This description references established [shaders] and [layout], without taking ownership of
+ * their backend allocations.
  *
  * Attachment formats, sample counts, and other compatibility-relevant state form part of the
  * pipeline description. Render passes using the resulting pipeline must provide compatible
