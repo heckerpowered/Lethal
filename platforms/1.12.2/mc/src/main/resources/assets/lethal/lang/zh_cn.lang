@@ -35,7 +35,7 @@ item.lethal.zeus_leggings.name=天神护腿
 item.lethal.zeus_boots.name=天神靴子
 
 item.lethal.zeus_blood.name=血族宙斯
-enchantment.lethal.deathblow=一击致命
+enchantment.lethal.deathblow=致命打击
 lethal.perk.zeus.missile=导弹
 lethal.perk.zeus.judgement=审判
 lethal.perk.zeus.berserk=狂暴
@@ -50,3 +50,5 @@ lethal.hud.fortune.sonic_boom=声波炮
 lethal.hud.zeus.judgement=审判
 lethal.hud.zeus.missile=导弹
 item.lethal.enchanted_golden_apple.name=附魔金苹果
+enchantment.lethal.piercing=穿透
+enchantment.lethal.split_explosion=分裂爆炸
