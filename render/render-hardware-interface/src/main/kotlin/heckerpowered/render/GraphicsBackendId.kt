@@ -8,9 +8,7 @@ package heckerpowered.render
 @JvmInline
 value class GraphicsBackendId(val value: String) {
     init {
-        require(value.isNotBlank()) {
-            "Graphics backend ID must not be blank"
-        }
+        require(value.isNotBlank()) { "Graphics backend ID must not be blank" }
     }
 
     override fun toString(): String = value
