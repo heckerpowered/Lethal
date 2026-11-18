@@ -8,13 +8,16 @@ package heckerpowered.lethal.mixin.target;
 import heckerpowered.bridge.adapter.item.ItemAccess;
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess;
 import heckerpowered.bridge.adapter.item.stack.PersistentDataAccess;
+import heckerpowered.bridge.adapter.item.stack.PersistentValueInput;
+import heckerpowered.bridge.adapter.item.stack.PersistentValueOutput;
+import heckerpowered.bridge.adapter.world.WorldAccess;
 import heckerpowered.bridge.resources.Identifier;
+import heckerpowered.lethal.mixin.impl.ItemStackAccessImpl;
 import heckerpowered.lethal.platform.adapter.item.ItemStackPersistentData;
 import heckerpowered.lethal.platform.interop.ItemInterop;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
 
 @Mixin(ItemStack.class)
@@ -97,25 +100,25 @@ abstract class ItemStackMixin {
         return isItemDamaged();
     }
 
-    @Nullable
-    public Long persistentDataAccess$getLong(@NotNull Identifier key) {
-        return ItemStackPersistentData.getLong((ItemStack) (Object) this, key);
+    public int itemStackAccess$getEnchantmentLevel(@NotNull Identifier enchantment) {
+        return ItemStackAccessImpl.getEnchantmentLevel((ItemStack) (Object) this, enchantment);
     }
 
-    public void persistentDataAccess$setLong(@NotNull Identifier key, long value) {
-        ItemStackPersistentData.setLong((ItemStack) (Object) this, key, value);
+    public boolean itemStackAccess$supportsEnchantment(@NotNull Identifier enchantment, @NotNull WorldAccess world) {
+        return ItemStackAccessImpl.supportsEnchantment((ItemStack) (Object) this, enchantment, world);
     }
 
-    @Nullable
-    public Double persistentDataAccess$getDouble(@NotNull Identifier key) {
-        return ItemStackPersistentData.getDouble((ItemStack) (Object) this, key);
+    public void itemStackAccess$addEnchantment(@NotNull Identifier enchantment, int level, @NotNull WorldAccess world) {
+        ItemStackAccessImpl.addEnchantment((ItemStack) (Object) this, enchantment, level, world);
     }
 
-    public void persistentDataAccess$setDouble(@NotNull Identifier key, double value) {
-        ItemStackPersistentData.setDouble((ItemStack) (Object) this, key, value);
+    @NotNull
+    public PersistentValueInput persistentDataAccess$getInput() {
+        return ItemStackPersistentData.input((ItemStack) (Object) this);
     }
 
-    public void persistentDataAccess$remove(@NotNull Identifier key) {
-        ItemStackPersistentData.remove((ItemStack) (Object) this, key);
+    @NotNull
+    public PersistentValueOutput persistentDataAccess$getOutput() {
+        return ItemStackPersistentData.output((ItemStack) (Object) this);
     }
 }
