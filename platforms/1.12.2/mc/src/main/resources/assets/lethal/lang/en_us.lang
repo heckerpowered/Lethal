@@ -50,3 +50,5 @@ lethal.hud.fortune.sonic_boom=SONIC
 lethal.hud.zeus.judgement=ULT
 lethal.hud.zeus.missile=MISSILE
 item.lethal.enchanted_golden_apple.name=Enchanted Golden Apple
+enchantment.lethal.piercing=Piercing
+enchantment.lethal.split_explosion=Splitting Explosion
