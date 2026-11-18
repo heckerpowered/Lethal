@@ -6,7 +6,7 @@
 package heckerpowered.render.engine.pass
 
 import heckerpowered.render.GraphicsDevice
-import heckerpowered.render.engine.image.RenderImageStore
+import heckerpowered.render.engine.image.RenderImageStorage
 import heckerpowered.render.engine.prepare.PassPreparation
 import heckerpowered.render.engine.prepare.StaticVertexStreams
 import heckerpowered.render.resource.ResourceLifetime
@@ -24,9 +24,9 @@ import heckerpowered.render.resource.ResourceLifetime
 internal class RasterPassProcessor(
     private val device: GraphicsDevice,
     private val elements: RenderElementPassProcessors,
-    private val images: RenderImageStore? = null,
+    private val images: RenderImageStorage,
 ) {
-    fun prepare(pass: RasterPass, lifetime: ResourceLifetime, staticVertices: StaticVertexStreams.Preparation? = null): PreparedRenderPass {
+    fun prepare(pass: RasterPass, lifetime: ResourceLifetime, staticVertices: StaticVertexStreams.Preparation): PreparedRenderPass {
         val targetAlphaQuantities = resolveTargetAlphaQuantities(pass, images)
         val preparation = PassPreparation(device, lifetime, targetAlphaQuantities, images, staticVertices)
         val commands = pass.collection.submissions.flatMap { elements.prepare(it, pass, preparation) }
