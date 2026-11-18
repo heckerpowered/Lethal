@@ -4,7 +4,7 @@
  */
 package heckerpowered.render.engine.postprocessing.tonemapping.aces
 
-import heckerpowered.render.color.Chromaticities
+import heckerpowered.render.engine.color.Chromaticities
 
 /**
  * Target display peak and limiting RGB primaries for the ACES 2.0 output transform.
