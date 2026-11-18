@@ -8,12 +8,19 @@ package heckerpowered.bridge.adapter.item
 import heckerpowered.bridge.adapter.BridgeAccess
 import heckerpowered.bridge.adapter.block.BlockStateAccess
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.item.equipment.EquipmentSlot
+import heckerpowered.bridge.adapter.item.equipment.Hand
+import heckerpowered.bridge.adapter.item.form.ItemForm
+import heckerpowered.bridge.adapter.item.form.Regular
+import heckerpowered.bridge.adapter.item.form.armor.Armor
+import heckerpowered.bridge.adapter.item.interaction.ItemInteractionResult
+import heckerpowered.bridge.adapter.item.interaction.ItemUseAnimation
 import heckerpowered.bridge.adapter.item.stack.ItemStackAccess
 import heckerpowered.bridge.adapter.world.WorldAccess
 import heckerpowered.bridge.math.BlockDirection
 import heckerpowered.bridge.math.BlockPositionView
-import heckerpowered.math.VectorView
 import heckerpowered.bridge.resources.Identifier
+import heckerpowered.math.VectorView
 
 interface ItemAccess : BridgeAccess {
     val identifier: Identifier
@@ -81,7 +88,7 @@ interface ItemAccess : BridgeAccess {
 
     fun getEquipmentSlot(stack: ItemStackAccess, slot: EquipmentSlot?, wearer: EntityAccess?): EquipmentSlot? {
         val itemForm = form
-        if (itemForm !is ItemForm.Armor) return null
+        if (itemForm !is Armor) return null
         return itemForm.equipmentSlot
     }
 
@@ -104,6 +111,6 @@ interface ItemBlueprint : ItemAccess {
 
 data class SimpleItemBlueprint(
     override val identifier: Identifier,
-    override val form: ItemForm = ItemForm.Regular,
+    override val form: ItemForm = Regular,
     override val properties: ItemProperties = ItemProperties(),
 ) : ItemBlueprint
