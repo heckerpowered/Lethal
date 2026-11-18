@@ -13,7 +13,7 @@ pluginManagement {
 
 plugins {
     // Use the Foojay Toolchains plugin to automatically download JDKs required by subprojects.
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.+"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 rootProject.name = "Lethal"
@@ -24,12 +24,20 @@ include("foundation:nbt")
 include("common")
 include("bridge")
 
-include("platforms:forge-1.12.2")
-include("platforms:neoforge-1.21.1")
-include("platforms:26.2:mc-26.2")
-include("platforms:26.2:fabric-26.2")
-include("platforms:26.2:forge-26.2")
-include("platforms:26.2:neoforge-26.2")
+include("platforms:1.12.2:mc")
+include("platforms:1.12.2:forge")
+include("platforms:1.20.1:mc")
+include("platforms:1.20.1:forge")
+include("platforms:1.20.1:neoforge")
+include("platforms:1.21.1:mc")
+include("platforms:1.21.1:neoforge")
+include("platforms:26.1.2:mc")
+include("platforms:26.1.2:neoforge")
+
+include("platforms:26.2:mc")
+include("platforms:26.2:fabric")
+include("platforms:26.2:forge")
+include("platforms:26.2:neoforge")
 
 include("render:render-hardware-interface")
 include("render:render-hardware-interface-codegen")
