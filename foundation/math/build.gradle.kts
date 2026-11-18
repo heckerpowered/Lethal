@@ -20,15 +20,15 @@ dependencies {
 java {
     // Keep the shared bridge API usable by the legacy Forge 1.12.2 module.
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaLegacy.get().toInt()))
     }
 
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaLegacy.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaLegacy.get())
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_1_8
+        jvmTarget = JvmTarget.fromTarget(JavaVersion.toVersion(libs.versions.javaLegacy.get()).toString())
     }
 }
