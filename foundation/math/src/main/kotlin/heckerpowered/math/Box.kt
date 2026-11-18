@@ -65,7 +65,7 @@ data class BoxIntersection(
         get() = enterTime ?: 0.0
 
     val nearestHitPoint: VectorView
-        get() = enterTime?.let(ray::pointAt) ?: ray.origin
+        get() = enterPoint
 
     val nearestSurfaceHitPoint: VectorView
         get() = ray.pointAt(nearestSurfaceHitTime)
@@ -347,12 +347,6 @@ fun BoxView.intersect(context: RayIntersectionContext): BoxIntersection? {
     val effectiveExitNormal = exitNormal ?: Vectors.Zero
 
     return BoxIntersection(context.ray, effectiveEnterTime, exitTime, effectiveEnterNormal, effectiveExitNormal)
-}
-
-private inline fun intersectAxis(origin: Double, direction: Double, minimum: Double, maximum: Double, minimumNormal: VectorView, maximumNormal: VectorView, enterTime: Double, exitTime: Double, updateEnter: (Double, VectorView) -> Unit, updateExit: (Double, VectorView) -> Unit): Boolean {
-    val directionIsNearlyZero = direction.isNearlyZero()
-    val inverseDirection = if (directionIsNearlyZero) 0.0 else 1.0 / direction
-    return intersectAxis(origin, directionIsNearlyZero, inverseDirection, minimum, maximum, minimumNormal, maximumNormal, enterTime, exitTime, updateEnter, updateExit)
 }
 
 private inline fun intersectAxis(origin: Double, directionIsNearlyZero: Boolean, inverseDirection: Double, minimum: Double, maximum: Double, minimumNormal: VectorView, maximumNormal: VectorView, enterTime: Double, exitTime: Double, updateEnter: (Double, VectorView) -> Unit, updateExit: (Double, VectorView) -> Unit): Boolean {
