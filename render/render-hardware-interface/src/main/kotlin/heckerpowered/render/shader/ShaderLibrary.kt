@@ -7,8 +7,8 @@ package heckerpowered.render.shader
 import heckerpowered.render.shader.primitive.PrimitiveShader
 
 /**
- * Device-owned, lazily established drawing programs. Callers borrow their stages and must not
- * close them. Access requires the owning device's graphics context and thread. Stages contain
+ * Drawing programs established lazily and closed by the device. Callers use their stages without
+ * closing them. Access requires that device's graphics context and thread. Stages contain
  * no host matrices, textures, attachments, fog or lighting. Unsupported programs fail on access.
  */
 interface ShaderLibrary {
