@@ -114,8 +114,8 @@ object Quaternion {
 
 object Plane {
     operator fun invoke(x: Double, y: Double, z: Double, w: Double): PlaneView = Geometry.plane(x, y, z, w)
-    operator fun invoke(plane: PlaneView): PlaneView = Planes.copyOf(plane)
-    operator fun invoke(normal: VectorView, w: Double): PlaneView = Planes.fromNormal(normal, w)
+    operator fun invoke(plane: PlaneView): PlaneView = Geometry.plane(plane.x, plane.y, plane.z, plane.w)
+    operator fun invoke(normal: VectorView, w: Double): PlaneView = Geometry.plane(normal.x, normal.y, normal.z, w)
 }
 
 object Matrix {
@@ -138,24 +138,38 @@ object Matrix {
         0.0, 0.0, 0.0, 1.0,
     )
 
-    operator fun invoke(matrix: MatrixView): MatrixView = Matrices.copyOf(matrix)
+    operator fun invoke(matrix: MatrixView): MatrixView = Geometry.matrix(
+        matrix.m00, matrix.m01, matrix.m02, matrix.m03,
+        matrix.m10, matrix.m11, matrix.m12, matrix.m13,
+        matrix.m20, matrix.m21, matrix.m22, matrix.m23,
+        matrix.m30, matrix.m31, matrix.m32, matrix.m33,
+    )
 }
 
 object Transform {
-    operator fun invoke(translation: VectorView, rotation: QuaternionView, scale: VectorView): TransformView = Geometry.transform(translation, rotation, scale)
+    operator fun invoke(translation: VectorView = Vectors.Zero, rotation: QuaternionView = Quaternions.Identity, scale: VectorView = Vectors.One): TransformView = Geometry.transform(translation, rotation, scale)
+
+    /** Creates fresh child values rather than reusing canonical constants. */
     operator fun invoke(): TransformView = Geometry.transform(Vector(), Quaternion(), Vector(1.0))
     operator fun invoke(transform: TransformView): TransformView = Geometry.transform(Vector(transform.translation), Quaternion(transform.rotation), Vector(transform.scale))
 }
 
 object AffineTransform {
-    operator fun invoke(axisX: VectorView, axisY: VectorView, axisZ: VectorView, translation: VectorView): AffineTransformView = Geometry.affineTransform(axisX, axisY, axisZ, translation)
+    operator fun invoke(axisX: VectorView = Vectors.UnitX, axisY: VectorView = Vectors.UnitY, axisZ: VectorView = Vectors.UnitZ, translation: VectorView = Vectors.Zero): AffineTransformView = Geometry.affineTransform(axisX, axisY, axisZ, translation)
+
+    /** Creates fresh child values rather than reusing canonical constants. */
     operator fun invoke(): AffineTransformView = Geometry.affineTransform(
         Vector(1.0, 0.0, 0.0),
         Vector(0.0, 1.0, 0.0),
         Vector(0.0, 0.0, 1.0),
         Vector(),
     )
-    operator fun invoke(transform: AffineTransformView): AffineTransformView = AffineTransforms.copyOf(transform)
+    operator fun invoke(transform: AffineTransformView): AffineTransformView = Geometry.affineTransform(
+        Vector(transform.axisX.x, transform.axisX.y, transform.axisX.z),
+        Vector(transform.axisY.x, transform.axisY.y, transform.axisY.z),
+        Vector(transform.axisZ.x, transform.axisZ.y, transform.axisZ.z),
+        Vector(transform.translation.x, transform.translation.y, transform.translation.z),
+    )
 }
 
 object Basis {
@@ -216,11 +230,9 @@ private data class FreestandingRay(
     override val direction: VectorView,
 ) : RayView {
     override fun snapshot(): RayView {
-        val sourceOrigin = this.origin
-        val sourceDirection = this.direction
-        val origin = sourceOrigin.snapshot()
-        val direction = sourceDirection.snapshot()
-        if (origin === sourceOrigin && direction === sourceDirection) return this
+        val origin = origin.snapshot()
+        val direction = direction.snapshot()
+        if (origin === this.origin && direction === this.direction) return this
         return Ray(origin, direction)
     }
 }
@@ -249,13 +261,10 @@ private data class FreestandingTransform(
     override val scale: VectorView,
 ) : TransformView {
     override fun snapshot(): TransformView {
-        val sourceTranslation = this.translation
-        val sourceRotation = this.rotation
-        val sourceScale = this.scale
-        val translation = sourceTranslation.snapshot()
-        val rotation = sourceRotation.snapshot()
-        val scale = sourceScale.snapshot()
-        if (translation === sourceTranslation && rotation === sourceRotation && scale === sourceScale) return this
+        val translation = translation.snapshot()
+        val rotation = rotation.snapshot()
+        val scale = scale.snapshot()
+        if (translation === this.translation && rotation === this.rotation && scale === this.scale) return this
         return Transform(translation, rotation, scale)
     }
 }
@@ -267,15 +276,11 @@ private data class FreestandingAffineTransform(
     override val translation: VectorView,
 ) : AffineTransformView {
     override fun snapshot(): AffineTransformView {
-        val sourceAxisX = this.axisX
-        val sourceAxisY = this.axisY
-        val sourceAxisZ = this.axisZ
-        val sourceTranslation = this.translation
-        val axisX = sourceAxisX.snapshot()
-        val axisY = sourceAxisY.snapshot()
-        val axisZ = sourceAxisZ.snapshot()
-        val translation = sourceTranslation.snapshot()
-        if (axisX === sourceAxisX && axisY === sourceAxisY && axisZ === sourceAxisZ && translation === sourceTranslation) return this
+        val axisX = axisX.snapshot()
+        val axisY = axisY.snapshot()
+        val axisZ = axisZ.snapshot()
+        val translation = translation.snapshot()
+        if (axisX === this.axisX && axisY === this.axisY && axisZ === this.axisZ && translation === this.translation) return this
         return AffineTransform(axisX, axisY, axisZ, translation)
     }
 }
@@ -286,13 +291,10 @@ private data class FreestandingBasis(
     override val forward: VectorView,
 ) : BasisView {
     override fun snapshot(): BasisView {
-        val sourceRight = this.right
-        val sourceUp = this.up
-        val sourceForward = this.forward
-        val right = sourceRight.snapshot()
-        val up = sourceUp.snapshot()
-        val forward = sourceForward.snapshot()
-        if (right === sourceRight && up === sourceUp && forward === sourceForward) return this
+        val right = right.snapshot()
+        val up = up.snapshot()
+        val forward = forward.snapshot()
+        if (right === this.right && up === this.up && forward === this.forward) return this
         return Basis(right, up, forward)
     }
 }
