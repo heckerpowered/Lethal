@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8.7",
+  "package": "heckerpowered.lethal.loader.fabric.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "ClientCommandInternalsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

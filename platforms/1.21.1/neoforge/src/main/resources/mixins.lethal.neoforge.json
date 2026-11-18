@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "package": "heckerpowered.lethal.mixin.target",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ArmorStandDamageMixin",
+    "DamagePipelineLivingEntityMixin",
+    "DamagePipelinePlayerMixin",
+    "ExecutionSynchedDataMixin",
+    "ItemMixin",
+    "LevelMixin",
+    "LivingEntityMixin",
+    "PartEntityMixin",
+    "ServerWorldMixin",
+    "WitherSkullDamageMixin"
+  ],
+  "client": [
+    "ClientPacketListenerMixin",
+    "MinecraftMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8",
+  "plugin": "heckerpowered.lethal.mixin.impl.LethalMixinPlugin"
+}
