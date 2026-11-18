@@ -4,6 +4,7 @@
  */
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import heckerpowered.gradle.consumeMinecraftSources
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -12,8 +13,8 @@ plugins {
     alias(libs.plugins.forgeGradle)
 }
 
-val minecraftProject = project(":platforms:26.2:mc-26.2")
-val minecraftVersion = libs.versions.minecraft262.get()
+val minecraftProject = project(":platforms:26.2:mc")
+val minecraftVersion = minecraftProject.property("minecraftVersion").toString()
 val minecraftVersionRange = "[$minecraftVersion]"
 val javaVersion = libs.versions.javaBuild.get().toInt()
 val modId = providers.gradleProperty("modId").get()
@@ -21,19 +22,6 @@ val modId = providers.gradleProperty("modId").get()
 // Minecraft still requires Java 25 when this mod's bytecode targets Java 21.
 configurations.matching { it.name in setOf("compileClasspath", "runtimeClasspath", "testCompileClasspath", "testRuntimeClasspath", "apiElements", "runtimeElements", "shadowRuntimeElements") }.configureEach {
     attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, javaVersion)
-}
-
-val minecraftJavaSources = configurations.create("minecraftJavaSources") {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-}
-val minecraftKotlinSources = configurations.create("minecraftKotlinSources") {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-}
-val minecraftResources = configurations.create("minecraftResources") {
-    isCanBeConsumed = false
-    isCanBeResolved = true
 }
 
 java {
@@ -45,7 +33,7 @@ kotlin {
     compilerOptions.jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaModern.get()))
 }
 
-val forgeVersion = libs.versions.forge262.get()
+val forgeVersion = "65.1.3"
 
 base {
     archivesName = "$modId-mc$minecraftVersion-forge$forgeVersion"
@@ -68,26 +56,12 @@ dependencies {
 
     implementation(minecraft.dependency("net.minecraftforge:forge:$minecraftVersion-$forgeVersion"))
 
-    add(minecraftJavaSources.name, project(path = minecraftProject.path, configuration = "minecraftJavaSources"))
-    add(minecraftKotlinSources.name, project(path = minecraftProject.path, configuration = "minecraftKotlinSources"))
-    add(minecraftResources.name, project(path = minecraftProject.path, configuration = "minecraftResources"))
-
     attach(project(":common"))
     attach(project(":bridge"))
     attach(project(":foundation:nbt"))
     attach(project(":foundation:math"))
     attach(project(":render:render-hardware-interface"))
     attach(kotlin("stdlib"))
-}
-
-// IDEA reads source roots across projects, so resolve these directory-only exports in their owning project.
-sourceSets.main {
-    java.srcDir(files(minecraftJavaSources.files).builtBy(minecraftJavaSources))
-    resources.srcDir(files(minecraftResources.files).builtBy(minecraftResources))
-}
-
-kotlin.sourceSets.main {
-    kotlin.srcDir(files(minecraftKotlinSources.files).builtBy(minecraftKotlinSources))
 }
 
 minecraft {
@@ -121,7 +95,7 @@ val metadataProperties = mapOf(
     "minecraft_version_range" to minecraftVersionRange,
     "java_version" to javaVersion.toString(),
     "forge_version" to forgeVersion,
-    "loader_version_range" to libs.versions.forgeLoader262.get(),
+    "loader_version_range" to "[65,)",
 )
 
 tasks.processResources {
@@ -167,3 +141,5 @@ tasks.withType<JavaCompile>().configureEach {
     options.release.set(libs.versions.javaModern.get().toInt())
     options.encoding = "UTF-8"
 }
+
+consumeMinecraftSources(minecraftProject)

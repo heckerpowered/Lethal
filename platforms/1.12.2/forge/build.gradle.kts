@@ -4,21 +4,24 @@
  */
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import heckerpowered.gradle.consumeMinecraftSources
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.zip.GZIPInputStream
 
 plugins {
     id("heckerpowered.convention.kotlin-jvm")
+    alias(libs.plugins.kotlinPluginSerialization)
     id("heckerpowered.convention.shadow")
-    // Dynamic selectors are intentional: follow the newest version in each selected major line.
-    id("net.minecraftforge.gradle") version "7.+"
-    id("net.minecraftforge.renamer") version "1.+"
+    alias(libs.plugins.forgeGradle)
+    alias(libs.plugins.forgeRenamer)
 }
 
-val minecraftVersion = project.property("minecraftVersion").toString()
-val forgeVersion = project.property("forgeVersion").toString()
-val mixinVersion = project.property("mixinVersion").toString()
-val modVersion = project.property("modVersion").toString()
+val minecraftProject = project(":platforms:1.12.2:mc")
+evaluationDependsOn(minecraftProject.path)
+
+val minecraftVersion = "1.12.2"
+val forgeVersion = "14.23.5.2864"
+val modVersion = project.version.toString()
 val modId = providers.gradleProperty("modId").get()
 
 val archiveName = "$modId-mc$minecraftVersion-forge$forgeVersion"
@@ -37,16 +40,19 @@ repositories {
 }
 
 dependencies {
+    attach(libs.mixinExtras)
     implementation(minecraft.dependency("net.minecraftforge:forge:$minecraftVersion-$forgeVersion"))
-    annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
-
-    testImplementation(kotlin("test"))
+    annotationProcessor(variantOf(libs.mixin) { classifier("processor") })
+    annotationProcessor(libs.mixinExtras)
 
     attach(project(":common"))
     attach(project(":bridge"))
+    attach(project(":foundation:nbt"))
     attach(project(":foundation:math"))
     attach(project(":render:render-hardware-interface"))
-    attach("org.spongepowered:mixin:$mixinVersion") {
+    attach(project(":render:render-engine"))
+    attach(project(":render:render-hardware-interface-opengl-lwjgl2"))
+    attach(libs.mixin) {
         exclude(group = "com.google.guava", module = "guava")
         exclude(group = "commons-io", module = "commons-io")
         exclude(group = "com.google.code.gson", module = "gson")
@@ -57,6 +63,7 @@ dependencies {
 
 minecraft {
     mappings("stable", "39-1.12")
+    accessTransformers.from(minecraftProject.layout.projectDirectory.file("src/main/resources/META-INF/accesstransformer.cfg"))
 
     runs {
         configureEach {
@@ -92,18 +99,18 @@ minecraft {
 java {
     // Minecraft 1.12.2 requires Java 8, overriding the shared fallback toolchain.
     toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = JavaLanguageVersion.of(libs.versions.javaLegacy.get().toInt())
     }
 
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaLegacy.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaLegacy.get())
 }
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(libs.versions.javaLegacy.get().toInt())
 
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_1_8
+        jvmTarget = JvmTarget.fromTarget(JavaVersion.toVersion(libs.versions.javaLegacy.get()).toString())
     }
 }
 
@@ -181,6 +188,11 @@ tasks.jar {
     archiveVersion = modVersion
     archiveClassifier = "dev"
 
+    // FML discovers resource packs from mod JARs, not their common-library dependencies.
+    from(project(":common").layout.projectDirectory.dir("src/main/resources")) {
+        include("assets/**")
+    }
+
     manifest {
         attributes(modManifestAttributes)
     }
@@ -194,7 +206,7 @@ val reobfJar = renamer.classes("reobfJar", tasks.jar) {
     dependsOn(reobfMappings)
     map = files(reobfMappings)
 
-    archiveClassifier = null
+    archiveClassifier = "frontend"
 }
 
 tasks.processResources {
@@ -211,10 +223,18 @@ tasks.processResources {
 }
 
 tasks.assemble {
-    dependsOn(reobfJar)
+    dependsOn("reobfShadowJar")
 }
 
 val shadowJar = tasks.named<ShadowJar>("shadowJar") {
+    relocate("com.llamalad7.mixinextras", "heckerpowered.lethal.shadow.mixinextras")
+    // LaunchWrapper's ASM scanner cannot read the Java 16 ModLauncher integration bundled by Mixin.
+    exclude("org/spongepowered/asm/launch/MixinLaunchPlugin.class")
+    exclude("org/spongepowered/asm/launch/MixinTransformationService.class")
+    exclude("org/spongepowered/asm/launch/platform/container/ContainerHandleModLauncherEx*.class")
+    exclude("META-INF/services/cpw.mods.modlauncher.api.ITransformationService")
+    exclude("META-INF/services/cpw.mods.modlauncher.serviceapi.ILaunchPluginService")
+
     // Renamer owns the final build/libs artifact, so Shadow writes only its reobfuscation input here.
     destinationDirectory = layout.buildDirectory.dir("tmp/shadowJar")
 
@@ -238,7 +258,7 @@ val reobfShadowJar = renamer.classes("reobfShadowJar", shadowJar) {
         }
     )
 
-    archiveClassifier = "shadow"
+    archiveClassifier = null
 }
 
 shadowJar.configure {
@@ -268,3 +288,5 @@ gradle.projectsEvaluated {
         }
     }
 }
+
+consumeMinecraftSources(minecraftProject)

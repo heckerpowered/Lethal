@@ -13,9 +13,14 @@ plugins {
 dependencies {
     // Add a dependency on the Kotlin Gradle plugin, so that convention plugins can apply it.
     implementation(libs.kotlinGradlePlugin)
-    implementation("com.gradleup.shadow:shadow-gradle-plugin:9.+")
+    implementation(libs.shadowGradlePlugin)
+    constraints {
+        implementation("org.apache.ant:ant:1.10.18") {
+            because("Fix CVE-2026-78254 in Shadow's transitive Ant dependency")
+        }
+    }
 }
 
 kotlin {
-    jvmToolchain(25)
+    jvmToolchain(libs.versions.javaBuild.get().toInt())
 }

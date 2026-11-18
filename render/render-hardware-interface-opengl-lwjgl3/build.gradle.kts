@@ -17,25 +17,31 @@ repositories {
 dependencies {
     implementation(project(":render:render-hardware-interface"))
     implementation(project(":render:render-hardware-interface-opengl"))
+    implementation(project(":render:render-hardware-interface-shader-compiler"))
     compileOnly(libs.lwjgl3Core)
     compileOnly(libs.lwjgl3OpenGL)
+}
 
-    testImplementation(kotlin("test"))
+// Both adapters deploy the same private compiler bundle, including every supported native classifier.
+evaluationDependsOn(":render:render-hardware-interface-opengl-lwjgl2")
+val compilerBundle = project(":render:render-hardware-interface-opengl-lwjgl2").tasks.named<ProcessResources>("processResources")
+tasks.processResources {
+    from(compilerBundle) { include("heckerpowered/render/opengl/lwjgl2/compiler-runtime/**") }
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.javaLegacy.get().toInt()))
     }
 
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.javaLegacy.get())
+    targetCompatibility = JavaVersion.toVersion(libs.versions.javaLegacy.get())
 }
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(libs.versions.javaLegacy.get().toInt())
 
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_1_8
+        jvmTarget = JvmTarget.fromTarget(JavaVersion.toVersion(libs.versions.javaLegacy.get()).toString())
     }
 }
