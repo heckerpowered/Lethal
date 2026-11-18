@@ -19,6 +19,12 @@ internal data class Aces20Parameters(
     val gamut: AcesGamut,
 ) {
     companion object {
+        /**
+         * Generates all model coefficients for one display target. AP0 is the input model;
+         * AP1 defines reach, while the configured primaries define the limiting gamut.
+         * Tone and chroma share the same log peak so their luminance-dependent fits agree.
+         * Unsupported peaks and invalid mathematical domains are rejected, not remapped.
+         */
         fun generate(configuration: Aces20Configuration): Aces20Parameters {
             val peak = configuration.peakLuminanceNits
             require(peak in 1f..10000f) { "ACES 2.0 peak luminance must be between 1 and 10000 nits" }
