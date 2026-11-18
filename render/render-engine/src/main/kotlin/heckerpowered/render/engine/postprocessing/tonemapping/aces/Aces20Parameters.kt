@@ -18,6 +18,10 @@ internal data class Aces20Parameters(
     val chroma: AcesChroma,
     val gamut: AcesGamut,
 ) {
+    /**
+     * Generates the appearance, tone, chroma and gamut coefficients for one validated display
+     * configuration.
+     */
     companion object {
         /**
          * Generates all model coefficients for one display target. AP0 is the input model;
