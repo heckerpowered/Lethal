@@ -22,7 +22,7 @@ internal data class AcesChroma(
 
 /**
  * Precomputes the display-dependent part of ACES 2.0 chroma compression.
- * [peak] is in cd/m²; [logPeak] must be `log10(peak / 100)` from the same tone scale.
+ * [peak] is in cd/m²; [logPeak] must be log₁₀(peak / 100) from the same tone scale.
  * The coefficients tune appearance and fit cusp geometry, rather than representing
  * universal physical constants. See the Academy's
  * [chroma model](https://docs.acescentral.com/system-components/output-transforms/technical-details/chroma-compression/)
