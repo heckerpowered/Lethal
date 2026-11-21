@@ -34,8 +34,15 @@ import java.nio.ByteOrder
 class Aces20 private constructor(val configuration: Aces20Configuration, parameters: Aces20Parameters, internal val hueTexture: TextureParameterValue?) {
     internal val shaderSource: ShaderSource = MemoryShaderSource(parameters.shaderSource(hueTexture != null))
 
+    /**
+     * Creates ACES output transforms either with a prepared GPU hue lookup or with CPU-generated
+     * values embedded in shader source. The supplied resource lifetime must cover GPU use of
+     * uploaded lookup data.
+     */
     companion object {
-        /** CPU-only default for renderers without a prepared texture; generated values live in the shader. */
+        /**
+         * CPU-only default for renderers without a prepared texture; generated values live in the shader.
+         */
         internal val Default: Aces20 by lazy {
             val configuration = Aces20Configuration()
             Aces20(configuration, Aces20Parameters.generate(configuration), null)
