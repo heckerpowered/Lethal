@@ -47,10 +47,18 @@ object AlgorithmResolution {
         return records.getOrPut(AlgorithmResolutionKey(state)) { AlgorithmResolutionRecord() }
     }
 
+    /**
+     * Groups raycasts with similar loaded-entity counts and distances into one performance bucket.
+     * Each component is a power-of-two bucket index rather than the original count or distance.
+     */
     private data class AlgorithmResolutionKey(val loadedEntityCountBucket: Int, val distanceBucket: Int) {
         constructor(state: AlgorithmResolutionState) : this(bucket(state.loadedEntityCount), bucket(state.distanceBlocks))
     }
 
+    /**
+     * Tracks per-policy measurements for one input bucket. Unmeasured policies are tried first;
+     * later choices combine input-dependent preference with the measured relative cost.
+     */
     private class AlgorithmResolutionRecord {
         private val estimates = RaycastExecutionPolicy.entries.associateWith { AlgorithmEstimate() }
 
@@ -59,7 +67,7 @@ object AlgorithmResolution {
         }
 
         fun record(policy: RaycastExecutionPolicy, elapsedNanoseconds: Long) {
-            estimates[policy]?.record(elapsedNanoseconds)
+            estimates.getValue(policy).record(elapsedNanoseconds)
         }
 
         private fun unmeasuredPolicy(state: AlgorithmResolutionState): RaycastExecutionPolicy? {
@@ -97,6 +105,11 @@ object AlgorithmResolution {
         }
     }
 
+    /**
+     * An exponentially weighted estimate of raycast latency in nanoseconds. The first sample
+     * initializes the estimate; later samples receive weight 0.125, and recorded durations are
+     * clamped to at least one nanosecond.
+     */
     private class AlgorithmEstimate {
         var averageElapsedNanoseconds = 0.0
             private set
