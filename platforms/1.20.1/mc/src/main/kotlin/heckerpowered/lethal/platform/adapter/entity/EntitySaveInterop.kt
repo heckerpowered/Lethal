@@ -14,6 +14,10 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
 import java.util.*
 
+/**
+ * Writes named bridge persistence values into the native data for one entity save. Values supplied
+ * with a serializer are encoded through the platform NBT adapter.
+ */
 internal class MinecraftEntitySaveOutput(private val data: CompoundTag) : PersistentValueOutput {
     override fun <T> encode(key: String, serializer: SerializationStrategy<T>, value: T) {
         val compound = NativeNbt.encode(serializer, value)
@@ -27,6 +31,10 @@ internal class MinecraftEntitySaveOutput(private val data: CompoundTag) : Persis
     override fun remove(key: String) = data.remove(key)
 }
 
+/**
+ * Reads named bridge values from native entity save data. The typed input lets entity behavior
+ * restore state without depending on the host’s tag or value-input classes.
+ */
 internal class MinecraftEntitySaveInput(private val data: CompoundTag) : PersistentValueInput {
     override fun <T> decode(key: String, deserializer: DeserializationStrategy<T>): T? = NativeNbt.decode(data.get(key), deserializer)
     override fun getInt(key: String): Int? = if (data.contains(key, Tag.TAG_INT.toInt())) data.getInt(key) else null
