@@ -3,35 +3,55 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-# The Kotlin plugin and standard library intentionally follow the newest available 2.x version together.
-kotlin = "2.+"
-kotlinxDatetime = "0.+"
-kotlinxSerializationJSON = "1.+"
-kotlinxCoroutines = "1.+"
+# Keep the Kotlin plugin and standard library on the same version.
+kotlin = "2.5.0-Beta1"
+kotlinxSerializationJSON = "1.12.0-RC"
 
-ksp = "2.+"
+ksp = "2.3.12"
+forgeGradle = "7.0.40"
+forgeRenamer = "1.1.8"
+modDev = "2.0.148"
+fabricLoom = "1.17.21"
+shadow = "9.6.1"
+asm = "9.11.1"
+annotations = "24.1.0"
+mixin = "0.8.7"
+mixinExtras = "0.5.4"
+
+mod = "1.0.4"
+javaLegacy = "8"
+javaModern = "21"
+javaBuild = "25"
 
 # RHI compile-time bindings do not replace the runtime LWJGL supplied by each game host.
 lwjgl2 = "2.9.2-nightly-20140822"
 lwjgl3 = "3.3.3"
+lwjglCompiler = "3.4.1"
 
 [libraries]
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlinxDatetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
-kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJSON" }
 kotlinxSerializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationJSON" }
-kotlinxCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 
 kspSymbolProcessingAPI = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+shadowGradlePlugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
+asmTree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
+annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
+mixin = { module = "org.spongepowered:mixin", version.ref = "mixin" }
+mixinExtras = { module = "io.github.llamalad7:mixinextras-common", version.ref = "mixinExtras" }
 
 lwjgl2 = { module = "org.lwjgl.lwjgl:lwjgl", version.ref = "lwjgl2" }
 lwjgl3Core = { module = "org.lwjgl:lwjgl", version.ref = "lwjgl3" }
 lwjgl3OpenGL = { module = "org.lwjgl:lwjgl-opengl", version.ref = "lwjgl3" }
+lwjglCompilerCore = { module = "org.lwjgl:lwjgl", version.ref = "lwjglCompiler" }
+lwjglCompilerVulkan = { module = "org.lwjgl:lwjgl-vulkan", version.ref = "lwjglCompiler" }
 
 [bundles]
-kotlinxEcosystem = ["kotlinxDatetime", "kotlinxSerialization", "kotlinxCoroutines"]
 lwjgl3 = ["lwjgl3Core", "lwjgl3OpenGL"]
 
 [plugins]
+forgeGradle = { id = "net.minecraftforge.gradle", version.ref = "forgeGradle" }
+forgeRenamer = { id = "net.minecraftforge.renamer", version.ref = "forgeRenamer" }
+modDev = { id = "net.neoforged.moddev", version.ref = "modDev" }
+fabricLoom = { id = "net.fabricmc.fabric-loom", version.ref = "fabricLoom" }
 kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
