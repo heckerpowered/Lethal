@@ -7,6 +7,10 @@ package heckerpowered.math
 
 import kotlin.test.*
 
+/**
+ * Checks that joint translation and ray-direction scaling preserve geometric hits, and that box
+ * union and overlap satisfy their containment relationships.
+ */
 class BoxCompositionTest {
     @Test
     fun translatingTheBoxAndRayTogetherPreservesIntersectionParametersAndNormals() {

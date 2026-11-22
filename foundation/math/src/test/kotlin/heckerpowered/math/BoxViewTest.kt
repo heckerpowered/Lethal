@@ -10,6 +10,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/**
+ * Checks derived bounds, containment boundaries, touching intersections and expansion operations
+ * on axis-aligned boxes.
+ */
 class BoxViewTest {
     @Test
     fun boundsExposeDerivedPositionAndSizeProperties() {

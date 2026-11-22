@@ -9,23 +9,23 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertTrue
 
+/**
+ * Checks tight axis-aligned bounds after affine transformation, including reflection, shear and
+ * collapsed dimensions. Also guards against repeatedly sampling live input components.
+ */
 class BoxTransformationTest {
     @Test
     fun identityAndTranslationPreserveBoxSize() {
         val box = Box(-1.0, -2.0, -3.0, 4.0, 5.0, 6.0)
 
         assertBox(-1.0, -2.0, -3.0, 4.0, 5.0, 6.0, box.transformedBy(AffineTransforms.Identity))
-        assertBox(6.0, 6.0, 6.0, 11.0, 13.0, 15.0, box.transformedBy(AffineTransforms.fromTranslation(Vectors.of(7.0, 8.0, 9.0))))
+        assertBox(6.0, 6.0, 6.0, 11.0, 13.0, 15.0, box.transformedBy(AffineTransforms.fromTranslation(Vector(7.0, 8.0, 9.0))))
     }
 
     @Test
     fun rotationReordersBoundsAndKeepsThemAxisAligned() {
         val box = Box(-1.0, -2.0, -3.0, 4.0, 5.0, 6.0)
-        val quarterTurn = AffineTransforms.of(
-            axisX = Vectors.UnitY,
-            axisY = Vectors.NegativeUnitX,
-            axisZ = Vectors.UnitZ,
-        )
+        val quarterTurn = AffineTransform(axisX = Vectors.UnitY, axisY = Vectors.NegativeUnitX, axisZ = Vectors.UnitZ)
 
         assertBox(-5.0, -1.0, -3.0, 2.0, 4.0, 6.0, box.transformedBy(quarterTurn))
     }
@@ -33,12 +33,7 @@ class BoxTransformationTest {
     @Test
     fun reflectionNonuniformScaleAndShearProduceTightBounds() {
         val box = Box(-1.0, -2.0, -3.0, 4.0, 5.0, 6.0)
-        val transform = AffineTransforms.of(
-            axisX = Vectors.of(-2.0, 0.0, 0.0),
-            axisY = Vectors.of(1.0, 3.0, 0.0),
-            axisZ = Vectors.of(0.0, -1.0, 4.0),
-            translation = Vectors.of(5.0, 7.0, 9.0),
-        )
+        val transform = AffineTransform(axisX = Vector(-2.0, 0.0, 0.0), axisY = Vector(1.0, 3.0, 0.0), axisZ = Vector(0.0, -1.0, 4.0), translation = Vector(5.0, 7.0, 9.0))
         val transformed = box.transformedBy(transform)
 
         assertBox(-5.0, -5.0, -3.0, 12.0, 25.0, 33.0, transformed)
@@ -54,13 +49,8 @@ class BoxTransformationTest {
     @Test
     fun singularTransformsCanFlattenOrCollapseTheBox() {
         val box = Box(-1.0, -2.0, -3.0, 4.0, 5.0, 6.0)
-        val flattened = AffineTransforms.of(axisX = Vectors.Zero, translation = Vectors.of(5.0, 7.0, 9.0))
-        val collapsed = AffineTransforms.of(
-            axisX = Vectors.Zero,
-            axisY = Vectors.Zero,
-            axisZ = Vectors.Zero,
-            translation = Vectors.of(5.0, 7.0, 9.0),
-        )
+        val flattened = AffineTransform(axisX = Vectors.Zero, translation = Vector(5.0, 7.0, 9.0))
+        val collapsed = AffineTransform(axisX = Vectors.Zero, axisY = Vectors.Zero, axisZ = Vectors.Zero, translation = Vector(5.0, 7.0, 9.0))
 
         assertBox(5.0, 5.0, 6.0, 5.0, 12.0, 15.0, box.transformedBy(flattened))
         assertBox(5.0, 7.0, 9.0, 5.0, 7.0, 9.0, box.transformedBy(collapsed))
@@ -69,12 +59,7 @@ class BoxTransformationTest {
     @Test
     fun pointBoxesRemainPointsUnderGeneralAffineTransforms() {
         val box = Box(1.0, 2.0, 3.0, 1.0, 2.0, 3.0)
-        val transform = AffineTransforms.of(
-            axisX = Vectors.of(-2.0, 0.0, 0.0),
-            axisY = Vectors.of(1.0, 3.0, 0.0),
-            axisZ = Vectors.of(0.0, -1.0, 4.0),
-            translation = Vectors.of(5.0, 7.0, 9.0),
-        )
+        val transform = AffineTransform(axisX = Vector(-2.0, 0.0, 0.0), axisY = Vector(1.0, 3.0, 0.0), axisZ = Vector(0.0, -1.0, 4.0), translation = Vector(5.0, 7.0, 9.0))
 
         assertBox(5.0, 10.0, 21.0, 5.0, 10.0, 21.0, box.transformedBy(transform))
     }
@@ -94,7 +79,7 @@ class BoxTransformationTest {
         val axisY = SampleOnceVector(1.0, 3.0, 0.0)
         val axisZ = SampleOnceVector(0.0, -1.0, 4.0)
         val translation = SampleOnceVector(5.0, 7.0, 9.0)
-        val transform = AffineTransforms.of(axisX, axisY, axisZ, translation)
+        val transform = AffineTransform(axisX, axisY, axisZ, translation)
 
         assertBox(-5.0, -5.0, -3.0, 12.0, 25.0, 33.0, box.transformedBy(transform))
         assertContentEquals(IntArray(6) { 1 }, boxReads)
@@ -103,6 +88,10 @@ class BoxTransformationTest {
         }
     }
 
+    /**
+     * A test view that changes its answers after a component has been sampled, exposing
+     * transformations that accidentally read a coordinate more than once.
+     */
     private class SampleOnceVector(private val firstX: Double, private val firstY: Double, private val firstZ: Double) : VectorView {
         val reads = IntArray(3)
         override val x: Double get() = if (++reads[0] == 1) firstX else Double.NaN

@@ -7,6 +7,10 @@ package heckerpowered.math
 
 import kotlin.test.*
 
+/**
+ * Checks entry and exit parameters, face normals and inside-origin behavior, including finite
+ * physical reach and degenerate rays.
+ */
 class BoxIntersectionTest {
     private val box = Box(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
 
@@ -123,12 +127,12 @@ class BoxIntersectionTest {
     fun reverseDirectionSwapsMinimumAndMaximumFaceNormals() {
         val ray = Ray(Vector(2.0, 0.5, 0.5), Vector(-2.0, 0.0, 0.0))
 
-        val intersection = assertNotNull(box.intersect(ray))
+        (val enterTime, val exitTime, val enterNormal, val exitNormal) = assertNotNull(box.intersect(ray))
 
-        assertEquals(expected = 0.5, actual = intersection.enterTime)
-        assertEquals(expected = 1.0, actual = intersection.exitTime)
-        assertVector(1.0, 0.0, 0.0, assertNotNull(intersection.enterNormal))
-        assertVector(-1.0, 0.0, 0.0, intersection.exitNormal)
+        assertEquals(expected = 0.5, actual = enterTime)
+        assertEquals(expected = 1.0, actual = exitTime)
+        assertVector(1.0, 0.0, 0.0, assertNotNull(enterNormal))
+        assertVector(-1.0, 0.0, 0.0, exitNormal)
     }
 
     @Test
