@@ -4,6 +4,10 @@ Judge a change by what the next maintainer will have to infer, and which parts t
 
 ## Names, types, and control flow
 
+Place declarations that readers look up or compare together next to each other. When several types support the
+same operations, group short overloads by operation. Keep one-line declarations adjacent within each group and
+leave a blank line where the operation changes.
+
 Name the concept in the vocabulary its callers use. Keep familiar terms such as GPU and UUID. Spell out a local
 abbreviation if a reader would have to look it up. Include a unit or reference point when the type leaves it open.
 `offsetBytes` identifies a unit, while a parameter of type `Duration` already carries one. Preserve familiar names
