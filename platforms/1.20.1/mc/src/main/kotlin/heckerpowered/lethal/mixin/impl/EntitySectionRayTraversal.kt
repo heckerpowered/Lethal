@@ -61,6 +61,10 @@ internal class EntitySectionRayTraversal(private val context: RayIntersectionCon
         return intersectTime(context, minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ)
     }
 
+    /**
+     * Defines the section geometry and ordering used by the ray traversal. Candidate
+     * intersections are compared by their lower-bound ray parameter.
+     */
     private companion object {
         const val SECTION_SIZE = 16.0
         const val VANILLA_HORIZONTAL_PADDING = 2.0
@@ -74,8 +78,20 @@ internal class EntitySectionRayTraversal(private val context: RayIntersectionCon
     }
 }
 
+/**
+ * A section encountered during a ray query, paired with a lower bound on its ray parameter. The
+ * bound orders candidate sections; it is not a confirmed hit on an entity.
+ */
 internal data class EntitySectionIntersection(val sectionX: Int, val sectionY: Int, val sectionZ: Int, val lowerBoundTime: Double)
 
+/**
+ * Integer coordinates identifying a spatial entity section along the traversal. These are section
+ * indices, not individual block coordinates.
+ */
 private data class EntitySectionPosition(val sectionX: Int, val sectionY: Int, val sectionZ: Int)
 
+/**
+ * Additional distances, in blocks, around candidate entity sections during ray traversal. Vertical
+ * padding is split into upward and downward extents instead of assuming a symmetric margin.
+ */
 private data class EntitySectionPadding(val horizontalBlocks: Double, val downwardBlocks: Double, val upwardBlocks: Double)

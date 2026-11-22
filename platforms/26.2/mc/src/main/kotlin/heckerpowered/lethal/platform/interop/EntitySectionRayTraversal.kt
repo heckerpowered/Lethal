@@ -3,24 +3,17 @@
  * Copyright (c) 2026 heckerpowered
  */
 
-package heckerpowered.lethal.mixin.impl
+package heckerpowered.lethal.platform.interop
 
 import heckerpowered.math.RayIntersectionContext
 import heckerpowered.math.intersectTime
-import java.util.PriorityQueue
+import java.util.*
 import kotlin.math.floor
-import kotlin.math.max
 
 /**
- * Enumerates Minecraft 1.21.1 entity storage sections by conservative ray entry time.
+ * Enumerates Minecraft 26.2 entity storage sections by conservative ray entry time.
  */
-internal class EntitySectionRayTraversal(private val context: RayIntersectionContext, maximumEntityRadius: Double) : Sequence<EntitySectionIntersection> {
-    init {
-        require(maximumEntityRadius.isFinite() && maximumEntityRadius >= 0.0) { "Maximum entity radius must be finite and non-negative" }
-    }
-
-    private val padding = EntitySectionPadding(max(maximumEntityRadius, VANILLA_HORIZONTAL_PADDING), maximumEntityRadius, max(maximumEntityRadius, VANILLA_UPWARD_PADDING))
-
+internal class EntitySectionRayTraversal(private val context: RayIntersectionContext) : Sequence<EntitySectionIntersection> {
     override fun iterator(): Iterator<EntitySectionIntersection> = sequence {
         val pendingSections = PriorityQueue(IntersectionOrder)
         val visitedSections = HashSet<EntitySectionPosition>()
@@ -52,19 +45,24 @@ internal class EntitySectionRayTraversal(private val context: RayIntersectionCon
     }.iterator()
 
     private fun sectionLowerBoundTime(sectionX: Int, sectionY: Int, sectionZ: Int): Double {
-        val minimumX = sectionX * SECTION_SIZE - padding.horizontalBlocks
-        val minimumY = sectionY * SECTION_SIZE - padding.downwardBlocks
-        val minimumZ = sectionZ * SECTION_SIZE - padding.horizontalBlocks
-        val maximumX = (sectionX + 1) * SECTION_SIZE + padding.horizontalBlocks
-        val maximumY = (sectionY + 1) * SECTION_SIZE + padding.upwardBlocks
-        val maximumZ = (sectionZ + 1) * SECTION_SIZE + padding.horizontalBlocks
+        val minimumX = sectionX * SECTION_SIZE - VANILLA_HORIZONTAL_PADDING
+        val minimumY = sectionY * SECTION_SIZE
+        val minimumZ = sectionZ * SECTION_SIZE - VANILLA_HORIZONTAL_PADDING
+        val maximumX = (sectionX + 1) * SECTION_SIZE + VANILLA_HORIZONTAL_PADDING
+        val maximumY = (sectionY + 1) * SECTION_SIZE + VANILLA_UPWARD_PADDING
+        val maximumZ = (sectionZ + 1) * SECTION_SIZE + VANILLA_HORIZONTAL_PADDING
         return intersectTime(context, minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ)
     }
 
+    /**
+     * Defines the section geometry and ordering used by the ray traversal. Candidate
+     * intersections are compared by their lower-bound ray parameter.
+     */
     private companion object {
         const val SECTION_SIZE = 16.0
         const val VANILLA_HORIZONTAL_PADDING = 2.0
         const val VANILLA_UPWARD_PADDING = 4.0
+
         val IntersectionOrder = compareBy(EntitySectionIntersection::lowerBoundTime)
             .thenBy(EntitySectionIntersection::sectionX)
             .thenBy(EntitySectionIntersection::sectionY)
@@ -74,6 +72,10 @@ internal class EntitySectionRayTraversal(private val context: RayIntersectionCon
     }
 }
 
+/**
+ * A section encountered during a ray query, paired with a lower bound on its ray parameter. The
+ * bound orders candidate sections; it is not a confirmed hit on an entity.
+ */
 internal data class EntitySectionIntersection(
     val sectionX: Int,
     val sectionY: Int,
@@ -81,14 +83,13 @@ internal data class EntitySectionIntersection(
     val lowerBoundTime: Double,
 )
 
+/**
+ * Integer coordinates identifying a spatial entity section along the traversal. These are section
+ * indices, not individual block coordinates.
+ */
 private data class EntitySectionPosition(
     val sectionX: Int,
     val sectionY: Int,
     val sectionZ: Int,
 )
 
-private data class EntitySectionPadding(
-    val horizontalBlocks: Double,
-    val downwardBlocks: Double,
-    val upwardBlocks: Double,
-)

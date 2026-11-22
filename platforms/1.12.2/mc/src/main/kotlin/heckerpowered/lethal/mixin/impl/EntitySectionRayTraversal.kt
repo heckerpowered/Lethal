@@ -7,7 +7,7 @@ package heckerpowered.lethal.mixin.impl
 
 import heckerpowered.math.RayIntersectionContext
 import heckerpowered.math.intersectTime
-import java.util.PriorityQueue
+import java.util.*
 import kotlin.math.floor
 
 /**
@@ -60,6 +60,10 @@ internal class EntitySectionRayTraversal(private val context: RayIntersectionCon
         return intersectTime(context, minimumX, minimumY, minimumZ, maximumX, maximumY, maximumZ)
     }
 
+    /**
+     * Defines the section geometry and ordering used by the ray traversal. Candidate
+     * intersections are compared by their lower-bound ray parameter.
+     */
     private companion object {
         const val SECTION_SIZE = 16.0
         const val LAST_SECTION_INDEX = 15
@@ -72,6 +76,10 @@ internal class EntitySectionRayTraversal(private val context: RayIntersectionCon
     }
 }
 
+/**
+ * A candidate entity section along the ray, identified by chunk coordinates and vertical section
+ * index. Its lower-bound ray parameter orders traversal; it does not confirm a hit.
+ */
 internal data class EntitySectionIntersection(
     val chunkX: Int,
     val sectionY: Int,
@@ -79,6 +87,10 @@ internal data class EntitySectionIntersection(
     val lowerBoundTime: Double,
 )
 
+/**
+ * Identifies a vertical entity section within a chunk using the chunk’s horizontal coordinates
+ * and its vertical section index.
+ */
 private data class EntitySectionPosition(
     val chunkX: Int,
     val sectionY: Int,
