@@ -7,7 +7,7 @@ package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.block.BlockAccess;
 import heckerpowered.bridge.adapter.block.BlockStateAccess;
-import heckerpowered.bridge.MixinInterop;
+import heckerpowered.lethal.platform.interop.ObjectInterop;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockStateContainer;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +24,6 @@ abstract class BlockStateMixin {
 
     @NotNull
     public BlockAccess blockStateAccess$getBlock() {
-        return MixinInterop.requireAccess(getBlock(), BlockAccess.class);
+        return ObjectInterop.asView(getBlock());
     }
 }

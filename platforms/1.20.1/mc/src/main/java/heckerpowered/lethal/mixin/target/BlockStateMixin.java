@@ -9,9 +9,8 @@ import heckerpowered.bridge.adapter.block.BlockAccess;
 import heckerpowered.bridge.adapter.block.BlockCategory;
 import heckerpowered.bridge.adapter.block.BlockClassificationAccess;
 import heckerpowered.bridge.adapter.block.BlockStateAccess;
-import heckerpowered.bridge.MixinInterop;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.Blocks;
+import heckerpowered.lethal.mixin.impl.BlockStateAccessImpl;
+import heckerpowered.lethal.platform.interop.BlockInteropKt;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Implements;
@@ -27,7 +26,7 @@ import org.spongepowered.asm.mixin.Unique;
 abstract class BlockStateMixin {
     @NotNull
     public BlockAccess blockStateAccess$getBlock() {
-        return MixinInterop.requireAccess(lethal$self().getBlock(), BlockAccess.class);
+        return BlockInteropKt.asView(lethal$self().getBlock());
     }
 
     public boolean blockClassificationAccess$isReplaceable() {
@@ -35,13 +34,7 @@ abstract class BlockStateMixin {
     }
 
     public boolean blockClassificationAccess$isIn(@NotNull BlockCategory category) {
-        return switch (category) {
-            case SugarCane -> lethal$self().getBlock() == Blocks.SUGAR_CANE;
-            case Logs -> lethal$self().is(BlockTags.LOGS);
-            case Planks -> lethal$self().is(BlockTags.PLANKS);
-            case Snow -> lethal$self().is(BlockTags.SNOW);
-            case Sand -> lethal$self().is(BlockTags.SAND);
-        };
+        return BlockStateAccessImpl.isIn(lethal$self(), category);
     }
 
     @Unique
