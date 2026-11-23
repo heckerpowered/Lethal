@@ -4,7 +4,9 @@
  */
 package heckerpowered.render.engine.postprocessing.tonemapping.aces
 
-/** Packing of generated cusp J/M/inverse-gamma and reach M values into one RGBA32F row. */
+/**
+ * Packing of generated cusp J/M/inverse-gamma and reach M values into one RGBA32F row.
+ */
 internal object Aces20HueLayout {
     const val TEXEL_COUNT = 363
 
@@ -18,7 +20,7 @@ internal object Aces20HueLayout {
      * ARB_texture_non_power_of_two. Using 512 by 1 satisfies that dimension check;
      * RGBA32F storage still requires the backend's separate float-texture capabilities.
      *
-     * Lookup shaders sample texel centers using `(index + 0.5) / 512.0`. Keep that divisor
+     * Lookup shaders sample texel centers using (index + 0.5) / 512.0. Keep that divisor
      * in sync if the storage width changes; padding never participates in hue interpolation.
      */
     const val TEXTURE_WIDTH = 512
