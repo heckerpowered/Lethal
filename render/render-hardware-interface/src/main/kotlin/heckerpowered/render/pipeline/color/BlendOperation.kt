@@ -9,9 +9,9 @@ package heckerpowered.render.pipeline.color
  * Selects the arithmetic operation used to combine the factor-scaled source and
  * destination terms of a [BlendComponent].
  *
- * ```
- * sourceTerm      = source * sourceFactor
- * destinationTerm = destination * destinationFactor
+ * ```text
+ * sourceTerm      = source × sourceFactor
+ * destinationTerm = destination × destinationFactor
  * result          = operation(sourceTerm, destinationTerm)
  * ```
  *
@@ -26,8 +26,8 @@ enum class BlendOperation {
     /**
      * Adds the factor-scaled source and destination terms:
      *
-     * ```
-     * result = source * sourceFactor + destination * destinationFactor
+     * ```text
+     * result = source × sourceFactor + destination × destinationFactor
      * ```
      *
      * Despite its name, this operation is not limited to full-strength additive blending. The selected
@@ -53,18 +53,18 @@ enum class BlendOperation {
     /**
      * Subtracts the factor-scaled destination term from the factor-scaled source term:
      *
-     * ```
-     * result = source * sourceFactor - destination * destinationFactor
+     * ```text
+     * result = source × sourceFactor - destination × destinationFactor
      * ```
      *
-     * With [BlendFactor.One] for both factors, this computes `source - destination`. Typical uses
+     * With [BlendFactor.One] for both factors, this computes source − destination. Typical uses
      * include storing signed differences or deltas in a floating-point target, and producing a
      * positive-difference mask in a normalized target where components below zero are discarded when
      * stored.
      *
      * This operation does not compute an absolute difference, and reversing source and destination
      * changes the result. In particular, it is not the usual choice for subtracting an incoming effect
-     * from the existing target; use [ReverseSubtract] for `destination - source`.
+     * from the existing target; use [ReverseSubtract] for destination − source.
      *
      * Negative results can be preserved by a floating-point color target but are constrained by an
      * unsigned-normalized target. When subtraction is required only for RGB, configure
@@ -75,11 +75,11 @@ enum class BlendOperation {
     /**
      * Subtracts the factor-scaled source term from the factor-scaled destination term:
      *
-     * ```
-     * result = destination * destinationFactor - source * sourceFactor
+     * ```text
+     * result = destination × destinationFactor - source × sourceFactor
      * ```
      *
-     * With [BlendFactor.One] for both factors, this computes `destination - source`. It is useful when
+     * With [BlendFactor.One] for both factors, this computes destination − source. It is useful when
      * the fragment output represents an amount to remove from an existing value, such as decrementing
      * an accumulation buffer or applying a subtractive mask.
      *
