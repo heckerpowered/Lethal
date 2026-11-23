@@ -5,8 +5,10 @@
 
 package heckerpowered.lethal.platform.interop
 
+import heckerpowered.bridge.MixinInterop
 import heckerpowered.bridge.adapter.world.WorldAccess
-import heckerpowered.bridge.requireHost
 import net.minecraft.world.level.Level
 
-fun WorldAccess.asHost() = requireHost<Level>(this)
+fun Level.asView(): WorldAccess = MixinInterop.requireAccess<WorldAccess>(this)
+
+fun WorldAccess.asHost(): Level = MixinInterop.requireHost<Level>(this)
