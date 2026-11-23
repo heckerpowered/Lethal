@@ -5,7 +5,9 @@
 
 package heckerpowered.math
 
-/** Three linear axes in right, up, forward order; scale and shear need not be removed. */
+/**
+ * Three linear axes in right, up, forward order; scale and shear need not be removed.
+ */
 interface BasisView {
     val right: VectorView
     val up: VectorView
