@@ -7,8 +7,7 @@ package heckerpowered.lethal.mixin.target;
 
 import heckerpowered.bridge.adapter.block.BlockAccess;
 import heckerpowered.bridge.resources.Identifier;
-import heckerpowered.bridge.MixinInterop;
-import net.minecraft.core.registries.BuiltInRegistries;
+import heckerpowered.lethal.mixin.impl.BlockAccessImpl;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Implements;
@@ -21,7 +20,7 @@ import org.spongepowered.asm.mixin.Unique;
 abstract class BlockMixin {
     @NotNull
     public Identifier blockAccess$getIdentifier() {
-        return MixinInterop.requireAccess(BuiltInRegistries.BLOCK.getKey(lethal$self()), Identifier.class);
+        return BlockAccessImpl.identifier(lethal$self());
     }
 
     @Unique
