@@ -111,6 +111,11 @@ fun TransformView.toAffine(): AffineTransformView =
         translation
     )
 
+/**
+ * Constructs affine mappings from translations or translation-rotation-scale values. The identity
+ * mapping preserves positions and directions; conversions retain shear through the affine
+ * representation.
+ */
 object AffineTransforms {
     val Identity: AffineTransformView = AffineTransform(
         axisX = Vectors.UnitX,

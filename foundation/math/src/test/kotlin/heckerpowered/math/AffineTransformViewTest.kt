@@ -10,6 +10,10 @@ import kotlin.test.assertFalse
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
+/**
+ * Checks affine axis interpretation and composition, including shear and reflection that a
+ * translation-rotation-scale decomposition cannot preserve.
+ */
 class AffineTransformViewTest {
     private val shear = AffineTransform(
         Vector(2.0, 0.0, 0.0),
