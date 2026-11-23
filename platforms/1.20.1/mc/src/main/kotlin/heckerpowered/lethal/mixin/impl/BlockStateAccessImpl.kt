@@ -10,6 +10,10 @@ import net.minecraft.tags.BlockTags
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
 
+/**
+ * Tests a native block state against the bridge’s block categories. Callers can classify a state
+ * without depending on the current host’s block constants or tags.
+ */
 object BlockStateAccessImpl {
     @JvmStatic
     fun isIn(state: BlockState, category: BlockCategory): Boolean = when (category) {
