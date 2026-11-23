@@ -9,7 +9,7 @@ import heckerpowered.render.io.resource
 
 /**
  * Emits shader constants and hue data from the same output-transform parameters.
- * The hue-dependent AP1 cusp fit is `scale * (a0 + sum(an*cos(n*h) + bn*sin(n*h)))`
+ * The hue-dependent AP1 cusp fit is scale × (a0 + Σₙ(an × cos(n × h) + bn × sin(n × h)))
  * for n=1..3. Its fitted coefficients are scaled here once, not once per pixel.
  * Array and texture paths share the same cusp/reach values and mathematical shader body.
  */
