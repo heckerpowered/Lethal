@@ -16,6 +16,9 @@ value class MemoryLayout private constructor(private val encoded: Long) {
     val alignment: Int
         get() = (encoded ushr Int.SIZE_BITS).toInt()
 
+    /**
+     * Creates validated byte-size and alignment descriptions.
+     */
     companion object {
         fun of(byteCount: Int, alignment: Int): MemoryLayout {
             require(byteCount >= 0) { "Memory layout size must be non-negative" }
