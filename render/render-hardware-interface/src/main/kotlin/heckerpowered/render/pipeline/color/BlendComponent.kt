@@ -12,9 +12,9 @@ package heckerpowered.render.pipeline.color
  * The source value is produced by the fragment shader. The destination value is the value already
  * present in the color target:
  *
- * ```
- * sourceTerm      = source      * sourceFactor
- * destinationTerm = destination * destinationFactor
+ * ```text
+ * sourceTerm      = source × sourceFactor
+ * destinationTerm = destination × destinationFactor
  * result          = operation(sourceTerm, destinationTerm)
  * ```
  *
@@ -27,8 +27,8 @@ package heckerpowered.render.pipeline.color
  * applies it separately to alpha.
  *
  * Reusing an RGB equation for alpha can produce an unintended result. For example, using
- * `SourceAlpha` as the source factor of the alpha equation produces `sourceAlpha * sourceAlpha`.
- * Conventional source-over alpha accumulation instead uses `One` for the source alpha factor.
+ * [BlendFactor.SourceAlpha] as the source factor of the alpha equation produces sourceAlpha².
+ * Conventional source-over alpha accumulation instead uses [BlendFactor.One] for the source alpha factor.
  *
  * [ColorTargetState.writeMask] is applied after blending. A component excluded from the write mask
  * therefore remains available as an input to blend factors even though the resulting value of that
