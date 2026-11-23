@@ -5,28 +5,34 @@
 
 package heckerpowered.lethal.platform.interop
 
+import heckerpowered.bridge.MixinInterop
+import heckerpowered.bridge.adapter.block.BlockAccess
 import heckerpowered.bridge.adapter.entity.EntityAccess
+import heckerpowered.bridge.adapter.entity.LivingEntityAccess
+import heckerpowered.bridge.adapter.entity.PlayerAccess
+import heckerpowered.bridge.adapter.entity.ServerPlayerAccess
 import heckerpowered.bridge.adapter.entity.damagesource.*
-import heckerpowered.bridge.requireAccess
-import heckerpowered.bridge.requireHost
 import heckerpowered.bridge.resources.Identifier
 import heckerpowered.lethal.gameplay.common.entity.damagesource.VirtualDamageSource
+import net.minecraft.block.Block
 import net.minecraft.entity.Entity
+import net.minecraft.entity.EntityLivingBase
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.util.DamageSource
 import java.util.*
 import heckerpowered.bridge.adapter.entity.damagesource.VirtualDamageSource as BridgeVirtualDamageSource
 
+/**
+ * Conversions used by legacy mixins when an operation crosses between host objects and bridge
+ * views, including blocks and attributed damage sources.
+ */
 object ObjectInterop {
     @JvmStatic
-    fun asHost(source: DamageSourceView): DamageSource {
-        if (source is DamageSource) return source
+    fun asView(block: Block): BlockAccess = MixinInterop.requireAccess<BlockAccess>(block)
 
-        val spec = source.toVirtualDamageSourceSpec()
-        val directEntity = source.directEntity?.asHost()
-        val causingEntity = source.causingEntity?.asHost()
-        val position = source.position?.let(GeometryInterop::asHost)
-        return VirtualDamageSource(spec, directEntity, causingEntity, position)
-    }
+    @JvmStatic
+    fun asHost(source: DamageSourceView): DamageSource = source.asHost()
 
     @JvmStatic
     fun asView(source: DamageSource): DamageSourceView = source.asView()
@@ -60,25 +66,17 @@ object ObjectInterop {
         }
     }
 
-    private fun DamageSourceView.toVirtualDamageSourceSpec(): VirtualDamageSourceSpec {
-        return when (this) {
-            is BridgeVirtualDamageSource -> VirtualDamageSourceSpec(spec.type, spec.features.clone())
-            is QuantumVanillaDamageSource -> VirtualDamageSourceSpec(source.identifier, source.copyFeatures())
-            else -> VirtualDamageSourceSpec(type, collectFeatures())
-        }
-    }
-
-    private fun DamageSourceView.collectFeatures(): EnumSet<DamageFeature> {
-        val features = EnumSet.noneOf(DamageFeature::class.java)
-        DamageFeature.entries.filterTo(features) { has(it) }
-        return features
-    }
+    @JvmStatic
+    fun asView(entity: Entity): EntityAccess = entity.asView()
 
     @JvmStatic
-    fun asView(entity: Entity?): EntityAccess? = entity?.asView()
+    fun asViewOrNull(entity: Entity?): EntityAccess? = entity?.asView()
 
     @JvmStatic
-    fun asHost(entity: EntityAccess?): Entity? = entity?.asHost()
+    fun asHost(entity: EntityAccess): Entity = entity.asHost()
+
+    @JvmStatic
+    fun asHostOrNull(entity: EntityAccess?): Entity? = entity?.asHost()
 
     private fun damageSourceType(damageType: String): Identifier {
         require(damageType.isNotEmpty()) { "Damage type must not be empty" }
@@ -131,12 +129,16 @@ object ObjectInterop {
 }
 
 fun DamageSourceView.asHost(): DamageSource {
-    return ObjectInterop.asHost(this)
+    if (this is DamageSource) return this
+
+    val spec = toVirtualDamageSourceSpec()
+    val nativeDirectEntity = directEntity?.asHost()
+    val nativeCausingEntity = causingEntity?.asHost()
+    val nativePosition = position?.asHost()
+    return VirtualDamageSource(spec, nativeDirectEntity, nativeCausingEntity, nativePosition)
 }
 
-fun DamageSource.asView(): DamageSourceView {
-    return ObjectInterop.asView(this)
-}
+fun DamageSource.asView(): DamageSourceView = MixinInterop.requireAccess<DamageSourceView>(this)
 
 fun DamageSource.damageSourceType(): Identifier {
     return ObjectInterop.damageSourceType(this)
@@ -146,10 +148,23 @@ fun DamageSource.hasDamageFeature(feature: DamageFeature): Boolean {
     return ObjectInterop.hasDamageFeature(this, feature)
 }
 
-fun Entity.asView(): EntityAccess {
-    return requireAccess(this)
+fun Entity.asView(): EntityAccess = MixinInterop.requireAccess<EntityAccess>(this)
+fun EntityLivingBase.asView(): LivingEntityAccess = MixinInterop.requireAccess<LivingEntityAccess>(this)
+fun EntityPlayer.asView(): PlayerAccess = MixinInterop.requireAccess<PlayerAccess>(this)
+fun EntityPlayerMP.asView(): ServerPlayerAccess = MixinInterop.requireAccess<ServerPlayerAccess>(this)
+
+fun EntityAccess.asHost(): Entity = MixinInterop.requireHost<Entity>(this)
+
+private fun DamageSourceView.toVirtualDamageSourceSpec(): VirtualDamageSourceSpec {
+    return when (this) {
+        is BridgeVirtualDamageSource -> VirtualDamageSourceSpec(spec.type, spec.features.clone())
+        is QuantumVanillaDamageSource -> VirtualDamageSourceSpec(source.identifier, source.copyFeatures())
+        else -> VirtualDamageSourceSpec(type, collectFeatures())
+    }
 }
 
-fun EntityAccess.asHost(): Entity {
-    return requireHost(this)
+private fun DamageSourceView.collectFeatures(): EnumSet<DamageFeature> {
+    val features = EnumSet.noneOf(DamageFeature::class.java)
+    DamageFeature.entries.filterTo(features) { has(it) }
+    return features
 }
