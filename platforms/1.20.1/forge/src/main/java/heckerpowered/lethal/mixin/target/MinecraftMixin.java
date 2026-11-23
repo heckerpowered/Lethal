@@ -5,9 +5,11 @@
 
 package heckerpowered.lethal.mixin.target;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import heckerpowered.bridge.adapter.client.MinecraftAccess;
 import heckerpowered.bridge.adapter.entity.ClientPlayerAccess;
-import heckerpowered.bridge.MixinInterop;
+import heckerpowered.lethal.mixin.impl.MinecraftAccessImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -19,16 +21,17 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(Minecraft.class)
 @Implements(@Interface(iface = MinecraftAccess.class, prefix = "minecraftAccess$"))
 abstract class MinecraftMixin {
+    @WrapMethod(method = "runTick")
+    private void lethal$performanceFrame(boolean renderLevel, Operation<Void> original) {
+        MinecraftAccessImpl.performanceFrame(renderLevel, original);
+    }
+
     @Shadow
     @Nullable
     public LocalPlayer player;
 
     @Nullable
     public ClientPlayerAccess minecraftAccess$getPlayer() {
-        if (player == null) {
-            return null;
-        }
-
-        return MixinInterop.requireAccess(player, ClientPlayerAccess.class);
+        return MinecraftAccessImpl.player(player);
     }
 }
