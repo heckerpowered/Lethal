@@ -5,22 +5,27 @@
 
 package heckerpowered.lethal.mixin.target;
 
-import heckerpowered.bridge.adapter.entity.EntityAccess;
 import heckerpowered.bridge.adapter.effect.ParticleEffect;
+import heckerpowered.bridge.adapter.entity.EntityAccess;
 import heckerpowered.bridge.adapter.sound.SoundPlayback;
 import heckerpowered.bridge.adapter.world.WorldAccess;
 import heckerpowered.bridge.adapter.world.raycast.BlockHitResult;
 import heckerpowered.bridge.adapter.world.raycast.BlockRaycastShape;
 import heckerpowered.bridge.adapter.world.raycast.EntityRayBucket;
-import heckerpowered.math.BoxView;
 import heckerpowered.bridge.math.BlockPositionView;
+import heckerpowered.lethal.mixin.impl.WorldAccessImpl;
+import heckerpowered.math.BoxView;
 import heckerpowered.math.RayView;
 import heckerpowered.math.VectorView;
-import heckerpowered.lethal.mixin.impl.WorldAccessImpl;
 import kotlin.sequences.Sequence;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(World.class)
 @Implements(@Interface(iface = WorldAccess.class, prefix = "worldAccess$"))
@@ -33,6 +38,11 @@ abstract class WorldMixin {
     @Unique
     private World self() {
         return (World) (Object) this;
+    }
+
+    @Inject(method = "getChunk(II)Lnet/minecraft/world/chunk/Chunk;", at = @At("HEAD"), cancellable = true)
+    private void lethal$readLoadedRayChunk(int chunkX, int chunkZ, CallbackInfoReturnable<Chunk> callback) {
+        WorldAccessImpl.readLoadedRayChunk(self(), chunkX, chunkZ, callback);
     }
 
     public boolean worldAccess$isClientSide() {
@@ -56,6 +66,15 @@ abstract class WorldMixin {
     @NotNull
     public Sequence<BlockHitResult> worldAccess$raycastBlockHits(@NotNull RayView ray, double distanceBlocks, @NotNull BlockRaycastShape shape) {
         return WorldAccessImpl.raycastBlockHits(self(), ray, distanceBlocks, shape);
+    }
+
+    @Nullable
+    public Integer worldAccess$getSurfaceHeight(int blockX, int blockZ) {
+        return WorldAccessImpl.getSurfaceHeight(self(), blockX, blockZ);
+    }
+
+    public boolean worldAccess$canTickEntityAt(@NotNull VectorView position) {
+        return WorldAccessImpl.canTickEntityAt(self(), position);
     }
 
     public boolean worldAccess$destroyBlock(@NotNull BlockPositionView position, boolean dropItems) {
